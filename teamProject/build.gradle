@@ -33,7 +33,11 @@ dependencies {
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
 	implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-web'  // 필수!
+	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'       // JSP 컴파일러
+	implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'  // JSTL AP
+	
 	// 로깅 (Spring Boot 기본 logback 사용. slf4j-log4j12, log4j 제거)
 	//implementation 'org.slf4j:slf4j-api:1.7.36' // 선택 사항 (이미 포함됨)
 
