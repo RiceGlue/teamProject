@@ -1,6 +1,6 @@
 package com.spring.teamProject.controller;
 
-import org.springframework.stereotype.Controller;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.spring.teamProject.service.WaitingService;
 
-@Controller
+@Mapper
 @RequestMapping("/waiting")
 public class UserWaitingController {
 

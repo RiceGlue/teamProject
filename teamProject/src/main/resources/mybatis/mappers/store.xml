@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
-<mapper namespace="mapper.store">
-	<resultMap id="storelist" type="StoreVO">
+<mapper namespace="com.spring.teamProject.dao.StoreDAO">
+	<resultMap id="storelist" type="com.spring.teamProject.vo.StoreVO">
 		<result property="store_id" column="store_id"/>
 		<result property="owner_id" column="owner_id"/>
 		<result property="store_name" column="store_name"/>
@@ -28,8 +28,9 @@
 	</select>
 	
 	<select id="SelectKeywordStore" parameterType="String" resultMap="storelist">
-		<![CDATA[
-			select * from stores where
-		]]>
+	  <![CDATA[
+	    SELECT * FROM stores WHERE store_name LIKE CONCAT('%', #{keyword}, '%')
+	  ]]>
 	</select>
+	
 </mapper>

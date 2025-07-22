@@ -2,13 +2,13 @@ package com.spring.teamProject.service;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.StoreDAO;
 import com.spring.teamProject.vo.StoreVO;
 
-@Mapper
+@Service
 public class StoreService{
 	
 	@Autowired

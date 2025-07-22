@@ -1,4 +1,4 @@
-package com.sping.teamProject.common;
+package com.spring.teamProject.common;
 
 import org.springframework.web.servlet.ModelAndView;
 

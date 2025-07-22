@@ -2,21 +2,21 @@ package com.spring.teamProject.controller;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sping.teamProject.common.ViewUtil;
+import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Mapper
+@Controller
 @RequestMapping(value="/store")
 public class StoreController {
 	
@@ -26,6 +26,7 @@ public class StoreController {
 	@RequestMapping(value="/storeRegionList.do", method=RequestMethod.POST)
 	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
+		System.out.print("요기");
 		List<StoreVO> storelist = storeService.storeRegionList(region);
 		
 		ModelAndView mav = ViewUtil.layout(viewName);

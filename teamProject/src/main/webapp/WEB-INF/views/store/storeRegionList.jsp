@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<h1>${region}
 <c:forEach var="store" items="${storelist}">
 	<tr>
 		<td>

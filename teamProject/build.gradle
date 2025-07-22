@@ -54,8 +54,8 @@ dependencies {
 	implementation 'net.coobird:thumbnailator:0.4.8'
 
 	// JSON
-	implementation 'net.sf.json-lib:json-lib:2.4'
-	implementation 'net.sf.ezmorph:ezmorph:1.0.6'
+//	implementation 'net.sf.json-lib:json-lib:2.4'
+//	implementation 'net.sf.ezmorph:ezmorph:1.0.6'
 
 	// 테스트
 	testImplementation 'junit:junit:4.12'
