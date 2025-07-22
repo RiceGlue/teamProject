@@ -1,17 +1,16 @@
 package com.spring.teamProject.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @Controller
 public class HomeController {
-	
+
 	@GetMapping("/")
-	public String index() {
-		return "index";
+	public String index(Model model) {
+		model.addAttribute("body", "index.jsp"); // 또는 "index"
+		return "layout/layout"; // 즉: /WEB-INF/views/layout/layout.jsp
 	}
-	
-	
+
 }
