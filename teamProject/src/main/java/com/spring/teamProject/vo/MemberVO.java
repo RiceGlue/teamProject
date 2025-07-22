@@ -5,7 +5,7 @@ public class MemberVO {
 	private int member_id;
 	private String login_id;
 	private String login_pw;
-	private String name;
+	private String member_name;
 	private String birth;
 	private String sex;
 	private String phone;
@@ -32,11 +32,11 @@ public class MemberVO {
 	public void setLogin_pw(String login_pw) {
 		this.login_pw = login_pw;
 	}
-	public String getName() {
-		return name;
+	public String getMember_name() {
+		return member_name;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String member_name) {
+		this.member_name = member_name;
 	}
 	public String getBirth() {
 		return birth;

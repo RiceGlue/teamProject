@@ -11,6 +11,7 @@
 		<typeAlias type="com.spring.teamProject.vo.PaymentVO" alias="paymentVO"/>
 		<typeAlias type="com.spring.teamProject.vo.WaitingVO" alias="waitingVO"/>
 		<typeAlias type="com.spring.teamProject.vo.StoreImageVO" alias="storeimageVO"/>
+		<typeAlias type="com.spring.teamProject.vo.MenuVO" alias="menuVO"/>
 	</typeAliases>
 	
 	<mappers>
