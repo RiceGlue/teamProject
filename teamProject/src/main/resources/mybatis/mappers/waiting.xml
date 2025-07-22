@@ -11,6 +11,7 @@
 		<result property="max_teams" column="max_teams"/>
 		<result property="is_active" column="is_active"/>
 	</resultMap>
+	
     <insert id="insertWaitingSlot" parameterType="WaitingVO">
         INSERT INTO waiting (
             store_id, day_of_week, time_slot, max_teams, is_active

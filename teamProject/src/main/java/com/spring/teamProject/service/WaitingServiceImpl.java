@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.WaitingDAO;
-import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.vo.WaitingVO;
 
 @Service
