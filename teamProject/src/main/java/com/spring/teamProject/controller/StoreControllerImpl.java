@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ public class StoreControllerImpl implements StoreController {
 	@Override
 	@RequestMapping(value="/storeRegionList.do", method=RequestMethod.POST)
 	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		List<StoreVO> storelist = storeServive.storeList(region);
+		List<StoreVO> storelist = storeService.storeRegionList(region);
 		
 		ModelAndView mav = new ModelAndView();
 		mav.addObject("storelist", storelist);
