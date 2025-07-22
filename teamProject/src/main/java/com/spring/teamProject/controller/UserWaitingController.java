@@ -27,6 +27,7 @@ public class UserWaitingController {
     }
 
     // 사용자: 웨이팅 신청 폼 등도 추가 가능
+    
 	
 	
 }
