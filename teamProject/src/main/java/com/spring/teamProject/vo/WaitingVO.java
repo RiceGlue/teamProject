@@ -8,7 +8,6 @@ public class WaitingVO {
 	private String max_teams;
 	private boolean is_active;
 	
-	
 	public String getWaiting_id() {
 		return waiting_id;
 	}
