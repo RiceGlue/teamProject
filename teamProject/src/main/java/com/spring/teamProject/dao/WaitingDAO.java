@@ -6,7 +6,7 @@ import com.spring.teamProject.vo.WaitingVO;
 
 public interface WaitingDAO {
 	
-	void inserWaitngSlot(WaitingVO vo);
+	void insertWaitngSlot(WaitingVO vo);
 	
 	List<WaitingVO> getWaitingSlotsByStore(Long storeId);
 	
