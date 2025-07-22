@@ -18,28 +18,28 @@
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title">서울</h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=서울">서울</a></h5>
 	                </div>
 	            </div>
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title">경기</h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=경기">경기</a></h5>
 	                </div>
 	            </div>
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title">대전</h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=대전">대전</a></h5>
 	                </div>
 	            </div>
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title">부산</h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=대전">부산</a></h5>
 	                </div>
 	            </div>
 	        </div>

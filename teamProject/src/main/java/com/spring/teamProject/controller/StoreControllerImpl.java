@@ -1,0 +1,35 @@
+package com.spring.teamProject.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.spring.teamProject.vo.StoreVO;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Controller("storeController")
+@RequestMapping(value="/store")
+public class StoreControllerImpl implements StoreController {
+	
+	@Autowired
+	private StoreService storeService;
+	
+	@Override
+	@RequestMapping(value="/storeRegionList.do", method=RequestMethod.POST)
+	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		List<StoreVO> storelist = storeServive.storeList(region);
+		
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("storelist", storelist);
+		return mav;
+		
+	}
+
+}

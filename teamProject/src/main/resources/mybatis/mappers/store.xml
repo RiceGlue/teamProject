@@ -15,4 +15,21 @@
 		<result property="updated_at" column="updated_at"/>
 	</resultMap>
 	
+	<select id="SelectStoreInfo">
+		<![CDATA[
+			select * from stores where store_id = #{store_id}
+		]]>
+	</select>
+	
+	<select id="SelectStoreRegion">
+		<![CDATA[
+			select * from stores where address like #{region}
+		]]>
+	</select>
+	
+	<select id="SearchStore">
+		<![CDATA[
+			select * from stores where
+		]]>
+	</select>
 </mapper>
