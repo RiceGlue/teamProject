@@ -4,6 +4,7 @@ public class StoreVO {
 	private String store_id;
 	private String owner_id;
 	private String store_name;
+	private String store_phone_number;
 	private String address;
 	private String description;
 	private String operation_type;
@@ -28,6 +29,12 @@ public class StoreVO {
 	}
 	public void setStore_name(String store_name) {
 		this.store_name = store_name;
+	}
+	public String getStore_phone_number() {
+		return store_phone_number;
+	}
+	public void setStore_phone_number(String store_phone_number) {
+		this.store_phone_number = store_phone_number;
 	}
 	public String getAddress() {
 		return address;

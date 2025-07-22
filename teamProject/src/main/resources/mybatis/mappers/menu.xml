@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="mapper.menu">
+	<resultMap id="menulist" type="MenuVO">
+		<result property="menu_id" column="menu_id"/>
+		<result property="store_id" column="store_id"/>
+		<result property="display_no" column="display_no"/>
+		<result property="menu_name" column="menu_name"/>
+		<result property="price" column="price"/>
+		<result property="description" column="description"/>
+		<result property="image_url" column="image_url"/>
+		<result property="created_at" column="created_at"/>
+		<result property="updated_at" column="updated_at"/>
+	</resultMap>
+	
+</mapper>

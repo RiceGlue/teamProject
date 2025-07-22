@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="mapper.reservation">
+	<resultMap id="reservationlist" type="ReservationVO">
+		<result property="reservation_id" column="reservation_id"/>
+		<result property="store_id" column="store_id"/>
+		<result property="day_of_week" column="day_of_week"/>
+		<result property="time_slot" column="time_slot"/>
+		<result property="is_active" column="is_active"/>
+	</resultMap>
+	
+</mapper>
