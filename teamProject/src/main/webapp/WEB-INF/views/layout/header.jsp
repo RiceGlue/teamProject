@@ -15,12 +15,14 @@
     <script src="${pageContext.request.contextPath}/js/common.js"></script>
 </head>
 <body>
+	<div><a href="#">언어선택</a></div>
+	
     <!-- 공통 네비게이션 -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="${pageContext.request.contextPath}/">MySite</a>
+        <a class="navbar-brand" href="${pageContext.request.contextPath}/">메인로고위치</a>
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/about">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/contact">Contact</a></li>
+            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/about">login</a></li>
+            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/contact">profile</a></li>
         </ul>
     </nav>
 
