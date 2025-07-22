@@ -10,6 +10,7 @@ import com.spring.teamProject.vo.StoreVO;
 
 @Mapper
 public class StoreService{
+	
 	@Autowired
 	private StoreDAO storeDAO;
 	
