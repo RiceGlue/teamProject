@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sping.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.StoreVO;
 
@@ -22,17 +23,15 @@ public class StoreControllerImpl implements StoreController {
 	@Autowired
 	private StoreService storeService;
 	
-	private String root="layout/layout";
-	
 	@Override
 	@RequestMapping(value="/storeRegionList.do", method=RequestMethod.POST)
 	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		List<StoreVO> storelist = storeService.storeRegionList(region);
 		
-		ModelAndView mav = new ModelAndView(root);
-		mav.addObject("body", viewName);
+		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storelist", storelist);
+		
 		return mav;
 		
 	}
@@ -45,8 +44,7 @@ public class StoreControllerImpl implements StoreController {
 		keyword = "%"+keyword+"%";
 		
 		List<StoreVO> storelist = storeService.keywordSearchStore(keyword);
-		ModelAndView mav = new ModelAndView(root);
-		mav.addObject("body", viewName);
+		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storelist",storelist);
 		
 		return mav;

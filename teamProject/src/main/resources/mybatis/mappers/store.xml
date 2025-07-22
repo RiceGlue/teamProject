@@ -15,7 +15,7 @@
 		<result property="updated_at" column="updated_at"/>
 	</resultMap>
 	
-	<select id="SelectStoreInfo">
+	<select id="SelectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where store_id = #{store_id}
 		]]>
@@ -27,7 +27,7 @@
 		]]>
 	</select>
 	
-	<select id="SelectKeywordStore" >
+	<select id="SelectKeywordStore" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			select * from stores where
 		]]>
