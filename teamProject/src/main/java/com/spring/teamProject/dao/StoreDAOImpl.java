@@ -19,4 +19,9 @@ public class StoreDAOImpl implements StoreDAO{
 		return storelist;
 	}
 	
+	@Override
+	public List<StoreVO> SelectKeywordStore(String keyword) {
+		List<StoreVO> storelist = sqlSession.selectList("mapper.store.SelectKeywordStore",keyword);
+		return storelist;
+	}
 }

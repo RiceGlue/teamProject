@@ -21,13 +21,13 @@
 		]]>
 	</select>
 	
-	<select id="SelectStoreRegion">
+	<select id="SelectStoreRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			select * from stores where address like #{region}
 		]]>
 	</select>
 	
-	<select id="SearchStore">
+	<select id="SelectKeywordStore" >
 		<![CDATA[
 			select * from stores where
 		]]>

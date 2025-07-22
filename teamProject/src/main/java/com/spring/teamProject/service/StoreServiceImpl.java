@@ -18,5 +18,11 @@ public class StoreServiceImpl implements StoreService{
 		List<StoreVO> storelist = storeDAO.SelectStoreRegion(region);
 		return storelist;
 	}
+	
+	@Override
+	public List<StoreVO> keywordSearchStore(String keyword) throws Exception {
+		List<StoreVO> storelist = storeDAO.SelectKeywordStore(keyword);
+		return storelist;
+	}
 
 }
