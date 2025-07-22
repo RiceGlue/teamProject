@@ -15,7 +15,7 @@ java {
 
 repositories {
 	mavenCentral()
-	google() // firebase
+//	google() // firebase
 }
 
 dependencies {

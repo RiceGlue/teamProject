@@ -16,7 +16,7 @@ public class WaitingServiceImpl implements WaitingService {
 
 	@Autowired
 	public void insertWaitingSlot(WaitingVO vo) {
-		waitingDAO.insertWaitngSlot(vo);
+		waitingDAO.insertWaitingSlot(vo);
 	}
 
 	@Override
