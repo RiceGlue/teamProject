@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class MemberVO {
 	
-	private int member_id;
+	private long member_id;
 	private String login_id;
 	private String login_pw;
 	
@@ -20,13 +20,13 @@ public class MemberVO {
 	private String role;
 	
 	// DB의 DATETIME 타입은 java.util.Date로 매핑
-	private String created_at;
-	private String updated_at;
+	private Date created_at;
+	private Date updated_at;
 	
-	public int getMember_id() {
+	public long getMember_id() {
 		return member_id;
 	}
-	public void setMember_id(int member_id) {
+	public void setMember_id(long member_id) {
 		this.member_id = member_id;
 	}
 	public String getLogin_id() {
@@ -89,16 +89,16 @@ public class MemberVO {
 	public void setRole(String role) {
 		this.role = role;
 	}
-	public String getCreated_at() {
+	public Date getCreated_at() {
 		return created_at;
 	}
-	public void setCreated_at(String created_at) {
+	public void setCreated_at(Date created_at) {
 		this.created_at = created_at;
 	}
-	public String getUpdated_at() {
+	public Date getUpdated_at() {
 		return updated_at;
 	}
-	public void setUpdated_at(String updated_at) {
+	public void setUpdated_at(Date updated_at) {
 		this.updated_at = updated_at;
 	}
 	
