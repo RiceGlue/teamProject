@@ -13,7 +13,7 @@ public class MemberVO {
 	private String socialId;
 
 	private String member_name;
-	private String birth;
+	private Date birth;
 	private String sex;
 	private String phone;
 	private String email;
