@@ -1,30 +1,36 @@
 package com.spring.teamProject.vo;
 
+import java.time.LocalDateTime;
+
 public class WaitingVO {
-    private Long waitingId;
+	private Long waitingId;
+    private Long memberId;
     private Long storeId;
-    private int dayOfWeek;
-    private String timeSlot;
-    private int maxTeams;
-    private boolean isActive;
+    private int guestCount;
+    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Long getWaitingId() { return waitingId; }
     public void setWaitingId(Long waitingId) { this.waitingId = waitingId; }
 
+    public Long getMemberId() { return memberId; }
+    public void setMemberId(Long memberId) { this.memberId = memberId; }
+
     public Long getStoreId() { return storeId; }
     public void setStoreId(Long storeId) { this.storeId = storeId; }
 
-    public int getDayOfWeek() { return dayOfWeek; }
-    public void setDayOfWeek(int dayOfWeek) { this.dayOfWeek = dayOfWeek; }
+    public int getGuestCount() { return guestCount; }
+    public void setGuestCount(int guestCount) { this.guestCount = guestCount; }
 
-    public String getTimeSlot() { return timeSlot; }
-    public void setTimeSlot(String timeSlot) { this.timeSlot = timeSlot; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public int getMaxTeams() { return maxTeams; }
-    public void setMaxTeams(int maxTeams) { this.maxTeams = maxTeams; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean isActive) { this.isActive = isActive; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
 
 
