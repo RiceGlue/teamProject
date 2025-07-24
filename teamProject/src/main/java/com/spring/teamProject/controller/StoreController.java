@@ -35,18 +35,5 @@ public class StoreController {
 		return mav;
 		
 	}
-	
-	@RequestMapping(value="/keywordSearchStore.do", method=RequestMethod.GET)
-	public ModelAndView keywordSearchStore(@RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception{
-		String viewName = (String)req.getAttribute("viewName");
-		
-		keyword = "%"+keyword+"%";
-		
-		List<StoreVO> storelist = storeService.keywordSearchStore(keyword);
-		ModelAndView mav = ViewUtil.layout(viewName);
-		mav.addObject("storelist",storelist);
-		
-		return mav;
-	}
 
 }

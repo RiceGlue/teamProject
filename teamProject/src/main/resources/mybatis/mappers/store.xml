@@ -19,6 +19,15 @@
 		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
+	<resultMap id="storeimagelist" type="com.spring.teamProject.vo.StoreImageVO">
+		<result property="imageId" column="imageId"/>
+		<result property="storeId" column="storeId"/>
+		<result property="imageUrl" column="imageUrl"/>
+		<result property="imageType" column="imageType"/>
+		<result property="displayNo" column="displayNo"/>
+		<result property="createdAt" column="createdAt"/>
+	</resultMap>
+	
 	<select id="SelectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where store_id = #{store_id}
@@ -34,13 +43,10 @@
 		]]>
 	</select>
 	
-<!--	<select id="SelectKeywordStore" parameterType="String" resultMap="storelist">-->
-<!--	  <![CDATA[-->
-<!--	    	select s.store_name, s.description, avg(r.rating) as '평균별점', count(r.review_id) as '리뷰개수', s.store_type, s.region, s.operation_type-->
-<!--			from stores s inner join reviews r on s.store_id = r.store_id-->
-<!--			where store_name =#{keyword} or -->
-<!--			order by s.store_id-->
-<!--	  ]]>-->
-<!--	</select>-->
+	<select id="SelectStoreImageList" parameterType="String" resultMap="storeimagelist">
+		<![CDATA[ 
+			select i.image_url from store_images i inner join stores s on i.store_id=s.store_id where s.region=#{region}
+		]]>
+	</select>
 	
 </mapper>
