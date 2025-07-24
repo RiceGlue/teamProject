@@ -4,15 +4,15 @@
 	
 <mapper namespace="mapper.member">
 	<resultMap id="memlist" type="MemberVO">
-		<result property="member_id" column="member_id"/>
-		<result property="login_id" column="login_id"/>
-		<result property="login_pw" column="login_pw"/>
+		<result property="memberId" column="member_id"/>
+		<result property="loginId" column="login_id"/>
+		<result property="loginPw" column="login_pw"/>
 		
 		<!--소셜 로그인 관련-->
 		<result property="socialProvider" column="social_provider"/>
 		<result property="socialId" column="social_id"/>
 		
-		<result property="member_name" column="member_name"/>
+		<result property="memberName" column="member_name"/>
 		<result property="birth" column="birth"/>
 		<result property="sex" column="sex"/>
 		<result property="phone" column="phone"/>
@@ -28,7 +28,7 @@
 			INSERT INTO members (
 				login_id, login_pw, member_name, birth, sex, phone, email, role
 			) VALUES (
-				#{login_id}, #{login_pw}, #{member_name}, #{birth}, #{sex}, #{phone}, #{email}, 'USER'
+				#{loginId}, #{loginPw}, #{memberName}, #{birth}, #{sex}, #{phone}, #{email}, 'USER'
 			)
 		]]>
 	</insert>
@@ -37,7 +37,7 @@
 	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
 		<![CDATA[
 			SELECT * FROM members 
-			WHERE login_id = #{login_id} AND login_pw = #{login_pw}
+			WHERE login_id = #{loginId} AND login_pw = #{loginPw}
 		]]>
 	</select>
 	
@@ -46,12 +46,12 @@
 		<![CDATA[
 			UPDATE members
 			SET 
-				login_pw = #{login_pw},
-				member_name = #{member_name},
+				login_pw = #{loginPw},
+				member_name = #{memberName},
 				phone = #{phone},
 				email = #{email}
 			WHERE 
-				member_id = #{member_id}
+				member_id = #{memberId}
 		]]>
 	</update>
 	
@@ -59,7 +59,7 @@
 	<delete id="deleteMember" parameterType="long">
 		<![CDATA[
 			DELETE FROM members
-			WHERE member_id = #{member_id}
+			WHERE member_id = #{memberId}
 		]]>
 	</delete>
 	

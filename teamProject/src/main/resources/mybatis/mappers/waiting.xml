@@ -3,40 +3,35 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.spring.teamProject.dao.WaitingDAO">
-	<resultMap id="waitinglist" type="WaitingVO">
-		<result property="waiting_id" column="waiting_id"/>
-		<result property="store_id" column="store_id"/>
-		<result property="day_of_week" column="day_of_week"/>
-		<result property="time_slot" column="time_slot"/>
-		<result property="max_teams" column="max_teams"/>
-		<result property="is_active" column="is_active"/>
-	</resultMap>
-	
-    <insert id="insertWaitingSlot" parameterType="WaitingVO">
-        INSERT INTO waiting (
-            store_id, day_of_week, time_slot, max_teams, is_active
-        ) VALUES (
-            #{storeId}, #{dayOfWeek}, #{timeSlot}, #{maxTeams}, #{isActive}
-        )
-    </insert>
+    <resultMap id="WaitingResultMap" type="com.spring.teamProject.vo.WaitingVO">
+        <id property="waitingId" column="waiting_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="storeId" column="store_id"/>
+        <result property="guestCount" column="guest_count"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
 
-    <select id="getWaitingSlotsByStore" parameterType="long" resultType="WaitingVO">
+    <select id="getAllWaitings" resultMap="WaitingResultMap">
         SELECT * FROM waiting
-        WHERE store_id = #{storeId}
-        ORDER BY day_of_week, time_slot
     </select>
 
-    <delete id="deleteWaitingSlot" parameterType="long">
-        DELETE FROM waiting WHERE waiting_id = #{waitingId}
-    </delete>
+    <select id="getWaitingById" parameterType="long" resultMap="WaitingResultMap">
+        SELECT * FROM waiting WHERE waiting_id = #{waitingId}
+    </select>
 
-    <update id="updateWaitingSlot" parameterType="WaitingVO">
-        UPDATE waiting
-        SET day_of_week = #{dayOfWeek},
-            time_slot = #{timeSlot},
-            max_teams = #{maxTeams},
-            is_active = #{isActive}
-        WHERE waiting_id = #{waitingId}
+    <insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO">
+        INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)
+        VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="updateWaitingStatus">
+        UPDATE waiting SET status = #{status}, updated_at = NOW() WHERE waiting_id = #{waitingId}
     </update>
 
+    <delete id="deleteWaiting" parameterType="long">
+        DELETE FROM waiting WHERE waiting_id = #{waitingId}
+    </delete>
 </mapper>
+

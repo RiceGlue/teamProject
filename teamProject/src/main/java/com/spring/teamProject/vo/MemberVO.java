@@ -24,7 +24,6 @@ public class MemberVO {
 	private Date createdAt;
 	private Date updatedAt;
 	
-	
 	public long getMemberId() {
 		return memberId;
 	}
@@ -105,4 +104,5 @@ public class MemberVO {
 	}
 	
 	
+
 }
