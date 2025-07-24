@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.service.MemberService;
@@ -20,6 +21,14 @@ public class MemberController {
 	
 	@Autowired
 	private MemberService memberService;
+	
+	//회원가입 유형 선택
+	@GetMapping("/join_select")
+	public String joinSelectForm(Model model) {
+		model.addAttribute("body", "member/join_select.jsp");
+		return "layout/layout";
+	}
+	
 	
 	//로그인
 	@GetMapping("/login")
@@ -44,6 +53,8 @@ public class MemberController {
 		}
 	}
 	
+	
+	//로그아웃
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request) {
 		HttpSession session = request.getSession(false);
@@ -55,8 +66,12 @@ public class MemberController {
 	
 	//회원가입
 	@GetMapping("/join")
-	public String joinForm(Model model) {
-		model.addAttribute("body", "member/join.jsp");
+	public String joinForm(@RequestParam("role") String role, Model model) {
+		if ("OWNER".equals(role)) {
+			model.addAttribute("body", "member/join_owner.jsp");
+		} else {
+			model.addAttribute("body", "member/join_user.jsp");
+		}
 		return "layout/layout";
 	}
 	
