@@ -4,15 +4,19 @@
 	
 <mapper namespace="com.spring.teamProject.dao.StoreDAO">
 	<resultMap id="storelist" type="com.spring.teamProject.vo.StoreVO">
-		<result property="store_id" column="store_id"/>
-		<result property="owner_id" column="owner_id"/>
-		<result property="store_name" column="store_name"/>
+		<result property="storeId" column="storeId"/>
+		<result property="ownerId" column="ownerId"/>
+		<result property="storeName" column="storeName"/>
+		<result property="storePhoneNumber" column="storePhoneNumber"/>
 		<result property="address" column="address"/>
-		<result property="store_phone_number" column="store_phone_number"/>
+		<result property="region" column="region"/>
+		<result property="storeType" column="storeType"/>
 		<result property="description" column="description"/>
-		<result property="operation_type" column="operation_type"/>
-		<result property="created_at" column="created_at"/>
-		<result property="updated_at" column="updated_at"/>
+		<result property="operationType" column="operationType"/>
+		<result property="createdAt" column="createdAt"/>
+		<result property="updatedAt" column="updatedAt"/>
+		<result property="avgRating" column="avgRating"/>
+		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
 	<select id="SelectStoreInfo" resultMap="storelist" parameterType="String">
@@ -23,14 +27,20 @@
 	
 	<select id="SelectStoreRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select * from stores where address like #{region}
+			select s.store_name, s.description, avg(r.rating) as 'avgRating', count(r.review_id) as 'countRating', s.store_type, s.region, s.operation_type
+			from stores s inner join reviews r on s.store_id = r.store_id
+			where region = #{region}
+			order by s.store_id
 		]]>
 	</select>
 	
-	<select id="SelectKeywordStore" parameterType="String" resultMap="storelist">
-	  <![CDATA[
-	    SELECT * FROM stores WHERE store_name LIKE CONCAT('%', #{keyword}, '%')
-	  ]]>
-	</select>
+<!--	<select id="SelectKeywordStore" parameterType="String" resultMap="storelist">-->
+<!--	  <![CDATA[-->
+<!--	    	select s.store_name, s.description, avg(r.rating) as '평균별점', count(r.review_id) as '리뷰개수', s.store_type, s.region, s.operation_type-->
+<!--			from stores s inner join reviews r on s.store_id = r.store_id-->
+<!--			where store_name =#{keyword} or -->
+<!--			order by s.store_id-->
+<!--	  ]]>-->
+<!--	</select>-->
 	
 </mapper>

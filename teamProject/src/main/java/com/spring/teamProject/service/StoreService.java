@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.StoreDAO;
+import com.spring.teamProject.vo.StoreImageVO;
 import com.spring.teamProject.vo.StoreVO;
 
 @Service
@@ -22,6 +23,11 @@ public class StoreService{
 	public List<StoreVO> keywordSearchStore(String keyword) throws Exception {
 		List<StoreVO> storelist = storeDAO.SelectKeywordStore(keyword);
 		return storelist;
+	}
+	
+	public List<Long> storeImageRegionList(String region) throws Exception {
+		List<Long> imagelist = storeDAO.SelectStoreImageRegion(region);
+		return imagelist;
 	}
 
 }

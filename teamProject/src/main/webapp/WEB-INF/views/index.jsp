@@ -39,7 +39,7 @@
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=대전">부산</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=부산">부산</a></h5>
 	                </div>
 	            </div>
 	        </div>

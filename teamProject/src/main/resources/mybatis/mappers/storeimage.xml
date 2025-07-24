@@ -4,12 +4,18 @@
 	
 <mapper namespace="mapper.storeimage">
 	<resultMap id="storeimagelist" type="StoreImageVO">
-		<result property="image_id" column="image_id"/>
-		<result property="store_id" column="store_id"/>
-		<result property="image_url" column="image_url"/>
-		<result property="image_type" column="image_type"/>
-		<result property="display_no" column="display_no"/>
-		<result property="created_at" column="created_at"/>
+		<result property="imageId" column="imageId"/>
+		<result property="storeId" column="storeId"/>
+		<result property="imageUrl" column="imageUrl"/>
+		<result property="imageType" column="imageType"/>
+		<result property="displayNo" column="displayNo"/>
+		<result property="createdAt" column="createdAt"/>
 	</resultMap>
+	
+	<select id="SelectStoreImageRegion" parameterType="String" resultType="long">
+		<![CDATA[ 
+			select image_id from store_images where image_type=true AND store_id = (select store_id from stores where regoin = #{region})
+		]]>
+	</select>
 	
 </mapper>

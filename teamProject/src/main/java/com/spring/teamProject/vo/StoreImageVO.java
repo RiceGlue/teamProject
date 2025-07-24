@@ -1,49 +1,50 @@
 package com.spring.teamProject.vo;
 
+import java.util.Date;
+
 public class StoreImageVO {
-	private String image_id;
-	private String store_id;
-	private String image_url;
-	private boolean image_type;
-	private int display_no;
-	private String created_at;
+	private long imageId;
+	private long storeId;
+	private String imageUrl;
+	private boolean imageType;
+	private int displayNo;
+	private Date createdAt;
 	
 	
-	public String getImage_id() {
-		return image_id;
+	public long getImageId() {
+		return imageId;
 	}
-	public void setImage_id(String image_id) {
-		this.image_id = image_id;
+	public void setImageId(long imageId) {
+		this.imageId = imageId;
 	}
-	public String getStore_id() {
-		return store_id;
+	public long getStoreId() {
+		return storeId;
 	}
-	public void setStore_id(String store_id) {
-		this.store_id = store_id;
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
 	}
-	public String getImage_url() {
-		return image_url;
+	public String getImageUrl() {
+		return imageUrl;
 	}
-	public void setImage_url(String image_url) {
-		this.image_url = image_url;
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
-	public boolean isImage_type() {
-		return image_type;
+	public boolean isImageType() {
+		return imageType;
 	}
-	public void setImage_type(boolean image_type) {
-		this.image_type = image_type;
+	public void setImageType(boolean imageType) {
+		this.imageType = imageType;
 	}
-	public int getDisplay_no() {
-		return display_no;
+	public int getDisplayNo() {
+		return displayNo;
 	}
-	public void setDisplay_no(int display_no) {
-		this.display_no = display_no;
+	public void setDisplayNo(int displayNo) {
+		this.displayNo = displayNo;
 	}
-	public String getCreated_at() {
-		return created_at;
+	public Date getCreatedAt() {
+		return createdAt;
 	}
-	public void setCreated_at(String created_at) {
-		this.created_at = created_at;
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
-	
 }

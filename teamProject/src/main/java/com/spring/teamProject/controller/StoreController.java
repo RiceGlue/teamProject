@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,14 +24,13 @@ public class StoreController {
 	@Autowired
 	private StoreService storeService;
 	
-	@RequestMapping(value="/storeRegionList.do", method=RequestMethod.POST)
+	@GetMapping(value="/storeRegionList.do")
 	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		String viewName = (String)req.getAttribute("viewName");
-		System.out.print("요기");
 		List<StoreVO> storelist = storeService.storeRegionList(region);
-		
-		ModelAndView mav = ViewUtil.layout(viewName);
+		List<Long> imagelist = storeService.storeImageRegionList(region);
+		ModelAndView mav = ViewUtil.layout("store/storeRegionList.jsp");
 		mav.addObject("storelist", storelist);
+		mav.addObject("imagelist", imagelist);
 		
 		return mav;
 		
