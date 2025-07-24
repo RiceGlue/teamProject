@@ -10,4 +10,8 @@ public interface WaitingService {
     void insertWaiting(WaitingVO waiting);
     void updateWaitingStatus(Long waitingId, String status);
     void deleteWaiting(Long waitingId);
+    
+    int registerWaiting(WaitingVO waitingVO);
+    
+    
 }

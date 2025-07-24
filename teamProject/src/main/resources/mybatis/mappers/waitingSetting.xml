@@ -22,6 +22,10 @@
           AND day_of_week = #{dayOfWeek}
           AND time_slot = #{timeSlot}
     </select>
+    
+	<select id="getSettingById" parameterType="long" resultMap="WaitingSettingResultMap">
+	    SELECT * FROM waiting_setting WHERE setting_id = #{settingId}
+	</select>
 
     <insert id="insertSetting" parameterType="com.spring.teamProject.vo.WaitingSettingVO">
         INSERT INTO waiting_setting (store_id, day_of_week, time_slot, max_teams, is_active)
@@ -37,5 +41,7 @@
     <delete id="deleteSetting" parameterType="long">
         DELETE FROM waiting_setting WHERE setting_id = #{settingId}
     </delete>
+    
+    
 </mapper>
 
