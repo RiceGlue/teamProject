@@ -12,6 +12,7 @@ public class MemberVO {
 	private String socialProvider;
 	private String socialId;
 
+	//수정
 	private String member_name;
 	private Date birth;
 	private String sex;
