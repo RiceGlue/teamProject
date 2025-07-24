@@ -40,4 +40,10 @@ public class WaitingSettingServiceImpl implements WaitingSettingService {
     public void deleteSetting(Long settingId) {
         settingDAO.deleteSetting(settingId);
     }
+    
+    @Override
+    public WaitingSettingVO getSettingById(Long settingId) {
+        return settingDAO.getSettingById(settingId);
+    }
+    
 }

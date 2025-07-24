@@ -7,7 +7,11 @@ import com.spring.teamProject.vo.WaitingSettingVO;
 public interface WaitingSettingService {
 	List<WaitingSettingVO> getAllSettingsByStoreId(Long storeId);
     WaitingSettingVO getSetting(Long storeId, int dayOfWeek, String timeSlot);
+    WaitingSettingVO getSettingById(Long settingId);
     void insertSetting(WaitingSettingVO setting);
     void updateSetting(WaitingSettingVO setting);
     void deleteSetting(Long settingId);
+    
+    
+    
 }
