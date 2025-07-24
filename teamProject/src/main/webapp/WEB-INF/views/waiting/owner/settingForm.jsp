@@ -19,7 +19,9 @@
         <input type="number" name="maxTeams" required /><br/>
 
         <label>활성화:</label>
-        <input type="checkbox" name="active" value="true" /><br/>
+		<!-- checkbox 문제 방지용 hidden -->
+        <input type="hidden" name="active" value="false"/>
+        <input type="checkbox" name="active" value="true" checked/><br/>
 
         <button type="submit">등록</button>
     </form>
