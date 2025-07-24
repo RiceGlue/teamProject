@@ -7,6 +7,11 @@
 		<result property="member_id" column="member_id"/>
 		<result property="login_id" column="login_id"/>
 		<result property="login_pw" column="login_pw"/>
+		
+		<!--소셜 로그인 관련-->
+		<result property="socialProvider" column="social_provider"/>
+		<result property="socialId" column="social_id"/>
+		
 		<result property="member_name" column="member_name"/>
 		<result property="birth" column="birth"/>
 		<result property="sex" column="sex"/>
@@ -16,5 +21,24 @@
 		<result property="created_at" column="created_at"/>
 		<result property="updated_at" column="updated_at"/>
 	</resultMap>
+	
+	<!-- 회원가입 (insertMember 메소드와 연결) -->
+	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
+		<![CDATA[
+			INSERT INTO members (
+				login_id, login_pw, member_name, birth, sex, phone, email, role
+			) VALUES (
+				#{login_id}, #{login_pw}, #{member_name}, #{birth}, #{sex}, #{phone}, #{email}, 'USER'
+			)
+		]]>
+	</insert>
+	
+	<!-- 로그인 (login 메소드와 연결) -->
+	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
+		<![CDATA[
+			SELECT * FROM members 
+			WHERE login_id = #{login_id} AND login_pw = #{login_pw}
+		]]>
+	</select>
 	
 </mapper>
