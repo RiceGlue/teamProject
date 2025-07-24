@@ -41,4 +41,26 @@
 		]]>
 	</select>
 	
+	<!-- 회원정보 수정 (updateMember 메소드와 연결) -->
+	<update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
+		<![CDATA[
+			UPDATE members
+			SET 
+				login_pw = #{login_pw},
+				member_name = #{member_name},
+				phone = #{phone},
+				email = #{email}
+			WHERE 
+				member_id = #{member_id}
+		]]>
+	</update>
+	
+	<!-- 회원탈퇴 (deleteMember 메소드와 연결) -->
+	<delete id="deleteMember" parameterType="long">
+		<![CDATA[
+			DELETE FROM members
+			WHERE member_id = #{member_id}
+		]]>
+	</delete>
+	
 </mapper>
