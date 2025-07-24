@@ -1,50 +1,54 @@
 package com.spring.teamProject.vo;
 
+import java.util.Date;
+
 public class ReservationVO {
-	private String reservation_id;
-	private String member_id;
-	private String store_id;
-	private String table_id;
-	private String reservation_time;
-	private String guest_count;
+	private long reservationId;
+	private long memberId;
+	private long storeId;
+	private long tableId;
+	private String reservationTime;
+	private String guestCount;
 	private String status;
-	private String created_at;
+	private String cancelledReason;
+	private Date createdAt;
 	
-	public String getReservation_id() {
-		return reservation_id;
+	
+	public long getReservationId() {
+		return reservationId;
 	}
-	public void setReservation_id(String reservation_id) {
-		this.reservation_id = reservation_id;
+	public void setReservationId(long reservationId) {
+		this.reservationId = reservationId;
 	}
-	public String getMember_id() {
-		return member_id;
+	public long getMemberId() {
+		return memberId;
 	}
-	public void setMember_id(String member_id) {
-		this.member_id = member_id;
+	public void setMemberId(long memberId) {
+		this.memberId = memberId;
 	}
-	public String getStore_id() {
-		return store_id;
+	public long getStoreId() {
+		return storeId;
 	}
-	public void setStore_id(String store_id) {
-		this.store_id = store_id;
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
 	}
-	public String getTable_id() {
-		return table_id;
+	public long getTableId() {
+		return tableId;
 	}
-	public void setTable_id(String table_id) {
-		this.table_id = table_id;
+	public void setTableId(long tableId) {
+		this.tableId = tableId;
 	}
-	public String getReservation_time() {
-		return reservation_time;
+	public String getReservationTime() {
+		return reservationTime;
 	}
-	public void setReservation_time(String reservation_time) {
-		this.reservation_time = reservation_time;
+	public void setReservationTime(String reservationTime) {
+		this.reservationTime = reservationTime;
 	}
-	public String getGuest_count() {
-		return guest_count;
+	public String getGuestCount() {
+		return guestCount;
 	}
-	public void setGuest_count(String guest_count) {
-		this.guest_count = guest_count;
+	public void setGuestCount(String guestCount) {
+		this.guestCount = guestCount;
 	}
 	public String getStatus() {
 		return status;
@@ -52,13 +56,16 @@ public class ReservationVO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public String getCreated_at() {
-		return created_at;
+	public String getCancelledReason() {
+		return cancelledReason;
 	}
-	public void setCreated_at(String created_at) {
-		this.created_at = created_at;
+	public void setCancelledReason(String cancelledReason) {
+		this.cancelledReason = cancelledReason;
 	}
-	
-	
-
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
 }

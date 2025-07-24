@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.StoreDAO;
-import com.spring.teamProject.vo.StoreImageVO;
 import com.spring.teamProject.vo.StoreVO;
 
 @Service
