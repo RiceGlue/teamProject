@@ -2,34 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
-<mapper namespace="com.spring.teamProject.dao.StoreDAO">
-	<resultMap id="storelist" type="com.spring.teamProject.vo.StoreVO">
+<mapper namespace="mapper.store">
+	<resultMap id="storelist" type="StoreVO">
 		<result property="storeId" column="storeId"/>
 		<result property="ownerId" column="ownerId"/>
 		<result property="storeName" column="storeName"/>
-		<result property="storePhoneNumber" column="storePhoneNumber"/>
 		<result property="address" column="address"/>
 		<result property="region" column="region"/>
-		<result property="storeType" column="storeType"/>
-		<result property="description" column="description"/>
-		<result property="operationType" column="operationType"/>
 		<result property="createdAt" column="createdAt"/>
 		<result property="updatedAt" column="updatedAt"/>
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
-	<resultMap id="storeimagelist" type="com.spring.teamProject.vo.StoreImageVO">
-		<result property="imageId" column="imageId"/>
-		<result property="storeId" column="storeId"/>
-		<result property="imageUrl" column="imageUrl"/>
-		<result property="imageType" column="imageType"/>
-		<result property="displayNo" column="displayNo"/>
-		<result property="createdAt" column="createdAt"/>
+	<resultMap id="storeinfo" type="StoreVO">
+		<result property="storeType" column="storeType" />
+		<result property="operationType" column="operationType" />
+		<result property="storePhoneNumber" column="storePhoneNumber" />
+		<result property="storeHours" column="storeHours" />
+		<result property="breakTime" column="breakTime" />
+		<result property="dayOff" column="dayOff" />
+		<result property="description" column="description" />
+		<result property="amenities" column="amenities" />
+		<result property="mainImage" column="mainImage" />
 	</resultMap>
 	
-	<resultMap id="storeinfo" type="com.spring.teamProject.vo.StoreInfoVO">
+	<resultMap id="imagelist" type="ImageFileVO">
+		<result property="imageId" column="imageId"/>
 		<result property="storeId" column="storeId"/>
+		<result property="reviewId" column="reviewId"/>
+		<result property="fileName" column="fileName"/>
+		<result property="fileType" column="fileType"/>
+		<result property="displayNo" column="displayNo"/>
+		<result property="createdAt" column="createdAt"/>
+		<result property="regId" column="regId"/>
 	</resultMap>
 	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
@@ -47,29 +53,27 @@
 		]]>
 	</select>
 	
-	<select id="selectStoreImageList" parameterType="String" resultMap="storeimagelist">
+	<select id="selectStoreImageList" parameterType="String" resultMap="imagelist">
 		<![CDATA[ 
 			select i.image_url from store_images i inner join stores s on i.store_id=s.store_id where s.region=#{region}
 		]]>
 	</select>
 	
-	<insert id="insertStoreInfo" parameterMap="map" >
-		<![CDATA[ 
-			insert into stores (store_type, operation_type, store_phone_number, store_hours, break_time, day_off, description ) values
-			<foreach collection="menulist" item="menu" separator=",">
+	<insert id="insertStoreInfo" parameterType="map" >
+			insert into stores (store_type, operation_type, store_phone_number, store_hours, break_time, day_off, description, amenities, main_image) values
+			<foreach collection="storelist" item="store" separator=",">
 				(
-					#{storeId},
-					#{displayNo},
-					#{menuName},
-					#{price},
-					#{description},
-					#{imageUrl},
-					NOW(),
-					NOW()
-					
+					#{store.store_type},
+					#{store.operation_type},
+					#{store.store_phone_number},
+					#{store.store_hours},
+					#{store.break_time},
+					#{store.day_off},
+					#{store.description},
+					#{store.amenities},
+					#{store.main_image}
 				)
 			</foreach> 
-		]]>
 	</insert>
 	
 </mapper>

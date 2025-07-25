@@ -26,6 +26,8 @@ public class StoreVO {
 	private String breakTime;
 	private String dayOff;
 	private String description;
+	private String amenities;
+	private String mainImage;
 	
 	
 	public String getOperationType() {
@@ -130,6 +132,19 @@ public class StoreVO {
 	public void setCountRating(int countRating) {
 		this.countRating = countRating;
 	}
+	public String getAmenities() {
+		return amenities;
+	}
+	public void setAmenities(String amenities) {
+		this.amenities = amenities;
+	}
+	public String getMainImage() {
+		return mainImage;
+	}
+	public void setMainImage(String mainImage) {
+		this.mainImage = mainImage;
+	}
+
 	
 	
 }
