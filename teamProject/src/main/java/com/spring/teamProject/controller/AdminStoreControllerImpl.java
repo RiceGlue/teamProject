@@ -7,21 +7,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.spring.teamProject.common.BaseController;
+import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MemberVO;
-import com.spring.teamProject.common.BaseController;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+@Controller("adminStoreController")
+@RequestMapping(value="/franchise")
 public class AdminStoreControllerImpl extends BaseController implements AdminStoreController {
 	
 	private static final String CURR_IMAGE_REPO_PATH = "C:\\project\\file_repo";
@@ -36,12 +41,12 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		res.setContentType("text/html; charset=UTF-8");
 		String imageFileName=null;
 		
-		Map newGoodsMap = new HashMap();
+		Map newStoreMap = new HashMap();
 		Enumeration enu=multiReq.getParameterNames();
 		while(enu.hasMoreElements()){
 			String name=(String)enu.nextElement();
 			String value=multiReq.getParameter(name);
-			newGoodsMap.put(name,value);
+			newStoreMap.put(name,value);
 		}
 		
 		HttpSession session = multiReq.getSession();
@@ -54,7 +59,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			for(ImageFileVO imageFileVO : imageFileList) {
 				imageFileVO.setRegId(reg_id);
 			}
-			newGoodsMap.put("imageFileList", imageFileList);
+			newStoreMap.put("imageFileList", imageFileList);
 		}
 		
 		String message = null;
@@ -62,7 +67,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "text/html; charset=utf-8");
 		try {
-			int goods_id = adminStoreService.addNewGoods(newGoodsMap);
+			long goods_id = adminStoreService.addStoreInfo(newStoreMap);
 			if(imageFileList!=null && imageFileList.size()!=0) {
 				for(ImageFileVO  imageFileVO:imageFileList) {
 					imageFileName = imageFileVO.getFileName();
