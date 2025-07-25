@@ -1,8 +1,14 @@
 package com.spring.teamProject.dao;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.spring.teamProject.vo.MemberVO;
 
+@Mapper
 public interface MemberDAO {
+	
+	// (신규) loginId로 회원 정보 조회 (스프링 시큐리티용)
+	MemberVO findByLoginId(String loginId);
 	
 	// 회원가입
 	public void insertMember(MemberVO memberVO);

@@ -33,7 +33,9 @@ public class WaitingCustomerController {
 
     @PostMapping("/register")
     public String submitForm(@ModelAttribute WaitingVO waitingVO, Model model) {
-        waitingService.insertWaiting(waitingVO);
+        // 이제 폼에서 넘어온 waitingVO에는 fcmToken 값이 포함되어야 합니다.
+        // (JSP/HTML 폼에 fcmToken을 담을 hidden input이 필요합니다)
+        waitingService.insertWaiting(waitingVO); // 이 메서드 호출 시 자동으로 Firebase 동기화가 이루어집니다.
         model.addAttribute("waiting", waitingVO);
         return "waiting/customer/result";
     }
