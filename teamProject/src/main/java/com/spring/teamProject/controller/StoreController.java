@@ -35,5 +35,10 @@ public class StoreController {
 		return mav;
 		
 	}
+	
+	public ModelAndView form(@RequestParam("store_id") String store_id, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		ModelAndView mav = ViewUtil.layout("franchise/");
+		return mav;
+	}
 
 }

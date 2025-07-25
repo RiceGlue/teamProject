@@ -3,21 +3,55 @@ package com.spring.teamProject.vo;
 import java.util.Date;
 
 public class StoreVO {
+	
+	//stores 테이블
 	private long storeId;
 	private long ownerId;
 	private String storeName;
-	private String storePhoneNumber;
+	
 	private String address;
 	private String region;
-	private String storeType;
-	private String description;
-	private String operationType;
+	
 	private Date createdAt;
 	private Date updatedAt;
 	private int avgRating;
 	private int countRating;
 	
 	
+	//store_info 테이블
+	private String storeType;
+	private String operationType;
+	private String storePhoneNumber;
+	private String storeHours;
+	private String breakTime;
+	private String dayOff;
+	private String description;
+	
+	
+	public String getOperationType() {
+		return operationType;
+	}
+	public void setOperationType(String operationType) {
+		this.operationType = operationType;
+	}
+	public String getStoreHours() {
+		return storeHours;
+	}
+	public void setStoreHours(String storeHours) {
+		this.storeHours = storeHours;
+	}
+	public String getBreakTime() {
+		return breakTime;
+	}
+	public void setBreakTime(String breakTime) {
+		this.breakTime = breakTime;
+	}
+	public String getDayOff() {
+		return dayOff;
+	}
+	public void setDayOff(String dayOff) {
+		this.dayOff = dayOff;
+	}
 	public long getStoreId() {
 		return storeId;
 	}

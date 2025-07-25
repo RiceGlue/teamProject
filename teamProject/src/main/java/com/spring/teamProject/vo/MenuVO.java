@@ -1,39 +1,40 @@
 package com.spring.teamProject.vo;
 
 public class MenuVO {
-	private String menu_id;
-	private String store_id;
-	private int display_no;
-	private String menu_name;
+	private String menuId;
+	private String storeId;
+	private int displayNo;
+	private String menuName;
 	private String price;
 	private String description;
-	private String image_url;
-	private String created_at;
-	private String updated_at;
+	private String imageUrl;
+	private String createdAt;
+	private String updatedAt;
 	
-	public String getMenu_id() {
-		return menu_id;
+	
+	public String getMenuId() {
+		return menuId;
 	}
-	public void setMenu_id(String menu_id) {
-		this.menu_id = menu_id;
+	public void setMenuId(String menuId) {
+		this.menuId = menuId;
 	}
-	public String getStore_id() {
-		return store_id;
+	public String getStoreId() {
+		return storeId;
 	}
-	public void setStore_id(String store_id) {
-		this.store_id = store_id;
+	public void setStoreId(String storeId) {
+		this.storeId = storeId;
 	}
-	public int getDisplay_no() {
-		return display_no;
+	public int getDisplayNo() {
+		return displayNo;
 	}
-	public void setDisplay_no(int display_no) {
-		this.display_no = display_no;
+	public void setDisplayNo(int displayNo) {
+		this.displayNo = displayNo;
 	}
-	public String getMenu_name() {
-		return menu_name;
+	public String getMenuName() {
+		return menuName;
 	}
-	public void setMenu_name(String menu_name) {
-		this.menu_name = menu_name;
+	public void setMenuName(String menuName) {
+		this.menuName = menuName;
 	}
 	public String getPrice() {
 		return price;
@@ -47,23 +48,23 @@ public class MenuVO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getImage_url() {
-		return image_url;
+	public String getImageUrl() {
+		return imageUrl;
 	}
-	public void setImage_url(String image_url) {
-		this.image_url = image_url;
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
-	public String getCreated_at() {
-		return created_at;
+	public String getCreatedAt() {
+		return createdAt;
 	}
-	public void setCreated_at(String created_at) {
-		this.created_at = created_at;
+	public void setCreatedAt(String createdAt) {
+		this.createdAt = createdAt;
 	}
-	public String getUpdated_at() {
-		return updated_at;
+	public String getUpdatedAt() {
+		return updatedAt;
 	}
-	public void setUpdated_at(String updated_at) {
-		this.updated_at = updated_at;
+	public void setUpdatedAt(String updatedAt) {
+		this.updatedAt = updatedAt;
 	}
 	
 	
