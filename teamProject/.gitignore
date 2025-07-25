@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Firebase secret key - DO NOT TRACK
+teamProject/src/main/resources/firebase-service-account.json
