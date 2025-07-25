@@ -40,7 +40,7 @@
 	
 	<select id="selectStoreRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select s.store_name, s.description, avg(r.rating) as 'avgRating', count(r.review_id) as 'countRating', s.store_type, s.region, s.operation_type
+			select s.store_name, s.description, avg(r.rating) as avgRating, count(r.review_id) as countRating, s.store_type, s.region, s.operation_type
 			from stores s inner join reviews r on s.store_id = r.store_id
 			where region = #{region}
 			order by s.store_id
@@ -56,7 +56,7 @@
 	<insert id="insertStoreInfo" parameterMap="map" >
 		<![CDATA[ 
 			insert into stores (store_type, operation_type, store_phone_number, store_hours, break_time, day_off, description ) values
-			<<foreach collection="menulist" item="menu" separator=",">
+			<foreach collection="menulist" item="menu" separator=",">
 				(
 					#{storeId},
 					#{displayNo},
