@@ -34,13 +34,19 @@
 	</insert>
 	
 	<!-- 로그인 (login 메소드와 연결) -->
-	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
+<!--	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">-->
+<!--		<![CDATA[-->
+<!--			SELECT * FROM members -->
+<!--			WHERE login_id = #{loginId} AND login_pw = #{loginPw}-->
+<!--		]]>-->
+<!--	</select>-->
+	<!-- 로그인 (login 메소드와 연결) -->
+	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memlist">
 		<![CDATA[
 			SELECT * FROM members 
 			WHERE login_id = #{loginId} AND login_pw = #{loginPw}
 		]]>
 	</select>
-	
 	<!-- 회원정보 수정 (updateMember 메소드와 연결) -->
 	<update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		<![CDATA[
