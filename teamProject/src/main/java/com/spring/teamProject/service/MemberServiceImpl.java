@@ -1,6 +1,7 @@
 package com.spring.teamProject.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.MemberDAO;
@@ -12,8 +13,16 @@ public class MemberServiceImpl implements MemberService {
 	@Autowired
 	private MemberDAO memberDAO;
 	
+	// (신규) SecurityConfig에 만들어 둔 PasswordEncoder를 주입받습니다.
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	@Override
 	public void join(MemberVO memberVO) {
+		// (수정) DB에 저장하기 전에 비밀번호를 암호화합니다.
+		String encodedPassword = passwordEncoder.encode(memberVO.getLoginPw());
+		memberVO.setLoginPw(encodedPassword);
+		
 		memberDAO.insertMember(memberVO);
 	}
 	

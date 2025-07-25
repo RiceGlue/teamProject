@@ -2,6 +2,8 @@ package com.spring.teamProject.vo;
 
 import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 public class MemberVO {
 	
 	private long memberId;
@@ -12,8 +14,9 @@ public class MemberVO {
 	private String socialProvider;
 	private String socialId;
 
-	//수정
 	private String memberName;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birth;
 	private String sex;
 	private String phone;

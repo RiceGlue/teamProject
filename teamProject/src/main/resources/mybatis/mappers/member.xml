@@ -2,38 +2,46 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
-<mapper namespace="mapper.member">
-	<resultMap id="memlist" type="MemberVO">
+<!-- namespace는 연결할 DAO 인터페이스의 전체 경로와 일치해야 합니다. -->
+<mapper namespace="com.spring.teamProject.dao.MemberDAO">
+
+	<!-- (수정) property 속성을 MemberVO의 camelCase 필드명과 정확히 일치시킵니다. -->
+	<resultMap id="memberResultMap" type="com.spring.teamProject.vo.MemberVO">
 		<result property="memberId" column="member_id"/>
 		<result property="loginId" column="login_id"/>
 		<result property="loginPw" column="login_pw"/>
-		
-		<!--소셜 로그인 관련-->
 		<result property="socialProvider" column="social_provider"/>
 		<result property="socialId" column="social_id"/>
-		
 		<result property="memberName" column="member_name"/>
 		<result property="birth" column="birth"/>
 		<result property="sex" column="sex"/>
 		<result property="phone" column="phone"/>
 		<result property="email" column="email"/>
 		<result property="role" column="role"/>
-		<result property="created_at" column="created_at"/>
-		<result property="updated_at" column="updated_at"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
 	
+	<!-- loginId로 회원 정보 조회 (스프링 시큐리티용) -->
+	<select id="findByLoginId" parameterType="String" resultMap="memberResultMap">
+		<![CDATA[
+			SELECT * FROM members WHERE login_id = #{loginId}
+		]]>
+	</select>
+	
 	<!-- 회원가입 (insertMember 메소드와 연결) -->
+	<!-- (수정) birth 파라미터에 jdbcType=DATE를 명시하여 날짜 형식 오류를 해결합니다. -->
 	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		<![CDATA[
 			INSERT INTO members (
 				login_id, login_pw, member_name, birth, sex, phone, email, role
 			) VALUES (
-				#{loginId}, #{loginPw}, #{memberName}, #{birth}, #{sex}, #{phone}, #{email}, 'USER'
+				#{loginId}, #{loginPw}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{phone}, #{email}, #{role}
 			)
 		]]>
 	</insert>
 	
-	<!-- 로그인 (login 메소드와 연결) -->
+	<!-- 로그인 (login 메소드와 연결) - 시큐리티 사용 시 직접 호출되지 않음 -->
 	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
 		<![CDATA[
 			SELECT * FROM members 
