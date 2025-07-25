@@ -27,10 +27,8 @@ public class StoreController {
 	@GetMapping(value="/storeRegionList.do")
 	public ModelAndView storeRegionList(@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		List<StoreVO> storelist = storeService.storeRegionList(region);
-		List<Long> imagelist = storeService.storeImageRegionList(region);
 		ModelAndView mav = ViewUtil.layout("store/storeRegionList.jsp");
 		mav.addObject("storelist", storelist);
-		mav.addObject("imagelist", imagelist);
 		
 		return mav;
 		

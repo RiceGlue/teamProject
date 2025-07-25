@@ -19,14 +19,5 @@ public class StoreService{
 		return storelist;
 	}
 	
-	public List<StoreVO> keywordSearchStore(String keyword) throws Exception {
-		List<StoreVO> storelist = storeDAO.SelectKeywordStore(keyword);
-		return storelist;
-	}
-	
-	public List<Long> storeImageRegionList(String region) throws Exception {
-		List<Long> imagelist = storeDAO.SelectStoreImageRegion(region);
-		return imagelist;
-	}
 
 }

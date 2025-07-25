@@ -16,6 +16,7 @@
 	</resultMap>
 	
 	<resultMap id="storeinfo" type="StoreVO">
+		<result property="storeId" column="storeId" />
 		<result property="storeType" column="storeType" />
 		<result property="operationType" column="operationType" />
 		<result property="storePhoneNumber" column="storePhoneNumber" />
@@ -44,18 +45,15 @@
 		]]>
 	</select>
 	
-	<select id="selectStoreRegion" parameterType="String" resultMap="storelist">
+	<select id="SelectStoreRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select s.store_name, s.description, avg(r.rating) as avgRating, count(r.review_id) as countRating, s.store_type, s.region, s.operation_type
-			from stores s inner join reviews r on s.store_id = r.store_id
-			where region = #{region}
-			order by s.store_id
+			select i.* from store_info i inner join stores s on i.store_id=s.store_id where s.region=#{region}
 		]]>
 	</select>
 	
 	<select id="selectStoreImageList" parameterType="String" resultMap="imagelist">
 		<![CDATA[ 
-			select i.image_url from store_images i inner join stores s on i.store_id=s.store_id where s.region=#{region}
+			select store_name from stores where region=#{region}
 		]]>
 	</select>
 	
