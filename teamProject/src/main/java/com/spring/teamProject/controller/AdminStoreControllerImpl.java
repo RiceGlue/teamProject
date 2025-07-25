@@ -16,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.BaseController;
+import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MemberVO;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -33,6 +36,14 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	
 	@Autowired
 	private AdminStoreService adminStoreService;
+	
+	@RequestMapping(value="/storeInfoForm.do")
+	public ModelAndView form (@RequestParam("store_id") String store_id, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		String viewName = (String)req.getAttribute("viewName");
+		
+		ModelAndView mav = ViewUtil.layout(viewName);
+		return mav;
+	}
 	
 	@Override
 	@RequestMapping(value="/addStoreInfo.do", method=RequestMethod.POST)
