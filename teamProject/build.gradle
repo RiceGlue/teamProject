@@ -21,8 +21,11 @@ repositories {
 dependencies {
 	// Spring Security & OAuth2 Client
 	// 로그인, 권한 관리 등 보안 기능 & 외부 서비스를 이용한 thtuf fhrmdls OAuth 2.0 인증 구현
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	// 보안관련 리다이렉션 충돌로 인해 현재 비활성화 해두었습니다
+	// 소셜로그인 기능을 다시 개발하기 위해선 옵션을 활성화 해야합니다
+	// config의  SecurityConfig.java 파일이 보안과 관련된 옵션을 조정할 수 있습니다
+	//implementation 'org.springframework.boot:spring-boot-starter-security'
+	//implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
