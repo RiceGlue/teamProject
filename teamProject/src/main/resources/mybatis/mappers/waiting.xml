@@ -12,32 +12,44 @@
         <result property="status" column="status"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="fcmToken" column="fcm_token"/> <!-- 추가 -->
     </resultMap>
 
     <select id="getAllWaitings" resultMap="WaitingResultMap">
-        SELECT * FROM waiting
+        SELECT * FROM waitings
     </select>
 
     <select id="getWaitingById" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waiting WHERE waiting_id = #{waitingId}
+        SELECT * FROM waitings WHERE waiting_id = #{waitingId}
     </select>
 
     <select id="getWaitingsByStoreId" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waiting WHERE store_id = #{storeId}
+        SELECT * FROM waitings WHERE store_id = #{storeId}
     </select>
 
     <select id="getWaitingsByMemberId" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waiting WHERE member_id = #{memberId}
+        SELECT * FROM waitings WHERE member_id = #{memberId}
     </select>
 
-    <insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" 
-            useGeneratedKeys="true" keyProperty="waitingId">
-        INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)
-        VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, NOW(), NOW())
-    </insert>
+	<insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" 
+        useGeneratedKeys="true" keyProperty="waitingId">
+	    INSERT INTO waitings (member_id, store_id, guest_count, status, fcm_token, created_at, updated_at)
+	    VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, #{fcmToken}, NOW(), NOW())
+	</insert>
 
+<!--    <insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" -->
+<!--            useGeneratedKeys="true" keyProperty="waitingId">-->
+<!--        INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)-->
+<!--        VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, NOW(), NOW())-->
+<!--    </insert>-->
+
+<!--	<insert id="insertWaiting" useGeneratedKeys="true" keyProperty="waitingId" keyColumn="waiting_id">-->
+<!--	    INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)-->
+<!--	    VALUES (#{memberId}, #{storeId}, #{guestCount}, 'WAITING', NOW(), NOW())-->
+<!--	</insert>-->
+	
     <update id="updateWaitingStatus" parameterType="map">
-        UPDATE waiting 
+        UPDATE waitings 
         SET status = #{status}, updated_at = NOW() 
         WHERE waiting_id = #{waitingId}
     </update>

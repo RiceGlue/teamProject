@@ -10,6 +10,8 @@ public class WaitingVO {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    private String fcmToken; // firebase waiting
 
     public Long getWaitingId() { return waitingId; }
     public void setWaitingId(Long waitingId) { this.waitingId = waitingId; }
@@ -31,6 +33,9 @@ public class WaitingVO {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
 }
 
 

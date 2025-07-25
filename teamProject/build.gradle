@@ -15,7 +15,7 @@ java {
 
 repositories {
 	mavenCentral()
-//	google() // firebase
+	google() // firebase
 }
 
 dependencies {
@@ -47,7 +47,10 @@ dependencies {
 	// JSTL 구현체
 	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 	implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	//implementation 'org.springframework.boot:spring-boot-starter-web' //자체 로깅 충돌 방지
+	implementation('org.springframework.boot:spring-boot-starter-web') {
+	    exclude group: 'commons-logging', module: 'commons-logging'
+	}
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'       // JSP 컴파일러
 	
 	// 로깅 (Spring Boot 기본 logback 사용. slf4j-log4j12, log4j 제거)
@@ -79,6 +82,9 @@ dependencies {
 
     // Jackson (종종 필요함)
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    
+    // Firebase Admin SDK 추가
+    implementation 'com.google.firebase:firebase-admin:9.3.0' // 최신 버전
 	
 }
 
