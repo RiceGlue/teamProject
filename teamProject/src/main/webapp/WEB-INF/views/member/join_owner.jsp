@@ -2,8 +2,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <div class="container my-5" style="max-width: 600px;">
-    <h2 class="text-center mb-4">회원가입</h2>
+    <h2 class="text-center mb-4">가맹점주 회원가입</h2>
+    
     <form action="${contextPath}/member/join" method="post">
+        <!-- 역할(role)을 hidden input으로 전송 -->
+        <input type="hidden" name="role" value="OWNER">
+
         <div class="mb-3">
             <label for="loginId" class="form-label">아이디</label>
             <input type="text" class="form-control" id="loginId" name="loginId" required>
@@ -13,9 +17,15 @@
             <input type="password" class="form-control" id="loginPw" name="loginPw" required>
         </div>
         <div class="mb-3">
-            <label for="memberName" class="form-label">이름</label>
+            <label for="memberName" class="form-label">대표자명</label>
             <input type="text" class="form-control" id="memberName" name="memberName" required>
         </div>
+        
+        <!-- TODO: 사업자 등록 정보 인증 관련 필드 추가 예정 -->
+        <div class="alert alert-secondary" role="alert">
+          사업자 등록 정보는 추후 별도 페이지에서 인증 및 입력하게 됩니다.
+        </div>
+
         <div class="mb-3">
             <label for="birth" class="form-label">생년월일</label>
             <input type="date" class="form-control" id="birth" name="birth" required>
@@ -34,7 +44,7 @@
             </div>
         </div>
         <div class="mb-3">
-            <label for="phone" class="form-label">전화번호</label>
+            <label for="phone" class="form-label">연락처</label>
             <input type="tel" class="form-control" id="phone" name="phone" placeholder="010-1234-5678" required>
         </div>
         <div class="mb-3">
@@ -42,7 +52,7 @@
             <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
         </div>
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary">가입하기</button>
+            <button type="submit" class="btn btn-success">가입하기</button>
         </div>
     </form>
 </div>

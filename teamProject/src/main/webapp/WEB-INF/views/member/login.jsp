@@ -18,7 +18,7 @@
     </form>
     
     <div class="text-center mt-3">
-        <a href="${contextPath}/member/join">회원가입</a> | <a href="#">아이디/비밀번호 찾기</a>
+        <a href="${contextPath}/member/join_select">회원가입</a> | <a href="#">아이디/비밀번호 찾기</a>
     </div>
     
     <!-- 로그인 실패 또는 회원가입 성공 메시지 표시 -->
