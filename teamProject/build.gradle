@@ -15,7 +15,7 @@ java {
 
 repositories {
 	mavenCentral()
-//	google() // firebase
+	google() // firebase
 }
 
 dependencies {
@@ -77,6 +77,9 @@ dependencies {
 
     // Jackson (종종 필요함)
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    
+    // Firebase Admin SDK 추가
+    implementation 'com.google.firebase:firebase-admin:9.3.0' // 최신 버전
 	
 }
 
