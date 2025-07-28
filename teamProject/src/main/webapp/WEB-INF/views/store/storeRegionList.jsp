@@ -6,5 +6,5 @@
 		<td>
 			<a href="${contextPath}/store/storeDetail.do?store_id=${store.store_id}">${store.store_name}</a>
 		</td>
-	<tr>
-<c:forEach>
+	</tr>
+</c:forEach>
