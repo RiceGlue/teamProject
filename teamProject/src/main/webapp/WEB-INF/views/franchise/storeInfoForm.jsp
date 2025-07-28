@@ -29,6 +29,13 @@
 		day_off_arr.push(day_off);
 	})
 	
+	var amenities_arr=[];	
+
+	$("input[name=amenities]:checked").each(function() {
+		var amenities = $(this).val();
+		amenities_arr.push(amenities);
+	})
+	
 	function addMenu() {
 		$("#moreMenu").append(`
 		  <tr><td>메뉴 이름 </td><td><input type="text" name="menu_name"></td></tr>
@@ -66,10 +73,30 @@
 	var start_min_arr = Array.from(document.getElementsByName("start_min")).map(el => el.value);
 	var end_hour_arr = Array.from(document.getElementsByName("end_hour")).map(el => el.value);
 	var end_min_arr = Array.from(document.getElementsByName("end_min")).map(el => el.value);
+	
+	
+	var brake_time = [];
+
+	// 각각의 input 요소 가져오기
+	var start_hours = document.getElementsByName("brake_start_hour");
+	var start_mins  = document.getElementsByName("brake_start_min");
+	var end_hours   = document.getElementsByName("brake_end_hour");
+	var end_mins    = document.getElementsByName("brake_end_min");
+
+	// 모든 brake 시간 입력 필드의 개수만큼 반복
+	var len = start_hours.length;  // 각 배열은 같은 길이여야 함
+	for (var i = 0; i < len; i++) {
+	    var start_time = start_hours[i].value.padStart(2, '0') + ":" + start_mins[i].value.padStart(2, '0');
+	    var end_time = end_hours[i].value.padStart(2, '0') + ":" + end_mins[i].value.padStart(2, '0');
+	    brake_time.push(start_time + "~" + end_time);
+	}
+
 
 	function checkStoreInfo() {
 		var form = document.storeInfo;	
 		var store_phone_number = form.store_phone_number.value;
+		
+		form.sumbit();
 	}
 
 </script>
@@ -106,9 +133,9 @@
 							<td width=200 >운영 방식</td>
 							<td width=500>
 								<select name="operation_type">
-									<option value="모두" selected>모두
-									<option value="웨이팅만">웨이팅만
-									<option value="예약만">예약만
+									<option value="ALL" selected>모두
+									<option value="WAITING_ONLY">웨이팅만
+									<option value="RESERVATION_ONLY">예약만
 								</select>
 							</td>
 						</tr>	

@@ -48,17 +48,18 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	
 	@Override
 	@RequestMapping(value="/addStoreInfo.do", method=RequestMethod.POST)
-	public ResponseEntity addStoreInfo (@RequestParam("store_id") long store_id, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
+	public ResponseEntity addStoreInfo (@RequestParam("storeId") long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
 		multiReq.setCharacterEncoding("utf-8");
 		res.setContentType("text/html; charset=UTF-8");
 		String imageFileName=null;
 		
-		Map newStoreMap = new HashMap();
+		Map storeInfoMap  = new HashMap<>();
+		storeInfoMap .put("storeId",storeId);
 		Enumeration enu=multiReq.getParameterNames();
 		while(enu.hasMoreElements()){
 			String name=(String)enu.nextElement();
 			String value=multiReq.getParameter(name);
-			newStoreMap.put(name,value);
+			storeInfoMap .put(name,value);
 		}
 		
 		HttpSession session = multiReq.getSession();
@@ -71,7 +72,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			for(ImageFileVO imageFileVO : imageFileList) {
 				imageFileVO.setRegId(reg_id);
 			}
-			newStoreMap.put("imageFileList", imageFileList);
+			storeInfoMap .put("imageFileList", imageFileList);
 		}
 		
 		String message = null;
@@ -79,12 +80,12 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "text/html; charset=utf-8");
 		try {
-			long goods_id = adminStoreService.addStoreInfo(newStoreMap);
+			long info_id = adminStoreService.addStoreInfo(storeInfoMap );
 			if(imageFileList!=null && imageFileList.size()!=0) {
 				for(ImageFileVO  imageFileVO:imageFileList) {
 					imageFileName = imageFileVO.getFileName();
 					File srcFile = new File(CURR_IMAGE_REPO_PATH+"\\"+"temp"+"\\"+imageFileName);
-					File destDir = new File(CURR_IMAGE_REPO_PATH+"\\"+goods_id);
+					File destDir = new File(CURR_IMAGE_REPO_PATH+"\\"+storeId);
 					FileUtils.moveFileToDirectory(srcFile, destDir,true);
 				}
 			}

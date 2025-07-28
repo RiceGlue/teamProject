@@ -20,13 +20,13 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	
 	@Override
 	public long addStoreInfo(Map newStoreMap) throws Exception {
-		long storeId = adminStoreDAO.insertStoreInfo(newStoreMap);
+		long info_id = adminStoreDAO.insertStoreInfo(newStoreMap);
 		ArrayList<ImageFileVO> imageFileList = (ArrayList)newStoreMap.get("imageFileList");
 		for(ImageFileVO imageFileVO : imageFileList ) {
-			imageFileVO.setStoreId(storeId);
+			imageFileVO.setInfoId(info_id);
 		}
 //		adminStoreDAO.insertStoreImageFile(imageFileList);
-		return storeId;
+		return info_id;
 	}
 
 }
