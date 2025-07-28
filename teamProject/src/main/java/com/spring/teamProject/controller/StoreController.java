@@ -34,6 +34,12 @@ public class StoreController {
 		
 	}
 	
+	@GetMapping(value="/storeList.do")
+	public ModelAndView storeList(HttpServletRequest req, HttpServletResponse res) throws Exception {
+		ModelAndView mav = ViewUtil.layout("store/storeList");
+		return mav;
+	}
+	
 	public ModelAndView form(@RequestParam("store_id") String store_id, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		ModelAndView mav = ViewUtil.layout("franchise/");
 		return mav;
