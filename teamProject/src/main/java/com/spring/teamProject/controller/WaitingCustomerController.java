@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus; // HttpStatus 임포트 추가
+import org.springframework.http.ResponseEntity; // ResponseEntity 임포트 추가
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -75,7 +77,7 @@ public class WaitingCustomerController {
         return "waiting/customer/result";
     }
 
-    // --- REST API 관련 메서드들은 이전 수정과 동일하게 유지 ---
+    // --- REST API 관련 메서드들 ---
 
     // 모든 웨이팅 목록 조회 (API)
     @GetMapping("/api")
@@ -99,10 +101,31 @@ public class WaitingCustomerController {
     }
 
     // 웨이팅 상태 업데이트 (API)
+    // **이 부분을 수정합니다.**
     @PutMapping("/api/{id}")
     @ResponseBody
-    public void updateWaitingStatus(@PathVariable Long id, @RequestParam String status) {
-        waitingService.updateWaitingStatus(id, status);
+    // 반환 타입을 void에서 ResponseEntity<Void>로 변경하여 더 명확한 HTTP 응답을 제공할 수 있습니다.
+    public ResponseEntity<Void> updateWaitingStatus(
+            @PathVariable("id") String idString, // String으로 받고, 명시적으로 이름을 지정
+            @RequestParam("status") String status) {
+        try {
+            // String으로 받은 ID를 Long으로 변환 (waitingId가 DB에서 Long 타입인 경우)
+            Long id = Long.parseLong(idString); 
+            
+            logger.info("Received update request for waitingId: {}, status: {}", id, status);
+            waitingService.updateWaitingStatus(id, status);
+            
+            // 성공적으로 처리되었음을 나타내는 200 OK 응답
+            return ResponseEntity.ok().build(); 
+        } catch (NumberFormatException e) {
+            // ID가 유효한 숫자가 아닌 경우
+            logger.error("Invalid waiting ID format: {}", idString, e);
+            return ResponseEntity.badRequest().build(); // 400 Bad Request
+        } catch (Exception e) {
+            // 그 외 다른 오류 발생 시
+            logger.error("Error updating waiting status for id {}: {}", idString, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
+        }
     }
 
     // 웨이팅 삭제 (API)

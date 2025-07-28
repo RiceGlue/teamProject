@@ -28,6 +28,7 @@ public class WaitingServiceImpl implements WaitingService {
     @Override
     @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
     public int registerWaiting(WaitingVO waitingVO) {
+        System.out.println("DEBUG: registerWaiting 메서드 시작"); // 1번
         // 사실상 insertWaiting과 동일한 로직을 수행합니다.
         return insertAndSyncToFirebase(waitingVO);
     }
@@ -36,60 +37,86 @@ public class WaitingServiceImpl implements WaitingService {
     @Override
     @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
     public void insertWaiting(WaitingVO waiting) {
+        System.out.println("DEBUG: insertWaiting 메서드 시작"); // 2번
         insertAndSyncToFirebase(waiting);
     }
 
     // 웨이팅 등록 및 Firebase 동기화 처리
     private int insertAndSyncToFirebase(WaitingVO waitingVO) {
+        System.out.println("DEBUG: insertAndSyncToFirebase 메서드 시작"); // 3번
+        System.out.println("DEBUG: 초기 waitingVO 상태: " + waitingVO.getStatus()); // 4번
+
         // status가 설정되지 않았으면 기본값 "WAITING" 설정
         if (waitingVO.getStatus() == null || waitingVO.getStatus().isEmpty()) {
             waitingVO.setStatus("WAITING");
         }
+        System.out.println("DEBUG: 최종 waitingVO 상태 설정 후: " + waitingVO.getStatus()); // 5번
 
         // 1. MyBatis를 통해 MySQL DB에 웨이팅 정보를 저장합니다.
         // insert 성공 시 waitingVO 객체에 auto-increment된 waitingId가 자동으로 채워집니다.
+        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 전"); // 6번
         int result = waitingDAO.insertWaiting(waitingVO);
+        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 후. 결과(result): " + result); // 7번
+        System.out.println("DEBUG: MySQL DB 저장 후 waitingVO.waitingId: " + waitingVO.getWaitingId()); // 8번 (★★ 가장 중요 ★★)
 
         // 2. Firebase Realtime Database에 실시간으로 동기화합니다.
+        System.out.println("DEBUG: Firebase 동기화 조건 확인: result > 0 && waitingVO.getWaitingId() != null"); // 9번
         if (result > 0 && waitingVO.getWaitingId() != null) {
-            final FirebaseDatabase database = FirebaseDatabase.getInstance();
-            // 데이터 구조: /waitings/{storeId}/{waitingId}
-            DatabaseReference ref = database.getReference("waitings")
-                                            .child(String.valueOf(waitingVO.getStoreId()))
-                                            .child(String.valueOf(waitingVO.getWaitingId()));
+            System.out.println("DEBUG: Firebase 동기화 조건 만족! Firebase 연동 로직 시작."); // 10번
 
-            // WaitingVO 객체의 필드를 Map으로 변환하여 Firebase에 보낼 데이터 구성
-            Map<String, Object> waitingMap = new HashMap<>();
-            waitingMap.put("memberId", waitingVO.getMemberId());
-            waitingMap.put("storeId", waitingVO.getStoreId());
-            waitingMap.put("guestCount", waitingVO.getGuestCount());
-            waitingMap.put("status", waitingVO.getStatus());
-            waitingMap.put("fcmToken", waitingVO.getFcmToken());
+            // FirebaseDatabase.getInstance() 호출 전에 FirebaseAdmin SDK가 초기화되었는지 확인
+            try {
+                final FirebaseDatabase database = FirebaseDatabase.getInstance();
+                System.out.println("DEBUG: FirebaseDatabase.getInstance() 성공."); // 11번
 
-            // createdAt 필드 변환: LocalDateTime -> Epoch Milliseconds
-            if (waitingVO.getCreatedAt() != null) {
-                waitingMap.put("createdAt", waitingVO.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
-            } else {
-                // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
-                waitingMap.put("createdAt", System.currentTimeMillis());
-            }
+                // 데이터 구조: /waitings/{storeId}/{waitingId}
+                DatabaseReference ref = database.getReference("waitings")
+                                                .child(String.valueOf(waitingVO.getStoreId()))
+                                                .child(String.valueOf(waitingVO.getWaitingId()));
+                System.out.println("DEBUG: Firebase Reference 경로: " + ref.toString()); // 12번
 
-            // updatedAt 필드 변환: LocalDateTime -> Epoch Milliseconds
-            if (waitingVO.getUpdatedAt() != null) {
-                waitingMap.put("updatedAt", waitingVO.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
-            } else {
-                // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
-                waitingMap.put("updatedAt", System.currentTimeMillis());
-            }
+                // WaitingVO 객체의 필드를 Map으로 변환하여 Firebase에 보낼 데이터 구성
+                Map<String, Object> waitingMap = new HashMap<>();
+                waitingMap.put("memberId", waitingVO.getMemberId());
+                waitingMap.put("storeId", waitingVO.getStoreId());
+                waitingMap.put("guestCount", waitingVO.getGuestCount());
+                waitingMap.put("status", waitingVO.getStatus());
+                waitingMap.put("fcmToken", waitingVO.getFcmToken());
 
-            // Firebase에 데이터 업데이트 (updateChildren 사용 및 CompletionListener 추가)
-            ref.updateChildren(waitingMap, (error, ref1) -> {
-                if (error != null) {
-                    System.err.println("Firebase updateChildren failed for new waiting (ID: " + waitingVO.getWaitingId() + "): " + error.getMessage());
+                // createdAt 필드 변환: LocalDateTime -> Epoch Milliseconds
+                if (waitingVO.getCreatedAt() != null) {
+                    waitingMap.put("createdAt", waitingVO.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
                 } else {
-                    System.out.println("Firebase new waiting added/updated successfully (ID: " + waitingVO.getWaitingId() + ")");
+                    // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
+                    waitingMap.put("createdAt", System.currentTimeMillis());
                 }
-            });
+
+                // updatedAt 필드 변환: LocalDateTime -> Epoch Milliseconds
+                if (waitingVO.getUpdatedAt() != null) {
+                    waitingMap.put("updatedAt", waitingVO.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
+                } else {
+                    // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
+                    waitingMap.put("updatedAt", System.currentTimeMillis());
+                }
+                System.out.println("DEBUG: Firebase로 보낼 데이터: " + waitingMap); // 13번
+
+                // Firebase에 데이터 업데이트 (updateChildren 사용 및 CompletionListener 추가)
+                ref.updateChildren(waitingMap, (error, ref1) -> {
+                    if (error != null) {
+                        System.err.println("Firebase updateChildren failed for new waiting (ID: " + waitingVO.getWaitingId() + "): " + error.getMessage()); // 14번 (오류 발생 시)
+                    } else {
+                        System.out.println("Firebase new waiting added/updated successfully (ID: " + waitingVO.getWaitingId() + ")"); // 15번 (성공 시)
+                    }
+                });
+                System.out.println("DEBUG: Firebase updateChildren 호출 완료 (비동기)."); // 16번
+
+            } catch (Exception e) {
+                System.err.println("DEBUG ERROR: Firebase 초기화 또는 데이터베이스 접근 중 예외 발생: " + e.getMessage()); // 17번
+                e.printStackTrace();
+            }
+
+        } else {
+            System.out.println("DEBUG: Firebase 동기화 조건 불만족 (result=" + result + ", waitingId=" + waitingVO.getWaitingId() + ")"); // 18번
         }
         return result;
     }

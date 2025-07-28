@@ -87,7 +87,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-admin:9.3.0' // 최신 버전
 	
 }
-
+// **추가된 부분: Java 컴파일 시 -parameters 플래그 추가**
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add("-parameters")
+}
 tasks.named('test') {
 	useJUnitPlatform()
 }
