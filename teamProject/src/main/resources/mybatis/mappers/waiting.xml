@@ -55,7 +55,7 @@
     </update>
 
     <delete id="deleteWaiting" parameterType="long">
-        DELETE FROM waiting WHERE waiting_id = #{waitingId}
+        DELETE FROM waitings WHERE waiting_id = #{waitingId}
     </delete>
 
 </mapper>
