@@ -27,6 +27,9 @@ public class MemberVO {
 	private Date createdAt;
 	private Date updatedAt;
 	
+	//국가코드
+	private String countryCode;
+	
 	public long getMemberId() {
 		return memberId;
 	}
@@ -105,7 +108,11 @@ public class MemberVO {
 	public void setUpdatedAt(Date updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	
-	
+    public String getCountryCode() {	
+        return countryCode;
+    }
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
 
 }

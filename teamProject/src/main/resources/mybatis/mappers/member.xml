@@ -15,12 +15,27 @@
 		<result property="memberName" column="member_name"/>
 		<result property="birth" column="birth"/>
 		<result property="sex" column="sex"/>
+		<result property="countryCode" column="country_code"/>
 		<result property="phone" column="phone"/>
 		<result property="email" column="email"/>
 		<result property="role" column="role"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
+	
+	<!-- (신규) 이메일로 회원 정보 조회 -->
+	<select id="findByEmail" parameterType="String" resultMap="memberResultMap">
+		SELECT * FROM members WHERE email = #{email}
+	</select>
+	
+	<!-- (신규) 소셜 로그인 사용자 정보 삽입 -->
+	<insert id="insertSocialMember" parameterType="com.spring.teamProject.vo.MemberVO">
+		INSERT INTO members (
+			social_provider, social_id, member_name, birth, sex, country_code, phone, email, role
+		) VALUES (
+			#{socialProvider}, #{socialId}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role}
+		)
+	</insert>
 	
 	<!-- loginId로 회원 정보 조회 (스프링 시큐리티용) -->
 	<select id="findByLoginId" parameterType="String" resultMap="memberResultMap">
