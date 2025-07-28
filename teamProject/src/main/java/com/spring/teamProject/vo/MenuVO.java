@@ -1,8 +1,8 @@
 package com.spring.teamProject.vo;
 
 public class MenuVO {
-	private String menuId;
-	private String storeId;
+	private long menuId;
+	private long storeId;
 	private int displayNo;
 	private String menuName;
 	private String price;
@@ -12,16 +12,16 @@ public class MenuVO {
 	private String updatedAt;
 	
 	
-	public String getMenuId() {
+	public long getMenuId() {
 		return menuId;
 	}
-	public void setMenuId(String menuId) {
+	public void setMenuId(long menuId) {
 		this.menuId = menuId;
 	}
-	public String getStoreId() {
+	public long getStoreId() {
 		return storeId;
 	}
-	public void setStoreId(String storeId) {
+	public void setStoreId(long storeId) {
 		this.storeId = storeId;
 	}
 	public int getDisplayNo() {
