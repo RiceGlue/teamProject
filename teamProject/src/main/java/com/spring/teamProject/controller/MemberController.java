@@ -1,6 +1,9 @@
 package com.spring.teamProject.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +39,6 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // --- (삭제) @PostMapping("/login") 메소드는 스프링 시큐리티가 처리하므로 삭제합니다. ---
-
     // --- 로그아웃 ---
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
@@ -48,7 +49,7 @@ public class MemberController {
         return "redirect:/";
     }
 
-    // --- 회원가입 폼 ---
+    // --- 일반 & 가맹점주 회원가입 폼 ---
     @GetMapping("/join")
     public String joinForm(@RequestParam("role") String role, Model model) {
         if ("OWNER".equals(role)) {
@@ -59,11 +60,57 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // --- 회원가입 처리 ---
+    // --- 일반 & 가맹점주 회원가입 처리 ---
     @PostMapping("/join")
     public String join(MemberVO memberVO, RedirectAttributes redirectAttributes) {
-        memberService.join(memberVO);
-        redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
+        try {
+            memberService.join(memberVO);
+            redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
+            return "redirect:/member/login";
+        } catch (DuplicateKeyException e) {
+            // (신규) DB에 중복된 값이 있을 경우 예외 처리
+            redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
+            // 가입 폼으로 다시 돌려보냄 (사용자가 입력한 role 값을 유지)
+            return "redirect:/member/join?role=" + memberVO.getRole();
+        }
+    }
+    
+    // --- 소셜 로그인 후 추가 정보 입력 페이지 ---
+    @GetMapping("/join-social")
+    public String joinSocialForm(Model model, HttpSession session) {
+        Object socialUserInfo = session.getAttribute("socialUserInfo");
+        if (socialUserInfo == null) {
+            return "redirect:/"; // 비정상 접근 시 메인으로
+        }
+        model.addAttribute("socialUserInfo", socialUserInfo);
+        model.addAttribute("body", "member/join-social.jsp");
+        return "layout/layout";
+    }
+
+    // --- 소셜 회원가입 최종 처리 ---
+    @PostMapping("/join-social")
+    public String joinSocial(MemberVO memberVO, HttpSession session, RedirectAttributes redirectAttributes) {
+        Map<String, Object> socialUserInfo = (Map<String, Object>) session.getAttribute("socialUserInfo");
+        
+        if (socialUserInfo != null) {
+            memberVO.setSocialProvider("GOOGLE");
+            memberVO.setSocialId((String) socialUserInfo.get("sub"));
+            memberVO.setEmail((String) socialUserInfo.get("email"));
+            memberVO.setMemberName((String) socialUserInfo.get("name"));
+            memberVO.setRole("USER");
+
+            try {
+                memberService.joinSocial(memberVO);
+                session.removeAttribute("socialUserInfo");
+                redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 다시 로그인해주세요.");
+                return "redirect:/member/login";
+            } catch (DuplicateKeyException e) {
+                // (신규) DB에 중복된 값이 있을 경우 예외 처리
+                session.setAttribute("socialUserInfo", socialUserInfo); // 세션 정보 유지
+                redirectAttributes.addFlashAttribute("error", "이미 가입된 전화번호 또는 이메일입니다.");
+                return "redirect:/member/join-social";
+            }
+        }
         return "redirect:/member/login";
     }
 }

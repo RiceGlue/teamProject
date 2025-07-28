@@ -7,7 +7,13 @@ import com.spring.teamProject.vo.MemberVO;
 @Mapper
 public interface MemberDAO {
 	
-	// (신규) loginId로 회원 정보 조회 (스프링 시큐리티용)
+    // (신규) 이메일로 회원 정보 조회
+    MemberVO findByEmail(String email);
+    
+    // (신규) 소셜 로그인 사용자를 DB에 삽입
+    void insertSocialMember(MemberVO memberVO);
+	
+	// loginId로 회원 정보 조회 (스프링 시큐리티용)
 	MemberVO findByLoginId(String loginId);
 	
 	// 회원가입

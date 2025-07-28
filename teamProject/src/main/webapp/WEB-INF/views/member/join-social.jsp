@@ -2,24 +2,18 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <div class="container my-5" style="max-width: 600px;">
-    <h2 class="text-center mb-4">일반 회원가입</h2>
+    <h2 class="text-center mb-4">추가 정보 입력</h2>
+    <p class="text-center text-muted mb-4">정확한 서비스 이용을 위해 추가 정보를 입력해주세요.</p>
     
-    <form action="${contextPath}/member/join" method="post">
-        <input type="hidden" name="role" value="USER">
-
-        <!-- ... 아이디, 비밀번호, 이름, 생년월일, 성별 필드 ... -->
-        
+    <form action="${contextPath}/member/join-social" method="post">
         <div class="mb-3">
-            <label for="loginId" class="form-label">아이디</label>
-            <input type="text" class="form-control" id="loginId" name="loginId" required>
-        </div>
-        <div class="mb-3">
-            <label for="loginPw" class="form-label">비밀번호</label>
-            <input type="password" class="form-control" id="loginPw" name="loginPw" required>
+            <label for="email" class="form-label">이메일</label>
+            <input type="email" class="form-control" id="email" name="email" value="${socialUserInfo.email}" readonly>
         </div>
         <div class="mb-3">
             <label for="memberName" class="form-label">이름</label>
-            <input type="text" class="form-control" id="memberName" name="memberName" required>
+            <%-- (수정) readonly 속성을 제거하여 사용자가 직접 이름을 수정할 수 있도록 변경 --%>
+            <input type="text" class="form-control" id="memberName" name="memberName" value="${socialUserInfo.name}" required>
         </div>
         <div class="mb-3">
             <label for="birth" class="form-label">생년월일</label>
@@ -38,8 +32,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- (수정) 전화번호 입력 부분 -->
+        
         <div class="mb-3">
             <label for="phone" class="form-label">전화번호</label>
             <div class="input-group">
@@ -71,13 +64,9 @@
                 <input type="tel" class="form-control" id="phone" name="phone" placeholder="'-' 없이 숫자만 입력" required>
             </div>
         </div>
-
-        <div class="mb-3">
-            <label for="email" class="form-label">이메일</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
-        </div>
+        
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary">가입하기</button>
+            <button type="submit" class="btn btn-primary">가입 완료</button>
         </div>
     </form>
 </div>

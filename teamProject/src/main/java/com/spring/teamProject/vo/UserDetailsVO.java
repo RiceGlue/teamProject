@@ -2,13 +2,16 @@ package com.spring.teamProject.vo;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User; // OAuth2User import
 
-// 우리 MemberVO를 스프링 시큐리티가 이해할 수 있는 UserDetails 형태로 변환하는 클래스
-public class UserDetailsVO implements UserDetails {
+// (수정) OAuth2User 인터페이스를 함께 구현하도록 변경
+public class UserDetailsVO implements UserDetails, OAuth2User {
 
     private final MemberVO memberVO;
 
@@ -16,10 +19,29 @@ public class UserDetailsVO implements UserDetails {
         this.memberVO = memberVO;
     }
 
+    // --- OAuth2User 인터페이스 구현 ---
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        // (신규) 소셜 로그인 사용자와 데이터 구조를 통일하기 위해 attributes 맵을 생성하여 반환합니다.
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("name", memberVO.getMemberName()); // 'name' 키에 사용자 이름을 저장
+        attributes.put("email", memberVO.getEmail());
+        // 필요한 다른 정보들도 여기에 추가할 수 있습니다.
+        return attributes;
+    }
+
+    @Override
+    public String getName() {
+        // UserDetails의 getUsername과 동일하게 로그인 ID를 반환하도록 설정
+        return memberVO.getLoginId();
+    }
+
+
+    // --- UserDetails 인터페이스 구현 ---
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 사용자의 권한(role)을 GrantedAuthority 컬렉션으로 반환
-        // 예: "ROLE_USER", "ROLE_OWNER"
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + memberVO.getRole()));
     }
 
@@ -33,31 +55,18 @@ public class UserDetailsVO implements UserDetails {
         return memberVO.getLoginId();
     }
 
-    // 계정이 만료되지 않았는지 리턴 (true: 만료안됨)
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
-    // 계정이 잠겨있지 않은지 리턴 (true: 잠기지 않음)
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
-    // 비밀번호가 만료되지 않았는지 리턴 (true: 만료안됨)
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
-    // 계정이 활성화(사용가능)인지 리턴 (true: 활성화)
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
     
-    // MemberVO 객체를 반환하는 getter
     public MemberVO getMemberVO() {
         return memberVO;
     }
