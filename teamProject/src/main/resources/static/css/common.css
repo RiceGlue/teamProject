@@ -3,3 +3,6 @@
 
 .row > .col-12,
 .row > .container {border: 2px solid olivedrab; border-radius: 20px; padding: 15px;}
+
+
+table td {vertical-align: top;}

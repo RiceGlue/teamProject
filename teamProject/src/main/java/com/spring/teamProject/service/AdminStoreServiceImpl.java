@@ -28,4 +28,5 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 //		adminStoreDAO.insertStoreImageFile(imageFileList);
 		return storeId;
 	}
+
 }

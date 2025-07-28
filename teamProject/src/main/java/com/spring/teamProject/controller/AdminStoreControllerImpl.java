@@ -27,7 +27,7 @@ import com.spring.teamProject.vo.MemberVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+  
 @Controller("adminStoreController")
 @RequestMapping(value="/franchise")
 public class AdminStoreControllerImpl extends BaseController implements AdminStoreController {
@@ -38,16 +38,17 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	private AdminStoreService adminStoreService;
 	
 	@RequestMapping(value="/storeInfoForm.do")
-	public ModelAndView form (@RequestParam("store_id") String store_id, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public ModelAndView form (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
-		
+		System.out.println(viewName);
+
 		ModelAndView mav = ViewUtil.layout(viewName);
 		return mav;
 	}
 	
 	@Override
 	@RequestMapping(value="/addStoreInfo.do", method=RequestMethod.POST)
-	public ResponseEntity addStoreInfo (@RequestParam("store_id") String store_id, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
+	public ResponseEntity addStoreInfo (@RequestParam("store_id") long store_id, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
 		multiReq.setCharacterEncoding("utf-8");
 		res.setContentType("text/html; charset=UTF-8");
 		String imageFileName=null;
@@ -90,7 +91,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			message= "<script>";
 			message += " alert('가게 정보가 등록되었습니다.');";
 			message +=" location.href='"+multiReq.getContextPath()+"/admin/goods/addNewGoodsForm.do';";
-			message +=("</script>");
+			message +="</script>";
 		}catch(Exception e) {
 			if(imageFileList!=null && imageFileList.size()!=0) {
 				for(ImageFileVO  imageFileVO:imageFileList) {

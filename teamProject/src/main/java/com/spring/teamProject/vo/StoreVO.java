@@ -5,8 +5,8 @@ import java.util.Date;
 public class StoreVO {
 	
 	//stores 테이블
-	private long storeId;
-	private long ownerId;
+	private String storeId;
+	private String ownerId;
 	private String storeName;
 	
 	private String address;
@@ -54,16 +54,16 @@ public class StoreVO {
 	public void setDayOff(String dayOff) {
 		this.dayOff = dayOff;
 	}
-	public long getStoreId() {
+	public String getStoreId() {
 		return storeId;
 	}
-	public void setStoreId(long storeId) {
+	public void setStoreId(String storeId) {
 		this.storeId = storeId;
 	}
-	public long getOwnerId() {
+	public String getOwnerId() {
 		return ownerId;
 	}
-	public void setOwnerId(long ownerId) {
+	public void setOwnerId(String ownerId) {
 		this.ownerId = ownerId;
 	}
 	public String getStoreName() {

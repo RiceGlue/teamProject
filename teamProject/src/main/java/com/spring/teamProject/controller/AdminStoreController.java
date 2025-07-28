@@ -8,6 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface AdminStoreController {
 	
-	public ResponseEntity addStoreInfo (@RequestParam("store_id")String store_id, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
+	public ResponseEntity addStoreInfo (@RequestParam("store_id")long store_id, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
 
 }

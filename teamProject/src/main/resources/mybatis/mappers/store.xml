@@ -39,6 +39,12 @@
 		<result property="regId" column="regId"/>
 	</resultMap>
 	
+	<select id="selectStoreName" parameterType="long" resultType="String">
+		<![CDATA[ 
+			select store_name from stores where store_id = #{store_id}
+		]]>
+	</select>
+	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where store_id = #{store_id}

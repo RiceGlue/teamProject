@@ -14,6 +14,7 @@ public class AdminStoreDAOImpl implements AdminStoreDAO{
 	@Override
 	public long insertStoreInfo(Map newStoreMap) throws DataAccessException {
 		sqlSession.insert("mapper.store.insertStoreInfo",newStoreMap);
-		return (long) newStoreMap.get("storeId");
+		return (long)newStoreMap.get("storeId");
 	}
+
 }
