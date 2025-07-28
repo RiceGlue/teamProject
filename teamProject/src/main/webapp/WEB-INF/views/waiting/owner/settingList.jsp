@@ -113,101 +113,103 @@
     </div>
 
     <script>
-        // --- Firebase 설정: YOUR_API_KEY, YOUR_PROJECT_ID 등을 실제 값으로 변경해야 합니다! ---
-        const firebaseConfigExam = {
-            apiKey: "YOUR_API_KEY_HERE",           // <-- 실제 API 키로 변경
-            authDomain: "YOUR_PROJECT_ID_HERE.firebaseapp.com", // <-- 실제 프로젝트 ID로 변경
-            databaseURL: "https://YOUR_PROJECT_ID_HERE.firebaseio.com", // <-- 실제 프로젝트 ID로 변경
-            projectId: "YOUR_PROJECT_ID_HERE",     // <-- 실제 프로젝트 ID로 변경
-            storageBucket: "YOUR_PROJECT_ID_HERE.appspot.com", // <-- 실제 프로젝트 ID로 변경
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE", // <-- 실제 발신자 ID로 변경
-            appId: "YOUR_APP_ID_HERE"              // <-- 실제 앱 ID로 변경
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9D4IB4LfBgyU-UBwoFSPJLo6giLcNyf4",
+            authDomain: "riceglue-9864b.firebaseapp.com",
+            databaseURL: "https://riceglue-9864b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "riceglue-9864b",
+            storageBucket: "riceglue-9864b.firebasestorage.app",
+            messagingSenderId: "962078958463",
+            appId: "1:962078958463:web:e6448b0d9a515cfecc304a",
+            measurementId: "G-B3DPWVEZJR"
         };
-		const firebaseConfig = {
-		    apiKey: "AIzaSyA9D4IB4LfBgyU-UBwoFSPJLo6giLcNyf4",
-		    authDomain: "riceglue-9864b.firebaseapp.com",
-		    databaseURL: "https://riceglue-9864b-default-rtdb.asia-southeast1.firebasedatabase.app",
-		    projectId: "riceglue-9864b",
-		    storageBucket: "riceglue-9864b.firebasestorage.app",
-		    messagingSenderId: "962078958463",
-		    appId: "1:962078958463:web:e6448b0d9a515cfecc304a",
-		    measurementId: "G-B3DPWVEZJR"
-	    };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // JSP Model에서 전달받은 storeId 사용
         const storeId = ${storeId};
 
-        if (storeId) {
-            // 'waitings/{storeId}' 경로의 변경사항을 구독
-            const waitingRef = database.ref('waitings/' + storeId);
+		if (storeId) {
+	        const waitingRef = database.ref('waitings/' + storeId);
 
-            waitingRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                const realtimeWaitingListDiv = document.getElementById('realtimeWaitingList');
-                realtimeWaitingListDiv.innerHTML = ''; // 기존 목록 초기화
+	        waitingRef.on('value', (snapshot) => {
+	            const data = snapshot.val();
+	            const realtimeWaitingListDiv = document.getElementById('realtimeWaitingList');
+	            realtimeWaitingListDiv.innerHTML = ''; // 기존 목록 초기화
 
-                if (data) {
-                    // 웨이팅 순서를 위해 createdAt 기준으로 정렬 (가장 오래된 웨이팅이 먼저 오도록)
-                    const sortedWaitings = Object.entries(data).sort(([, a], [, b]) => a.createdAt - b.createdAt);
+	            console.log("DEBUG: Firebase fetched data:", data);
 
-                    sortedWaitings.forEach(([waitingId, waiting]) => {
-                        const listItem = document.createElement('div');
-                        listItem.className = 'waiting-item';
+	            if (data) {
+	                const sortedWaitings = Object.entries(data).sort(([, a], [, b]) => a.createdAt - b.createdAt);
 
-                        // **수정된 부분: new Date() 사용을 JavaScript 블록으로 이동**
-                        const formattedCreatedAt = new Date(waiting.createdAt).toLocaleString();
+	                console.log("DEBUG: Sorted waitings for rendering:", sortedWaitings);
 
-                        listItem.innerHTML = `
-                            <p><strong>웨이팅 ID:</strong> ${waitingId}</p>
-                            <p><strong>고객:</strong> ${waiting.memberId || '알 수 없음'} (인원: ${waiting.guestCount}명)</p>
-                            <p><strong>상태:</strong> <span class="status-${waiting.status}">${waiting.status}</span></p>
-                            <p><strong>등록 시간:</strong> ${formattedCreatedAt}</p> <div class="actions">
-                                <button class="accepted" onclick="updateWaitingStatus('${waitingId}', 'ACCEPTED', ${storeId})">입장 처리</button>
-                                <button class="canceled" onclick="updateWaitingStatus('${waitingId}', 'CANCELED', ${storeId})">취소 처리</button>
-                                <button class="no-show" onclick="updateWaitingStatus('${waitingId}', 'NO_SHOW', ${storeId})">노쇼 처리</button>
-                            </div>
-                        `;
-                        realtimeWaitingListDiv.appendChild(listItem);
-                    });
-                } else {
-                    realtimeWaitingListDiv.innerHTML = '<p>현재 웨이팅이 없습니다.</p>';
-                }
-            }, (error) => {
-                console.error("Firebase 데이터 읽기 실패:", error);
-                realtimeWaitingListDiv.innerHTML = '<p>웨이팅 데이터를 불러오는 중 오류가 발생했습니다.</p>';
-            });
-        } else {
-             document.getElementById('realtimeWaitingList').innerHTML = '<p>유효한 매장 ID가 필요합니다.</p>';
-        }
+	                sortedWaitings.forEach(([waitingId, waiting]) => {
+	                    console.log("DEBUG: Processing waitingId for rendering:", waitingId, "with data:", waiting);
+	                    const listItem = document.createElement('div');
+	                    listItem.className = 'waiting-item';
 
-        // 웨이팅 상태 업데이트 함수 (Firebase 및 백엔드 DB)
-        async function updateWaitingStatus(waitingId, newStatus, storeId) {
-            console.log(`웨이팅 ${waitingId}의 상태를 ${newStatus}로 변경 시도 (매장 ID: ${storeId})`);
-            try {
-                // 1. 백엔드 API 호출 (Spring Controller): DB 및 Firebase 동기화 담당
-                const response = await fetch('/waiting/owner/api/updateStatus', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ waitingId: waitingId, status: newStatus, storeId: storeId })
-                });
+	                    const formattedCreatedAt = new Date(waiting.createdAt).toLocaleString();
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || '상태 업데이트 실패');
-                }
+	                    let htmlContent = '';
+	                    htmlContent += '<p><strong>웨이팅 ID:</strong> ' + waitingId + '</p>';
+	                    htmlContent += '<p><strong>고객:</strong> ' + (waiting.memberId || '알 수 없음') + ' (인원: ' + waiting.guestCount + '명)</p>';
+	                    htmlContent += '<p><strong>상태:</strong> <span class="status-' + waiting.status + '">' + waiting.status + '</span></p>';
+	                    htmlContent += '<p><strong>등록 시간:</strong> ' + formattedCreatedAt + '</p>';
+	                    htmlContent += '<div class="actions">';
+	                    // --- 여기 버튼 onclick 속성의 상태 값들을 ENUM 정의와 일치시킵니다. ---
+	                    // '입장 처리'를 'CALLED' 또는 'SEATED' 중 하나로 선택. 여기서는 'SEATED'를 사용.
+	                    htmlContent += '    <button class="accepted" onclick="updateWaitingStatus(\'' + waitingId + '\', \'SEATED\')">입장 처리</button>';
+	                    // '취소 처리'의 철자를 'CANCELLED' (L 두 개)로 수정.
+	                    htmlContent += '    <button class="canceled" onclick="updateWaitingStatus(\'' + waitingId + '\', \'CANCELLED\')">취소 처리</button>';
+	                    // '노쇼 처리'는 이미 일치하므로 변경 없음.
+	                    htmlContent += '    <button class="no-show" onclick="updateWaitingStatus(\'' + waitingId + '\', \'NO_SHOW\')">노쇼 처리</button>';
+	                    htmlContent += '</div>';
 
-                const result = await response.json();
-                console.log('상태 업데이트 성공:', result);
-                // Firebase 리스너가 자동적으로 화면을 업데이트하므로 별도 DOM 조작은 필요 없습니다.
-                alert(`웨이팅 ${waitingId}의 상태가 ${newStatus}로 변경되었습니다.`);
+	                    console.log("DEBUG: Generated HTML for waitingId", waitingId, ":", htmlContent);
+	                    listItem.innerHTML = htmlContent;
 
-            } catch (error) {
-                console.error('웨이팅 상태 업데이트 중 오류 발생:', error);
-                alert('웨이팅 상태 업데이트 실패: ' + error.message);
-            }
-        }
+	                    realtimeWaitingListDiv.appendChild(listItem);
+	                    console.log("DEBUG: Appended listItem for waitingId", waitingId);
+	                });
+	            } else {
+	                realtimeWaitingListDiv.innerHTML = '<p>현재 웨이팅이 없습니다.</p>';
+	            }
+	        }, (error) => {
+	            console.error("Firebase 데이터 읽기 실패:", error);
+	            realtimeWaitingListDiv.innerHTML = '<p>웨이팅 데이터를 불러오는 중 오류가 발생했습니다.</p>';
+	        });
+	    } else {
+	         document.getElementById('realtimeWaitingList').innerHTML = '<p>유효한 매장 ID가 필요합니다.</p>';
+	    }
+
+		async function updateWaitingStatus(waitingId, newStatus) {
+	        console.log("DEBUG: updateWaitingStatus 호출됨. received waitingId:", waitingId, "received newStatus:", newStatus);
+	        
+	        // **여기서 URL 구성 방식을 문자열 연결로 변경**
+	        const url = "/waiting/customer/api/" + waitingId + "?status=" + newStatus; 
+	        
+	        console.log("DEBUG: Constructed URL:", url); // URL이 제대로 구성되었는지 확인하는 새로운 로그
+	        console.log("DEBUG: Type of waitingId:", typeof waitingId, "Type of newStatus:", typeof newStatus); // 변수 타입 확인
+
+	        try {
+	            const response = await fetch(url, {
+	                method: 'PUT',
+	                headers: { 'Content-Type': 'application/json' },
+	            });
+
+	            if (!response.ok) {
+	                const errorText = await response.text();
+	                throw new Error(`HTTP 오류: ${response.status} - ${errorText}`);
+	            }
+
+	            console.log('웨이팅 상태 업데이트 성공 (백엔드 처리 완료)');
+	            alert(`웨이팅 ${waitingId}의 상태가 ${newStatus}로 변경되었습니다.`);
+
+	        } catch (error) {
+	            console.error('웨이팅 상태 업데이트 중 오류 발생:', error);
+	            alert('웨이팅 상태 업데이트 실패: ' + error.message);
+	        }
+	    }
     </script>
 </body>
 </html>
