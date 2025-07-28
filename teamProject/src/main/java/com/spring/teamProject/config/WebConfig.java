@@ -1,5 +1,6 @@
 package com.spring.teamProject.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -14,4 +15,5 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new ViewNameInterceptor())
                 .addPathPatterns("/**/*.do");  // .do로 끝나는 모든 요청에 인터셉터 적용
     }
+
 }

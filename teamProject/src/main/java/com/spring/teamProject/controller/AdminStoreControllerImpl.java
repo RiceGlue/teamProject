@@ -41,8 +41,9 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	public ModelAndView form (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		System.out.println(viewName);
-
+		
 		ModelAndView mav = ViewUtil.layout(viewName);
+		mav.addObject("storeId", storeId);
 		return mav;
 	}
 	

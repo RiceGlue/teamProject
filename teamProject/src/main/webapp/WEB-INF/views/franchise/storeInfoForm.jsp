@@ -96,7 +96,7 @@
 		var form = document.storeInfo;	
 		var store_phone_number = form.store_phone_number.value;
 		
-		form.sumbit();
+		form.submit();
 	}
 
 </script>
