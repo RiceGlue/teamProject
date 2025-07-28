@@ -10,38 +10,73 @@
         <result property="timeSlot" column="time_slot"/>
         <result property="maxTeams" column="max_teams"/>
         <result property="active" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <select id="getAllSettingsByStoreId" parameterType="long" resultMap="WaitingSettingResultMap">
-        SELECT * FROM waiting_setting WHERE store_id = #{storeId}
+        SELECT
+            setting_id,
+            store_id,
+            day_of_week,
+            time_slot,
+            max_teams,
+            is_active,
+            created_at,  updated_at   FROM
+            waiting_settings WHERE store_id = #{storeId}
     </select>
 
     <select id="getSetting" resultMap="WaitingSettingResultMap">
-        SELECT * FROM waiting_setting
-        WHERE store_id = #{storeId}
+        SELECT
+            setting_id,
+            store_id,
+            day_of_week,
+            time_slot,
+            max_teams,
+            is_active,
+            created_at,  updated_at   FROM
+            waiting_settings WHERE store_id = #{storeId}
           AND day_of_week = #{dayOfWeek}
           AND time_slot = #{timeSlot}
     </select>
-    
+
 	<select id="getSettingById" parameterType="long" resultMap="WaitingSettingResultMap">
-	    SELECT * FROM waiting_setting WHERE setting_id = #{settingId}
+	    SELECT
+	        setting_id,
+	        store_id,
+	        day_of_week,
+	        time_slot,
+	        max_teams,
+	        is_active,
+	        created_at,  updated_at   FROM
+	        waiting_settings WHERE setting_id = #{settingId}
 	</select>
 
     <insert id="insertSetting" parameterType="com.spring.teamProject.vo.WaitingSettingVO">
-        INSERT INTO waiting_setting (store_id, day_of_week, time_slot, max_teams, is_active)
-        VALUES (#{storeId}, #{dayOfWeek}, #{timeSlot}, #{maxTeams}, #{active})
+        INSERT INTO waiting_settings ( store_id,
+            day_of_week,
+            time_slot,
+            max_teams,
+            is_active
+            )
+        VALUES (
+            #{storeId},
+            #{dayOfWeek},
+            #{timeSlot},
+            #{maxTeams},
+            #{active}
+        )
     </insert>
 
     <update id="updateSetting" parameterType="com.spring.teamProject.vo.WaitingSettingVO">
-        UPDATE waiting_setting
-        SET max_teams = #{maxTeams}, is_active = #{active}
-        WHERE setting_id = #{settingId}
+        UPDATE waiting_settings SET
+            max_teams = #{maxTeams},
+            is_active = #{active},
+            updated_at = CURRENT_TIMESTAMP WHERE setting_id = #{settingId}
     </update>
 
     <delete id="deleteSetting" parameterType="long">
-        DELETE FROM waiting_setting WHERE setting_id = #{settingId}
+        DELETE FROM waiting_settings WHERE setting_id = #{settingId}
     </delete>
-    
-    
-</mapper>
 
+</mapper>
