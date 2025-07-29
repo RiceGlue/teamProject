@@ -23,8 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.service.WaitingSettingService;
 import com.spring.teamProject.vo.WaitingSettingVO;
-// StoreVO도 필요하다면 임포트
-// import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.StoreVO; // StoreVO 임포트 (더미 데이터용)
 
 
 @Controller
@@ -39,13 +38,14 @@ public class WaitingOwnerController {
     @Autowired
     private WaitingService waitingService;
 
-    // (필요하다면) 더미 StoreVO 메소드
-    // private StoreVO getDummyStoreInfo(Long storeId) {
-    //     StoreVO store = new StoreVO();
-    //     store.setStoreId(storeId);
-    //     store.setStoreName("더미 매장 " + storeId);
-    //     return store;
-    // }
+    // 더미 StoreVO 메소드 (이전과 동일하게 유지)
+    private StoreVO getDummyStoreInfo(Long storeId) {
+        StoreVO store = new StoreVO();
+        store.setStoreId(storeId);
+        store.setStoreName("더미 매장 " + storeId);
+        store.setAddress("서울시 가짜구 더미동 " + storeId + "번지");
+        return store;
+    }
 
     // 웨이팅 설정 목록 페이지 (JSP 반환)
     @GetMapping("/settings")
@@ -53,45 +53,31 @@ public class WaitingOwnerController {
         List<WaitingSettingVO> settings = settingService.getAllSettingsByStoreId(storeId);
         model.addAttribute("settings", settings);
         model.addAttribute("storeId", storeId);
-        // (선택사항) 매장 정보도 모델에 추가하여 JSP에서 사용
-        // model.addAttribute("store", getDummyStoreInfo(storeId));
+        model.addAttribute("store", getDummyStoreInfo(storeId));
         return "waiting/owner/settingList";
     }
 
     // 새 웨이팅 설정 추가 폼 페이지 (JSP 반환)
     @GetMapping("/settings/addForm")
     public String showAddSettingForm(@RequestParam("storeId") Long storeId, Model model) {
-        // model.addAttribute("storeId", storeId); // 이 부분은 아래 WaitingSettingVO에 포함되므로 필요없을 수 있습니다.
-
-        // WaitingSettingVO 객체를 생성하고 storeId를 미리 설정합니다.
         WaitingSettingVO waitingSettingVO = new WaitingSettingVO();
-        waitingSettingVO.setStoreId(storeId); // <-- 이 부분이 핵심입니다! storeId를 VO에 설정
+        waitingSettingVO.setStoreId(storeId);
 
-        model.addAttribute("waitingSettingVO", waitingSettingVO); // 모델에 설정된 VO 추가
-        // (선택사항) 매장 정보도 모델에 추가하여 JSP에서 사용
-        // model.addAttribute("store", getDummyStoreInfo(storeId));
+        model.addAttribute("waitingSettingVO", waitingSettingVO);
+        model.addAttribute("storeId", storeId);
+        model.addAttribute("store", getDummyStoreInfo(storeId));
         return "waiting/owner/settingAddForm";
     }
 
     // 웨이팅 설정 추가 처리 (폼 제출)
     @PostMapping("/settings/add")
     public String addSetting(@ModelAttribute WaitingSettingVO settingVO) {
-        // 이제 settingVO.getStoreId()는 settingAddForm.jsp의 hidden 필드로부터 값을 받게 됩니다.
-        // 추가적인 storeId @RequestParam은 필요 없지만, 명시적으로 URL에 storeId를 포함했다면 받을 수도 있습니다.
-        // 예를 들어: @PostMapping("/settings/add") public String addSetting(@ModelAttribute WaitingSettingVO settingVO, @RequestParam("storeId") Long storeId)
-        // 이 경우, settingVO.setStoreId(storeId); (if null) 로직을 추가하는 것도 안전합니다.
-
-        // 현재 코드에서는 settingVO.getStoreId()가 null이 아니어야 합니다.
-        // 만약 여전히 null이라면, settingAddForm.jsp에 hidden input이 없거나 path가 잘못된 것입니다.
-
-        logger.info("웨이팅 설정 추가 시도: {}", settingVO); // 로깅으로 넘어온 VO 확인
+        logger.info("웨이팅 설정 추가 시도: {}", settingVO);
         try {
             settingService.insertSetting(settingVO);
             logger.info("웨이팅 설정 성공적으로 추가됨: {}", settingVO);
         } catch (Exception e) {
             logger.error("웨이팅 설정 추가 실패: {}", e.getMessage(), e);
-            // 에러 발생 시 처리 (예: 에러 메시지와 함께 폼으로 다시 이동)
-            // 에러 시에도 storeId를 다시 전달해야 합니다.
             return "redirect:/waiting/owner/settings/addForm?storeId=" + settingVO.getStoreId() + "&error=true";
         }
 
@@ -107,7 +93,7 @@ public class WaitingOwnerController {
         WaitingSettingVO settingVO = settingService.getSettingById(settingId);
         model.addAttribute("waitingSettingVO", settingVO);
         model.addAttribute("storeId", storeId);
-        // model.addAttribute("store", getDummyStoreInfo(storeId));
+        model.addAttribute("store", getDummyStoreInfo(storeId));
         return "waiting/owner/settingEditForm";
     }
 
@@ -127,7 +113,24 @@ public class WaitingOwnerController {
         return "redirect:/waiting/owner/settings?storeId=" + storeId;
     }
 
+    // --- 실시간 웨이팅 관리 관련 메소드 (향후 추가될 예정) ---
+    // 이 부분은 time_slot 제거 후 실시간 대기열을 관리하기 위해 필요할 것입니다.
 
+    // 실시간 웨이팅 현황 페이지 (고객 대기열)
+    @GetMapping("/currentWaiting")
+    public String showCurrentWaiting(@RequestParam("storeId") Long storeId, Model model) {
+        logger.info("실시간 웨이팅 현황 요청 - storeId: {}", storeId);
+        model.addAttribute("storeId", storeId);
+        model.addAttribute("store", getDummyStoreInfo(storeId));
+
+        // TODO: 여기서 waitingService를 사용하여 현재 대기 중인 고객 목록을 가져와 모델에 추가
+        // List<WaitingVO> currentWaitings = waitingService.getCurrentWaitings(storeId);
+        // model.addAttribute("currentWaitings", currentWaitings);
+
+        return "waiting/owner/currentWaitingList"; // 새로운 JSP 파일이 필요
+    }
+
+    // API: 웨이팅 상태 업데이트 (기존 로직 유지)
     @PostMapping("/api/updateStatus")
     @ResponseBody
     public ResponseEntity<?> updateWaitingStatusFromOwner(@RequestBody Map<String, Object> payload) {

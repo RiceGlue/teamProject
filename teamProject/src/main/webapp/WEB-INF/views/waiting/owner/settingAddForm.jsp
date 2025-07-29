@@ -6,7 +6,6 @@
 <head>
     <title>${store.storeName} - 웨이팅 설정 추가</title>
     <style>
-        /* 기존 스타일 유지 또는 추가 */
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
         h2 { color: #333; text-align: center; margin-bottom: 25px; }
         form { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; margin: 20px auto; }
@@ -26,24 +25,18 @@
 
     <form:form modelAttribute="waitingSettingVO" action="/waiting/owner/settings/add" method="post">
 
-        <%-- *** 중요: storeId를 hidden 필드로 전달합니다. *** --%>
-        <%-- showAddSettingForm에서 waitingSettingVO.setStoreId(storeId); 했기 때문에,
-             여기서 path="storeId"로 참조하면 모델에 설정된 storeId 값이 전송됩니다. --%>
         <form:hidden path="storeId" />
 
         <label for="dayOfWeek">요일:</label>
-        <%-- 요일을 숫자로 받을 경우, select 박스를 사용하는 것이 더 좋습니다. --%>
-        <form:input type="number" path="dayOfWeek" id="dayOfWeek" required="true" placeholder="1=월, 7=일" /><br/>
+        <form:input type="number" path="dayOfWeek" id="dayOfWeek" min="1" max="7" required="true" placeholder="1=월, 7=일" /><br/>
 
-        <label for="timeSlot">시간대:</label>
-        <%-- LocalTime을 직접 입력받으려면 type="time"을 사용할 수 있습니다. --%>
-        <form:input type="time" path="timeSlot" id="timeSlot" required="true" /><br/>
+        <%-- timeSlot 입력 필드를 제거합니다. --%>
 
         <label for="maxTeams">최대 팀 수:</label>
         <form:input type="number" path="maxTeams" id="maxTeams" min="1" required="true" /><br/>
 
         <label for="active">활성화:</label>
-        <form:checkbox path="active" id="active" /><br/> <%-- isActive() 대신 active() 게터/세터에 맞게 path="active" --%>
+        <form:checkbox path="active" id="active" /><br/>
 
         <button type="submit">설정 추가</button>
     </form:form>

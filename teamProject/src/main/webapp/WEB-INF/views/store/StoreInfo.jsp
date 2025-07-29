@@ -49,7 +49,7 @@
 			<span class="visually-hidden">Next</span>
 		</button>
 	</div>
-</forEach>
+</c:forEach>
 
 <div>
 	<h4>${store.storeName } </h4>
@@ -69,9 +69,8 @@
 		<div class="tab_container">
 			<div class="tab_content" id="tab1">
 				<h4>예약</h4>
-				
+
 			</div>
 		</div>
 	</div>
 <div>
-			
