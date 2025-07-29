@@ -31,34 +31,28 @@ public class ViewNameInterceptor implements HandlerInterceptor {
     }
 
     private String getViewName(HttpServletRequest request) throws Exception {
-        String contextPath = request.getContextPath();
         String uri = (String) request.getAttribute("javax.servlet.include.request_uri");
-        if (uri == null || uri.trim().equals("")) {
-            uri = request.getRequestURI();
-        }
-
-        int begin = 0;
-        if (contextPath != null && !contextPath.isEmpty()) {
-            begin = contextPath.length();
+        if (uri == null || uri.trim().isEmpty()) {
+            uri = request.getRequestURI(); 
         }
 
         int end;
-        if (uri.indexOf(";") != -1) {
+        if (uri.contains(";")) {
             end = uri.indexOf(";");
-        } else if (uri.indexOf("?") != -1) {
+        } else if (uri.contains("?")) {
             end = uri.indexOf("?");
         } else {
             end = uri.length();
         }
 
-        String fileName = uri.substring(begin, end);
-        if (fileName.indexOf(".") != -1) {
-            fileName = fileName.substring(0, fileName.lastIndexOf("."));
-        }
-        if (fileName.lastIndexOf("/") != -1) {
-            fileName = fileName.substring(fileName.lastIndexOf("/", 1), fileName.length());
+        String viewName = uri.substring(0, end); // 확장자 제거 전 단계
+
+        // 확장자 제거 (.do, .jsp 등)
+        int dotIndex = viewName.lastIndexOf(".");
+        if (dotIndex != -1) {
+            viewName = viewName.substring(0, dotIndex);
         }
 
-        return fileName;
+        return viewName;  
     }
 }
