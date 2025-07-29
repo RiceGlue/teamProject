@@ -46,8 +46,8 @@
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList.do?region=서울">서울</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm.do?storeId=1">서울</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList?region=서울">서울</a></h5>
+						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?storeId=1">서울</a></h5>
 	                </div>
 	            </div>
 	        </div>

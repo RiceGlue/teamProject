@@ -37,7 +37,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@Autowired
 	private AdminStoreService adminStoreService;
 	
-	@RequestMapping(value="/storeInfoForm.do")
+	@RequestMapping(value="/storeInfoForm")
 	public ModelAndView form (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		
@@ -47,7 +47,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@Override
-	@RequestMapping(value="/addStoreInfo.do", method=RequestMethod.POST)
+	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
 	public ResponseEntity addStoreInfo (@RequestParam("storeId") long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
 		multiReq.setCharacterEncoding("utf-8");
 		res.setContentType("text/html; charset=UTF-8");
@@ -65,7 +65,6 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		HttpSession session = multiReq.getSession();
 		MemberVO memberVO = (MemberVO) session.getAttribute("memberInfo");
 		long reg_id = memberVO.getMemberId();
-		
 		
 		List<ImageFileVO> imageFileList =upload(multiReq);
 		if(imageFileList!= null && imageFileList.size()!=0) {

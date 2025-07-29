@@ -4,7 +4,7 @@
 <c:forEach var="store" items="${storelist}">
 	<tr>
 		<td>
-			<a href="${contextPath}/store/storeDetail.do?store_id=${store.store_id}">${store.store_name}</a>
+			<a href="${contextPath}/store/storeDetail.do?store_id=${store.store_id}">${store.storeName}</a>
 		</td>
 	</tr>
 </c:forEach>

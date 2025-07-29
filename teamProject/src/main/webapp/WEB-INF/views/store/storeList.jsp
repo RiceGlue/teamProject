@@ -1,9 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-
-
 <h1>매장 목록</h1>
-
 
 <table>
 	<thead>
