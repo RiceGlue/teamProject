@@ -38,51 +38,51 @@
 		<result property="createdAt" column="createdAt"/>
 		<result property="regId" column="regId"/>
 	</resultMap>
-	
+
 	<select id="selectStoreName" parameterType="long" resultType="String">
 		<![CDATA[ 
-			select store_name from stores where store_id = #{store_id}
+			select storeName from stores where storeId = #{storeId}
 		]]>
 	</select>
 	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
-			select * from stores where store_id = #{store_id}
+			select * from stores where storeId = #{storeId}
 		]]>
 	</select>
 	
 	<select id="SelectStoreRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select i.* from store_info i inner join stores s on i.store_id=s.store_id where s.region=#{region}
+			select i.* from store_info i inner join stores s on i.storeId=s.storeId where s.region=#{region}
 		]]>
 	</select>
 	
 	<select id="selectStoreImageList" parameterType="String" resultMap="imagelist">
 		<![CDATA[ 
-			select store_name from stores where region=#{region}
+			select storeName from stores where region=#{region}
 		]]>
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="map" >
-			insert into stores (store_id, store_type, operation_type, store_phone_number, break_time, day_off, description, amenities, created_at, update_at, main_image, start_hour, start_min, end_hour, end_min, open_day) values
+			insert into stores (storeId, storeType, operationType, storePhoneNumber, breakTime, day_odayOffff, description, amenities, createdAt, updateAt, mainImage, startHour, startMin, endHour, endMin, openDay) values
 			<foreach collection="storelist" item="store" separator=",">
 				(
-					#{store.store_id},
-					#{store.store_type},
-					#{store.operation_type},
-					#{store.store_phone_number},
-					#{store.break_time},
-					#{store.day_off},
+					#{store.storeId},
+					#{store.storeType},
+					#{store.operationType},
+					#{store.storePhoneNumber},
+					#{store.breakTime},
+					#{store.dayOff},
 					#{store.description},
 					#{store.amenities},
-					#{store.main_image},
+					#{store.mainImage},
 					now(),
 					now(),
-					#{store.start_hour},
-					#{store.start_min},
-					#{store.end_hour},
-					#{store.end_min},
-					#{store.open_day}
+					#{store.startHour},
+					#{store.startMin},
+					#{store.endHour},
+					#{store.endMin},
+					#{store.openDay}
 					
 				)
 			</foreach> 
