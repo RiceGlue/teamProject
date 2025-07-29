@@ -51,9 +51,9 @@
 		]]>
 	</select>
 	
-	<select id="SelectStoreRegion" parameterType="String" resultMap="storelist">
+	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select i.* from store_info i inner join stores s on i.storeId=s.storeId where s.region=#{region}
+			select storeId, storeName, address, storePhoneNumber, description, 
 		]]>
 	</select>
 	

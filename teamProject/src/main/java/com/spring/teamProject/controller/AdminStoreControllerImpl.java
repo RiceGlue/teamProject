@@ -23,6 +23,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MemberVO;
+import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +45,16 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeId", storeId);
 		return mav;
+	}
+	
+	@RequestMapping(value="/storeRegionList", method=RequestMethod.GET)
+	public ModelAndView SelectRegionStoreList (@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		String viewName = (String)req.getAttribute("viewName");
+		
+		List<StoreVO> storelist = adminStoreService.storeRegionList(region);
+		ModelAndView mav = ViewUtil.layout(viewName);
+		mav.addObject("storelist",storelist);
+		return mav;	
 	}
 	
 	@Override

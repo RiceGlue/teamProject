@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <script>
 	$(document).ready(function() { //tab 실행
@@ -67,6 +68,8 @@
 		</ul>
 		<div class="tab_container">
 			<div class="tab_content" id="tab1">
+				<h4>예약</h4>
+				
 			</div>
 		</div>
 	</div>
