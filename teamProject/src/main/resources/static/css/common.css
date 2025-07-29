@@ -4,9 +4,13 @@
 .row > .col-12,
 .row > .container {border: 2px solid olivedrab; border-radius: 20px; padding: 15px;}
 
+table {border:1px solid cornflowerblue;}
+table th {padding: 5px 10px;}
+table td {vertical-align: top; padding: 5px 10px;}
 
-table td {vertical-align: top;}
-
+table th,
+table td {border:1px solid coral;}
+table thead th {text-align: center;}
 
 
 .search-container {
