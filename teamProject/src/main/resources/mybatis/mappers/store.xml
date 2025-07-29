@@ -53,7 +53,6 @@
 	
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			select storeId, storeName, address, storePhoneNumber, description, 
 		]]>
 	</select>
 	
