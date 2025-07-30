@@ -40,6 +40,18 @@
 		<result property="regId" column="regId"/>
 	</resultMap>
 	
+	<resultMap type="MenuVO" id="menulist">
+		<result property="menuId" column="menuId" />
+		<result property="storeId" column="storeId" />
+		<result property="displayNo" column="displayNo" />
+		<result property="menuName" column="menuName" />
+		<result property="price" column="price" />
+		<result property="description" column="description" />
+		<result property="imageName" column="imageName" />
+		<result property="createdAt" column="createdAt" />
+		<result property="updatedAt" column="updatedAt" />
+	</resultMap>
+	
 	<select id="selectStoreId" parameterType="storeVO" resultType="long">
 		<![CDATA[
 			select store_id from stores where owner_id = #{ownerId} and store_name=#{storeName}

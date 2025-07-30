@@ -87,7 +87,7 @@
 <c:forEach var="store" items="${storelist}" varStatus="status">
   <div class="store-card">
     <div class="store-image">
-      <a href="${contextPath}/store/storeDetail.do?store_id=${store.storeId}">
+      <a href="${contextPath}/store/storeDetail?storeId=${store.storeId}">
         <img src="${store.mainImage}" alt="가게이미지">
       </a>
 <!--       대기 팀 수 표시 -->
@@ -104,6 +104,7 @@
       </p>
       <p class="meta-info">${store.storeType} · ${store.region}</p>
       <p class="meta-info">${store.description}</p>
+<%--       <p class="meta-info">${store.openHour}:${store.openMin}~${store.endHour}:${store.endMin}</p> --%>
     </div>
   </div>
 </c:forEach>

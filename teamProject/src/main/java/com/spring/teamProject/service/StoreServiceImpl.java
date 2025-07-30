@@ -1,11 +1,16 @@
 package com.spring.teamProject.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spring.teamProject.dao.StoreDAO;
+import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreVO;
 
 @Service
@@ -18,6 +23,25 @@ public class StoreServiceImpl implements StoreService{
 	public List<StoreVO> storeRegionList(String region) throws Exception {
 		List<StoreVO> storelist = storeDAO.selectStoreByRegion(region);
 		return storelist;
+	}
+	
+	@Override
+	public Map storeDetail(long storeId) throws Exception {
+		Map storeMap = new HashMap<>();
+		
+		StoreVO store = storeDAO.selectStoreDetail(storeId);
+		List<ImageFileVO> imagelist = storeDAO.selectStoreImage(storeId);
+//		ReviewVO review = storeDAO.selectStoreReivew(storeId);
+		MenuVO menu = storeDAO.selectStoreMenu(storeId);
+//		ReservationVO reservation = storeDAO.selectStoreReservatioin(storeId);
+		
+		storeMap.put("store", store);
+		storeMap.put("imagelist", imagelist);
+//		storeMap.put("review", review);
+		storeMap.put("menu", menu);
+//		storeMap.put("reservation", reservation);
+		
+		return storeMap;
 	}
 	
 
