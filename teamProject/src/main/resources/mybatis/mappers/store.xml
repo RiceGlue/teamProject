@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
-<mapper namespace="mapper.store">
+<mapper namespace="com.spring.teamProject.dao.AdminStoreDAO">
 	<resultMap id="storelist" type="StoreVO">
 		<result property="storeId" column="storeId"/>
 		<result property="ownerId" column="ownerId"/>
@@ -38,10 +38,10 @@
 		<result property="createdAt" column="createdAt"/>
 		<result property="regId" column="regId"/>
 	</resultMap>
-
-	<select id="selectStoreName" parameterType="long" resultType="String">
-		<![CDATA[ 
-			select storeName from stores where storeId = #{storeId}
+	
+	<select id="selectStoreId" parameterType="storeVO" resultType="long">
+		<![CDATA[
+			select store_id from stores where owner_id = #{ownerId} and store_name=#{storeName}
 		]]>
 	</select>
 	
@@ -53,43 +53,42 @@
 	
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, AVG(r.rating) AS avgRating, COUNT(r.review_id) AS countRatingFROM stores s INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.region = #{region} GROUP BY s.store_id ORDER BY s.store_id;
-		]]>
-	</select>
-	
-	<select id="selectStoreImageList" parameterType="String" resultMap="imagelist">
-		<![CDATA[ 
-			select storeName from stores where region=#{region}
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description,
+	      	AVG(r.rating) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.region = #{region}
+			GROUP BY s.store_id
+			ORDER BY s.store_id;
 		]]>
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="map" >
-			insert into stores (storeId, storeType, operationType, storePhoneNumber, breakTime, day_odayOffff, description, amenities, createdAt, updateAt, mainImage, startHour, startMin, endHour, endMin, openDay) values
-			<foreach collection="storelist" item="store" separator=",">
-				(
-					#{store.storeId},
-					#{store.storeType},
-					#{store.operationType},
-					#{store.storePhoneNumber},
-					#{store.breakTime},
-					#{store.dayOff},
-					#{store.description},
-					#{store.amenities},
-					#{store.mainImage},
-					now(),
-					now(),
-					#{store.startHour},
-					#{store.startMin},
-					#{store.endHour},
-					#{store.endMin},
-					#{store.openDay}
-					
-				)
-			</foreach> 
-			<selectKey>
-				select LAST_INSERT_ID()
-			</selectKey>
+	    insert into stores (store_id, store_type, operation_type, store_phone_number, break_time, day_off, description, amenities, created_at, update_at, main_image, start_hour, start_min, end_hour, end_min, open_day) values
+	    <foreach collection="storelist" item="store" separator=",">
+	        (
+	            #{store.storeId},
+	            #{store.storeType},
+	            #{store.operationType},
+	            #{store.storePhoneNumber},
+	            #{store.breakTime},
+	            #{store.dayOff},
+	            #{store.description},
+	            #{store.amenities},
+	            #{store.mainImage},
+	            now(),
+	            now(),
+	            #{store.startHour},
+	            #{store.startMin},
+	            #{store.endHour},
+	            #{store.endMin},
+	            #{store.openDay}
+	        )
+	    </foreach> 
+	    <selectKey>
+	        select LAST_INSERT_ID()
+	    </selectKey>
 	</insert>
+
 	
 </mapper>

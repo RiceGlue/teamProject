@@ -9,6 +9,6 @@ import com.spring.teamProject.vo.StoreVO;
 @Mapper
 public interface StoreDAO {
 	
-	public List<StoreVO> SelectStoreRegion(String region);
+	public List<StoreVO> selectStoreByRegion(String region);
 
 }

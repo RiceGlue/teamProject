@@ -47,7 +47,7 @@
 	            <div class="card text-center">
 	                <div class="card-body">
 	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList?region=서울">서울</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?storeId=1">서울</a></h5>
+						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?ownerId=2&storeName=부산횟집">가게 정보 입력</a></h5>
 	                </div>
 	            </div>
 	        </div>
