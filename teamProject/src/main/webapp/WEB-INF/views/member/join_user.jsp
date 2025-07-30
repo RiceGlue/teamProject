@@ -11,8 +11,8 @@
             <%-- (수정) 기본 이미지 경로를 로컬 경로로 변경 --%>
             <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
             <div>
-                <label for="profileImageFile" class="form-label">프로필 이미지 (2MB 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
+                <label for="profileImageFile" class="form-label">프로필 이미지 (2MB / 500x500px 이하)</label>
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
             </div>
         </div>
         
@@ -54,17 +54,17 @@
                     <option value="82" selected>+82 (대한민국)</option>
                     <option value="1">+1 (United States)</option>
                     <option value="81">+81 (日本)</option>
-                    <option value="86">+86 (中国)</option>
+                    <option value="86">+86 (中?)</option>
                     <option value="44">+44 (United Kingdom)</option>
                     <option value="49">+49 (Deutschland)</option>
                     <option value="33">+33 (France)</option>
                     <option value="1">+1 (Canada)</option>
                     <option value="61">+61 (Australia)</option>
                     <option value="7">+7 (Россия)</option>
-                    <option value="34">+34 (España)</option>
+                    <option value="34">+34 (Espana)</option>
                     <option value="39">+39 (Italia)</option>
-                    <option value="84">+84 (Việt Nam)</option>
-                    <option value="66">+66 (ประเทศไทย)</option>
+                    <option value="84">+84 (Vi?t Nam)</option>
+                    <option value="66">+66 (?????????)</option>
                     <option value="63">+63 (Pilipinas)</option>
                     <option value="886">+886 (台灣)</option>
                     <option value="852">+852 (Hong Kong)</option>
@@ -73,7 +73,7 @@
                     <option value="62">+62 (Indonesia)</option>
                     <option value="91">+91 (India)</option>
                     <option value="55">+55 (Brasil)</option>
-                    <option value="52">+52 (México)</option>
+                    <option value="52">+52 (Mexico)</option>
                 </select>
                 <input type="tel" class="form-control" id="phone" name="phone" placeholder="'-' 없이 숫자만 입력" required>
             </div>
@@ -90,25 +90,36 @@
 </div>
 
 <script>
-function previewImage(input) {
-    if (input.files && input.files[0]) {
+    function validateImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
+            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+            resetInput(input);
+            return;
+        }
+
+        const maxResolution = 500; // 최대 가로/세로 500px
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('preview').src = e.target.result;
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
-}
-function checkFileSize(input) {
-    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-    const file = input.files[0];
-    if (file && file.size > maxSizeInBytes) {
-        alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+
+    function resetInput(input) {
         input.value = '';
-        <%-- (수정) 파일 선택 취소 시 기본 이미지 경로로 되돌림 --%>
         document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
-        return;
     }
-    previewImage(input);
-}
 </script>

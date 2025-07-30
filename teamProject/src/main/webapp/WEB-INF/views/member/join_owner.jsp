@@ -11,8 +11,8 @@
             <%-- (수정) 기본 이미지 경로를 로컬 경로로 변경 --%>
             <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
             <div>
-                <label for="profileImageFile" class="form-label">대표자 프로필 이미지 (2MB 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
+                <label for="profileImageFile" class="form-label">대표자 프로필 이미지 (2MB / 500x500px 이하)</label>
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
             </div>
         </div>
         
@@ -92,25 +92,36 @@
 </div>
 
 <script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('preview').src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    function checkFileSize(input) {
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    function validateImage(input) {
         const file = input.files[0];
-        if (file && file.size > maxSizeInBytes) {
+        if (!file) return;
+
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
             alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-            input.value = '';
-            <%-- (수정) 파일 선택 취소 시 기본 이미지 경로로 되돌림 --%>
-            document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
+            resetInput(input);
             return;
         }
-        previewImage(input);
+
+        const maxResolution = 500; // 최대 가로/세로 500px
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function resetInput(input) {
+        input.value = '';
+        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
     }
 </script>
