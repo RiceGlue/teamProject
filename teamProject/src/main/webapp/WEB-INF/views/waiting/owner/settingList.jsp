@@ -6,6 +6,7 @@
 
     <%-- Firebase SDK 스크립트 (버전 9.6.0으로 명시) --%>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-messaging-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 
     <style>
@@ -279,7 +280,8 @@
 
                 // 성공 응답이 비어있을 수 있으므로 text() 대신 응답 상태만 확인
                 console.log('웨이팅 상태 업데이트 성공 (백엔드 처리 완료)');
-                alert(`웨이팅 ${waitingId}의 상태가 ${newStatus}로 변경되었습니다.`);
+                //alert(`웨이팅 ${waitingId}의 상태가 ${newStatus}로 변경되었습니다.`);
+                alert("웨이팅 " + waitingId + "의 상태가 "+ newStatus + "로 변경되었습니다.");
                 // Firebase 리스너에 의해 자동으로 UI 갱신될 것임. (페이지 새로고침 불필요)
             } catch (error) {
                 console.error('웨이팅 상태 업데이트 중 오류 발생:', error);

@@ -163,17 +163,36 @@ public class WaitingServiceImpl implements WaitingService {
                 }
             });
 
-            if ("CALLED".equalsIgnoreCase(status) || "READY".equalsIgnoreCase(status)) {
-                String fcmToken = waiting.getFcmToken();
-                if (fcmToken != null && !fcmToken.isEmpty()) {
-                    fcmService.sendNotification(
-                        fcmToken,
-                        "입장 안내",
-                        "고객님의 순서가 되었습니다. 카운터로 와주세요. (대기번호: " + waiting.getWaitingId() + ")"
-                    );
-                } else {
-                    System.out.println("FCM Token is missing for waiting ID: " + waiting.getWaitingId() + ". Skipping notification.");
+            String fcmToken = waiting.getFcmToken();
+            if (fcmToken != null && !fcmToken.isEmpty()) { // FCM 토큰이 있는 경우에만 알림 시도
+                String title = "웨이팅 상태 변경 안내"; // 기본 타이틀
+                String body = "고객님의 웨이팅 상태가 '" + status + "'(으)로 변경되었습니다."; // 기본 본문
+
+                switch (status.toUpperCase()) {
+                    case "CALLED":
+                        title = "입장 안내";
+                        body = "고객님의 순서가 되었습니다. 카운터로 와주세요. (대기번호: " + waiting.getWaitingId() + ")";
+                        break;
+                    case "SEATED": // 'ENTERED' 대신 'SEATED' 사용했으므로 통일
+                        title = "입장 완료";
+                        body = "고객님의 웨이팅이 '입장 완료' 처리되었습니다. 즐거운 시간 되세요!";
+                        break;
+                    case "NO_SHOW": // 'NOSHOW'로 통일 (대시보드 버튼 이름과 일치)
+                        title = "웨이팅 취소 안내";
+                        body = "고객님의 웨이팅이 '노쇼' 처리되어 취소되었습니다.";
+                        break;
+                    case "CANCELLED":
+                        title = "웨이팅 취소 완료";
+                        body = "고객님의 웨이팅이 성공적으로 취소되었습니다.";
+                        break;
+                    case "WAITING":
+                        body = "고객님의 웨이팅 상태가 '대기중'으로 변경되었습니다. (대기번호: " + waiting.getWaitingId() + ")";
+                        break;
+                    // "READY" 상태에 대한 case도 필요하면 추가하세요.
+                    // default 케이스는 위에서 기본 body를 설정했으므로 제거하거나 그대로 두면 됩니다.
                 }
+
+                fcmService.sendNotification(fcmToken, title, body);
             }
         }
     }

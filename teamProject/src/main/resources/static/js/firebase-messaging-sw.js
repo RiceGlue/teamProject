@@ -1,16 +1,19 @@
 // firebase-messaging-sw.js
 // Firebase SDK를 불러옵니다.
-importScripts('https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.1.0/firebase-messaging-compat.js');
+
+importScripts('https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.6.0/firebase-messaging-compat.js');
 
 // Firebase 프로젝트 설정 (register.jsp와 동일하게 설정)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID", // YOUR_PROJECT_ID를 실제 프로젝트 ID로 변경
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyA9D4IB4LfBgyU-UBwoFSPJLo6giLcNyf4",
+    authDomain: "riceglue-9864b.firebaseapp.com",
+    databaseURL: "https://riceglue-9864b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "riceglue-9864b",
+    storageBucket: "riceglue-9864b.firebasestorage.app",
+    messagingSenderId: "962078958463",
+    appId: "1:962078958463:web:e6448b0d9a515cfecc304a",
+    measurementId: "G-B3DPWVEZJR"
 };
 
 // Firebase 초기화
@@ -23,8 +26,9 @@ messaging.onBackgroundMessage((payload) => {
 
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/firebase-logo.png' // 알림 아이콘 경로 (선택 사항, src/main/resources/static/ 에 있어야 함)
+        body: payload.notification.body
+        //body: payload.notification.body,
+        //icon: '/firebase-logo.png' // 알림 아이콘 경로 (선택 사항, src/main/resources/static/ 에 있어야 함)
     };
 
     // 알림 표시
