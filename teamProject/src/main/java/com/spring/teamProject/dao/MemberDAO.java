@@ -1,26 +1,28 @@
 package com.spring.teamProject.dao;
 
 import org.apache.ibatis.annotations.Mapper;
-
 import com.spring.teamProject.vo.MemberVO;
 
 @Mapper
 public interface MemberDAO {
-	
-    // (신규) 이메일로 회원 정보 조회
+    
+    // memberId로 회원 정보 조회 (마이페이지용)
+    MemberVO findById(long memberId);
+    
+    // 이메일로 회원 정보 조회 (소셜 로그인용)
     MemberVO findByEmail(String email);
     
-    // (신규) 소셜 로그인 사용자를 DB에 삽입
-    void insertSocialMember(MemberVO memberVO);
-	
-	// loginId로 회원 정보 조회 (스프링 시큐리티용)
+    // loginId로 회원 정보 조회 (Security용)
 	MemberVO findByLoginId(String loginId);
 	
-	// 회원가입
-	public void insertMember(MemberVO memberVO);
+    // 소셜 회원가입
+    void insertSocialMember(MemberVO memberVO);
 	
-	// 로그인
-	public MemberVO login(MemberVO memberVO);
+	// 일반 회원가입
+	void insertMember(MemberVO memberVO);
+	
+	// (레거시) 로그인 처리 - Security가 인증을 대신 처리합니다.
+	MemberVO login(MemberVO memberVO);
 	
 	/*
 	 * 회원정보 수정
@@ -35,5 +37,5 @@ public interface MemberDAO {
 	 * 회원정보 수정과 같은 사유로 int형으로 보냅니다
 	 * 회원탈퇴가 정상적으로 실행되지 않았다면 0을 반환합니다
 	 */
-	public int deleteMember(long member_id);
+	public int deleteMember(long memberId);
 }

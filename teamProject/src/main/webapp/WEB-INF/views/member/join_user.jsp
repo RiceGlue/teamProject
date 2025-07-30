@@ -7,7 +7,13 @@
     <form action="${contextPath}/member/join" method="post">
         <input type="hidden" name="role" value="USER">
 
-        <!-- ... 아이디, 비밀번호, 이름, 생년월일, 성별 필드 ... -->
+		<div class="text-center mb-4">
+		    <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+		    <div>
+		        <label for="profileImageFile" class="form-label">프로필 이미지 (2MB 이하)</label>
+		        <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
+		    </div>
+		</div>
         
         <div class="mb-3">
             <label for="loginId" class="form-label">아이디</label>
@@ -81,3 +87,26 @@
         </div>
     </form>
 </div>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function checkFileSize(input) {
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        const file = input.files[0];
+        if (file && file.size > maxSizeInBytes) {
+            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+            input.value = '';
+            document.getElementById('preview').src = 'https://via.placeholder.com/150';
+            return;
+        }
+        previewImage(input);
+    }
+</script>

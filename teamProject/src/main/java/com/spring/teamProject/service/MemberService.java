@@ -17,5 +17,8 @@ public interface MemberService {
 	public boolean updateMember(MemberVO memberVO);
 	
 	//회원탈퇴
-	public boolean deleteMember(long member_id);
+	public boolean deleteMember(long memberId);
+	
+	// (신규) 이메일로 회원 정보 조회
+	public MemberVO findByEmail(String email);
 }
