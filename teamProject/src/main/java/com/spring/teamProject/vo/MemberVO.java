@@ -3,6 +3,7 @@ package com.spring.teamProject.vo;
 import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 public class MemberVO {
 	
@@ -23,6 +24,10 @@ public class MemberVO {
 	private String email;
 	private String role;
 	
+	// (신규) 프로필 이미지, 매너온도 필드 추가
+	private String profileImageUrl;
+	private double mannerTemperature;
+	
 	// DB의 DATETIME 타입은 java.util.Date로 매핑
 	private Date createdAt;
 	private Date updatedAt;
@@ -30,6 +35,13 @@ public class MemberVO {
 	//국가코드
 	private String countryCode;
 	
+    // (신규) 프로필 이미지 파일 업로드를 위한 필드 (DB에는 저장되지 않음)
+    private MultipartFile profileImageFile;
+	
+    // (신규) 폼 데이터 전송용 임시 필드
+    private String currentLoginPw;
+    private String newLoginPw;
+    
 	public long getMemberId() {
 		return memberId;
 	}
@@ -96,6 +108,18 @@ public class MemberVO {
 	public void setRole(String role) {
 		this.role = role;
 	}
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+    public double getMannerTemperature() {
+        return mannerTemperature;
+    }
+    public void setMannerTemperature(double mannerTemperature) {
+        this.mannerTemperature = mannerTemperature;
+    }
 	public Date getCreatedAt() {
 		return createdAt;
 	}
@@ -114,5 +138,22 @@ public class MemberVO {
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
-
+    public MultipartFile getProfileImageFile() {
+        return profileImageFile;
+    }
+    public void setProfileImageFile(MultipartFile profileImageFile) {
+        this.profileImageFile = profileImageFile;
+    }
+    public String getCurrentLoginPw() {
+        return currentLoginPw;
+    }
+    public void setCurrentLoginPw(String currentLoginPw) {
+        this.currentLoginPw = currentLoginPw;
+    }
+    public String getNewLoginPw() {
+        return newLoginPw;
+    }
+    public void setNewLoginPw(String newLoginPw) {
+        this.newLoginPw = newLoginPw;
+    }
 }

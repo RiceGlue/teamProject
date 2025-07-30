@@ -19,16 +19,23 @@
 		<result property="phone" column="phone"/>
 		<result property="email" column="email"/>
 		<result property="role" column="role"/>
+		<result property="profileImageUrl" column="profile_image_url"/>
+		<result property="mannerTemperature" column="manner_temperature"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
 	
-	<!-- (신규) 이메일로 회원 정보 조회 -->
+    <!-- (신규) memberId로 회원 정보 조회 -->
+    <select id="findById" parameterType="long" resultMap="memberResultMap">
+        SELECT * FROM members WHERE member_id = #{memberId}
+    </select>
+	
+	<!-- 이메일로 회원 정보 조회 -->
 	<select id="findByEmail" parameterType="String" resultMap="memberResultMap">
 		SELECT * FROM members WHERE email = #{email}
 	</select>
 	
-	<!-- (신규) 소셜 로그인 사용자 정보 삽입 -->
+	<!-- 소셜 로그인 사용자 정보 삽입 -->
 	<insert id="insertSocialMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		INSERT INTO members (
 			social_provider, social_id, member_name, birth, sex, country_code, phone, email, role
@@ -63,18 +70,24 @@
 			WHERE login_id = #{loginId} AND login_pw = #{loginPw}
 		]]>
 	</select>
-	<!-- 회원정보 수정 (updateMember 메소드와 연결) -->
+	<!-- (수정) 프로필 수정을 위한 update 쿼리 개선 -->
 	<update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		<![CDATA[
-			UPDATE members
-			SET 
+		UPDATE members
+		<set>
+			<if test="loginPw != null and loginPw != ''">
 				login_pw = #{loginPw},
+			</if>
+			<if test="memberName != null and memberName != ''">
 				member_name = #{memberName},
-				phone = #{phone},
-				email = #{email}
-			WHERE 
-				member_id = #{memberId}
-		]]>
+			</if>
+			<if test="profileImageUrl != null and profileImageUrl != ''">
+				profile_image_url = #{profileImageUrl},
+			</if>
+			phone = #{phone},
+			email = #{email}
+		</set>
+		WHERE 
+			member_id = #{memberId}
 	</update>
 	
 	<!-- 회원탈퇴 (deleteMember 메소드와 연결) -->

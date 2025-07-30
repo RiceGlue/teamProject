@@ -1,0 +1,123 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<style>
+    /* 가로 스크롤을 위한 스타일 */
+    .scroll-container {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 15px;
+    }
+    .scroll-item {
+        display: inline-block;
+        width: 220px; /* 각 아이템의 너비 */
+        margin-right: 15px;
+        white-space: normal;
+        vertical-align: top;
+    }
+    /* 스크롤바 숨기기 (선택 사항) */
+    .scroll-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* ... (기존 스타일) ... */
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover; /* 이미지가 원 안에서 잘리지 않고 꽉 차도록 설정 */
+    }
+</style>
+
+<div class="container my-5">
+    
+    <%-- 프로필 섹션 --%>
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-2 text-center">
+            <%-- (수정) 프로필 이미지가 없으면 기본 이미지를, 있으면 해당 이미지를 보여줍니다. --%>
+            <c:choose>
+                <c:when test="${not empty memberInfo.profileImageUrl}">
+                    <img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle profile-img" alt="프로필 이미지">
+                </c:when>
+                <c:otherwise>
+                    <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle profile-img" alt="기본 프로필 이미지">
+                </c:otherwise>
+            </c:choose>
+        </div>
+        <div class="col-md-10">
+            <h2 class="mb-1">@${memberInfo.memberName}</h2>
+            
+            <div class="mb-2">
+                <span>매너온도</span>
+                <span class="fw-bold text-primary">${memberInfo.mannerTemperature}°C</span>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: ${memberInfo.mannerTemperature}%;" aria-valuenow="${memberInfo.mannerTemperature}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <a href="${contextPath}/member/edit-profile" class="btn btn-outline-secondary btn-sm">프로필 수정</a>
+        </div>
+    </div>
+
+    <%-- 웨이팅 정보 섹션 --%>
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-clock-history"></i> 나의 웨이팅 정보</h4>
+            <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
+        </div>
+        <div class="scroll-container">
+            <%-- TODO: DB에서 실제 웨이팅 목록을 가져와 c:forEach로 반복 --%>
+            <c:forEach var="i" begin="1" end="5">
+                <div class="card scroll-item">
+                    <div class="card-body">
+                        <h5 class="card-title">가게 이름 ${i}</h5>
+                        <p class="card-text">대기번호: <span class="fw-bold text-danger">12번</span></p>
+                        <p class="card-text"><small class="text-muted">내 앞 대기: 6팀</small></p>
+                        <a href="#" class="btn btn-sm btn-primary">상세보기</a>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+
+    <%-- 나의 위시리스트 섹션 --%>
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-heart-fill"></i> 나의 위시리스트</h4>
+            <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
+        </div>
+        <div class="scroll-container">
+            <%-- TODO: DB에서 실제 위시리스트 목록을 가져와 c:forEach로 반복 --%>
+            <c:forEach var="i" begin="1" end="5">
+                <div class="card scroll-item">
+                    <img src="https://via.placeholder.com/220x150" class="card-img-top" alt="가게 이미지">
+                    <div class="card-body">
+                        <h6 class="card-title">위시리스트 가게 ${i}</h6>
+                        <p class="card-text"><small class="text-muted">서울 강남구</small></p>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+
+    <%-- 예약 정보 섹션 --%>
+    <div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-calendar-check"></i> 나의 예약 정보</h4>
+            <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
+        </div>
+        <div class="scroll-container">
+            <%-- TODO: DB에서 실제 예약 목록을 가져와 c:forEach로 반복 --%>
+            <c:forEach var="i" begin="1" end="5">
+                <div class="card scroll-item">
+                    <div class="card-body">
+                        <h5 class="card-title">예약한 가게 ${i}</h5>
+                        <p class="card-text">예약 시간: <strong>17:00</strong></p>
+                        <p class="card-text">예약 인원: <strong>2명</strong></p>
+                        <a href="#" class="btn btn-sm btn-primary">상세보기</a>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+
+</div>

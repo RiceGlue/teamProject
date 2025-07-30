@@ -41,7 +41,7 @@
                         <sec:authentication property="principal.attributes['name']"/>님 환영합니다.
                     </span>
                 </li>
-                <li class="nav-item"><a class="nav-link" href="#">마이페이지</a></li>
+                <li class="nav-item"><a class="nav-link" href="${contextPath}/member/mypage">마이페이지</a></li>
                 <li class="nav-item">
                     <form action="${contextPath}/member/logout" method="post" class="d-inline">
                         <button type="submit" class="btn btn-link nav-link">로그아웃</button>
