@@ -21,12 +21,43 @@
 	a { color: #007bff; text-decoration: none; }
 	a:hover { text-decoration: underline; }
 </style>
+	
+<script>
+	const da
+</script>
 
 	<title>${store.storeName}</title>
 
-    <div class="container">
-        <h2>${store.storeName} 상세 정보</h2>
+	<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <!-- 가게 이미지 캐러셀 -->
+		<div class="carousel-inner">
+			<div class="carousel-item active">
+				<img src="..." class="d-block w-100" alt="...">
+			</div>
+			<div class="carousel-item">
+				<img src="..." class="d-block w-100" alt="...">
+			</div>
+			<div class="carousel-item">
+				<img src="..." class="d-block w-100" alt="...">
+			</div>
+		</div>
+		<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+			<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Previous</span>
+		</button>
+		<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+			<span class="carousel-control-next-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Next</span>
+		</button>
+	</div>
 
+    <div class="container">
+        <h2>${store.storeName} </h2>
+        
+        <div id="info1" >
+        	<h4>${store.avgRating} 리뷰 ${store.countRating}개</h4>
+        	<h4>${store.address}</h4>
+        	<h4>${store.avgRating} 리뷰 ${store.countRating}개</h4>
+        </div>
         <p><strong>주소:</strong> ${store.address}</p>
         <p><strong>설명:</strong> ${store.description}</p>
         <p><strong>운영 방식:</strong> ${store.operationType}</p>
