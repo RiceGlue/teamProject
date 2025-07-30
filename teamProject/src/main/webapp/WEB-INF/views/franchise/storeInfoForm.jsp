@@ -108,6 +108,7 @@
 			<div class="tab_content" id="tab1">
 				<form action="${contextPath}/franchisor/addStoreInfo.do?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
 					<input type="hidden" id="storeId" value="${storeId}" />
+					<input type="hidden" id="storeName" value="${storeName}" />
 					<h3>가게 정보 등록</h3>
 					<table>
 						<tr>

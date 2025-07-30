@@ -31,7 +31,9 @@ public class StoreControllerImpl implements StoreController {
 		String viewName = (String)req.getAttribute("viewName");
 		
 		List<StoreVO> storelist = storeService.storeRegionList(region);
+		
 		ModelAndView mav = ViewUtil.layout(viewName);
+		mav.addObject("region",region);
 		mav.addObject("storelist",storelist);
 		return mav;	
 	}

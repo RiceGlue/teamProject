@@ -51,6 +51,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeId", storeId);
+		mav.addObject("storeName", storeName);
 		return mav;
 	}
 	
@@ -62,7 +63,6 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		String imageFileName=null;
 		
 		Map storeInfoMap  = new HashMap<>();
-		storeInfoMap .put("storeId",storeId);
 		Enumeration enu=multiReq.getParameterNames();
 		while(enu.hasMoreElements()){
 			String name=(String)enu.nextElement();
