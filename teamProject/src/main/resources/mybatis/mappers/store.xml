@@ -4,39 +4,64 @@
 	
 <mapper namespace="com.spring.teamProject.dao.StoreDAO">
 	<resultMap id="storelist" type="StoreVO">
-		<result property="storeId" column="storeId"/>
-		<result property="ownerId" column="ownerId"/>
-		<result property="storeName" column="storeName"/>
+		<result property="storeId" column="store_id"/>
+		<result property="ownerId" column="owner_id"/>
+		<result property="storeName" column="store_Name"/>
 		<result property="address" column="address"/>
 		<result property="region" column="region"/>
-		<result property="createdAt" column="createdAt"/>
-		<result property="updatedAt" column="updatedAt"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
-	<resultMap id="storeinfo" type="StoreVO">
-		<result property="storeId" column="storeId" />
-		<result property="storeType" column="storeType" />
-		<result property="operationType" column="operationType" />
-		<result property="storePhoneNumber" column="storePhoneNumber" />
-		<result property="storeHours" column="storeHours" />
-		<result property="breakTime" column="breakTime" />
-		<result property="dayOff" column="dayOff" />
+	<resultMap id="storeInfo" type="StoreVO">
+		<result property="storeId" column="store_id" />
+		<result property="storeName" column="store_Name" />
+		<result property="storeType" column="store_type" />
+		<result property="operationType" column="operation_yype" />
+		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="breakTime" column="break_time" />
+		<result property="dayOff" column="day_ff" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
-		<result property="mainImage" column="mainImage" />
+		<result property="mainImage" column="main_image" />
+		<result property="startHour" column="start_hour" />
+		<result property="startMin" column="start_min" />
+		<result property="endHour" column="end_hour" />
+		<result property="endMin" column="end_min" />
+		<result property="openDay" column="open_day" />
 	</resultMap>
 	
 	<resultMap id="imagelist" type="ImageFileVO">
-		<result property="imageId" column="imageId"/>
-		<result property="storeId" column="storeId"/>
-		<result property="reviewId" column="reviewId"/>
-		<result property="fileName" column="fileName"/>
-		<result property="fileType" column="fileType"/>
-		<result property="displayNo" column="displayNo"/>
-		<result property="createdAt" column="createdAt"/>
-		<result property="regId" column="regId"/>
+		<result property="imageId" column="image_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="reviewId" column="review_id"/>
+		<result property="fileName" column="file_name"/>
+		<result property="fileType" column="file_type"/>
+		<result property="displayNo" column="display_no"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="regId" column="reg_id"/>
+	</resultMap>
+	
+	<resultMap type="MenuVO" id="menulist">
+		<result property="menuId" column="menu_id" />
+		<result property="storeId" column="store_id" />
+		<result property="displayNo" column="display_no" />
+		<result property="menuName" column="menu_name" />
+		<result property="price" column="price" />
+		<result property="description" column="description" />
+		<result property="imageName" column="image_name" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+	
+	<resultMap id="reservationlist" type="ReservationVO">
+		<result property="settingId" column="setting_id" />
+		<result property="storeId" column="store_id"/>
+		<result property="dayOfWeek" column="day_of_week"/>
+		<result property="timeSlot" column="time_slot"/>
+		<result property="isActive" column="is_active"/>
 	</resultMap>
 	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
@@ -56,5 +81,35 @@
 			ORDER BY s.store_id;
 		]]>
 	</select>
+	
+	<select id="selectStoreDetail" parameterType="long" resultMap="storeInfo" >
+		<![CDATA[
+			select * from store_info where store_id = #{storeId}
+		]]>
+	</select>
+	
+	<select id="selectStoreImage" parameterType="long" resultMap="imagelist" >
+		<![CDATA[
+			select * from image_file
+			where info_id = (select info_id from store_info where store_id=#{storeId} ) or 
+			review_id = (select review_id from reviews where store_id=#{storeId});
+		]]>
+	</select>
+		
+	<select id="selectStoreMenu" parameterType="long" resultMap="menulist" >
+		<![CDATA[
+			select menu_name, price, description, image_name from menu
+			where store_id=#{storeId} order by display_no asc
+		]]>
+	</select>
+	
+<!-- 	<select id="selectStoreReservatioin" parameterType="long" resultMap="reservationlist" > -->
+<!-- 		<![CDATA[ -->
+<!-- 			select * from reservation_setting -->
+<!-- 			where store_id=#{storeId} -->
+<!-- 		]]> -->
+<!-- 	</select> -->
+
+
 	
 </mapper>

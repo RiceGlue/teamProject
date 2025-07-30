@@ -7,7 +7,7 @@ public class MenuVO {
 	private String menuName;
 	private String price;
 	private String description;
-	private String imageUrl;
+	private String imageName;
 	private String createdAt;
 	private String updatedAt;
 	
@@ -48,11 +48,11 @@ public class MenuVO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getImageUrl() {
-		return imageUrl;
+	public String getImageName() {
+		return imageName;
 	}
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 	public String getCreatedAt() {
 		return createdAt;

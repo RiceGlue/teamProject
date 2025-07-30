@@ -9,5 +9,5 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface StoreController {
 	
 	public ModelAndView SelectRegionStoreList (@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception;
-
+	public ModelAndView storeDetail(@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception;
 }

@@ -1,23 +1,29 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<html>
-<head>
-    <title>${store.storeName} 상세 정보</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 600px; margin: 30px auto; }
-        h2 { color: #333; text-align: center; margin-bottom: 25px; }
-        p { margin-bottom: 10px; line-height: 1.6; }
-        strong { display: inline-block; width: 100px; }
-        .button-group { text-align: center; margin-top: 30px; }
-        .button-group a { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px; display: inline-block; }
-        .button-group a:hover { background-color: #0056b3; }
-        .back-link { display: block; text-align: center; margin-top: 20px; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
+
+<c:set var="contextPath"  value="${pageContext.request.contextPath}"  />
+<c:set var="store"  value="${storeMap.store}"  />
+<c:set var="image"  value="${storeMap.imagelist }"  />
+<c:set var="menu"  value="${storeMap.menu }"  />
+<%-- <c:set var="review"  value="${storeMap.review }"  /> --%>
+<c:set var="reservation"  value="${storeMap.reservation }"  />
+
+<style>
+	body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+	.container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 600px; margin: 30px auto; }
+	h2 { color: #333; text-align: center; margin-bottom: 25px; }
+	p { margin-bottom: 10px; line-height: 1.6; }
+	strong { display: inline-block; width: 100px; }
+	.button-group { text-align: center; margin-top: 30px; }
+	.button-group a { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px; display: inline-block; }
+	.button-group a:hover { background-color: #0056b3; }
+	.back-link { display: block; text-align: center; margin-top: 20px; }
+	a { color: #007bff; text-decoration: none; }
+	a:hover { text-decoration: underline; }
+</style>
+
+	<title>${store.storeName}</title>
+
     <div class="container">
         <h2>${store.storeName} 상세 정보</h2>
 

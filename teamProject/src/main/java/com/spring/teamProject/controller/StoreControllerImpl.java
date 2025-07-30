@@ -1,6 +1,7 @@
 package com.spring.teamProject.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,15 +33,25 @@ public class StoreControllerImpl implements StoreController {
 		
 		List<StoreVO> storelist = storeService.storeRegionList(region);
 		
+		for(int i=0;i<storelist.size();i++) {
+			System.out.println(storelist.get(i).getStoreName());
+		}
+		
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("region",region);
 		mav.addObject("storelist",storelist);
-		return mav;	
+		return mav;
 	}
-
-	@GetMapping(value="/storeList.do")
-	public ModelAndView storeList(HttpServletRequest req, HttpServletResponse res) throws Exception {
-		ModelAndView mav = ViewUtil.layout("store/storeList");
+	
+	@Override
+	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
+	public ModelAndView storeDetail(@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		String viewName = (String)req.getAttribute("viewName");
+		
+		Map storeMap = storeService.storeDetail(storeId);
+		
+		ModelAndView mav = ViewUtil.layout(viewName);
+		mav.addObject("storeMap", storeMap);
 		return mav;
 	}
 
