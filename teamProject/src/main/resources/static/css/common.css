@@ -4,5 +4,48 @@
 .row > .col-12,
 .row > .container {border: 2px solid olivedrab; border-radius: 20px; padding: 15px;}
 
+table {border:1px solid cornflowerblue;}
+table th {padding: 5px 10px;}
+table td {vertical-align: top; padding: 5px 10px;}
 
-table td {vertical-align: top;}
+table th,
+table td {border:1px solid coral;}
+table thead th {text-align: center;}
+
+
+.search-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 30px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      border-color: #007bff;
+    }
+
+    .search-button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-button img {
+      width: 20px;
+      height: 20px;
+    }

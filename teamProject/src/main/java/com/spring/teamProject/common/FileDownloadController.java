@@ -9,21 +9,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletResponse;
+import net.coobird.thumbnailator.Thumbnails;
 
 @Controller
 public class FileDownloadController {
 	private static String CURR_IMAGE_REPO_PATH="c://project//image_repo";
 	
 	@RequestMapping("/download")
-	protected void download(@RequestParam("image_url") String image_url,
-		                 	@RequestParam("store_id") String store_id,
+	protected void download(@RequestParam("imageName") String imageName,
+		                 	@RequestParam("storeId") String storeId,
 			                 HttpServletResponse response) throws Exception {
 		OutputStream out = response.getOutputStream();
-		String filePath=CURR_IMAGE_REPO_PATH+"\\"+store_id+"\\"+image_url;
+		String filePath=CURR_IMAGE_REPO_PATH+"\\"+storeId+"\\"+imageName;
 		File image=new File(filePath);
 
 		response.setHeader("Cache-Control","no-cache");
-		response.addHeader("Content-disposition", "attachment; image_url="+image_url);
+		response.addHeader("Content-disposition", "attachment; image_url="+imageName);
 		FileInputStream in=new FileInputStream(image); 
 		byte[] buffer=new byte[1024*8];
 		while(true){
@@ -34,6 +35,32 @@ public class FileDownloadController {
 		}
 		in.close();
 		out.close();
+	}
+	
+	@RequestMapping("/image")
+	protected void showImage(@RequestParam("imageName") String imageName,
+	                         @RequestParam("storeId") String storeId,
+	                         HttpServletResponse response) throws Exception {
+	    String filePath = CURR_IMAGE_REPO_PATH + "\\" + storeId + "\\" + imageName;
+	    File image = new File(filePath);
+
+	    if (image.exists()) {
+	        FileInputStream in = new FileInputStream(image);
+	        byte[] buffer = new byte[1024 * 8];
+
+	        // 이미지 파일 형식에 따라 ContentType 조정 (예: jpg, png 등)
+	        response.setContentType("image/jpeg");
+
+	        OutputStream out = response.getOutputStream();
+	        int count;
+	        while ((count = in.read(buffer)) != -1) {
+	            out.write(buffer, 0, count);
+	        }
+	        in.close();
+	        out.close();
+	    } else {
+	        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+	    }
 	}
 
 }
