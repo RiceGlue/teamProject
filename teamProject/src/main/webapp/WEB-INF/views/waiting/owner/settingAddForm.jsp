@@ -1,4 +1,3 @@
-<%-- src/main/webapp/WEB-INF/views/waiting/owner/settingAddForm.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -14,7 +13,7 @@
         input[type="number"],
         select { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; }
         input[type="checkbox"] { margin-top: 5px; margin-bottom: 15px; }
-        button { background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button { background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor; font-size: 16px; }
         button:hover { background-color: #218838; }
         p a { color: #007bff; text-decoration: none; display: block; text-align: center; margin-top: 20px; }
         p a:hover { text-decoration: underline; }
@@ -27,10 +26,9 @@
 
         <form:hidden path="storeId" />
 
-        <label for="dayOfWeek">요일:</label>
-        <form:input type="number" path="dayOfWeek" id="dayOfWeek" min="1" max="7" required="true" placeholder="1=월, 7=일" /><br/>
-
-        <%-- timeSlot 입력 필드를 제거합니다. --%>
+        <%-- 요일(dayOfWeek) 입력 필드를 제거합니다. --%>
+        <%-- <label for="dayOfWeek">요일:</label>
+        <form:input type="number" path="dayOfWeek" id="dayOfWeek" min="1" max="7" required="true" placeholder="1=월, 7=일" /><br/> --%>
 
         <label for="maxTeams">최대 팀 수:</label>
         <form:input type="number" path="maxTeams" id="maxTeams" min="1" required="true" /><br/>
