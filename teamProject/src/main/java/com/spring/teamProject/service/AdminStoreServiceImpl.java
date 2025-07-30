@@ -21,10 +21,11 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	private AdminStoreDAO adminStoreDAO;
 	
 	@Override
-	public List<StoreVO> storeRegionList(String region) throws Exception {
-		List<StoreVO> storelist = adminStoreDAO.selectStoreByRegion(region);
-		return storelist;
+	public long selectStoreId(StoreVO storeVO) throws Exception {
+		long storeId = adminStoreDAO.selectStoreId(storeVO);
+		return storeId;
 	}
+	
 	@Override
 	public long addStoreInfo(Map newStoreMap) throws Exception {
 		long info_id = adminStoreDAO.insertStoreInfo(newStoreMap);

@@ -22,7 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new ViewNameInterceptor())
-                .addPathPatterns("/**/*.do");  // .do로 끝나는 모든 요청에 인터셉터 적용
+                .addPathPatterns("/**");
     }
     
     /**

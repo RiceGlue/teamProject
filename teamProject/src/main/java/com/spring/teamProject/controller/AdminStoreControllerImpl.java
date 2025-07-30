@@ -39,22 +39,20 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	private AdminStoreService adminStoreService;
 	
 	@RequestMapping(value="/storeInfoForm")
-	public ModelAndView form (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public ModelAndView form (@RequestParam("ownerId") long ownerId, @RequestParam("storeName") String storeName, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		
+		StoreVO storeVO = new StoreVO();
+		
+		storeVO.setOwnerId(ownerId);
+		storeVO.setStoreName(storeName);
+		
+		long storeId = adminStoreService.selectStoreId(storeVO);
+
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeId", storeId);
+		mav.addObject("storeName", storeName);
 		return mav;
-	}
-	
-	@RequestMapping(value="/storeRegionList", method=RequestMethod.GET)
-	public ModelAndView SelectRegionStoreList (@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		String viewName = (String)req.getAttribute("viewName");
-		
-		List<StoreVO> storelist = adminStoreService.storeRegionList(region);
-		ModelAndView mav = ViewUtil.layout(viewName);
-		mav.addObject("storelist",storelist);
-		return mav;	
 	}
 	
 	@Override
@@ -65,7 +63,6 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		String imageFileName=null;
 		
 		Map storeInfoMap  = new HashMap<>();
-		storeInfoMap .put("storeId",storeId);
 		Enumeration enu=multiReq.getParameterNames();
 		while(enu.hasMoreElements()){
 			String name=(String)enu.nextElement();
