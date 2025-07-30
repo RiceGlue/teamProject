@@ -1,8 +1,10 @@
 package com.spring.teamProject.service;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -129,23 +131,39 @@ public class MemberServiceImpl implements MemberService {
     private void saveProfileImage(MemberVO memberVO) {
         MultipartFile file = memberVO.getProfileImageFile();
         if (file != null && !file.isEmpty()) {
-            // 2MB 용량 제한 검사
-            long maxSizeInBytes = 2 * 1024 * 1024;
+            
+            // 1. 서버 측 파일 크기 검사
+            long maxSizeInBytes = 2 * 1024 * 1024; // 2MB
             if (file.getSize() > maxSizeInBytes) {
                 throw new RuntimeException("프로필 사진은 2MB를 초과할 수 없습니다.");
             }
+
             try {
-                // 중복을 피하기 위해 UUID로 새로운 파일 이름 생성
+                // 2. 서버 측 해상도 검사
+                BufferedImage image = ImageIO.read(file.getInputStream());
+                if (image == null) {
+                    // 이미지 파일이 아닌 경우
+                    throw new RuntimeException("올바른 이미지 파일이 아닙니다.");
+                }
+                int width = image.getWidth();
+                int height = image.getHeight();
+                int maxResolution = 500; // 최대 해상도 500px
+
+                if (width > maxResolution || height > maxResolution) {
+                    throw new RuntimeException("프로필 사진의 해상도는 500x500 픽셀을 초과할 수 없습니다.");
+                }
+
+                // 3. 파일 저장 로직
                 String originalFilename = file.getOriginalFilename();
                 String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
                 String savedFilename = UUID.randomUUID().toString() + extension;
-                
-                // 지정된 경로에 파일 저장
+
                 File dest = new File(uploadDir + savedFilename);
+                // ImageIO.read()로 inputStream을 한 번 사용했으므로, 파일을 다시 저장해야 합니다.
                 file.transferTo(dest);
 
-                // DB에 저장할 웹 접근 경로 설정
                 memberVO.setProfileImageUrl("/profile-images/" + savedFilename);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);

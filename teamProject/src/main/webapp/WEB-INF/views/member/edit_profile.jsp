@@ -17,13 +17,12 @@
                 </c:otherwise>
             </c:choose>
             <div>
-                <label for="profileImageFile" class="form-label">프로필 이미지 변경 (2MB 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
+                <label for="profileImageFile" class="form-label">프로필 이미지 변경 (2MB / 500x500px 이하)</label>
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
             </div>
         </div>
 
         <div class="mb-3">
-            <%-- (수정 2) '닉네임'을 '이름'으로 변경하고, value에 실제 사용자 이름을 표시합니다. --%>
             <label for="memberName" class="form-label">이름</label>
             <input type="text" class="form-control" id="memberName" name="memberName" value="${memberInfo.memberName}" required>
         </div>
@@ -60,27 +59,41 @@
 </div>
 
 <script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('preview').src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    function checkFileSize(input) {
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    function validateImage(input) {
         const file = input.files[0];
-        if (file && file.size > maxSizeInBytes) {
+        if (!file) return;
+
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
             alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-            input.value = '';
-            const currentImage = '${(not empty memberInfo.profileImageUrl) ? contextPath.concat(memberInfo.profileImageUrl) : contextPath.concat("/images/default_profile.png")}';
-            document.getElementById('preview').src = currentImage;
+            resetInput(input);
             return;
         }
-        previewImage(input);
+
+        const maxResolution = 500; // 최대 가로/세로 500px
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
+        };
+        reader.readAsDataURL(file);
     }
+    
+    function resetInput(input) {
+        input.value = '';
+        // 파일 선택 취소 시, 현재 프로필 이미지나 기본 이미지로 되돌립니다.
+        const currentImage = '${(not empty memberInfo.profileImageUrl) ? contextPath.concat(memberInfo.profileImageUrl) : contextPath.concat("/images/default_profile.png")}';
+        document.getElementById('preview').src = currentImage;
+    }
+
     function validatePassword() {
         const newPassword = document.getElementById('newLoginPw').value;
         const confirmPassword = document.getElementById('newLoginPwConfirm').value;
