@@ -4,16 +4,17 @@
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">가맹점주 회원가입</h2>
     
-    <form action="${contextPath}/member/join" method="post">
+    <form action="${contextPath}/member/join" method="post" enctype="multipart/form-data">
         <input type="hidden" name="role" value="OWNER">
 
-		<div class="text-center mb-4">
-		    <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
-		    <div>
-		        <label for="profileImageFile" class="form-label">대표자 프로필 이미지 (2MB 이하)</label>
-		        <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
-		    </div>
-		</div>
+        <div class="text-center mb-4">
+            <%-- (수정) 기본 이미지 경로를 로컬 경로로 변경 --%>
+            <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+            <div>
+                <label for="profileImageFile" class="form-label">대표자 프로필 이미지 (2MB 이하)</label>
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="checkFileSize(this);" accept="image/*">
+            </div>
+        </div>
         
         <div class="mb-3">
             <label for="loginId" class="form-label">아이디</label>
@@ -48,7 +49,6 @@
             </div>
         </div>
         
-        <!-- (수정) 전화번호 입력 부분 -->
         <div class="mb-3">
             <label for="phone" class="form-label">연락처</label>
             <div class="input-group">
@@ -56,17 +56,17 @@
                     <option value="82" selected>+82 (대한민국)</option>
                     <option value="1">+1 (United States)</option>
                     <option value="81">+81 (日本)</option>
-                    <option value="86">+86 (中国)</option>
+                    <option value="86">+86 (中?)</option>
                     <option value="44">+44 (United Kingdom)</option>
                     <option value="49">+49 (Deutschland)</option>
                     <option value="33">+33 (France)</option>
                     <option value="1">+1 (Canada)</option>
                     <option value="61">+61 (Australia)</option>
                     <option value="7">+7 (Россия)</option>
-                    <option value="34">+34 (España)</option>
+                    <option value="34">+34 (Espana)</option>
                     <option value="39">+39 (Italia)</option>
-                    <option value="84">+84 (Việt Nam)</option>
-                    <option value="66">+66 (ประเทศไทย)</option>
+                    <option value="84">+84 (Vi?t Nam)</option>
+                    <option value="66">+66 (?????????)</option>
                     <option value="63">+63 (Pilipinas)</option>
                     <option value="886">+886 (台灣)</option>
                     <option value="852">+852 (Hong Kong)</option>
@@ -75,7 +75,7 @@
                     <option value="62">+62 (Indonesia)</option>
                     <option value="91">+91 (India)</option>
                     <option value="55">+55 (Brasil)</option>
-                    <option value="52">+52 (México)</option>
+                    <option value="52">+52 (Mexico)</option>
                 </select>
                 <input type="tel" class="form-control" id="phone" name="phone" placeholder="'-' 없이 숫자만 입력" required>
             </div>
@@ -107,7 +107,8 @@
         if (file && file.size > maxSizeInBytes) {
             alert("프로필 사진은 2MB를 초과할 수 없습니다.");
             input.value = '';
-            document.getElementById('preview').src = 'https://via.placeholder.com/150';
+            <%-- (수정) 파일 선택 취소 시 기본 이미지 경로로 되돌림 --%>
+            document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
             return;
         }
         previewImage(input);

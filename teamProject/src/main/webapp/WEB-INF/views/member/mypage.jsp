@@ -20,8 +20,6 @@
     .scroll-container::-webkit-scrollbar {
         display: none;
     }
-    
-    /* ... (기존 스타일) ... */
     .profile-img {
         width: 150px;
         height: 150px;
@@ -33,8 +31,7 @@
     
     <%-- 프로필 섹션 --%>
     <div class="row mb-5 align-items-center">
-        <div class="col-md-2 text-center">
-            <%-- (수정) 프로필 이미지가 없으면 기본 이미지를, 있으면 해당 이미지를 보여줍니다. --%>
+        <div class="col-auto"> <%-- col-md-2 대신 col-auto로 변경하여 이미지 크기에 맞게 조절 --%>
             <c:choose>
                 <c:when test="${not empty memberInfo.profileImageUrl}">
                     <img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle profile-img" alt="프로필 이미지">
@@ -44,17 +41,21 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <div class="col-md-10">
-            <h2 class="mb-1">@${memberInfo.memberName}</h2>
-            
-            <div class="mb-2">
-                <span>매너온도</span>
-                <span class="fw-bold text-primary">${memberInfo.mannerTemperature}°C</span>
-                <div class="progress" style="height: 10px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: ${memberInfo.mannerTemperature}%;" aria-valuenow="${memberInfo.mannerTemperature}" aria-valuemin="0" aria-valuemax="100"></div>
+        <%-- (수정) 버튼을 아래로 내리고 오른쪽 정렬하기 위해 구조 변경 --%>
+        <div class="col">
+            <div>
+                <h2 class="mb-1">@${memberInfo.memberName}</h2>
+                <div class="mb-2">
+                    <span>매너온도</span>
+                    <span class="fw-bold text-primary">${memberInfo.mannerTemperature}°C</span>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${memberInfo.mannerTemperature}%;" aria-valuenow="${memberInfo.mannerTemperature}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
             </div>
-            <a href="${contextPath}/member/edit-profile" class="btn btn-outline-secondary btn-sm">프로필 수정</a>
+            <div class="text-end mt-2">
+                <a href="${contextPath}/member/edit-profile" class="btn btn-outline-secondary">프로필 수정</a>
+            </div>
         </div>
     </div>
 

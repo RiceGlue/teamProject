@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User; // OAuth2User import
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +28,7 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
-
-
-    // --- 기존 회원가입, 로그인, 로그아웃 메소드 (변경 없음) ---
+    // --- 회원가입 및 로그인/로그아웃 관련 메소드 ---
     
     @GetMapping("/join-select")
     public String joinSelectForm(Model model) {
@@ -108,5 +106,112 @@ public class MemberController {
             }
         }
         return "redirect:/member/login";
+    }
+
+    // --- 마이페이지, 프로필 수정, 회원 탈퇴 ---
+    
+    @GetMapping("/mypage")
+    public String mypage(@AuthenticationPrincipal Object principal, Model model) {
+        MemberVO memberInfo = null;
+
+        if (principal instanceof UserDetailsVO) {
+            // Case 1: 일반 로그인 사용자
+            memberInfo = ((UserDetailsVO) principal).getMemberVO();
+        } else if (principal instanceof OAuth2User) {
+            // Case 2: 소셜 로그인 사용자
+            OAuth2User oauth2User = (OAuth2User) principal;
+            String email = oauth2User.getAttribute("email");
+            // DB에서 최신 회원 정보를 이메일로 조회합니다.
+            memberInfo = memberService.findByEmail(email);
+        }
+
+        if (memberInfo == null) {
+            // 예외 처리: 로그인 정보가 없거나 DB에서 회원을 찾지 못한 경우
+            return "redirect:/member/login";
+        }
+
+        model.addAttribute("memberInfo", memberInfo);
+        model.addAttribute("body", "member/mypage.jsp");
+        return "layout/layout";
+    }
+
+    @GetMapping("/edit-profile")
+    public String editProfileForm(@AuthenticationPrincipal Object principal, Model model) {
+        MemberVO memberInfo = null;
+
+        if (principal instanceof UserDetailsVO) {
+            memberInfo = ((UserDetailsVO) principal).getMemberVO();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            String email = oauth2User.getAttribute("email");
+            memberInfo = memberService.findByEmail(email);
+        }
+
+        if (memberInfo == null) {
+            return "redirect:/member/login";
+        }
+        
+        model.addAttribute("memberInfo", memberInfo);
+        model.addAttribute("body", "member/edit_profile.jsp");
+        return "layout/layout";
+    }
+
+    @PostMapping("/edit-profile")
+    public String editProfile(MemberVO memberVO, @AuthenticationPrincipal Object principal, RedirectAttributes redirectAttributes) {
+        long currentMemberId = 0;
+        
+        if (principal instanceof UserDetailsVO) {
+            currentMemberId = ((UserDetailsVO) principal).getMemberVO().getMemberId();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            String email = oauth2User.getAttribute("email");
+            MemberVO currentMember = memberService.findByEmail(email);
+            if (currentMember != null) {
+                currentMemberId = currentMember.getMemberId();
+            }
+        }
+
+        if (currentMemberId == 0) {
+            return "redirect:/member/login";
+        }
+        
+        memberVO.setMemberId(currentMemberId);
+        
+        boolean isSuccess = memberService.updateMember(memberVO);
+        
+        if (isSuccess) {
+            redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
+            return "redirect:/member/mypage";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않습니다. 다시 확인해주세요.");
+            return "redirect:/member/edit-profile";
+        }
+    }
+    
+    @PostMapping("/withdraw")
+    public String withdraw(@AuthenticationPrincipal Object principal, HttpServletRequest request) {
+        long memberId = 0;
+        
+        if (principal instanceof UserDetailsVO) {
+            memberId = ((UserDetailsVO) principal).getMemberVO().getMemberId();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            String email = oauth2User.getAttribute("email");
+            MemberVO currentMember = memberService.findByEmail(email);
+            if (currentMember != null) {
+                memberId = currentMember.getMemberId();
+            }
+        }
+        
+        if (memberId != 0) {
+            memberService.deleteMember(memberId);
+        }
+        
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        
+        return "redirect:/";
     }
 }
