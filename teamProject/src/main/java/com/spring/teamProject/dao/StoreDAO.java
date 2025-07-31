@@ -20,7 +20,8 @@ public interface StoreDAO {
 	public List<ImageFileVO> selectStoreImage(long storeId) throws DataAccessException;
 	public List<MenuVO> selectStoreMenu(long storeId) throws DataAccessException;
 	public List<ReviewVO> selectDetailReview(long storeId) throws DataAccessException;
+	public ReviewVO selectStoreReivew(long storeId) throws DataAccessException;
 //	public ReservationVO selectStoreReservatioin(long storeId) throws DataAccessException;
-//	public ReviewVO selectStoreReivew(long storeId) throws DataAccessException;
+
 	
 }

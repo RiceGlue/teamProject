@@ -3,8 +3,9 @@
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
-<c:set var="review" value="${storeMap.review }" />
-<c:set var="reservation" value="${storeMap.reservation}" />
+<c:set var="detailReview" value="${storeMap.detailReview}" />
+<%-- <c:set var="reservation" value="${storeMap.reservation}" /> --%>
+
 
 <html>
 <head>
@@ -35,11 +36,21 @@
 		.menu_name { font-weight:bold; margin:4px 0 2px; }
 		.menu_price { color:#555; margin:2px 0; }
 		.menu_description { color:#777; font-size:12px; margin:2px 0 4px; }
-		.detail_countRating { margin-top:16px; }
-		.rating_bar_container { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-		.rating_label { width:100px; font-weight:bold; }
-		.rating_bar_bg { background:#eee; width:200px; height:12px; border-radius:6px; overflow:hidden; }
-		.rating_bar_fill { background:#f90; height:100%; border-radius:6px 0 0 6px; }		
+		.card-rating, .card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
+		.review_count {font-weight:bold;margin-bottom:12px;}
+		.countRating {margin-bottom:20px;}
+		.rating_bar_container {display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+		.rating_label {width:120px;font-weight:500;}
+		.rating_bar_bg {background:#eee;width:200px;height:12px;border-radius:6px;overflow:hidden;}
+		.rating_bar_fill {background:#f90;height:100%;border-radius:6px 0 0 6px;}
+		.detailReviewList {margin-top:20px;}
+		.review_box {border:1px solid #ddd;padding:12px;border-radius:6px;margin-bottom:10px;background-color:#fff;}
+		.review_stars {color:#f90;font-size:14px;}
+		.review_user {font-weight:bold;font-size:13px;margin:4px 0;}
+		.review_text {font-size:14px;color:#333;}
+		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
+		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
+		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}	
 	</style>
 	
 	<script>
@@ -66,7 +77,7 @@
 	</script>
 </head>
 
-<body style="background-color: #f4f4f4;">
+<body>
 	<div class="store-info">
 		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <!-- 가게 이미지 캐러셀 -->
 			<div class="carousel-inner">
@@ -89,6 +100,7 @@
 				<span class="visually-hidden">Next</span>
 			</button>
 		</div>
+		
 		<h4 class="mt-3">${store.storeName}</h4>
 		<div class="rating">★ ${store.avgRating} 리뷰 ${store.countRating}개</div>
 		<div>
@@ -149,23 +161,33 @@
 							</c:forEach>
 						</div>
 					</div>
-					<div class="tab_content" id="tab3"> <!-- 리뷰 -->
-						<div class="avgRating">
-							<h4>전체 평점</h4>
-							<h1><img src="별 사진">${store.avgRating }</h1>
-						</div>
-						
-						<div class="detail_countRating">
-							<c:forEach var="detailReview" items="${storeMap.detailReview }">
-								<div class="rating_bar_container">
-									<span class="rating_label">${detailReview.rating}점 : ${detailReview.countScoreRating}명</span>
-									<div class="rating_bar_bg">
-										<div class="rating_bar_fill" style="width: ${detailReview.countScoreRating * 10}px;"></div>
+					<div class="tab_content" id="tab3">
+						<div class="rating_summary_cards">
+							<div class="card card-rating">
+								<p>전체 별점</p>
+								<h2><img src="별 이미지" alt="별점 이미지">${store.avgRating }</h2>
+							</div>
+							<div class="card card-detail">
+								<c:forEach var="detailReview" items="${storeMap.detailReview}">
+									<div class="rating_bar_container">
+										<span class="rating_label">${detailReview.rating}점 : ${detailReview.countScoreRating}명</span>
+										<div class="rating_bar_bg">
+											<div class="rating_bar_fill" style="width: ${detailReview.countScoreRating * 10}px;"></div>
+										</div>
 									</div>
+								</c:forEach>
+							</div>
+						</div>
+						<div class="detailReviewList">
+							<h4>리뷰 ${store.countRating}건</h4>
+							<c:forEach var="item" items="${storeMap.review }" >
+								<div class="review_box">
+									<p>${review.rating }점<p>
+									<p>${review.writerId}<p>
+									<p>${review.comment}<p>
 								</div>
 							</c:forEach>
 						</div>
-
 					</div>
 					<div class="tab_content" id="tab4"> <!-- 상세 정보 -->
 					</div>

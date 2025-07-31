@@ -55,26 +55,4 @@ public class StoreControllerImpl implements StoreController {
 		return mav;
 	}
 
-	/**
-     * 매장 상세 페이지를 보여주는 메서드
-     * GET /store/storeDetail.do?storeId={storeId}
-     */
-    @GetMapping(value="/storeDetail.do")
-    public String storeDetail(@RequestParam("storeId") Long storeId, Model model) {
-
-        // JSP 파일 경로
-        return "store/storeDetail"; // src/main/webapp/WEB-INF/views/store/storeDetail.jsp 를 가리킴
-    }
-
-    @GetMapping(value="/storeList.do")
-    public ModelAndView storeList(HttpServletRequest req, HttpServletResponse res) throws Exception {
-        ModelAndView mav = ViewUtil.layout("store/storeList");
-        return mav;
-    }
-
-	public ModelAndView form(@RequestParam("store_id") String store_id, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		ModelAndView mav = ViewUtil.layout("franchise/");
-		return mav;
-	}
-
 }

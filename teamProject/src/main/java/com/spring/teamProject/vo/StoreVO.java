@@ -14,7 +14,7 @@ public class StoreVO {
 	
 	private Date createdAt;
 	private Date updatedAt;
-	private int avgRating;
+	private String avgRating;
 	private int countRating;
 	
 	
@@ -92,11 +92,11 @@ public class StoreVO {
 		this.updatedAt = updatedAt;
 	}
 
-	public int getAvgRating() {
+	public String getAvgRating() {
 		return avgRating;
 	}
 
-	public void setAvgRating(int avgRating) {
+	public void setAvgRating(String avgRating) {
 		this.avgRating = avgRating;
 	}
 

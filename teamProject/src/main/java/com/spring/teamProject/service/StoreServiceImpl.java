@@ -31,15 +31,17 @@ public class StoreServiceImpl implements StoreService{
 		
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
 		List<ImageFileVO> imagelist = storeDAO.selectStoreImage(storeId);
-//		ReviewVO review = storeDAO.selectStoreReivew(storeId);
+		ReviewVO review = storeDAO.selectStoreReivew(storeId);
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
-//		ReservationVO reservation = storeDAO.selectStoreReservatioin(storeId);
 		List<ReviewVO> detailReview = storeDAO.selectDetailReview(storeId);
+//		ReservationVO reservation = storeDAO.selectStoreReservatioin(storeId);
+
 		
 		storeMap.put("store", store);
 		storeMap.put("imagelist", imagelist);
-//		storeMap.put("review", review);
+		storeMap.put("review", review);
 		storeMap.put("menu", menu);
+		storeMap.put("detailReview", detailReview);
 //		storeMap.put("reservation", reservation);
 		
 		return storeMap;

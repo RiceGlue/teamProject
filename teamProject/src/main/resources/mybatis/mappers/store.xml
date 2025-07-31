@@ -31,6 +31,8 @@
 		<result property="endHour" column="end_hour" />
 		<result property="endMin" column="end_min" />
 		<result property="openDay" column="open_day" />
+		<result property="avgRating" column="avgRating"/>
+		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
 	<resultMap id="imagelist" type="ImageFileVO">
@@ -67,6 +69,7 @@
 	<resultMap id="reviewlist" type="ReviewVO">
 		<result property="reviewId" column="review_id" />
 		<result property="memberId" column="member_id" />
+		<result property="writerId" column="writerId" />
 		<result property="storeId" column="store_id" />
 		<result property="reservationId" column="reservation_id" />
 		<result property="waitingId" column="waiting_id" />
@@ -88,7 +91,7 @@
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.main_image, s.store_type, s.region,
-	      	AVG(r.rating) AS avgRating, COUNT(r.review_id) AS countRating
+	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
 			WHERE s.region = #{region}
@@ -99,7 +102,12 @@
 	
 	<select id="selectStoreDetail" parameterType="long" resultMap="storeInfo" >
 		<![CDATA[
-			select * from store_info where store_id = #{storeId}
+			SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM store_info s
+			LEFT JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.store_id = #{storeId}
+			GROUP BY s.store_id;
+
 		]]>
 	</select>
 	
@@ -118,9 +126,18 @@
 		]]>
 	</select>
 	
+	<select id="selectStoreReivew" parameterType="long" resultMap="reviewlist" >
+		<![CDATA[
+			select r.review_id, m.login_id as writerId, r.reservation_id, r.waiting_id, r.rating, r.content, r.created_at, r.updated_at
+			from reviews r inner join members m on r.member_id=m.member_id
+			where store_id=#{storeId}
+			order by r.created_at desc
+		]]>
+	</select>
+	
 	<select id="selectDetailReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
-			select rating, count(rating) as countScoreRating from reviews where store_id=1 group by rating order by rating desc
+			select rating, count(rating) as countScoreRating from reviews where store_id=#{storeId} group by rating order by rating desc
 		]]>
 	</select>
 	

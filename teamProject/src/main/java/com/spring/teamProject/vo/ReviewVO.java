@@ -6,6 +6,7 @@ public class ReviewVO {
 
 	private long reviewId;
 	private long memberId;
+	private String writerId;
 	private long storeId;
 	private long reservationId;
 	private long waitingId;
@@ -30,6 +31,12 @@ public class ReviewVO {
 	}
 	public void setMemberId(long memberId) {
 		this.memberId = memberId;
+	}
+	public String getWriterId() {
+		return writerId;
+	}
+	public void setWriterId(String writerId) {
+		this.writerId = writerId;
 	}
 	public long getStoreId() {
 		return storeId;
