@@ -75,8 +75,8 @@
 		<result property="waitingId" column="waiting_id" />
 		<result property="rating" column="rating" />
 		<result property="content" column="content" />
-		<result property="createdAt" column="createdAt" />
-		<result property="updatedAt" column="updatedAt" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
 		<result property="avgRating" column="avgRating" />
 		<result property="countRating" column="countRating" />
 		<result property="countScoreRating" column="countScoreRating" />

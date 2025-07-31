@@ -37,7 +37,7 @@ public class StoreServiceImpl implements StoreService{
 		
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
 		List<ImageFileVO> imagelist = storeDAO.selectStoreImage(storeId);
-		ReviewVO review = storeDAO.selectStoreReview(storeId);
+		List<ReviewVO> review = storeDAO.selectStoreReview(storeId);
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
 		List<ReviewVO> detailReview = storeDAO.selectDetailReview(storeId);
 //		ReservationVO reservation = storeDAO.selectStoreReservatioin(storeId);

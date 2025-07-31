@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
@@ -180,11 +182,11 @@
 						</div>
 						<div class="detailReviewList">
 							<h4>리뷰 ${store.countRating}건</h4>
-							<c:forEach var="item" items="${storeMap.review }" >
+							<c:forEach var="review" items="${storeMap.review }" >
 								<div class="review_box">
 									<p>${review.rating }점<p>
 									<p>${review.writerId}<p>
-									<p>${review.comment}<p>
+									<p>${review.content}<p>
 								</div>
 							</c:forEach>
 						</div>
