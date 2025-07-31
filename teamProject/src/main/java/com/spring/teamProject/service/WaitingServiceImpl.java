@@ -141,11 +141,16 @@ public class WaitingServiceImpl implements WaitingService {
     @Override
     @Transactional
     public void updateWaitingStatus(Long waitingId, String status) {
+        System.out.println("SERVER_DEBUG: updateWaitingStatus 호출됨. waitingId=" + waitingId + ", status=" + status);
         waitingDAO.updateWaitingStatus(waitingId, status);
+        System.out.println("SERVER_DEBUG: DB 상태 업데이트 완료.");
 
         WaitingVO waiting = waitingDAO.getWaitingById(waitingId);
+        System.out.println("SERVER_DEBUG: DB에서 WaitingVO 조회 완료. 조회된 웨이팅: " + (waiting != null ? waiting.toString() : "null"));
+
 
         if (waiting != null) {
+            System.out.println("SERVER_DEBUG: Firebase 동기화 및 FCM 알림 발송 로직 시작.");
             final FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference ref = database.getReference("waitings")
                                             .child(String.valueOf(waiting.getStoreId()))
@@ -155,45 +160,63 @@ public class WaitingServiceImpl implements WaitingService {
             updates.put("status", status);
             updates.put("updatedAt", System.currentTimeMillis());
 
+            System.out.println("SERVER_DEBUG: Firebase 업데이트 데이터: " + updates);
             ref.updateChildren(updates, (error, ref1) -> {
                 if (error != null) {
-                    System.err.println("Firebase status update failed for waiting (ID: " + waitingId + "): " + error.getMessage());
+                    System.err.println("SERVER_ERROR: Firebase status update failed for waiting (ID: " + waitingId + "): " + error.getMessage());
                 } else {
-                    System.out.println("Firebase status updated successfully: " + waitingId + " to " + status);
+                    System.out.println("SERVER_DEBUG: Firebase status updated successfully: " + waitingId + " to " + status);
                 }
             });
 
+            // FCM 토큰 유효성 검사 및 알림 발송
             String fcmToken = waiting.getFcmToken();
+            System.out.println("SERVER_DEBUG: 웨이팅 ID " + waitingId + "에 대한 FCM 토큰: " + (fcmToken != null && !fcmToken.isEmpty() ? fcmToken : "없음 또는 비어있음"));
+
             if (fcmToken != null && !fcmToken.isEmpty()) { // FCM 토큰이 있는 경우에만 알림 시도
-                String title = "웨이팅 상태 변경 안내"; // 기본 타이틀
-                String body = "고객님의 웨이팅 상태가 '" + status + "'(으)로 변경되었습니다."; // 기본 본문
+                String title = "웨이팅 상태 변경 안내";
+                String body = "";
 
                 switch (status.toUpperCase()) {
                     case "CALLED":
                         title = "입장 안내";
                         body = "고객님의 순서가 되었습니다. 카운터로 와주세요. (대기번호: " + waiting.getWaitingId() + ")";
                         break;
-                    case "SEATED": // 'ENTERED' 대신 'SEATED' 사용했으므로 통일
+                    case "SEATED":
                         title = "입장 완료";
                         body = "고객님의 웨이팅이 '입장 완료' 처리되었습니다. 즐거운 시간 되세요!";
                         break;
-                    case "NO_SHOW": // 'NOSHOW'로 통일 (대시보드 버튼 이름과 일치)
+                    case "NO_SHOW":
                         title = "웨이팅 취소 안내";
                         body = "고객님의 웨이팅이 '노쇼' 처리되어 취소되었습니다.";
                         break;
                     case "CANCELLED":
                         title = "웨이팅 취소 완료";
-                        body = "고객님의 웨이팅이 성공적으로 취소되었습니다.";
+                        body = "고객님의 웨이팅이 매장관리자 의해 강제 취소되었습니다.";
                         break;
                     case "WAITING":
                         body = "고객님의 웨이팅 상태가 '대기중'으로 변경되었습니다. (대기번호: " + waiting.getWaitingId() + ")";
                         break;
-                    // "READY" 상태에 대한 case도 필요하면 추가하세요.
-                    // default 케이스는 위에서 기본 body를 설정했으므로 제거하거나 그대로 두면 됩니다.
+                    default:
+                        body = "고객님의 웨이팅 상태가 '" + status + "'(으)로 변경되었습니다.";
+                        break;
+                }
+                System.out.println("SERVER_DEBUG: FCM 알림 메시지 준비 - Title: " + title + ", Body: " + body + ", Target FCM Token: " + fcmToken);
+
+                // ⭐⭐⭐ 이 부분을 try-catch 블록으로 감쌉니다. ⭐⭐⭐
+                try {
+                    fcmService.sendNotification(fcmToken, title, body);
+                    System.out.println("SERVER_DEBUG: FCMService.sendNotification 호출 완료.");
+                } catch (Exception e) {
+                    System.err.println("SERVER_ERROR: FCM 알림 발송 중 예외 발생: " + e.getMessage());
+                    e.printStackTrace(); // 스택 트레이스도 출력하여 상세 오류 확인
                 }
 
-                fcmService.sendNotification(fcmToken, title, body);
+            } else {
+                System.out.println("SERVER_DEBUG: FCM 토큰이 없어 알림을 보내지 않았습니다.");
             }
+        } else {
+            System.out.println("SERVER_DEBUG: 웨이팅 ID " + waitingId + "에 해당하는 웨이팅 정보를 찾을 수 없습니다.");
         }
     }
 
