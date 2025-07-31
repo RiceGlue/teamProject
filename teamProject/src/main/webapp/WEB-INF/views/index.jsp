@@ -19,10 +19,27 @@
 	                </div>
 	            </div>
 	        </div>
-	        
+
+	    </div>
+	    <div class="row row-cols-2 row-cols-md-2 g-3">
+	        <div class="col">
+	            <div class="card text-center">
+	                <div class="card-body">
+	                    <h5 class="card-title"><a href="${contextPath}/reservation/customer/bookForm?storeId=1">매장 ID: 1 가게에 사용자 예약 등록 버튼</a></h5>
+	                </div>
+	            </div>
+	        </div>
+	        <div class="col">
+	            <div class="card text-center">
+	                <div class="card-body">
+	                    <h5 class="card-title"><a href="#">관리자 예약 세팅 개발 중</a></h5>
+	                </div>
+	            </div>
+	        </div>
+
 	    </div>
 	</div>
-	
+
 	<div class="container my-4">
 		<div class="col-12">
 			<h2>배너</h2>
