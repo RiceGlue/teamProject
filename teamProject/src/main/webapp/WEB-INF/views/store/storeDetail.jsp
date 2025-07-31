@@ -53,11 +53,11 @@
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-		.time-slot.selected { background-color: #ffc107; font-weight: bold; }	
+		.time-slot.selected { background-color: #ffc107; font-weight: bold; }
 	</style>
-	
+
 	<script>
-	
+
 	document.addEventListener('DOMContentLoaded', function () {
 		const timeSlots = document.querySelectorAll('.time-slot');
 		const hiddenInput = document.getElementById('selectedTimeSlot');
@@ -84,28 +84,28 @@
 			window.location.href = url;
 		});
 	});
-	
+
 		$(document).ready(function() { //tab 실행
-	
+
 			//When page loads...
 			$(".tab_content").hide(); //Hide all content
 			$("ul.tabs li:first").addClass("active").show(); //Activate first tab
 			$(".tab_content:first").show(); //Show first tab content
-	
+
 			//On Click Event
 			$("ul.tabs li").click(function() {
-	
+
 				$("ul.tabs li").removeClass("active"); //Remove any "active" class
 				$(this).addClass("active"); //Add "active" class to selected tab
 				$(".tab_content").hide(); //Hide all tab content
-	
+
 				var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
 				$(activeTab).fadeIn(); //Fade in the active ID content
 				return false;
 			});
-	
+
 		});
-		
+
 		document.addEventListener('DOMContentLoaded', function () {
 			const copyBtn = document.getElementById('copyUrlBtn');
 			copyBtn.addEventListener('click', function () {
@@ -117,7 +117,7 @@
 				});
 			});
 		});
-	
+
 		let count = 1; // 초기값
 
 		    function updateDisplay() { document.getElementById("guestCount").value = count;}
@@ -159,7 +159,7 @@
 				<span class="visually-hidden">Next</span>
 			</button>
 		</div>
-		
+
 		<h4 class="mt-3">${store.storeName}</h4>
 		<div class="rating">★ ${store.avgRating} 리뷰 ${store.countRating}개</div>
 		<div>
@@ -168,8 +168,8 @@
 		<div style="color: green;">오늘 ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin}</div>
 		<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">주소복사</button>
 
-		
-		
+
+
 		<div class="tab_container">
 			<div class="tab_container" id="container">
 				<ul class="tabs">
@@ -188,21 +188,20 @@
 											<input type="button" value="${reservation.timeSlot }">
 										</c:forEach>
 									</div>
-							
+
 								<input type="hidden" id="selectTimeSlot" value="" />
 								<button class="btn-reserve" id="reserveBtn" disabled>예약하기</button>
 							</form>
 						</div>
-						
+
 						<div class="button-group">
 							<a href="<c:url value='/reservation/customer/bookForm?storeId=${store.storeId}'/>">예약하기</a>
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
-						
 						<div class="back-link">
-						<a href="<c:url value='/store/storeList'/>">매장 목록으로 돌아가기</a>
+							<a href="<c:url value='/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
-						</div>
+					</div>
 					<div class="tab_content" id="tab2"> <!-- 메뉴 -->
 						<div class="menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}">
@@ -249,7 +248,7 @@
 					</div>
 				</div>
 			</div>
-		</div>	
+		</div>
 	</div>
 </body>
 </html>

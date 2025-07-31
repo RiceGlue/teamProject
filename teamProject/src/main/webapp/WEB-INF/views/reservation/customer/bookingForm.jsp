@@ -1,54 +1,68 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%-- 기존 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %> 는 주석 처리하거나 제거하세요. --%>
+<%-- src/main/webapp/WEB-INF/views/reservation/customer/bookingForm.jsp --%>
+<%-- <%@ page contentType="text/html;charset=UTF-8" language="java" %> --%>
+<%-- <%@ taglib prefix="c" uri="[http://java.sun.com/jsp/jstl/core](http://java.sun.com/jsp/jstl/core)" %> --%>
+<%-- <%@ taglib prefix="form" uri="[http://www.springframework.org/tags/form](http://www.springframework.org/tags/form)" %> --%>
 <html>
 <head>
     <title>예약하기 - ${store.storeName}</title>
+    <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        h2 { color: #333; }
-        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; margin: 20px auto; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="date"],
-        input[type="time"],
-        input[type="number"],
-        input[type="text"],
-        textarea { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        .container { max-width: 600px; margin-top: 50px; }
+        .form-group label { font-weight: bold; }
+        .error-message { color: red; font-size: 0.9em; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <h2>${store.storeName} 예약하기 (가데이터 화면)</h2>
+<div class="container">
+    <h2 class="mb-4">${store.storeName} 예약하기</h2>
+    <p class="text-muted">주소: ${store.address}</p>
+    <hr>
 
-    <%-- Spring form 태그 대신 일반 HTML form 태그 사용 --%>
-    <form action="/reservation/customer/book" method="post">
-        <input type="hidden" name="storeId" value="${storeId}" />
-        <input type="hidden" name="memberId" value="1" /> <%-- 예시 멤버 ID --%>
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger" role="alert">
+                ${errorMessage}
+        </div>
+    </c:if>
 
-        <label for="reservationDate">날짜:</label>
-        <input type="date" id="reservationDate" name="reservationDate" required="true" value="2025-07-29" /><br/> <%-- 가데이터 --%>
+    <form:form action="${contextPath}/reservation/customer/book" method="post" modelAttribute="reservationVO">
+        <form:hidden path="storeId" value="${storeId}" /> <%-- Hidden 필드로 storeId 전달 --%>
 
-        <label for="reservationTime">시간:</label>
-        <input type="time" id="reservationTime" name="reservationTime" required="true" value="14:30" /><br/> <%-- 가데이터 --%>
+        <div class="mb-3">
+            <label for="reservationTime" class="form-label">예약 날짜 및 시간:</label>
+            <%-- HTML5 datetime-local 타입 사용 --%>
+            <form:input type="datetime-local" class="form-control" id="reservationTime" path="reservationTime" required="true" />
+            <form:errors path="reservationTime" cssClass="error-message" />
+            <small class="form-text text-muted">원하는 날짜와 시간을 선택해주세요.</small>
+        </div>
 
-        <label for="guestCount">인원 수:</label>
-        <input type="number" id="guestCount" name="guestCount" min="1" required="true" value="2" /><br/> <%-- 가데이터 --%>
+        <div class="mb-3">
+            <label for="guestCount" class="form-label">예약 인원:</label>
+            <form:input type="number" class="form-control" id="guestCount" path="guestCount" min="1" max="10" required="true" />
+            <form:errors path="guestCount" cssClass="error-message" />
+            <small class="form-text text-muted">최소 1명, 최대 10명까지 예약 가능합니다.</small>
+        </div>
 
-        <label for="customerName">예약자 이름:</label>
-        <input type="text" id="customerName" name="customerName" required="true" value="홍길동" /><br/> <%-- 가데이터 --%>
+        <div class="mb-3">
+            <label for="tableId" class="form-label">테이블 선택:</label>
+            <%-- TODO: 실제로는 store_tables 테이블과 reservation_settings를 활용하여 동적으로 예약 가능한 테이블 목록을 드롭다운으로 제공해야 합니다. --%>
+            <%-- 현재는 임시로 입력 필드 제공 --%>
+            <form:input type="number" class="form-control" id="tableId" path="tableId" placeholder="예약할 테이블 ID (예: 1)" required="true"/>
+            <form:errors path="tableId" cssClass="error-message"/>
+            <small class="form-text text-muted">예약할 테이블의 ID를 입력해주세요. (예: 1, 2, 3)</small>
+        </div>
 
-        <label for="customerPhoneNumber">예약자 연락처:</label>
-        <input type="text" id="customerPhoneNumber" name="customerPhoneNumber" placeholder="010-1234-5678" required="true" value="010-1234-5678" /><br/> <%-- 가데이터 --%>
+        <div class="mb-3">
+            <label for="request" class="form-label">요청 사항 (선택 사항):</label>
+            <form:textarea class="form-control" id="request" path="request" rows="3" placeholder="특별히 요청할 사항이 있다면 입력해주세요."></form:textarea>
+        </div>
 
-        <label for="request">요청 사항 (선택 사항):</label>
-        <textarea id="request" name="request" rows="3" cols="30">창가 자리로 부탁드립니다.</textarea><br/> <%-- 가데이터 --%>
-
-        <button type="submit">예약 신청 (화면 이동만)</button>
-    </form>
-
-    <p><a href="/store/detail?storeId=${store.storeId}">매장 상세 보기로 돌아가기</a></p>
+        <button type="submit" class="btn btn-primary mt-3">예약 신청하기</button>
+        <a href="${contextPath}/store/storeDetail?storeId=${storeId}" class="btn btn-secondary mt-3">취소</a>
+    </form:form>
+</div>
 </body>
 </html>

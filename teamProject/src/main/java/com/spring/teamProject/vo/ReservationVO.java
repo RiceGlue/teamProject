@@ -11,6 +11,7 @@ public class ReservationVO {
     private int guestCount;
     private String status; // ENUM 값은 PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
     private String cancelledReason; // DDL상 DEFAULT NULL
+    private LocalDateTime createdAt; // ★ 이 필드를 추가해야 합니다! ★
 
     // DDL에 없는 필드지만, 예약 신청 시 필요할 수 있는 정보 (VO에 유지)
     private String customerName; // 예약자 이름 (DB 저장 시 memberId와 연결 또는 별도 필드 필요)
@@ -19,7 +20,7 @@ public class ReservationVO {
 
     public ReservationVO() {}
 
-    // Getter, Setter (Lombok @Data 사용 시 자동 생성)
+    // Getter, Setter
     public Long getReservationId() { return reservationId; }
     public void setReservationId(Long reservationId) { this.reservationId = reservationId; }
 
@@ -44,6 +45,10 @@ public class ReservationVO {
     public String getCancelledReason() { return cancelledReason; }
     public void setCancelledReason(String cancelledReason) { this.cancelledReason = cancelledReason; }
 
+    // ★ createdAt 필드에 대한 Getter, Setter 추가 ★
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     // DDL에 없는 필드들에 대한 Getter, Setter (유지)
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
@@ -65,6 +70,7 @@ public class ReservationVO {
                 ", guestCount=" + guestCount +
                 ", status='" + status + '\'' +
                 ", cancelledReason='" + cancelledReason + '\'' +
+                ", createdAt=" + createdAt + // toString에도 추가
                 ", customerName='" + customerName + '\'' +
                 ", customerPhoneNumber='" + customerPhoneNumber + '\'' +
                 ", request='" + request + '\'' +
