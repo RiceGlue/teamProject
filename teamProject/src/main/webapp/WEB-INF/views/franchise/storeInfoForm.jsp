@@ -1,8 +1,44 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<style>
+	ul.tabs {
+	  margin: 0;
+	  padding: 0;
+	  list-style: none;
+	  display: flex;
+	  border-bottom: 2px solid #ccc;
+	}
+	
+	ul.tabs li {
+	  margin: 0;
+	  padding: 12px 24px;
+	  background: #f4f4f4;
+	  cursor: pointer;
+	  border-top-left-radius: 10px;
+	  border-top-right-radius: 10px;
+	  margin-right: 5px;
+	  transition: background 0.3s;
+	}
+	
+	ul.tabs li:hover {
+	  background: #ddd;
+	}
+	
+	ul.tabs li.active {
+	  background: #fff;
+	  font-weight: bold;
+	  border: 2px solid #ccc;
+	  border-bottom: none;
+	  border-radius: 10px 10px 0 0;
+	}
+	
+	.tab_content {
+	  border: 2px solid #ccc;
+	  border-top: none;
+	  padding: 20px;
+	  background: #fff;
+	}
+</style>
 <script>
-	
-	
 	$(document).ready(function() { //tab 실행
 
 		//When page loads...

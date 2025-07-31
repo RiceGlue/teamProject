@@ -64,6 +64,21 @@
 		<result property="isActive" column="is_active"/>
 	</resultMap>
 	
+	<resultMap id="reviewlist" type="ReviewVO">
+		<result property="reviewId" column="review_id" />
+		<result property="memberId" column="member_id" />
+		<result property="storeId" column="store_id" />
+		<result property="reservationId" column="reservation_id" />
+		<result property="waitingId" column="waiting_id" />
+		<result property="rating" column="rating" />
+		<result property="content" column="content" />
+		<result property="createdAt" column="createdAt" />
+		<result property="updatedAt" column="updatedAt" />
+		<result property="avgRating" column="avgRating" />
+		<result property="countRating" column="countRating" />
+		<result property="countScoreRating" column="countScoreRating" />
+	</resultMap>
+	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
@@ -100,6 +115,12 @@
 		<![CDATA[
 			select menu_name, price, description, image_name from menu
 			where store_id=#{storeId} order by display_no asc
+		]]>
+	</select>
+	
+	<select id="selectDetailReview" parameterType="long" resultMap="reviewlist" >
+		<![CDATA[
+			select rating, count(rating) as countScoreRating from reviews where store_id=1 group by rating order by rating desc
 		]]>
 	</select>
 	

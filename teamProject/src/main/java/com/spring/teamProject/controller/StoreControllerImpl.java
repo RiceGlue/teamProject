@@ -34,7 +34,7 @@ public class StoreControllerImpl implements StoreController {
 		List<StoreVO> storelist = storeService.storeRegionList(region);
 		
 		for(int i=0;i<storelist.size();i++) {
-			System.out.println(storelist.get(i).getStoreName());
+			System.out.println(storelist.get(i).getAddress());
 		}
 		
 		ModelAndView mav = ViewUtil.layout(viewName);
