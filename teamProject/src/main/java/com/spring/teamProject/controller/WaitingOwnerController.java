@@ -48,10 +48,13 @@ public class WaitingOwnerController {
     }
 
     // 웨이팅 설정 목록 페이지 (JSP 반환)
+    // 매장별로 단 하나의 설정만 관리한다면, List가 아닌 단일 WaitingSettingVO를 반환할 수 있습니다.
+    // 현재는 기존 getAllSettingsByStoreId를 사용하므로 목록 형태 유지.
+    // 만약 하나의 매장에 하나의 설정만 존재한다면, 이 쿼리는 1개 또는 0개의 결과를 반환할 것입니다.
     @GetMapping("/settings")
     public String listSettings(@RequestParam("storeId") Long storeId, Model model) {
         List<WaitingSettingVO> settings = settingService.getAllSettingsByStoreId(storeId);
-        model.addAttribute("settings", settings);
+        model.addAttribute("settings", settings); // 단일 설정이어도 List로 받아서 JSTL에서 처리 가능
         model.addAttribute("storeId", storeId);
         model.addAttribute("store", getDummyStoreInfo(storeId));
         return "waiting/owner/settingList";
@@ -62,6 +65,7 @@ public class WaitingOwnerController {
     public String showAddSettingForm(@RequestParam("storeId") Long storeId, Model model) {
         WaitingSettingVO waitingSettingVO = new WaitingSettingVO();
         waitingSettingVO.setStoreId(storeId);
+        // dayOfWeek 필드는 VO에서 제거되었으므로, 여기에서 더 이상 설정할 필요 없음
 
         model.addAttribute("waitingSettingVO", waitingSettingVO);
         model.addAttribute("storeId", storeId);
@@ -74,10 +78,12 @@ public class WaitingOwnerController {
     public String addSetting(@ModelAttribute WaitingSettingVO settingVO) {
         logger.info("웨이팅 설정 추가 시도: {}", settingVO);
         try {
+            // dayOfWeek 필드는 VO에서 제거되었으므로, 관련 로직 필요 없음
             settingService.insertSetting(settingVO);
             logger.info("웨이팅 설정 성공적으로 추가됨: {}", settingVO);
         } catch (Exception e) {
             logger.error("웨이팅 설정 추가 실패: {}", e.getMessage(), e);
+            // 에러 시, storeId를 포함하여 리다이렉트 (필요하다면 에러 메시지도 추가)
             return "redirect:/waiting/owner/settings/addForm?storeId=" + settingVO.getStoreId() + "&error=true";
         }
 
@@ -100,6 +106,7 @@ public class WaitingOwnerController {
     // 웨이팅 설정 수정 처리 (폼 제출)
     @PostMapping("/settings/edit")
     public String editSetting(@ModelAttribute WaitingSettingVO settingVO) {
+        // dayOfWeek 필드는 VO에서 제거되었으므로, 관련 로직 필요 없음
         settingService.updateSetting(settingVO);
         return "redirect:/waiting/owner/settings?storeId=" + settingVO.getStoreId();
     }
@@ -113,8 +120,7 @@ public class WaitingOwnerController {
         return "redirect:/waiting/owner/settings?storeId=" + storeId;
     }
 
-    // --- 실시간 웨이팅 관리 관련 메소드 (향후 추가될 예정) ---
-    // 이 부분은 time_slot 제거 후 실시간 대기열을 관리하기 위해 필요할 것입니다.
+    // --- 실시간 웨이팅 관리 관련 메소드 ---
 
     // 실시간 웨이팅 현황 페이지 (고객 대기열)
     @GetMapping("/currentWaiting")

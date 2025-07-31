@@ -3,59 +3,43 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.spring.teamProject.dao.WaitingDAO">
-
     <resultMap id="WaitingResultMap" type="com.spring.teamProject.vo.WaitingVO">
         <id property="waitingId" column="waiting_id"/>
         <result property="memberId" column="member_id"/>
         <result property="storeId" column="store_id"/>
         <result property="guestCount" column="guest_count"/>
         <result property="status" column="status"/>
+        <result property="fcmToken" column="fcm_token"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
-        <result property="fcmToken" column="fcm_token"/> <!-- 추가 -->
     </resultMap>
 
-    <select id="getAllWaitings" resultMap="WaitingResultMap">
-        SELECT * FROM waitings
-    </select>
+    <insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" useGeneratedKeys="true" keyProperty="waitingId">
+        INSERT INTO waitings (member_id, store_id, guest_count, status, fcm_token, created_at, updated_at)
+        VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, #{fcmToken}, NOW(), NOW())
+    </insert>
 
-    <select id="getWaitingById" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waitings WHERE waiting_id = #{waitingId}
-    </select>
-
-    <select id="getWaitingsByStoreId" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waitings WHERE store_id = #{storeId}
-    </select>
-
-    <select id="getWaitingsByMemberId" parameterType="long" resultMap="WaitingResultMap">
-        SELECT * FROM waitings WHERE member_id = #{memberId}
-    </select>
-
-	<insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" 
-        useGeneratedKeys="true" keyProperty="waitingId">
-	    INSERT INTO waitings (member_id, store_id, guest_count, status, fcm_token, created_at, updated_at)
-	    VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, #{fcmToken}, NOW(), NOW())
-	</insert>
-
-<!--    <insert id="insertWaiting" parameterType="com.spring.teamProject.vo.WaitingVO" -->
-<!--            useGeneratedKeys="true" keyProperty="waitingId">-->
-<!--        INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)-->
-<!--        VALUES (#{memberId}, #{storeId}, #{guestCount}, #{status}, NOW(), NOW())-->
-<!--    </insert>-->
-
-<!--	<insert id="insertWaiting" useGeneratedKeys="true" keyProperty="waitingId" keyColumn="waiting_id">-->
-<!--	    INSERT INTO waiting (member_id, store_id, guest_count, status, created_at, updated_at)-->
-<!--	    VALUES (#{memberId}, #{storeId}, #{guestCount}, 'WAITING', NOW(), NOW())-->
-<!--	</insert>-->
-	
-    <update id="updateWaitingStatus" parameterType="map">
-        UPDATE waitings 
-        SET status = #{status}, updated_at = NOW() 
-        WHERE waiting_id = #{waitingId}
+    <update id="updateWaitingStatus">
+        UPDATE waitings SET status = #{status}, updated_at = NOW() WHERE waiting_id = #{waitingId}
     </update>
 
     <delete id="deleteWaiting" parameterType="long">
         DELETE FROM waitings WHERE waiting_id = #{waitingId}
     </delete>
+
+    <select id="getWaitingById" parameterType="long" resultMap="WaitingResultMap">
+        SELECT * FROM waitings WHERE waiting_id = #{waitingId}
+    </select>
+
+    <select id="getAllWaitings" resultMap="WaitingResultMap">
+        SELECT * FROM waitings ORDER BY created_at DESC
+    </select>
+
+    <select id="countCurrentWaitings" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM waitings
+        WHERE store_id = #{storeId}
+        AND (status = 'WAITING' OR status = 'CALLED')
+    </select>
 
 </mapper>
