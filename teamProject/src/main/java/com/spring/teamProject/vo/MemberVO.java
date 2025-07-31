@@ -24,9 +24,14 @@ public class MemberVO {
 	private String email;
 	private String role;
 	
-	// (신규) 프로필 이미지, 매너온도 필드 추가
+	// 프로필 이미지, 매너온도 필드 추가
 	private String profileImageUrl;
 	private double mannerTemperature;
+	
+    // (신규) 알림 수신 동의 필드 추가
+    private boolean agreeEmail;
+    private boolean agreeSms;
+    private boolean agreeKakao;
 	
 	// DB의 DATETIME 타입은 java.util.Date로 매핑
 	private Date createdAt;
@@ -119,6 +124,24 @@ public class MemberVO {
     }
     public void setMannerTemperature(double mannerTemperature) {
         this.mannerTemperature = mannerTemperature;
+    }
+    public boolean isAgreeEmail() {
+        return agreeEmail;
+    }
+    public void setAgreeEmail(boolean agreeEmail) {
+        this.agreeEmail = agreeEmail;
+    }
+    public boolean isAgreeSms() {
+        return agreeSms;
+    }
+    public void setAgreeSms(boolean agreeSms) {
+        this.agreeSms = agreeSms;
+    }
+    public boolean isAgreeKakao() {
+        return agreeKakao;
+    }
+    public void setAgreeKakao(boolean agreeKakao) {
+        this.agreeKakao = agreeKakao;
     }
 	public Date getCreatedAt() {
 		return createdAt;

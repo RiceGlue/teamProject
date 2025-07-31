@@ -83,6 +83,27 @@
             <label for="email" class="form-label">이메일</label>
             <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
         </div>
+
+        <%-- (수정) 알림 수신 동의 UI 개선 --%>
+        <div class="mb-3">
+            <label class="form-label">알림 수신 동의 (선택)</label>
+            <div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="agreeSms" value="true" id="agreeSms">
+                    <label class="form-check-label" for="agreeSms">SMS</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="agreeEmail" value="true" id="agreeEmail">
+                    <label class="form-check-label" for="agreeEmail">이메일</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="agreeKakao" value="true" id="agreeKakao">
+                    <label class="form-check-label" for="agreeKakao">카카오톡</label>
+                </div>
+            </div>
+            <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
+        </div>
+
         <div class="d-grid">
             <button type="submit" class="btn btn-primary">가입하기</button>
         </div>

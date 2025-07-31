@@ -21,6 +21,10 @@
 		<result property="role" column="role"/>
 		<result property="profileImageUrl" column="profile_image_url"/>
 		<result property="mannerTemperature" column="manner_temperature"/>
+        <!-- (신규) 알림 동의 컬럼 매핑 추가 -->
+        <result property="agreeEmail" column="agree_email"/>
+        <result property="agreeSms" column="agree_sms"/>
+        <result property="agreeKakao" column="agree_kakao"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
@@ -35,15 +39,6 @@
 		SELECT * FROM members WHERE email = #{email}
 	</select>
 	
-	<!-- 소셜 로그인 사용자 정보 삽입 -->
-	<insert id="insertSocialMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		INSERT INTO members (
-			social_provider, social_id, member_name, birth, sex, country_code, phone, email, role
-		) VALUES (
-			#{socialProvider}, #{socialId}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role}
-		)
-	</insert>
-	
 	<!-- loginId로 회원 정보 조회 (스프링 시큐리티용) -->
 	<select id="findByLoginId" parameterType="String" resultMap="memberResultMap">
 		<![CDATA[
@@ -51,16 +46,26 @@
 		]]>
 	</select>
 	
-	<!-- 회원가입 (insertMember 메소드와 연결) -->
-	<!-- (수정) birth 파라미터에 jdbcType=DATE를 명시하여 날짜 형식 오류를 해결합니다. -->
+	<!-- (수정) insertMember 쿼리에 알림 동의 컬럼 추가 -->
 	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		<![CDATA[
-			INSERT INTO members (
-				login_id, login_pw, member_name, birth, sex, phone, email, role
-			) VALUES (
-				#{loginId}, #{loginPw}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{phone}, #{email}, #{role}
-			)
-		]]>
+		INSERT INTO members (
+			login_id, login_pw, member_name, birth, sex, country_code, phone, email, role,
+			agree_email, agree_sms, agree_kakao
+		) VALUES (
+			#{loginId}, #{loginPw}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role},
+			#{agreeEmail}, #{agreeSms}, #{agreeKakao}
+		)
+	</insert>
+	
+	<!-- (수정) insertSocialMember 쿼리에 알림 동의 컬럼 추가 -->
+	<insert id="insertSocialMember" parameterType="com.spring.teamProject.vo.MemberVO">
+		INSERT INTO members (
+			social_provider, social_id, member_name, birth, sex, country_code, phone, email, role,
+			agree_email, agree_sms, agree_kakao
+		) VALUES (
+			#{socialProvider}, #{socialId}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role},
+			#{agreeEmail}, #{agreeSms}, #{agreeKakao}
+		)
 	</insert>
 	
 	<!-- 로그인 (login 메소드와 연결) - 시큐리티 사용 시 직접 호출되지 않음 -->
@@ -70,7 +75,8 @@
 			WHERE login_id = #{loginId} AND login_pw = #{loginPw}
 		]]>
 	</select>
-	<!-- (수정) 프로필 수정을 위한 update 쿼리 개선 -->
+	
+	<!-- (수정) updateMember 쿼리에 알림 동의 컬럼 추가 -->
 	<update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		UPDATE members
 		<set>
@@ -80,11 +86,14 @@
 			<if test="memberName != null and memberName != ''">
 				member_name = #{memberName},
 			</if>
-			<if test="profileImageUrl != null and profileImageUrl != ''">
+			<if test="profileImageUrl != null">
 				profile_image_url = #{profileImageUrl},
 			</if>
 			phone = #{phone},
-			email = #{email}
+			email = #{email},
+			agree_email = #{agreeEmail},
+			agree_sms = #{agreeSms},
+			agree_kakao = #{agreeKakao}
 		</set>
 		WHERE 
 			member_id = #{memberId}
