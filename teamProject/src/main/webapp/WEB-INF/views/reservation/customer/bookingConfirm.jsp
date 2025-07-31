@@ -17,7 +17,7 @@
         <h2>${store.storeName} 예약 완료!</h2>
         <p>${message}</p>
         <p>예약해주셔서 감사합니다. 빠른 시일 내에 매장에서 확인 연락을 드릴 예정입니다.</p>
-        <p><a href="/store/storeDetail.do?storeId=${storeId}">매장 상세 보기로 돌아가기</a></p>
+        <p><a href="/store/storeDetail?storeId=${storeId}">매장 상세 보기로 돌아가기</a></p>
     </div>
 </body>
 </html>

@@ -7,6 +7,7 @@ import com.spring.teamProject.vo.StoreVO;
 
 public interface StoreService {
 
-	public List<StoreVO> storeRegionList(String region) throws Exception;
+	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception;
+	public List<StoreVO> selectStoreByType(String keyword) throws Exception;
 	public Map storeDetail(long StoreId) throws Exception;
 }

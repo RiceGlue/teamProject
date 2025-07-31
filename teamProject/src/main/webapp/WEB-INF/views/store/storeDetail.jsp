@@ -141,7 +141,7 @@
 						</div>
 													
 						<div class="back-link">
-							<a href="<c:url value='/store/storeList.do'/>">매장 목록으로 돌아가기</a>
+							<a href="<c:url value='/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
 						
 					</div>
