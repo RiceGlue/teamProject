@@ -6,7 +6,6 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
-<%-- <c:set var="reservation" value="${storeMap.reservation}" /> --%>
 
 
 <html>
@@ -14,6 +13,7 @@
 	<title>${store.storeName}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 	<style>
+	 	input[type="text"] { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
 		.rating { font-size: 16px; margin-bottom: 10px; }
@@ -52,10 +52,39 @@
 		.review_text {font-size:14px;color:#333;}
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}	
+		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
+		.time-slot.selected { background-color: #ffc107; font-weight: bold; }	
 	</style>
 	
 	<script>
+	
+	document.addEventListener('DOMContentLoaded', function () {
+		const timeSlots = document.querySelectorAll('.time-slot');
+		const hiddenInput = document.getElementById('selectedTimeSlot');
+		const reserveBtn = document.getElementById('reserveBtn');
+		const storeId = '${store.storeId}';
+		const contextPath = '${contextPath}';
+
+		timeSlots.forEach(slot => {
+			slot.addEventListener('click', function () {
+				timeSlots.forEach(s => s.classList.remove('selected'));
+			this.classList.add('selected');
+			hiddenInput.value = this.dataset.time;
+			reserveBtn.disabled = false;
+			});
+		});
+
+		reserveBtn.addEventListener('click', function () {
+			const time = hiddenInput.value;
+			if (!time) {
+				alert("예약 시간을 선택하세요.");
+				return;
+			}
+			const url = contextPath + '/reservation/customer/bookingForm?storeId=' + storeId + '&time=' + encodeURIComponent(time);
+			window.location.href = url;
+		});
+	});
+	
 		$(document).ready(function() { //tab 실행
 	
 			//When page loads...
@@ -76,6 +105,34 @@
 			});
 	
 		});
+		
+		document.addEventListener('DOMContentLoaded', function () {
+			const copyBtn = document.getElementById('copyUrlBtn');
+			copyBtn.addEventListener('click', function () {
+				const url = window.location.href;
+				navigator.clipboard.writeText(url).then(function () {
+					alert("주소가 복사되었습니다.");
+				}).catch(function (err) {
+					alert("복사에 실패했습니다: " + err);
+				});
+			});
+		});
+	
+		let count = 1; // 초기값
+
+		    function updateDisplay() { document.getElementById("guestCount").value = count;}
+
+		    function addGuest() {
+		      count++;
+		      updateDisplay();
+		    }
+
+		    function minusGuest() {
+		      if (count > 1) {
+		        count--;
+		        updateDisplay();
+		      }
+		    }
 	</script>
 </head>
 
@@ -109,44 +166,43 @@
 			<p><img src="${contextPath}/resources/img/pin.png" width="16" height="16" alt="위치"> ${store.address} <a href="#" style="color: #008cff; font-size: 12px;">위치</a></p>
 		</div>
 		<div style="color: green;">오늘 ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin}</div>
-		<button class="btn btn-outline-secondary btn-sm mt-2">전화</button>
+		<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">주소복사</button>
+
+		
+		
 		<div class="tab_container">
 			<div class="tab_container" id="container">
 				<ul class="tabs">
 					<li><a href="#tab1">홈</a></li>
 					<li><a href="#tab2">메뉴</a></li>
 					<li><a href="#tab3">리뷰</a></li>
-					<li><a href="#tab4">상세 정보</a></li>
 				</ul>
 				<div class="tab_container">
-					<div class="tab_content" id="tab1"> <!-- 홈 -->
+					<div class="tab_content" id="tab1">
 						<div class="reservation-box">
 							<h5 class="mt-4">예약</h5>
-							<div>오늘 (${reservation.day}) · 2명</div>
-							<div class="mt-3">
-								<span class="time-slot">오전 11:00</span>
-								<span class="time-slot">오전 11:30</span>
-								<span class="time-slot">오전 12:00</span>
-								<span class="time-slot">오전 12:30</span>
-								<span class="time-slot">오전 13:00</span>
-								<span class="time-slot">오후 13:30</span>
-								<span class="time-slot">오후 14:00</span>
-							</div>
-							<button class="btn-reserve" disabled>예약하기</button>
+								<form action="${contentPath }/reservation/customer/bookForm" id="reservation" method="post">
+									<div class="mt-3" id="timeSlotContainer">
+										<button type="button" onclick="minusGuest()">-</button><input type="text" id="guestCount" value="1" readonly><button type="button" onclick="addGuest()">+</button>
+										<c:forEach var="reservation" items="${storeMap.reservation}">
+											<input type="button" value="${reservation.timeSlot }">
+										</c:forEach>
+									</div>
+							
+								<input type="hidden" id="selectTimeSlot" value="" />
+								<button class="btn-reserve" id="reserveBtn" disabled>예약하기</button>
+							</form>
 						</div>
 						
 						<div class="button-group">
-							<%-- 예약 페이지로 이동하는 링크. storeId를 함께 넘깁니다. --%>
 							<a href="<c:url value='/reservation/customer/bookForm?storeId=${store.storeId}'/>">예약하기</a>
-							<%-- 점주용 관리 페이지로 이동하는 링크. storeId를 함께 넘깁니다. --%>
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
-													
-						<div class="back-link">
-							<a href="<c:url value='/store/storeList'/>">매장 목록으로 돌아가기</a>
-						</div>
 						
-					</div>
+						<div class="back-link">
+						<a href="<c:url value='/store/storeList'/>">매장 목록으로 돌아가기</a>
+						</div>
+						</div>
 					<div class="tab_content" id="tab2"> <!-- 메뉴 -->
 						<div class="menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}">
@@ -190,8 +246,6 @@
 								</div>
 							</c:forEach>
 						</div>
-					</div>
-					<div class="tab_content" id="tab4"> <!-- 상세 정보 -->
 					</div>
 				</div>
 			</div>
