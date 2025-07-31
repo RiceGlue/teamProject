@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 public class WaitingSettingVO {
 	private Long settingId;
     private Long storeId;
-    private int dayOfWeek; // 요일 정보는 유지
-    // private LocalTime timeSlot; // <-- 이 필드를 제거합니다.
+    // private int dayOfWeek; // 불필요
+    // private LocalTime timeSlot; // 불필요
     private int maxTeams;
     private boolean active;
 
@@ -21,8 +21,8 @@ public class WaitingSettingVO {
     public Long getStoreId() { return storeId; }
     public void setStoreId(Long storeId) { this.storeId = storeId; }
 
-    public int getDayOfWeek() { return dayOfWeek; }
-    public void setDayOfWeek(int dayOfWeek) { this.dayOfWeek = dayOfWeek; }
+    // public int getDayOfWeek() { return dayOfWeek; }
+    // public void setDayOfWeek(int dayOfWeek) { this.dayOfWeek = dayOfWeek; }
 
     // public LocalTime getTimeSlot() { return timeSlot; } // <-- 이 게터도 제거합니다.
     // public void setTimeSlot(LocalTime timeSlot) { this.timeSlot = timeSlot; } // <-- 이 세터도 제거합니다.
@@ -44,8 +44,8 @@ public class WaitingSettingVO {
         return "WaitingSettingVO{" +
                 "settingId=" + settingId +
                 ", storeId=" + storeId +
-                ", dayOfWeek=" + dayOfWeek +
-                // ", timeSlot=" + timeSlot + // <-- 이 부분도 제거합니다.
+                // ", dayOfWeek=" + dayOfWeek +
+                // ", timeSlot=" + timeSlot +
                 ", maxTeams=" + maxTeams +
                 ", active=" + active +
                 ", createdAt=" + createdAt +

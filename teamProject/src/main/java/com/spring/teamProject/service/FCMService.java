@@ -8,31 +8,26 @@ import com.google.firebase.messaging.Notification;
 
 @Service
 public class FCMService {
-	
-	
-	public void sendNotification(String token, String title, String body) {
-        // FCM 토큰이 없으면 알림을 보내지 않습니다.
+
+    // 이 메소드가 서버에서 전달받은 title과 body를 그대로 사용하는지 확인
+    public void sendNotification(String token, String title, String body) {
         if (token == null || token.isEmpty()) {
-            System.out.println("FCM Token is null. Skipping notification.");
+            System.err.println("FCM token is null or empty. Cannot send notification.");
             return;
         }
-
-        Notification notification = Notification.builder()
-            .setTitle(title)
-            .setBody(body)
-            .build();
-
         Message message = Message.builder()
-            .setNotification(notification)
-            .setToken(token) // 알림을 받을 대상 디바이스의 토큰 설정
-            .build();
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body) // <-- 이 body가 이미 완성된 문자열이어야 합니다.
+                        .build())
+                .setToken(token)
+                .build();
 
         try {
-            // 메시지 전송
             String response = FirebaseMessaging.getInstance().send(message);
             System.out.println("Successfully sent message: " + response);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Failed to send message: " + e.getMessage());
         }
     }
 }

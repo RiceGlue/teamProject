@@ -1,21 +1,18 @@
 package com.spring.teamProject.dao;
 
 import java.util.List;
-
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
 import com.spring.teamProject.vo.WaitingVO;
 
-@Mapper
 public interface WaitingDAO {
-
-	List<WaitingVO> getAllWaitings();
-    WaitingVO getWaitingById(Long waitingId);
-    //void insertWaiting(WaitingVO waiting);
+    int insertWaiting(WaitingVO waiting);
     void updateWaitingStatus(@Param("waitingId") Long waitingId, @Param("status") String status);
     void deleteWaiting(Long waitingId);
-	
-    int insertWaiting(WaitingVO waitingVO);
-    
+    WaitingVO getWaitingById(Long waitingId);
+    List<WaitingVO> getAllWaitings();
+    // TODO: 매장별로 현재 대기중인 모든 웨이팅 목록을 가져오는 메소드도 필요할 수 있음
+    // List<WaitingVO> getCurrentWaitings(Long storeId);
+
+    // 새로 추가된 메소드: 현재 대기 중인 팀 수 카운트
+    int countCurrentWaitings(@Param("storeId") Long storeId);
 }

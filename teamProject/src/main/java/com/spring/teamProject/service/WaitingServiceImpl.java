@@ -1,81 +1,104 @@
 package com.spring.teamProject.service;
 
-import java.time.LocalDateTime; // LocalDateTime 임포트 추가
-import java.time.ZoneId;       // ZoneId 임포트 추가
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 트랜잭션 관리를 위해 추가
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.spring.teamProject.dao.WaitingDAO;
 import com.spring.teamProject.vo.WaitingVO;
+import com.spring.teamProject.vo.WaitingSettingVO; // WaitingSettingVO 임포트 추가
 
 @Service
 public class WaitingServiceImpl implements WaitingService {
 
-	@Autowired
+    @Autowired
     private WaitingDAO waitingDAO;
 
-	@Autowired
-    private FCMService fcmService; // FCM 서비스 주입
+    @Autowired
+    private FCMService fcmService;
 
-	// 인터페이스에 추가하신 MVC 폼 전송용 메서드 구현
+    @Autowired
+    private WaitingSettingService waitingSettingService; // WaitingSettingService 주입 추가
+
     @Override
-    @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
+    @Transactional
     public int registerWaiting(WaitingVO waitingVO) {
-        System.out.println("DEBUG: registerWaiting 메서드 시작"); // 1번
-        // 사실상 insertWaiting과 동일한 로직을 수행합니다.
+        System.out.println("DEBUG: registerWaiting 메서드 시작");
         return insertAndSyncToFirebase(waitingVO);
     }
 
-    // 핵심 등록 메서드
     @Override
-    @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
+    @Transactional
     public void insertWaiting(WaitingVO waiting) {
-        System.out.println("DEBUG: insertWaiting 메서드 시작"); // 2번
+        System.out.println("DEBUG: insertWaiting 메서드 시작");
         insertAndSyncToFirebase(waiting);
     }
 
     // 웨이팅 등록 및 Firebase 동기화 처리
     private int insertAndSyncToFirebase(WaitingVO waitingVO) {
-        System.out.println("DEBUG: insertAndSyncToFirebase 메서드 시작"); // 3번
-        System.out.println("DEBUG: 초기 waitingVO 상태: " + waitingVO.getStatus()); // 4번
+        System.out.println("DEBUG: insertAndSyncToFirebase 메서드 시작");
+        System.out.println("DEBUG: 초기 waitingVO 상태: " + waitingVO.getStatus());
+
+        // **1. 웨이팅 설정 및 활성화/비활성화, 최대 팀 수 제한 로직 추가 시작 **
+        Long storeId = waitingVO.getStoreId();
+        WaitingSettingVO setting = waitingSettingService.getSetting(storeId); // 해당 매장의 웨이팅 설정 가져오기
+
+        if (setting == null) {
+            System.err.println("ERROR: 매장 ID " + storeId + "에 대한 웨이팅 설정이 존재하지 않습니다.");
+            // 설정이 없으면 웨이팅 불가. 적절한 예외를 던지거나 특정 에러 코드 반환
+            // 여기서는 0을 반환하여 실패를 알리고, 호출하는 컨트롤러에서 이 값을 확인하여 사용자에게 메시지 전달
+            throw new IllegalStateException("웨이팅 설정을 먼저 등록해야 합니다."); // RuntimeException 발생
+        }
+
+        if (!setting.isActive()) {
+            System.err.println("INFO: 매장 ID " + storeId + "의 웨이팅이 현재 비활성화되어 있습니다.");
+            throw new IllegalStateException("현재 웨이팅 접수 시간이 아닙니다. 잠시 후 다시 시도해주세요."); // RuntimeException 발생
+        }
+
+        // 현재 대기 중인 팀 수 조회
+        // 이 메소드는 WaitingDAO와 WaitingService 인터페이스에 추가해야 합니다.
+        int currentWaitingCount = waitingDAO.countCurrentWaitings(storeId); // DAO 호출
+
+        if (currentWaitingCount >= setting.getMaxTeams()) {
+            System.err.println("INFO: 매장 ID " + storeId + "의 웨이팅이 최대 팀 수(" + setting.getMaxTeams() + ")에 도달했습니다.");
+            throw new IllegalStateException("현재 웨이팅 팀 수가 가득 찼습니다. 잠시 후 다시 시도해주세요."); // RuntimeException 발생
+        }
+        // ** 웨이팅 설정 및 활성화/비활성화, 최대 팀 수 제한 로직 추가 끝 **
 
         // status가 설정되지 않았으면 기본값 "WAITING" 설정
         if (waitingVO.getStatus() == null || waitingVO.getStatus().isEmpty()) {
             waitingVO.setStatus("WAITING");
         }
-        System.out.println("DEBUG: 최종 waitingVO 상태 설정 후: " + waitingVO.getStatus()); // 5번
+        System.out.println("DEBUG: 최종 waitingVO 상태 설정 후: " + waitingVO.getStatus());
 
         // 1. MyBatis를 통해 MySQL DB에 웨이팅 정보를 저장합니다.
-        // insert 성공 시 waitingVO 객체에 auto-increment된 waitingId가 자동으로 채워집니다.
-        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 전"); // 6번
+        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 전");
         int result = waitingDAO.insertWaiting(waitingVO);
-        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 후. 결과(result): " + result); // 7번
-        System.out.println("DEBUG: MySQL DB 저장 후 waitingVO.waitingId: " + waitingVO.getWaitingId()); // 8번 (★★ 가장 중요 ★★)
+        System.out.println("DEBUG: MySQL DAO insertWaiting 호출 후. 결과(result): " + result);
+        System.out.println("DEBUG: MySQL DB 저장 후 waitingVO.waitingId: " + waitingVO.getWaitingId());
 
         // 2. Firebase Realtime Database에 실시간으로 동기화합니다.
-        System.out.println("DEBUG: Firebase 동기화 조건 확인: result > 0 && waitingVO.getWaitingId() != null"); // 9번
+        System.out.println("DEBUG: Firebase 동기화 조건 확인: result > 0 && waitingVO.getWaitingId() != null");
         if (result > 0 && waitingVO.getWaitingId() != null) {
-            System.out.println("DEBUG: Firebase 동기화 조건 만족! Firebase 연동 로직 시작."); // 10번
+            System.out.println("DEBUG: Firebase 동기화 조건 만족! Firebase 연동 로직 시작.");
 
-            // FirebaseDatabase.getInstance() 호출 전에 FirebaseAdmin SDK가 초기화되었는지 확인
             try {
                 final FirebaseDatabase database = FirebaseDatabase.getInstance();
-                System.out.println("DEBUG: FirebaseDatabase.getInstance() 성공."); // 11번
+                System.out.println("DEBUG: FirebaseDatabase.getInstance() 성공.");
 
-                // 데이터 구조: /waitings/{storeId}/{waitingId}
                 DatabaseReference ref = database.getReference("waitings")
                                                 .child(String.valueOf(waitingVO.getStoreId()))
                                                 .child(String.valueOf(waitingVO.getWaitingId()));
-                System.out.println("DEBUG: Firebase Reference 경로: " + ref.toString()); // 12번
+                System.out.println("DEBUG: Firebase Reference 경로: " + ref.toString());
 
-                // WaitingVO 객체의 필드를 Map으로 변환하여 Firebase에 보낼 데이터 구성
                 Map<String, Object> waitingMap = new HashMap<>();
                 waitingMap.put("memberId", waitingVO.getMemberId());
                 waitingMap.put("storeId", waitingVO.getStoreId());
@@ -83,112 +106,135 @@ public class WaitingServiceImpl implements WaitingService {
                 waitingMap.put("status", waitingVO.getStatus());
                 waitingMap.put("fcmToken", waitingVO.getFcmToken());
 
-                // createdAt 필드 변환: LocalDateTime -> Epoch Milliseconds
                 if (waitingVO.getCreatedAt() != null) {
                     waitingMap.put("createdAt", waitingVO.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
                 } else {
-                    // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
                     waitingMap.put("createdAt", System.currentTimeMillis());
                 }
-
-                // updatedAt 필드 변환: LocalDateTime -> Epoch Milliseconds
                 if (waitingVO.getUpdatedAt() != null) {
                     waitingMap.put("updatedAt", waitingVO.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli());
                 } else {
-                    // DB에서 NOW()로 저장되더라도 객체에 바로 반영되지 않을 수 있으므로, 현재 시간을 사용
                     waitingMap.put("updatedAt", System.currentTimeMillis());
                 }
-                System.out.println("DEBUG: Firebase로 보낼 데이터: " + waitingMap); // 13번
+                System.out.println("DEBUG: Firebase로 보낼 데이터: " + waitingMap);
 
-                // Firebase에 데이터 업데이트 (updateChildren 사용 및 CompletionListener 추가)
                 ref.updateChildren(waitingMap, (error, ref1) -> {
                     if (error != null) {
-                        System.err.println("Firebase updateChildren failed for new waiting (ID: " + waitingVO.getWaitingId() + "): " + error.getMessage()); // 14번 (오류 발생 시)
+                        System.err.println("Firebase updateChildren failed for new waiting (ID: " + waitingVO.getWaitingId() + "): " + error.getMessage());
                     } else {
-                        System.out.println("Firebase new waiting added/updated successfully (ID: " + waitingVO.getWaitingId() + ")"); // 15번 (성공 시)
+                        System.out.println("Firebase new waiting added/updated successfully (ID: " + waitingVO.getWaitingId() + ")");
                     }
                 });
-                System.out.println("DEBUG: Firebase updateChildren 호출 완료 (비동기)."); // 16번
+                System.out.println("DEBUG: Firebase updateChildren 호출 완료 (비동기).");
 
             } catch (Exception e) {
-                System.err.println("DEBUG ERROR: Firebase 초기화 또는 데이터베이스 접근 중 예외 발생: " + e.getMessage()); // 17번
+                System.err.println("DEBUG ERROR: Firebase 초기화 또는 데이터베이스 접근 중 예외 발생: " + e.getMessage());
                 e.printStackTrace();
             }
 
         } else {
-            System.out.println("DEBUG: Firebase 동기화 조건 불만족 (result=" + result + ", waitingId=" + waitingVO.getWaitingId() + ")"); // 18번
+            System.out.println("DEBUG: Firebase 동기화 조건 불만족 (result=" + result + ", waitingId=" + waitingVO.getWaitingId() + ")");
         }
         return result;
     }
 
     @Override
-    @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
+    @Transactional
     public void updateWaitingStatus(Long waitingId, String status) {
-        // 1. MySQL DB 상태 업데이트
+        System.out.println("SERVER_DEBUG: updateWaitingStatus 호출됨. waitingId=" + waitingId + ", status=" + status);
         waitingDAO.updateWaitingStatus(waitingId, status);
+        System.out.println("SERVER_DEBUG: DB 상태 업데이트 완료.");
 
-        // 2. FCM 토큰 및 Firebase 경로 생성을 위해 웨이팅 정보 조회
         WaitingVO waiting = waitingDAO.getWaitingById(waitingId);
+        System.out.println("SERVER_DEBUG: DB에서 WaitingVO 조회 완료. 조회된 웨이팅: " + (waiting != null ? waiting.toString() : "null"));
 
-        // 3. Firebase 상태 업데이트 및 푸시 알림 전송
+
         if (waiting != null) {
+            System.out.println("SERVER_DEBUG: Firebase 동기화 및 FCM 알림 발송 로직 시작.");
             final FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference ref = database.getReference("waitings")
                                             .child(String.valueOf(waiting.getStoreId()))
                                             .child(String.valueOf(waiting.getWaitingId()));
 
-            // Firebase에 업데이트할 데이터 (status와 updatedAt)
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", status);
-            updates.put("updatedAt", System.currentTimeMillis()); // 현재 시간을 Epoch Milliseconds로 업데이트
+            updates.put("updatedAt", System.currentTimeMillis());
 
-            // Firebase 데이터 업데이트 (updateChildren 사용 및 CompletionListener 추가)
+            System.out.println("SERVER_DEBUG: Firebase 업데이트 데이터: " + updates);
             ref.updateChildren(updates, (error, ref1) -> {
                 if (error != null) {
-                    System.err.println("Firebase status update failed for waiting (ID: " + waitingId + "): " + error.getMessage());
+                    System.err.println("SERVER_ERROR: Firebase status update failed for waiting (ID: " + waitingId + "): " + error.getMessage());
                 } else {
-                    System.out.println("Firebase status updated successfully: " + waitingId + " to " + status);
+                    System.out.println("SERVER_DEBUG: Firebase status updated successfully: " + waitingId + " to " + status);
                 }
             });
 
-            // 4. 'CALLED' 또는 'READY' 상태일 때 푸시 알림 전송
-            if ("CALLED".equalsIgnoreCase(status) || "READY".equalsIgnoreCase(status)) {
-                String fcmToken = waiting.getFcmToken();
-                // FCM 토큰이 유효한 경우에만 알림 전송
-                if (fcmToken != null && !fcmToken.isEmpty()) {
-                    fcmService.sendNotification(
-                        fcmToken,
-                        "입장 안내",
-                        "고객님의 순서가 되었습니다. 카운터로 와주세요. (대기번호: " + waiting.getWaitingId() + ")"
-                    );
-                } else {
-                    System.out.println("FCM Token is missing for waiting ID: " + waiting.getWaitingId() + ". Skipping notification.");
+            // FCM 토큰 유효성 검사 및 알림 발송
+            String fcmToken = waiting.getFcmToken();
+            System.out.println("SERVER_DEBUG: 웨이팅 ID " + waitingId + "에 대한 FCM 토큰: " + (fcmToken != null && !fcmToken.isEmpty() ? fcmToken : "없음 또는 비어있음"));
+
+            if (fcmToken != null && !fcmToken.isEmpty()) { // FCM 토큰이 있는 경우에만 알림 시도
+                String title = "웨이팅 상태 변경 안내";
+                String body = "";
+
+                switch (status.toUpperCase()) {
+                    case "CALLED":
+                        title = "입장 안내";
+                        body = "고객님의 순서가 되었습니다. 카운터로 와주세요. (대기번호: " + waiting.getWaitingId() + ")";
+                        break;
+                    case "SEATED":
+                        title = "입장 완료";
+                        body = "고객님의 웨이팅이 '입장 완료' 처리되었습니다. 즐거운 시간 되세요!";
+                        break;
+                    case "NO_SHOW":
+                        title = "웨이팅 취소 안내";
+                        body = "고객님의 웨이팅이 '노쇼' 처리되어 취소되었습니다.";
+                        break;
+                    case "CANCELLED":
+                        title = "웨이팅 취소 완료";
+                        body = "고객님의 웨이팅이 매장관리자 의해 강제 취소되었습니다.";
+                        break;
+                    case "WAITING":
+                        body = "고객님의 웨이팅 상태가 '대기중'으로 변경되었습니다. (대기번호: " + waiting.getWaitingId() + ")";
+                        break;
+                    default:
+                        body = "고객님의 웨이팅 상태가 '" + status + "'(으)로 변경되었습니다.";
+                        break;
                 }
+                System.out.println("SERVER_DEBUG: FCM 알림 메시지 준비 - Title: " + title + ", Body: " + body + ", Target FCM Token: " + fcmToken);
+
+                // ⭐⭐⭐ 이 부분을 try-catch 블록으로 감쌉니다. ⭐⭐⭐
+                try {
+                    fcmService.sendNotification(fcmToken, title, body);
+                    System.out.println("SERVER_DEBUG: FCMService.sendNotification 호출 완료.");
+                } catch (Exception e) {
+                    System.err.println("SERVER_ERROR: FCM 알림 발송 중 예외 발생: " + e.getMessage());
+                    e.printStackTrace(); // 스택 트레이스도 출력하여 상세 오류 확인
+                }
+
+            } else {
+                System.out.println("SERVER_DEBUG: FCM 토큰이 없어 알림을 보내지 않았습니다.");
             }
+        } else {
+            System.out.println("SERVER_DEBUG: 웨이팅 ID " + waitingId + "에 해당하는 웨이팅 정보를 찾을 수 없습니다.");
         }
     }
 
     @Override
-    @Transactional // DB 및 Firebase 작업이 함께 수행되도록 트랜잭션 처리
+    @Transactional
     public void deleteWaiting(Long waitingId) {
-        // 1. 삭제하기 전에 Firebase 경로를 찾기 위해 웨이팅 정보를 먼저 조회합니다.
         WaitingVO waiting = waitingDAO.getWaitingById(waitingId);
-
-        // 2. MySQL DB에서 웨이팅 정보를 삭제합니다.
         waitingDAO.deleteWaiting(waitingId);
 
-        // 3. Firebase에서도 해당 웨이팅 정보를 삭제합니다.
         if (waiting != null) {
             final FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference ref = database.getReference("waitings")
                                             .child(String.valueOf(waiting.getStoreId()))
                                             .child(String.valueOf(waiting.getWaitingId()));
-            // 비동기 방식으로 데이터 삭제
             ref.removeValueAsync();
         }
     }
 
-    // 인터페이스의 다른 메서드들 구현
     @Override
     public List<WaitingVO> getAllWaitings() {
         return waitingDAO.getAllWaitings();
@@ -197,5 +243,11 @@ public class WaitingServiceImpl implements WaitingService {
     @Override
     public WaitingVO getWaitingById(Long waitingId) {
         return waitingDAO.getWaitingById(waitingId);
+    }
+
+    // 새롭게 추가: 현재 대기중인 팀 수를 세는 메소드 구현
+    @Override
+    public int getCurrentWaitingCount(Long storeId) {
+        return waitingDAO.countCurrentWaitings(storeId);
     }
 }

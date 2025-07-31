@@ -6,7 +6,6 @@
     <resultMap id="WaitingSettingResultMap" type="com.spring.teamProject.vo.WaitingSettingVO">
         <id property="settingId" column="setting_id"/>
         <result property="storeId" column="store_id"/>
-        <result property="dayOfWeek" column="day_of_week"/>
         <result property="maxTeams" column="max_teams"/>
         <result property="active" column="is_active"/>
         <result property="createdAt" column="created_at"/>
@@ -17,10 +16,10 @@
         SELECT
             setting_id,
             store_id,
-            day_of_week,
-            -- time_slot,  max_teams,
+            max_teams,
             is_active,
-            created_at,  updated_at
+            created_at,
+            updated_at
         FROM waiting_settings
         WHERE store_id = #{storeId}
     </select>
@@ -29,39 +28,41 @@
         SELECT
             setting_id,
             store_id,
-            day_of_week,
-            -- time_slot,  max_teams,
+            max_teams,
             is_active,
-            created_at,  updated_at
+            created_at,
+            updated_at
         FROM waiting_settings
         WHERE store_id = #{storeId}
-          AND day_of_week = #{dayOfWeek}
-          -- AND time_slot = #{timeSlot} </select>
+        LIMIT 1
+    </select>
 
 	<select id="getSettingById" parameterType="long" resultMap="WaitingSettingResultMap">
 	    SELECT
 	        setting_id,
 	        store_id,
-	        day_of_week,
-	        -- time_slot,  max_teams,
+	        max_teams,
 	        is_active,
-	        created_at,  updated_at
+	        created_at,
+	        updated_at
 	    FROM waiting_settings
 	    WHERE setting_id = #{settingId}
 	</select>
 
-    <insert id="insertSetting" parameterType="com.spring.teamProject.vo.WaitingSettingVO">
+    <insert id="insertSetting" parameterType="com.spring.teamProject.vo.WaitingSettingVO" useGeneratedKeys="true" keyProperty="settingId">
         INSERT INTO waiting_settings (
             store_id,
-            day_of_week,
-            -- time_slot,  max_teams,
-            is_active
+            max_teams,
+            is_active,
+            created_at,
+            updated_at
         )
         VALUES (
             #{storeId},
-            #{dayOfWeek},
-            -- #{timeSlot}, #{maxTeams},
-            #{active}
+            #{maxTeams},
+            #{active},
+            NOW(),
+            NOW()
         )
     </insert>
 
