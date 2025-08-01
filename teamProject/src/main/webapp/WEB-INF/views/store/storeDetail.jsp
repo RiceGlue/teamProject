@@ -58,20 +58,20 @@
 		.detail-box { padding:auto 10px; margin:30px; }
 		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
 	</style>
-	
+
 	<script>
 		let map;
-	
+
 	    function initMap() {
 	        const geocoder = new google.maps.Geocoder();
 	        const address = '<c:out value="${store.address}"/>'; // 서버 사이드 템플릿으로 주입되는 값
-	
+
 	        if (!address) {
 	        	console.log('address : ',address);
 	            alert("주소 정보가 없습니다.");
 	            return;
 	        }
-	
+
 	        geocoder.geocode({ address: address }, function(results, status) {
 	            if (status === 'OK') {
 	                const location = results[0].geometry.location;
@@ -88,9 +88,9 @@
 	            }
 	        });
 	    }
-	
+
 		document.addEventListener('DOMContentLoaded', function () {
-	
+
 		    // 탭 클릭 시 지도 resize
 		    $("ul.tabs li a").click(function () {
 		        const activeTab = $(this).attr("href");
@@ -98,13 +98,13 @@
 		        $(activeTab).fadeIn();
 		        $("ul.tabs li").removeClass("active");
 		        $(this).parent().addClass("active");
-	
+
 		        if (activeTab === "#tab4" && map) {
 		            google.maps.event.trigger(map, "resize");
 		        }
 		        return false;
 		    });
-	
+
 		    // 복사 기능 (주소)
 		    document.getElementById('copyaddress').addEventListener('click', function () {
 		        navigator.clipboard.writeText('${store.address}').then(function () {
@@ -113,7 +113,7 @@
 		            alert("복사 실패: " + err);
 		        });
 		    });
-	
+
 		    // 공유 버튼 (URL)
 		    document.getElementById('copyUrlBtn').addEventListener('click', function () {
 		        navigator.clipboard.writeText(window.location.href).then(function () {
@@ -122,17 +122,17 @@
 		            alert("복사 실패: " + err);
 		        });
 		    });
-	
+
 		    // 탭 초기 설정
 		    $(".tab_content").hide();
 		    $("ul.tabs li:first").addClass("active").show();
 		    $(".tab_content:first").show();
 		});
 	</script>
-	
+
 <!-- Google Maps API (storeMap은 맨 아래에서 선언) -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
-	
+
 
 </head>
 
@@ -188,16 +188,17 @@
 					<div class="tab_content" id="tab1">
 						<h5 class="mt-4">예약</h5>
 							<div class="reservation-box">
-								<form action="${contentPath }/reservation/customer/bookForm" id="reservation" method="post">
+								<form action="${contentPath }/reservation/customer/book" id="reservation" method="post">
 									<div class="mt-3" id="timeSlotContainer">
 										<button type="button" onclick="minusGuest()">-</button><input type="text" id="guestCount" value="1" readonly><button type="button" onclick="addGuest()">+</button>
 										<c:forEach var="reservation" items="${storeMap.reservation}">
 											<input type="button" value="${reservation.timeSlot }">
 										</c:forEach>
 									</div>
-
 									<input type="hidden" id="selectedTimeSlot" value="" />
-									<button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookForm?storeId=${store.storeId}'">예약하기</button>
+									<%-- <button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookForm?storeId=${store.storeId}'">예약하기</button> --%>
+									<input type="hidden" name="storeId" value="${store.storeId}" />
+									<button type="submit" class="btn-reserve" id="reserveBtn">예약하기</button>
 								</form>
 							</div>
 
