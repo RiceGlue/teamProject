@@ -27,18 +27,20 @@ public class StoreControllerImpl implements StoreController {
 	private StoreServiceImpl storeService;
 
 	@Override
-	@RequestMapping(value="/storeRegionList", method=RequestMethod.GET)
-	public ModelAndView SelectRegionStoreList (@RequestParam("region") String region, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	@RequestMapping(value="/storeList", method=RequestMethod.GET)
+	public ModelAndView storeList (@RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
-
-		List<StoreVO> storelist = storeService.storeRegionList(region);
-
-		for(int i=0;i<storelist.size();i++) {
-			System.out.println(storelist.get(i).getAddress());
+		
+		List<StoreVO> storelist = null ;
+		
+		if(option.equals("region")) {
+			storelist = storeService.selectStoreByRegion(keyword);
+		} else if(option.equals("storeType")) {
+			storelist = storeService.selectStoreByType(keyword);
 		}
 
 		ModelAndView mav = ViewUtil.layout(viewName);
-		mav.addObject("region",region);
+		mav.addObject("keyword",keyword);
 		mav.addObject("storelist",storelist);
 		return mav;
 	}

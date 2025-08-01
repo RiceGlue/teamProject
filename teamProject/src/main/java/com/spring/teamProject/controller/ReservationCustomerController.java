@@ -1,14 +1,25 @@
+// src/main/java/com/spring/teamProject/controller/ReservationCustomerController.java
 package com.spring.teamProject.controller;
 
-import com.spring.teamProject.vo.StoreVO; // StoreVO 임포트
+import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.StoreTableVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping; // PostMapping 임포트 추가
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpSession; // HttpSession import 추가
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/reservation/customer")
@@ -16,61 +27,112 @@ public class ReservationCustomerController {
 
     private static final Logger logger = LoggerFactory.getLogger(ReservationCustomerController.class);
 
-    // JSP에 전달할 가데이터 StoreVO 생성 (화면에 표시될 매장 정보를 위한 더미 데이터)
+    @Autowired
+    private ReservationService reservationService;
+
+    // JSP에 전달할 가데이터 StoreVO 생성
     private StoreVO getDummyStoreInfo(Long storeId) {
         StoreVO store = new StoreVO();
         store.setStoreId(storeId);
-        store.setStoreName("더미 레스토랑"); // JSP에 표시될 가데이터
+        store.setStoreName("더미 레스토랑 (ID:" + storeId + ")");
         store.setAddress("서울시 가짜구 더미동 123");
-        // 필요하다면 다른 필드도 여기에 추가하세요.
         return store;
     }
 
     /**
      * 예약 신청 폼을 보여주는 메서드
-     * GET /reservation/customer/bookForm?storeId={storeId}
-     * 이 메서드는 오직 bookingForm.jsp 화면을 반환하는 역할만 합니다.
      */
     @GetMapping("/bookForm")
-    public String showBookingForm(@RequestParam("storeId") Long storeId, Model model) {
+    public String showBookingForm(@RequestParam("storeId") Long storeId,
+                                  @RequestParam(value = "date", required = false)
+                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                  Model model) {
         logger.info("고객 예약 폼 요청 - storeId: {}", storeId);
 
-        // JSP에서 사용할 더미 상점 정보를 Model에 추가
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
         StoreVO store = getDummyStoreInfo(storeId);
         model.addAttribute("store", store);
-        model.addAttribute("storeId", storeId); // storeId도 필요할 수 있으니 추가
+        model.addAttribute("storeId", storeId);
+        model.addAttribute("reservationVO", new ReservationVO());
+        model.addAttribute("currentDate", date);
 
-        // Spring Form 태그를 사용하지 않으므로 ReservationVO 객체를 Model에 추가하지 않습니다.
-        // `bookingForm.jsp`가 `form:form modelAttribute="reservationVO"`를 사용하지 않도록 변경할 것입니다.
-
-        // JSP 파일 경로 (이전 설정 유지)
         return "reservation/customer/bookingForm";
     }
 
     /**
-     * 예약 신청 폼 제출 처리 메소드 (기능 제거, 단순히 다음 페이지로 이동)
-     * POST /reservation/customer/book
-     * 현재는 폼 제출 시 에러 발생을 막고 단순히 다음 화면으로 넘어가는 역할만 합니다.
-     * 실제 데이터 처리 로직은 여기에 구현되지 않습니다.
+     * 예약 가능한 시간대 및 테이블 정보를 JSON 형태로 반환하는 AJAX 엔드포인트
+     */
+    @GetMapping("/available-slots")
+    @ResponseBody
+    public Map<String, List<StoreTableVO>> getAvailableSlots(@RequestParam("storeId") Long storeId,
+                                                             @RequestParam("date")
+                                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        logger.info("예약 가능한 시간대 요청 - storeId: {}, date: {}", storeId, date);
+
+        try {
+            return reservationService.getAvailableTimeSlots(storeId, date);
+        } catch (Exception e) {
+            logger.error("예약 가능 시간대 조회 중 오류 발생: {}", e.getMessage(), e);
+            return Map.of();
+        }
+    }
+
+
+    /**
+     * 예약 신청 폼 제출 처리 메소드 (단일 테이블 선택으로 원복)
      */
     @PostMapping("/book")
-    public String processBookingForm() {
-        logger.info("예약 폼 제출됨 - 단순히 다음 화면으로 이동");
-        // 실제 로직 없이, 예약 완료 페이지로 리다이렉트합니다.
-        // storeId가 필요하다면 hidden input 등으로 받아와서 넘겨줄 수 있습니다.
-        return "redirect:/reservation/customer/bookingConfirm?storeId=1"; // 임시로 storeId=1 사용
+    public String processBookingForm(@ModelAttribute("reservationVO") ReservationVO reservation,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+        logger.info("예약 폼 제출됨 - ReservationVO: {}", reservation);
+
+        // TODO: 로그인된 사용자 ID를 세션에서 가져와야 함 (더미 데이터 사용)
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            memberId = 1L; // 테스트용 임시 memberId
+        }
+        reservation.setMemberId(memberId);
+        reservation.setStatus("PENDING");
+
+        try {
+            reservationService.addReservation(reservation);
+            logger.info("예약 성공: {}", reservation.getReservationId());
+            redirectAttributes.addFlashAttribute("message", "예약이 성공적으로 접수되었습니다!");
+            return "redirect:/reservation/customer/bookingConfirm?storeId=" + reservation.getStoreId() + "&reservationId=" + reservation.getReservationId();
+        } catch (Exception e) {
+            logger.error("예약 중 오류 발생: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "예약 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+            return "redirect:/reservation/customer/bookForm?storeId=" + reservation.getStoreId();
+        }
     }
 
     /**
-     * 임시로 만들 "예약 완료" 페이지 (화면만 띄울 목적)
-     * GET /reservation/customer/bookingConfirm?storeId={storeId}
+     * 임시로 만들 "예약 완료" 페이지
      */
     @GetMapping("/bookingConfirm")
-    public String bookingConfirm(@RequestParam("storeId") Long storeId, Model model) {
+    public String bookingConfirm(@RequestParam("storeId") Long storeId,
+                                 @RequestParam(value = "reservationId", required = false) Long reservationId,
+                                 Model model) {
         StoreVO store = getDummyStoreInfo(storeId);
         model.addAttribute("store", store);
         model.addAttribute("storeId", storeId);
-        model.addAttribute("message", "예약이 접수되었습니다! (이것은 가데이터 화면입니다.)");
-        return "reservation/customer/bookingConfirm"; // 이 JSP 파일을 새로 만들어야 합니다.
+
+        if (reservationId != null) {
+            try {
+                ReservationVO confirmedReservation = reservationService.getReservationById(reservationId);
+                model.addAttribute("confirmedReservation", confirmedReservation);
+                model.addAttribute("message", "예약이 성공적으로 접수되었습니다! (예약 번호: " + reservationId + ")");
+            } catch (Exception e) {
+                logger.error("예약 상세 조회 오류: {}", e.getMessage(), e);
+                model.addAttribute("message", "예약 완료! (예약 정보를 불러오는데 오류가 있었습니다.)");
+            }
+        } else {
+            model.addAttribute("message", "예약이 접수되었습니다! (예약 번호는 확인되지 않았습니다.)");
+        }
+        return "reservation/customer/bookingConfirm";
     }
 }

@@ -20,8 +20,14 @@ public class StoreServiceImpl implements StoreService{
 	private StoreDAO storeDAO;
 	
 	@Override
-	public List<StoreVO> storeRegionList(String region) throws Exception {
-		List<StoreVO> storelist = storeDAO.selectStoreByRegion(region);
+	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception {
+		List<StoreVO> storelist = storeDAO.selectStoreByRegion(keyword);
+		return storelist;
+	}
+	
+	@Override
+	public List<StoreVO> selectStoreByType(String keyword) throws Exception {
+		List<StoreVO> storelist = storeDAO.selectStoreByType(keyword);
 		return storelist;
 	}
 	
@@ -31,7 +37,7 @@ public class StoreServiceImpl implements StoreService{
 		
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
 		List<ImageFileVO> imagelist = storeDAO.selectStoreImage(storeId);
-		ReviewVO review = storeDAO.selectStoreReivew(storeId);
+		List<ReviewVO> review = storeDAO.selectStoreReview(storeId);
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
 		List<ReviewVO> detailReview = storeDAO.selectDetailReview(storeId);
 //		ReservationVO reservation = storeDAO.selectStoreReservatioin(storeId);
@@ -43,6 +49,9 @@ public class StoreServiceImpl implements StoreService{
 		storeMap.put("menu", menu);
 		storeMap.put("detailReview", detailReview);
 //		storeMap.put("reservation", reservation);
+		
+		System.out.println(storeId);
+		System.out.println(store.getAddress());
 		
 		return storeMap;
 	}

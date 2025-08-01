@@ -1,14 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-	
-<mapper namespace="mapper.reservation">
-	<resultMap id="reservationlist" type="ReservationVO">
-		<result property="reservation_id" column="reservation_id"/>
-		<result property="store_id" column="store_id"/>
-		<result property="day_of_week" column="day_of_week"/>
-		<result property="time_slot" column="time_slot"/>
-		<result property="is_active" column="is_active"/>
+
+<mapper namespace="com.spring.teamProject.dao.ReservationDAO">
+
+	<resultMap id="reservationResultMap" type="com.spring.teamProject.vo.ReservationVO">
+		<id property="reservationId" column="reservation_id"/>
+		<result property="memberId" column="member_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="tableId" column="table_id"/>
+		<result property="reservationTime" column="reservation_time"/>
+		<result property="guestCount" column="guest_count"/>
+		<result property="status" column="status"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="cancelledReason" column="cancelled_reason"/>
 	</resultMap>
-	
+
+	<insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
+            useGeneratedKeys="true" keyProperty="reservationId">
+        INSERT INTO reservations (
+            member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason
+        ) VALUES (
+            #{memberId}, #{storeId}, #{tableId}, #{reservationTime}, #{guestCount},
+            #{status}, #{cancelledReason}
+        )
+    </insert>
+
+    <select id="selectReservationsByStoreId" parameterType="long" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            store_id = #{storeId}
+        ORDER BY
+            reservation_time DESC, created_at DESC
+    </select>
+
+    <update id="updateReservationStatus">
+        UPDATE reservations
+        SET status = #{status}
+        WHERE reservation_id = #{reservationId}
+    </update>
+
+    <select id="selectReservationById" parameterType="long" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            reservation_id = #{reservationId}
+    </select>
+
+    <select id="selectReservationsByStoreIdAndDate" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            store_id = #{storeId}
+        AND
+            DATE(reservation_time) = #{date}
+        ORDER BY
+            reservation_time ASC
+    </select>
+
 </mapper>

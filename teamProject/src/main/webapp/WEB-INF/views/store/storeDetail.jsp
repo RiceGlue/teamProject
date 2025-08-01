@@ -1,17 +1,18 @@
+<!-- 상단 스크립트 선언 -->
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
-<%-- <c:set var="reservation" value="${storeMap.reservation}" /> --%>
-
 
 <html>
 <head>
 	<title>${store.storeName}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 	<style>
+	 	input[type="text"] { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
 		.rating { font-size: 16px; margin-bottom: 10px; }
@@ -27,7 +28,7 @@
 		.tab_content { padding: 20px; background-color: #fff; }
 		.reservation-box { margin-top: 30px; }
 		.time-slot { padding: 10px 15px; margin: 5px; background: #e0dcdc; border-radius: 5px; display: inline-block; }
-		.btn-reserve { margin-top: 15px; width: 100%; padding: 10px; background-color: #f4d6d6; border: none; border-radius: 5px; color: #555; }
+		.btn-reserve { margin-top: 15px; width: 120px; padding: 6px 12px; background-color: #f4d6d6; border: none; border-radius: 5px; color: #555; }
 		.menu_container { display:flex; flex-wrap:wrap; gap:8px; }
 		.menu_card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
 		.menu_image { width:100%; height:120px; background:#eee; display:flex; justify-content:center; align-items:center; }
@@ -50,34 +51,93 @@
 		.review_text {font-size:14px;color:#333;}
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}	
+		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
+		.time-slot.selected { background-color: #ffc107; font-weight: bold; }
+		.reservation-box{ text-align:center; }
+		#googleMap { width: 100%; height: 400px; }
 	</style>
 	
+	
+	
 	<script>
-		$(document).ready(function() { //tab 실행
+		let map;
 	
-			//When page loads...
-			$(".tab_content").hide(); //Hide all content
-			$("ul.tabs li:first").addClass("active").show(); //Activate first tab
-			$(".tab_content:first").show(); //Show first tab content
+	    function initMap() {
+	        const geocoder = new google.maps.Geocoder();
+	        const address = '<c:out value="${store.address}"/>'; // 서버 사이드 템플릿으로 주입되는 값
 	
-			//On Click Event
-			$("ul.tabs li").click(function() {
+	        if (!address) {
+	        	console.log('address : ',address);
+	            alert("주소 정보가 없습니다.");
+	            return;
+	        }
 	
-				$("ul.tabs li").removeClass("active"); //Remove any "active" class
-				$(this).addClass("active"); //Add "active" class to selected tab
-				$(".tab_content").hide(); //Hide all tab content
+	        geocoder.geocode({ address: address }, function(results, status) {
+	            if (status === 'OK') {
+	                const location = results[0].geometry.location;
+	                map = new google.maps.Map(document.getElementById("googleMap"), {
+	                    center: location,
+	                    zoom: 16
+	                });
+	                new google.maps.Marker({
+	                    map: map,
+	                    position: location
+	                });
+	            } else {
+	                alert("지도를 불러올 수 없습니다: " + status);
+	            }
+	        });
+	    }
 	
-				var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-				$(activeTab).fadeIn(); //Fade in the active ID content
-				return false;
-			});
+		document.addEventListener('DOMContentLoaded', function () {
 	
+		    // 탭 클릭 시 지도 resize
+		    $("ul.tabs li a").click(function () {
+		        const activeTab = $(this).attr("href");
+		        $(".tab_content").hide();
+		        $(activeTab).fadeIn();
+		        $("ul.tabs li").removeClass("active");
+		        $(this).parent().addClass("active");
+	
+		        if (activeTab === "#tab4" && map) {
+		            google.maps.event.trigger(map, "resize");
+		        }
+		        return false;
+		    });
+	
+		    // 복사 기능 (주소)
+		    document.getElementById('copyaddress').addEventListener('click', function () {
+		        navigator.clipboard.writeText('${store.address}').then(function () {
+		            alert("주소가 복사되었습니다.");
+		        }).catch(function (err) {
+		            alert("복사 실패: " + err);
+		        });
+		    });
+	
+		    // 공유 버튼 (URL)
+		    document.getElementById('copyUrlBtn').addEventListener('click', function () {
+		        navigator.clipboard.writeText(window.location.href).then(function () {
+		            alert("주소가 복사되었습니다.");
+		        }).catch(function (err) {
+		            alert("복사 실패: " + err);
+		        });
+		    });
+	
+		    // 탭 초기 설정
+		    $(".tab_content").hide();
+		    $("ul.tabs li:first").addClass("active").show();
+		    $(".tab_content:first").show();
 		});
 	</script>
+	
+<!-- Google Maps API (storeMap은 맨 아래에서 선언) -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
+	
+
 </head>
 
 <body>
+
 	<div class="store-info">
 		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <!-- 가게 이미지 캐러셀 -->
 			<div class="carousel-inner">
@@ -100,50 +160,53 @@
 				<span class="visually-hidden">Next</span>
 			</button>
 		</div>
-		
-		<h4 class="mt-3">${store.storeName}</h4>
-		<div class="rating">★ ${store.avgRating} 리뷰 ${store.countRating}개</div>
-		<div>
-			<p><img src="${contextPath}/resources/img/pin.png" width="16" height="16" alt="위치"> ${store.address} <a href="#" style="color: #008cff; font-size: 12px;">위치</a></p>
+
+		<div style="display: flex; justify-content: space-between; align-items: center;">
+			<h4 class="mt-3">${store.storeName}</h4>
+			<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 		</div>
-		<div style="color: green;">오늘 ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin}</div>
-		<button class="btn btn-outline-secondary btn-sm mt-2">전화</button>
+		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지"> ${store.avgRating} 리뷰 ${store.countRating}개</div>
+		<div>
+			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-outline-secondary btn-sm mt-2" id="copyaddress">주소</button></p>
+			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.storePhoneNumber } </p>
+		</div>
+		<div style="color: green;">
+			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"> ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin} </p>
+		</div>
+
+
+
 		<div class="tab_container">
 			<div class="tab_container" id="container">
 				<ul class="tabs">
 					<li><a href="#tab1">홈</a></li>
 					<li><a href="#tab2">메뉴</a></li>
 					<li><a href="#tab3">리뷰</a></li>
-					<li><a href="#tab4">상세 정보</a></li>
+					<li><a href="#tab4">매장정보</a></li>
 				</ul>
 				<div class="tab_container">
-					<div class="tab_content" id="tab1"> <!-- 홈 -->
-						<div class="reservation-box">
-							<h5 class="mt-4">예약</h5>
-							<div>오늘 (${reservation.day}) · 2명</div>
-							<div class="mt-3">
-								<span class="time-slot">오전 11:00</span>
-								<span class="time-slot">오전 11:30</span>
-								<span class="time-slot">오전 12:00</span>
-								<span class="time-slot">오전 12:30</span>
-								<span class="time-slot">오전 13:00</span>
-								<span class="time-slot">오후 13:30</span>
-								<span class="time-slot">오후 14:00</span>
+					<div class="tab_content" id="tab1">
+						<h5 class="mt-4">예약</h5>
+							<div class="reservation-box">
+								<form action="${contentPath }/reservation/customer/bookForm" id="reservation" method="post">
+									<div class="mt-3" id="timeSlotContainer">
+										<button type="button" onclick="minusGuest()">-</button><input type="text" id="guestCount" value="1" readonly><button type="button" onclick="addGuest()">+</button>
+										<c:forEach var="reservation" items="${storeMap.reservation}">
+											<input type="button" value="${reservation.timeSlot }">
+										</c:forEach>
+									</div>
+
+									<input type="hidden" id="selectedTimeSlot" value="" />
+									<button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookingForm?storeId=${store.storeId}'">예약하기</button>
+								</form>
 							</div>
-							<button class="btn-reserve" disabled>예약하기</button>
-						</div>
-						
+
 						<div class="button-group">
-							<%-- 예약 페이지로 이동하는 링크. storeId를 함께 넘깁니다. --%>
-							<a href="<c:url value='/reservation/customer/bookForm?storeId=${store.storeId}'/>">예약하기</a>
-							<%-- 점주용 관리 페이지로 이동하는 링크. storeId를 함께 넘깁니다. --%>
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
-													
 						<div class="back-link">
-							<a href="<c:url value='/store/storeList.do'/>">매장 목록으로 돌아가기</a>
+							<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
-						
 					</div>
 					<div class="tab_content" id="tab2"> <!-- 메뉴 -->
 						<div class="menu_container">
@@ -180,20 +243,21 @@
 						</div>
 						<div class="detailReviewList">
 							<h4>리뷰 ${store.countRating}건</h4>
-							<c:forEach var="item" items="${storeMap.review }" >
+							<c:forEach var="review" items="${storeMap.review }" >
 								<div class="review_box">
 									<p>${review.rating }점<p>
 									<p>${review.writerId}<p>
-									<p>${review.comment}<p>
+									<p>${review.content}<p>
 								</div>
 							</c:forEach>
 						</div>
 					</div>
-					<div class="tab_content" id="tab4"> <!-- 상세 정보 -->
+					<div class="tab_content" id="tab4">
+					    <div id="googleMap"></div>
 					</div>
 				</div>
 			</div>
-		</div>	
+		</div>
 	</div>
 </body>
 </html>

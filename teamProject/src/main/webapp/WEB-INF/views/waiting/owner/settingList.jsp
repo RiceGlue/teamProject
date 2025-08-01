@@ -159,7 +159,7 @@
 
         <hr> <%-- 하단 구분선 추가 --%>
 
-        <p><a href="<c:url value='/store/storeDetail.do?storeId=${storeId}'/>">매장 상세 보기로 돌아가기</a></p>
+        <p><a href="<c:url value='/store/storeDetail?storeId=${storeId}'/>">매장 상세 보기로 돌아가기</a></p>
     </div>
 
     <script>
