@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-	
-<mapper namespace="mapper.storetable">
-	<resultMap id="storetablelist" type="StoreTableVO">
-		<result property="table_id" column="table_id"/>
-		<result property="store_id" column="store_id"/>
-		<result property="table_info" column="table_info"/>
+
+<mapper namespace="com.spring.teamProject.dao.StoreTableDAO">
+
+	<resultMap id="storeTableResultMap" type="com.spring.teamProject.vo.StoreTableVO">
+		<id property="tableId" column="table_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="tableName" column="table_info"/>
 		<result property="capacity" column="capacity"/>
-		<result property="pos_x" column="pos_x"/>
-		<result property="pos_y" column="pos_y"/>
+		<result property="posX" column="pos_x"/>
+		<result property="posY" column="pos_y"/>
 	</resultMap>
-	
+
+    <select id="selectAllTablesByStoreId" resultMap="storeTableResultMap">
+        SELECT
+            table_id, store_id, table_info, capacity, pos_x, pos_y
+        FROM
+            store_tables
+        WHERE
+            store_id = #{storeId}
+        ORDER BY
+            capacity, table_info
+    </select>
+
 </mapper>

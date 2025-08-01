@@ -14,18 +14,9 @@
 		<result property="status" column="status"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="cancelledReason" column="cancelled_reason"/>
-		</resultMap>
-
-	<resultMap id="reservationSettingResultMap" type="com.spring.teamProject.vo.ReservationSettingVO">
-		<id property="settingId" column="setting_id"/>
-		<result property="storeId" column="store_id"/>
-		<result property="dayOfWeek" column="day_of_week"/>
-		<result property="timeSlot" column="time_slot"/>
-		<result property="isActive" column="is_active"/>
 	</resultMap>
 
-
-    <insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
+	<insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
             useGeneratedKeys="true" keyProperty="reservationId">
         INSERT INTO reservations (
             member_id, store_id, table_id, reservation_time, guest_count,
@@ -64,4 +55,18 @@
             reservation_id = #{reservationId}
     </select>
 
-    </mapper>
+    <select id="selectReservationsByStoreIdAndDate" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            store_id = #{storeId}
+        AND
+            DATE(reservation_time) = #{date}
+        ORDER BY
+            reservation_time ASC
+    </select>
+
+</mapper>
