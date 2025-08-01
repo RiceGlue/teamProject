@@ -12,6 +12,9 @@
 	<title>${store.storeName}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 	<style>
+		p {    display: flex;
+    align-items: center;
+    gap: 7px;}
 	 	input[type="text"] { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
@@ -42,7 +45,7 @@
 		.countRating {margin-bottom:20px;}
 		.rating_bar_container {display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 		.rating_label {width:120px;font-weight:500;}
-		.rating_bar_bg {background:#eee;width:200px;height:12px;border-radius:6px;overflow:hidden;}
+		.rating_bar_bg {background:#e1e1df; width:200px; height:12px; border-radius:6px; overflow:hidden;}
 		.rating_bar_fill {background:#f90;height:100%;border-radius:6px 0 0 6px;}
 		.detailReviewList {margin-top:20px;}
 		.review_box {border:1px solid #ddd;padding:12px;border-radius:6px;margin-bottom:10px;background-color:#fff;}
@@ -54,10 +57,9 @@
 		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.time-slot.selected { background-color: #ffc107; font-weight: bold; }
 		.reservation-box{ text-align:center; }
-		#googleMap { width: 100%; height: 400px; }
+		.detail-box { padding:auto 10px; }
+		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
 	</style>
-	
-	
 	
 	<script>
 		let map;
@@ -167,7 +169,7 @@
 		</div>
 		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지"> ${store.avgRating} 리뷰 ${store.countRating}개</div>
 		<div>
-			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-outline-secondary btn-sm mt-2" id="copyaddress">주소</button></p>
+			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-outline-secondary btn-sm mt-2" id="copyaddress">복사</button></p>
 			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.storePhoneNumber } </p>
 		</div>
 		<div style="color: green;">
@@ -197,7 +199,7 @@
 									</div>
 
 									<input type="hidden" id="selectedTimeSlot" value="" />
-									<button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookingForm?storeId=${store.storeId}'">예약하기</button>
+									<button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookForm?storeId=${store.storeId}'">예약하기</button>
 								</form>
 							</div>
 
@@ -227,15 +229,15 @@
 					<div class="tab_content" id="tab3">
 						<div class="rating_summary_cards">
 							<div class="card card-rating">
-								<p>전체 별점</p>
-								<h2><img src="별 이미지" alt="별점 이미지">${store.avgRating }</h2>
+								<h7>${store.countRating }개 리뷰 별점 평균</h7>
+								<h2><img src="${contextPath}/image/review_rating.jpg" width="40" alt="리뷰이미지">${store.avgRating }</h2>
 							</div>
 							<div class="card card-detail">
 								<c:forEach var="detailReview" items="${storeMap.detailReview}">
 									<div class="rating_bar_container">
-										<span class="rating_label">${detailReview.rating}점 : ${detailReview.countScoreRating}명</span>
+										<span class="rating_label">${detailReview.rating}점 ${detailReview.countScoreRating}</span>
 										<div class="rating_bar_bg">
-											<div class="rating_bar_fill" style="width: ${detailReview.countScoreRating * 10}px;"></div>
+											<div class="rating_bar_fill" style="width: ${detailReview.countScoreRating}px;"></div>
 										</div>
 									</div>
 								</c:forEach>
@@ -253,7 +255,30 @@
 						</div>
 					</div>
 					<div class="tab_content" id="tab4">
-					    <div id="googleMap"></div>
+						<div class="detail-box">
+							<h4>매장소개</h4>
+							<p>${store.description }
+						</div>
+						<div class="detail-box">
+							<h4>편의시설</h4>
+							<p>${store.amenities }
+						</div>
+						<div class="detail-box">
+							<h4>위치</h4>
+							<div id="googleMap"></div>
+							<p ><img src="${contextPath}/image/location.png" width="10" height="10" alt="위치">${store.address } <button class="btn btn-outline-secondary btn-sm" id="copyaddress">복사</button> </p>
+						</div>
+						<div class="detail-box">
+							<h4>상세정보</h4>
+							<div>
+								<p><strong>영업시간</strong></p>
+								<p>${store.dayOff }
+							</div>
+							<div>
+								<P><strong>정기휴무</strong></P>
+								<p>${store.dayOff }</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
