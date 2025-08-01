@@ -1,13 +1,23 @@
 // src/main/java/com/spring/teamProject/service/ReservationServiceImpl.java
 package com.spring.teamProject.service;
 
-import com.spring.teamProject.dao.ReservationDAO;
-import com.spring.teamProject.vo.ReservationVO;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.spring.teamProject.dao.ReservationDAO;
+import com.spring.teamProject.dao.StoreTableDAO;
+import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.StoreTableVO;
 
 @Service
 @Transactional
@@ -16,10 +26,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired
     private ReservationDAO reservationDAO;
 
+    @Autowired
+    private StoreTableDAO storeTableDAO;
+
     @Override
     public void addReservation(ReservationVO reservation) throws Exception {
-        // 예약 유효성 검사 등 비즈니스 로직 추가 가능
-        // 예: 해당 테이블이 해당 시간에 예약 가능한지, 인원수 제한 등
         reservationDAO.insertReservation(reservation);
     }
 
@@ -30,12 +41,55 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void updateReservationStatus(Long reservationId, String status) throws Exception {
-        // 상태 업데이트 전 유효성 검사 등 비즈니스 로직 추가 가능
         reservationDAO.updateReservationStatus(reservationId, status);
     }
 
     @Override
     public ReservationVO getReservationById(Long reservationId) throws Exception {
         return reservationDAO.selectReservationById(reservationId);
+    }
+
+    @Override
+    public Map<String, List<StoreTableVO>> getAvailableTimeSlots(Long storeId, LocalDate date) throws Exception {
+        List<StoreTableVO> allTables = storeTableDAO.selectAllTablesByStoreId(storeId);
+
+        List<ReservationVO> existingReservations = reservationDAO.selectReservationsByStoreIdAndDate(storeId, date);
+
+        Map<Long, List<LocalDateTime>> reservedTableSlots = new HashMap<>();
+        for (ReservationVO reservation : existingReservations) {
+            reservedTableSlots.computeIfAbsent(reservation.getTableId(), k -> new ArrayList<>())
+                              .add(reservation.getReservationTime());
+        }
+
+        Map<String, List<StoreTableVO>> availableSlots = new LinkedHashMap<>();
+
+        LocalTime startTime = LocalTime.of(11, 0);
+        LocalTime endTime = LocalTime.of(22, 0);
+        LocalTime currentTimeSlot = startTime;
+
+        while (currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime)) {
+            String timeKey = currentTimeSlot.toString();
+            List<StoreTableVO> availableTablesForSlot = new ArrayList<>();
+            LocalDateTime currentDateTime = LocalDateTime.of(date, currentTimeSlot);
+
+            for (StoreTableVO table : allTables) {
+                boolean isReserved = false;
+                if (reservedTableSlots.containsKey(table.getTableId())) {
+                    isReserved = reservedTableSlots.get(table.getTableId()).contains(currentDateTime);
+                }
+
+                if (!isReserved) {
+                    availableTablesForSlot.add(table);
+                }
+            }
+
+            if (!availableTablesForSlot.isEmpty()) {
+                availableSlots.put(timeKey, availableTablesForSlot);
+            }
+
+            currentTimeSlot = currentTimeSlot.plusMinutes(30);
+        }
+
+        return availableSlots;
     }
 }
