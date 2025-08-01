@@ -1,4 +1,4 @@
-    </div> <!-- .container 닫기, header.jsp에서 열었을 경우 -->
+    </div> <!-- .container ë«ê¸°, header.jspìì ì´ìì ê²½ì° -->
 
     <footer class="text-center mt-5 mb-3">
         <hr>

@@ -92,13 +92,19 @@
             </div>
             <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
         </div>
-
+        
+        <%-- (신규) reCAPTCHA 위젯 추가 --%>
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+        </div>
+        
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary">가입 완료</button>
+            <button type="submit" class="btn btn-primary">가입하기</button>
         </div>
     </form>
 </div>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     function validateImage(input) {
         const file = input.files[0];

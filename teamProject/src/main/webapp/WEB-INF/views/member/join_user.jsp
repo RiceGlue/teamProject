@@ -18,7 +18,7 @@
         
         <div class="mb-3">
             <label for="loginId" class="form-label">아이디</label>
-            <input type="text" class="form-control" id="loginId" name="loginId" required>
+            <input type="text" class="form-control" id="loginId" name="loginId" value="${memberVO.loginId}" required>
         </div>
         <div class="mb-3">
             <label for="loginPw" class="form-label">비밀번호</label>
@@ -26,11 +26,11 @@
         </div>
         <div class="mb-3">
             <label for="memberName" class="form-label">이름</label>
-            <input type="text" class="form-control" id="memberName" name="memberName" required>
+            <input type="text" class="form-control" id="memberName" name="memberName" value="${memberVO.memberName}" required>
         </div>
         <div class="mb-3">
             <label for="birth" class="form-label">생년월일</label>
-            <input type="date" class="form-control" id="birth" name="birth" required>
+            <input type="date" class="form-control" id="birth" name="birth" value="${memberVO.birth}" required>
         </div>
         <div class="mb-3">
             <label class="form-label">성별</label>
@@ -103,6 +103,16 @@
             </div>
             <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
         </div>
+        
+        <%-- (신규) 디버깅용 코드: 사이트 키가 제대로 전달되는지 화면에 직접 출력해봅니다. --%>
+        <div class="alert alert-info">
+            <strong>디버깅용 사이트 키:</strong> [${recaptchaSiteKey}]
+        </div>
+        
+        <%-- (신규) reCAPTCHA 위젯 추가 --%>
+        <div class="mb-3 d-flex justify-content-center">
+            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+        </div>
 
         <div class="d-grid">
             <button type="submit" class="btn btn-primary">가입하기</button>
@@ -110,6 +120,7 @@
     </form>
 </div>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     function validateImage(input) {
         const file = input.files[0];

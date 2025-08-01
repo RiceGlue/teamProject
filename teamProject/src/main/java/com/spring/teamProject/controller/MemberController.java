@@ -3,6 +3,7 @@ package com.spring.teamProject.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.service.MemberService;
+import com.spring.teamProject.service.RecaptchaService; // RecaptchaService import
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 
@@ -28,8 +30,16 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
+    // (신규) RecaptchaService 주입
+    @Autowired
+    private RecaptchaService recaptchaService;
+
+    // (신규) application.properties에서 사이트 키 값을 주입받습니다.
+    @Value("${google.recaptcha.site-key}")
+    private String recaptchaSiteKey;
+
     // --- 회원가입 및 로그인/로그아웃 관련 메소드 ---
-    
+
     @GetMapping("/join-select")
     public String joinSelectForm(Model model) {
         model.addAttribute("body", "member/join_select.jsp");
@@ -51,8 +61,10 @@ public class MemberController {
         return "redirect:/";
     }
 
+    // (수정) 회원가입 폼을 보여줄 때, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join")
     public String joinForm(@RequestParam("role") String role, Model model) {
+        model.addAttribute("recaptchaSiteKey", recaptchaSiteKey); // 사이트 키 추가
         if ("OWNER".equals(role)) {
             model.addAttribute("body", "member/join_owner.jsp");
         } else {
@@ -61,31 +73,58 @@ public class MemberController {
         return "layout/layout";
     }
 
+    // (수정) 일반 & 가맹점주 회원가입 처리에 reCAPTCHA 검증 추가
     @PostMapping("/join")
-    public String join(MemberVO memberVO, RedirectAttributes redirectAttributes) {
+    public String join(MemberVO memberVO, 
+                       @RequestParam("g-recaptcha-response") String recaptchaResponse,
+                       RedirectAttributes redirectAttributes) {
+        
+        boolean isRecaptchaVerified = recaptchaService.verifyRecaptcha(recaptchaResponse);
+        if (!isRecaptchaVerified) {
+            redirectAttributes.addFlashAttribute("error", "reCAPTCHA 인증에 실패했습니다. 다시 시도해주세요.");
+            redirectAttributes.addFlashAttribute("memberVO", memberVO); // 입력 데이터 유지
+            return "redirect:/member/join?role=" + memberVO.getRole();
+        }
+
         try {
             memberService.join(memberVO);
             redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
             return "redirect:/member/login";
         } catch (DuplicateKeyException e) {
             redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
+            redirectAttributes.addFlashAttribute("memberVO", memberVO); // 입력 데이터 유지
             return "redirect:/member/join?role=" + memberVO.getRole();
         }
     }
     
+    // (수정) 소셜 회원가입 폼을 보여줄 때도, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join-social")
     public String joinSocialForm(Model model, HttpSession session) {
         Object socialUserInfo = session.getAttribute("socialUserInfo");
         if (socialUserInfo == null) {
             return "redirect:/";
         }
+        model.addAttribute("recaptchaSiteKey", recaptchaSiteKey); // 사이트 키 추가
         model.addAttribute("socialUserInfo", socialUserInfo);
         model.addAttribute("body", "member/join-social.jsp");
         return "layout/layout";
     }
 
+    // (수정) 소셜 회원가입 최종 처리에 reCAPTCHA 검증 추가
     @PostMapping("/join-social")
-    public String joinSocial(MemberVO memberVO, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String joinSocial(MemberVO memberVO, 
+                             @RequestParam("g-recaptcha-response") String recaptchaResponse,
+                             HttpSession session, 
+                             RedirectAttributes redirectAttributes) {
+        
+        boolean isRecaptchaVerified = recaptchaService.verifyRecaptcha(recaptchaResponse);
+        if (!isRecaptchaVerified) {
+            redirectAttributes.addFlashAttribute("error", "reCAPTCHA 인증에 실패했습니다. 다시 시도해주세요.");
+            // 세션 정보를 유지해야 폼이 다시 제대로 보입니다.
+            session.setAttribute("socialUserInfo", session.getAttribute("socialUserInfo"));
+            return "redirect:/member/join-social";
+        }
+        
         Map<String, Object> socialUserInfo = (Map<String, Object>) session.getAttribute("socialUserInfo");
         
         if (socialUserInfo != null) {

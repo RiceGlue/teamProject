@@ -46,7 +46,7 @@
 		]]>
 	</select>
 	
-	<!-- (수정) insertMember 쿼리에 알림 동의 컬럼 추가 -->
+	<!-- (수정) insertMember 쿼리에 누락된 country_code와 알림 동의 컬럼들을 추가합니다. -->
 	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		INSERT INTO members (
 			login_id, login_pw, member_name, birth, sex, country_code, phone, email, role,
