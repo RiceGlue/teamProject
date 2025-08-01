@@ -17,12 +17,13 @@
 	
 	<resultMap id="storeInfo" type="StoreVO">
 		<result property="storeId" column="store_id" />
-		<result property="storeName" column="store_Name" />
+		<result property="storeName" column="store_name" />
 		<result property="storeType" column="store_type" />
-		<result property="operationType" column="operation_yype" />
+		<result property="operationType" column="operation_type" />
 		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="address" column="address" />
 		<result property="breakTime" column="break_time" />
-		<result property="dayOff" column="day_ff" />
+		<result property="dayOff" column="day_off" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
 		<result property="mainImage" column="main_image" />
@@ -114,12 +115,12 @@
 	
 	<select id="selectStoreDetail" parameterType="long" resultMap="storeInfo" >
 		<![CDATA[
-			SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			SELECT s.*, a.store_name, a.address, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM store_info s
+			LEFT JOIN stores a ON s.store_id = a.store_id
 			LEFT JOIN reviews r ON s.store_id = r.store_id
 			WHERE s.store_id = #{storeId}
-			GROUP BY s.store_id;
-
+			GROUP BY s.store_id, a.address;
 		]]>
 	</select>
 	
