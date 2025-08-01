@@ -26,7 +26,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             session.setAttribute("socialUserInfo", oAuth2User.getAttributes());
             
             // 추가 정보 입력 페이지로 리다이렉트
-            getRedirectStrategy().sendRedirect(request, response, "/member/join-social");
+            getRedirectStrategy().sendRedirect(request, response, "/member/join_social");
         } else {
             // 기존 사용자인 경우, 메인 페이지로 리다이렉트
             super.onAuthenticationSuccess(request, response, authentication);

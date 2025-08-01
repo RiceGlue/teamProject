@@ -5,7 +5,7 @@
     <h2 class="text-center mb-4">추가 정보 입력</h2>
     <p class="text-center text-muted mb-4">정확한 서비스 이용을 위해 추가 정보를 입력해주세요.</p>
     
-    <form action="${contextPath}/member/join-social" method="post" enctype="multipart/form-data">
+    <form action="${contextPath}/member/join_social" method="post" enctype="multipart/form-data">
         
         <div class="text-center mb-4">
             <%-- (수정) 기본 이미지 경로를 로컬 경로로 변경 --%>

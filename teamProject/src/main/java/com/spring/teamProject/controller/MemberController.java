@@ -98,7 +98,7 @@ public class MemberController {
     }
     
     // (수정) 소셜 회원가입 폼을 보여줄 때도, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
-    @GetMapping("/join-social")
+    @GetMapping("/join_social")
     public String joinSocialForm(Model model, HttpSession session) {
         Object socialUserInfo = session.getAttribute("socialUserInfo");
         if (socialUserInfo == null) {
@@ -106,12 +106,12 @@ public class MemberController {
         }
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey); // 사이트 키 추가
         model.addAttribute("socialUserInfo", socialUserInfo);
-        model.addAttribute("body", "member/join-social.jsp");
+        model.addAttribute("body", "member/join_social.jsp");
         return "layout/layout";
     }
 
     // (수정) 소셜 회원가입 최종 처리에 reCAPTCHA 검증 추가
-    @PostMapping("/join-social")
+    @PostMapping("/join_social")
     public String joinSocial(MemberVO memberVO, 
                              @RequestParam("g-recaptcha-response") String recaptchaResponse,
                              HttpSession session, 
@@ -122,7 +122,7 @@ public class MemberController {
             redirectAttributes.addFlashAttribute("error", "reCAPTCHA 인증에 실패했습니다. 다시 시도해주세요.");
             // 세션 정보를 유지해야 폼이 다시 제대로 보입니다.
             session.setAttribute("socialUserInfo", session.getAttribute("socialUserInfo"));
-            return "redirect:/member/join-social";
+            return "redirect:/member/join_social";
         }
         
         Map<String, Object> socialUserInfo = (Map<String, Object>) session.getAttribute("socialUserInfo");
@@ -141,7 +141,7 @@ public class MemberController {
             } catch (DuplicateKeyException e) {
                 session.setAttribute("socialUserInfo", socialUserInfo);
                 redirectAttributes.addFlashAttribute("error", "이미 가입된 전화번호 또는 이메일입니다.");
-                return "redirect:/member/join-social";
+                return "redirect:/member/join_social";
             }
         }
         return "redirect:/member/login";
