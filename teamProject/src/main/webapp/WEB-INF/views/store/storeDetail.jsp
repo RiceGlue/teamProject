@@ -12,9 +12,7 @@
 	<title>${store.storeName}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 	<style>
-		p {    display: flex;
-    align-items: center;
-    gap: 7px;}
+		p { display: flex; align-items: center; gap: 7px;}
 	 	input[type="text"] { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
@@ -57,7 +55,7 @@
 		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.time-slot.selected { background-color: #ffc107; font-weight: bold; }
 		.reservation-box{ text-align:center; }
-		.detail-box { padding:auto 10px; }
+		.detail-box { padding:auto 10px; margin:30px; }
 		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
 	</style>
 	

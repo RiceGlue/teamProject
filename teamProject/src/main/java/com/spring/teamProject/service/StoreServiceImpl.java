@@ -51,7 +51,7 @@ public class StoreServiceImpl implements StoreService{
 //		storeMap.put("reservation", reservation);
 		
 		System.out.println(storeId);
-		System.out.println(store.getAddress());
+		System.out.println(store.getStoreId());
 		
 		return storeMap;
 	}
