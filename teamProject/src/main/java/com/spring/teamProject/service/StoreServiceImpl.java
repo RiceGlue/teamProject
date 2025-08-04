@@ -21,8 +21,8 @@ public class StoreServiceImpl implements StoreService{
 	
 	@Override
 	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception {
-		List<StoreVO> storelist = storeDAO.selectStoreByRegion(keyword);
-		return storelist;
+		List<StoreVO> regionlist = storeDAO.selectStoreByRegion(keyword);
+		return regionlist;
 	}
 	
 	@Override
@@ -41,6 +41,12 @@ public class StoreServiceImpl implements StoreService{
 	public List<StoreVO> selectStoreByName(String keyword) throws Exception{
 		List<StoreVO> namelist = storeDAO.selectStoreByName(keyword);
 		return namelist;
+	}
+	
+	@Override
+	public List<StoreVO> selectStoreByType(String keyword) throws Exception {
+		List<StoreVO> typelist = storeDAO.selectStoreByType(keyword);
+		return typelist;
 	}
 	
 	@Override

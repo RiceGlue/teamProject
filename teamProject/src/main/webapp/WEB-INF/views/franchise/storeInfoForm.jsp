@@ -1,46 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <style>
-	ul.tabs {
-	  margin: 0;
-	  padding: 0;
-	  list-style: none;
-	  display: flex;
-	  border-bottom: 2px solid #ccc;
-	}
-	
-	ul.tabs li {
-	  margin: 0;
-	  padding: 12px 24px;
-	  background: #f4f4f4;
-	  cursor: pointer;
-	  border-top-left-radius: 10px;
-	  border-top-right-radius: 10px;
-	  margin-right: 5px;
-	  transition: background 0.3s;
-	}
-	
-	ul.tabs li:hover {
-	  background: #ddd;
-	}
-	
-	ul.tabs li.active {
-	  background: #fff;
-	  font-weight: bold;
-	  border: 2px solid #ccc;
-	  border-bottom: none;
-	  border-radius: 10px 10px 0 0;
-	}
-	
-	.tab_content {
-	  border: 2px solid #ccc;
-	  border-top: none;
-	  padding: 20px;
-	  background: #fff;
-	}
+	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
+	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
+	.tabs li:last-child { border-right: none; }
+	.tabs li.active { background-color: white; }
+	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; }
+	.tabs li.active a { color: black; }
+	.tabs ul { background-color:#3f3f3f; }
+	.tabs li:hover { background-color: white; color:black; }
+	.tabs li a:hover { color:black; }
+	.tab_content { padding: 20px; background-color: #fff; }
+	.info_container { text-align:left; }
 </style>
 <script>
 	$(document).ready(function() { //tab 실행
-
 		//When page loads...
 		$(".tab_content").hide(); //Hide all content
 		$("ul.tabs li:first").addClass("active").show(); //Activate first tab
@@ -57,12 +30,9 @@
 			$(activeTab).fadeIn(); //Fade in the active ID content
 			return false;
 		});
-
 	});
 	
-	function padTime(value) { //숫자 한자리수 입력시 두자릿수로 바꿔줌
-	  return value.toString().padStart(2, '0');
-	}
+	function padTime(value) { return value.toString().padStart(2, '0'); }  //숫자 한자리수 입력시 두자릿수로 바꿔줌
 	
 	function addMenu() { //메뉴 추가 버튼
 		$("#moreMenu").append(`
@@ -72,63 +42,36 @@
 		  <tr><td>메뉴 사진 </td><td><input type="file" mame="image_name" accept="image/*" /></td></tr>
 		`);
 	}
-	
-	function addDay() { //요일별 영업시간 설정
-	  $("#moreDay").append(`
-	  <tr>
-	  <td><select name="openDayList"><option value="월" selected>월</option><option value="화">화</option><option value="수">수</option><option value="목">목</option><option value="금">금</option><option value="토">토</option><option value="일">일</option></select></td>
-	  <td><input name="startHourValue" type="text" size="4" /> : <input name="startMinValue" type="text" size="4" /> ~ <input name="endHourValue" type="text" size="4" /> : <input name="endMinValue" type="text" size="4" /></td>
-	  </tr>
-	  `);
-	}
-	
+
 	var dayOff=[];	//휴일
 
 	$("input[name=dayOffOption]:checked").each(function() {
-		var dayOffOption = $(this).val();
+		var dayOffOption = $(this).val()+",";
 		dayOff.push(dayOffOption);
 	})
 
 	var amenities=[];	//편의시설 
 
 	$("input[name=amenOption]:checked").each(function() {
-		var amenOption = $(this).val();
+		var amenOption = $(this).val()+",";
 		amenities.push(amenOption);
 	})
 	
-	var openDay = [];
-	
-	for(let i = 0; i < document.getElementsByName("startHourValue").length; i++) {
-	  openDay[i] = document.getElementsByName("openDayList")[i]?.value || "";
-	}
+	const brakeTime =  //브레이크 타임
+	 	padTime(document.getElementById("#brakeStartHour").value) + " : " +
+	  	padTime(document.getElementById("#brakeStartMin").value) + " ~ " +
+	  	padTime(document.getElementById("#brakeEndHour").value) + " : " +
+	  	padTime(document.getElementById("#brakeEndMin").value);
 
-
-	const brakeTime = 
-	  padTime(document.getElementById("#brakeStartHour").value) + " : " +
-	  padTime(document.getElementById("#brakeStartMin").value) + " ~ " +
-	  padTime(document.getElementById("#brakeEndHour").value) + " : " +
-	  padTime(document.getElementById("#brakeEndMin").value);
-
-	var startHour = [];
-	var startMin = [];
-	var endHour = [];
-	var endMin = [];
-	
-	for(let i = 0; i < document.getElementsByName("startHourValue").length ; i++) {
-		startHour[i] = document.getElementsByName("startHourValue")[i]?.value || "";
-		startMin[i] = document.getElementsByName("startMinValue")[i]?.value || "";
-		endHour[i] = document.getElementsByName("endHourValue")[i]?.value || "";
-		endMin[i] = document.getElementsByName("endMinValue")[i]?.value || "";
-	}
-
-<!--	function checkStoreInfo() {-->
-<!--		var form = document.storeInfo;	-->
-<!--		var store_phone_number = form.storePhoneNumber.value;-->
+	const operatingHour =  //운영 시간
+		padTime(document.getElementById("#startHour").value) + " : " +
+		padTime(document.getElementById("#startMin").value) + " ~ " +
+		padTime(document.getElementById("#endHour").value) + " : " +
+		padTime(document.getElementById("#endMin").value);
 		
-		
-<!--		form.submit();-->
-<!--	}-->
-
+	const lastOrder =  //라스트 오더
+		padTime(document.getElementById("#lastOrderHour").value) + " : " +
+		padTime(document.getElementById("#lastOrderMin").value);
 </script>
 
 
@@ -145,8 +88,12 @@
 				<form action="${contextPath}/franchisor/addStoreInfo?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
 					<input type="hidden" id="storeId" value="${storeId}" />
 					<input type="hidden" id="storeName" value="${storeName}" />
-					<h3>가게 정보 등록</h3>
-					<table>
+					<h3 style="text-align:center">가게 정보 등록</h3>
+					<table class="info_container">
+						<colgroup>
+							<col style="width: 200px;">
+							<col style="width: 500px;">
+						</colgroup>
 						<tr>
 							<td width=200 >가게 유형</td>
 							<td width=500>
@@ -192,42 +139,19 @@
 							</td>
 						</tr>
 						<tr>
-							<td >운영시간<small>(24시간제로 입력)</small></td>
-							<td>
-								<table>
-									<thead>
-										<tr>
-											<td>
-												<select name="openDayList">
-													<option value="월" selected>월
-													<option value="화">화
-													<option value="수">수
-													<option value="목">목
-													<option value="금">금
-													<option value="토">토
-													<option value="일">일
-												</select>
-											</td>
-											<td>
-												<input name="startHourValue" type="text" size="4" /> :
-												<input name="startMinValue" type="text" size="4" /> ~
-												<input name="endHourValue" type="text" size="4" /> :
-												<input name="endMinValue" type="text" size="4" />
-											</td>
-										</tr>
-									</thead>
-									<tbody id="moreDay"></tbody>
-								</table>
-								<input type="button" value="요일 추가" onClick="addDay()" >
-							</td>
+							<td>운영시간<small>(24시간제로 입력)</small></td>
+							<td><input type="text" id="startHour" size="4"> : <input type="text" id="startMin" size="4"> ~ <input type="text" id="endHour" size="4"> : <input type="text" id="endMin" size="4"></td>
 						</tr>
 						<tr>
 							<td>브레이크 타임</td>
 							<td>
-								<input id="brakeStartHour" type="text" size="4" /> :
-								<input id="brakeStartMin" type="text" size="4" /> ~
-								<input id="brakeEndHour" type="text" size="4" /> :
-								<input id="brakeEndMin" type="text" size="4" />
+								<input id="brakeStartHour" type="text" size="4" /> : <input id="brakeStartMin" type="text" size="4" /> ~ <input id="brakeEndHour" type="text" size="4" /> : <input id="brakeEndMin" type="text" size="4" />
+							</td>
+						</tr>
+						<tr>
+							<td>라스트 오더</td>
+							<td>
+								<input id="lastOrderHour" type="text" size="4" /> : <input id="lastOrderMin" type="text" size="4" />
 							</td>
 						</tr>
 						<tr>
@@ -253,8 +177,12 @@
 			
 			<div class="tab_content" id="tab2">
 				<form action="${contextPath}/franchisor/addMenuInfo?storeId=${storeId}" method="post" enctype="multipart/form-data">
-					<h3>메뉴 등록</h3>
-					<table>
+					<h3 style="text-align:center">메뉴 등록</h3>
+					<table class="info_container">
+						<colgroup>
+							<col style="width:200px;">
+							<col style="width: 500px;">
+						</colgroup>
 						<tbody>
 							<tr>
 								<td>메뉴 이름 </td>
@@ -305,7 +233,7 @@
 								<td><input type="file" mame="image_name" accept="image/*" /></td>
 							</tr>
 						</tbody>
-						<tbody id="moreMenu"></tbody>
+						<tbody id="moreMenu" class="menu_container" ></tbody>
 					</table>
 					<input type="button" value="메뉴 추가" onClick="addMenu()">
 					<input type="button" onClick="checkMenu()" value="메뉴 등록" >

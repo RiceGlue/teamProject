@@ -24,6 +24,8 @@
 	.tabs li:hover { background-color: white; color:black; }
 	.tabs li a:hover { color:black; }
 	.tab_content { padding: 20px; background-color: #fff; }
+	
+	#map{ width: 100%; height:300px; margin: 0px auto 20px; position: relative; overflow: hidden; border-radius: 5px;}
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -48,8 +50,8 @@
 	});
 	
 	const regionStores = [
-		<c:forEach var="store" items="${storelist}" varStatus="status">
-	    	{ name: "${store.storeName}", address: "${store.address}" }<c:if test="${!status.last}">,</c:if>
+		<c:forEach var="region" items="${regionlist}" varStatus="status">
+	    	{ name: "${region.storeName}", address: "${region.address}" }<c:if test="${!status.last}">,</c:if>
 	 	</c:forEach>
 	];   
 	
@@ -73,7 +75,7 @@
     
     let map,markers=[];
     
-    function initMap(){map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.5665,lng:126.9780},zoom:12});}
+    function initMap(){map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.5665,lng:126.9780},zoom:11});}
     function showMarkers(storeList){
       const geocoder=new google.maps.Geocoder();
       markers.forEach(m=>m.setMap(null));markers=[];
@@ -113,19 +115,19 @@
     	      showMarkers(addrStores);
     	    } else if (activeTab === "#tab3") {
     	      showMarkers(nameStores);
+    	    } else {
+    	    	showMarkers(nameStores);
     	    }
     	  });
 
     	  // 최초 지도 초기화 및 첫 탭 데이터 로딩
     	  initMap();
-    	  showMarkers(menuStores);
+    	  showMarkers(regionStores);
     	});
 
 </script>
 
-<!-- Google Maps API (storeMap은 맨 아래에서 선언) -->
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&v=weekly&libraries=marker" defer></script>
 <c:choose>
 <c:when test="${option eq 'search'}">
 	<h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
@@ -134,14 +136,14 @@
 	<div class="tab_container">
 		<div class="tab_container" id="container">
 			<ul class="tabs">
-				<li><a href="#tab1">메뉴 검색</a></li>
-				<li><a href="#tab2">주소 검색</a></li>
-				<li><a href="#tab3">매장명 검색</a></li>
+				<li><a href="#tab1">메뉴</a></li>
+				<li><a href="#tab2">주소</a></li>
+				<li><a href="#tab3">매장명</a></li>
 			</ul>
 			<div class="tab_container">
 				<div class="tab_content" id="tab1">
 					<c:forEach var="menu" items="${menulist}" varStatus="status">
-						<div id="map" style="width: 100%; height: 500px; margin: 20px 0;"></div>
+						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
 								<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${menu.mainImage}" alt="가게이미지"></a>
@@ -163,7 +165,7 @@
 				</div>
 				<div class="tab_content" id="tab2">
 					<c:forEach var="addr" items="${addrlist}" varStatus="status">
-						<div id="map" style="width: 100%; height: 500px; margin: 20px 0;"></div>
+						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
 								<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${addr.mainImage}" alt="가게이미지"></a>
@@ -185,7 +187,7 @@
 				</div>
 				<div class="tab_content" id="tab3">
 					<c:forEach var="name" items="${namelist}" varStatus="status">
-						<div id="map" style="width: 100%; height: 500px; margin: 20px 0;"></div>
+						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
 								<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${name.mainImage}" alt="가게이미지"></a>
@@ -215,12 +217,12 @@
 	<hr>
 	
 	<!-- 반복 렌더링 시작 -->
-	<c:forEach var="store" items="${storelist}" varStatus="status">
-	<div id="map" style="width: 100%; height: 500px; margin: 20px 0;"></div>
+	<c:forEach var="region" items="${regionlist}" varStatus="status">
+	<div id="map"></div>
 	  <div class="store-card">
 	    <div class="store-image">
-	      <a href="${contextPath}/store/storeDetail?storeId=${store.storeId}">
-	        <img src="${store.mainImage}" alt="가게이미지">
+	      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
+	        <img src="${region.mainImage}" alt="가게이미지">
 	      </a>
 	<!--       대기 팀 수 표시 -->
 	<%--       <c:if test="${store.waitCount > 0}"> --%>
@@ -229,14 +231,14 @@
 	    </div>
 	
 	    <div class="store-info">
-	      <h4>${store.storeName}</h4>
+	      <h4>${region.storeName}</h4>
 	      <p>
-	        <span class="rating">★ ${store.avgRating}</span>
-	        리뷰 ${store.countRating}개
+	        <span class="rating">★ ${region.avgRating}</span>
+	        리뷰 ${region.countRating}개
 	      </p>
-	      <p class="meta-info">${store.storeType} · ${store.region}</p>
-	      <p class="meta-info">${store.description}</p>
-	<%--       <p class="meta-info">${store.openHour}:${store.openMin}~${store.endHour}:${store.endMin}</p> --%>
+	      <p class="meta-info">${region.storeType} · ${region.region}</p>
+	      <p class="meta-info">${region.description}</p>
+	<%--       <p class="meta-info">${region.openHour}:${region.openMin}~${region.endHour}:${region.endMin}</p> --%>
 	    </div>
 	  </div>
 	</c:forEach>

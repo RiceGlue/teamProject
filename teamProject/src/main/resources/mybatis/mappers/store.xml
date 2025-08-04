@@ -138,6 +138,18 @@
 		]]>
 	</select>
 	
+	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
+		<![CDATA[
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.main_image, s.store_type, s.region,
+	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.store_type = #{keyword}
+			GROUP BY s.store_id
+			ORDER BY s.store_id
+		]]>
+	</select>
+	
 	<select id="selectStoreDetail" parameterType="long" resultMap="storeInfo" >
 		<![CDATA[
 			SELECT s.*, a.store_name, a.address, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
