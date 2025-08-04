@@ -58,11 +58,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         // (수정) 빠져있던 이 코드를 다시 추가하여, 세션에 소셜 제공자 정보를 저장합니다.
         attributes.put("socialProvider", registrationId.toUpperCase());
-        
-        // (신규) 디버깅용 로그: 세션에 저장하기 직전의 attributes 맵 내용을 콘솔에 출력합니다.
-        System.out.println("--- CustomOAuth2UserService DEBUG ---");
-        System.out.println("Attributes to be saved in session: " + attributes);
-        System.out.println("-------------------------------------");
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role)),
