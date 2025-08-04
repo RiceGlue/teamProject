@@ -142,7 +142,7 @@
 		</ul>
 		<div class="tab_container">
 			<div class="tab_content" id="tab1">
-				<form action="${contextPath}/franchisor/addStoreInfo.do?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
+				<form action="${contextPath}/franchisor/addStoreInfo?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
 					<input type="hidden" id="storeId" value="${storeId}" />
 					<input type="hidden" id="storeName" value="${storeName}" />
 					<h3>가게 정보 등록</h3>
@@ -252,7 +252,7 @@
 			
 			
 			<div class="tab_content" id="tab2">
-				<form action="${contextPath}/franchisor/addMenuInfo.do?storeId=${storeId}" method="post" enctype="multipart/form-data">
+				<form action="${contextPath}/franchisor/addMenuInfo?storeId=${storeId}" method="post" enctype="multipart/form-data">
 					<h3>메뉴 등록</h3>
 					<table>
 						<tbody>

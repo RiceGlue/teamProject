@@ -1,4 +1,3 @@
-// src/main/java/com/spring/teamProject/controller/ReservationCustomerController.java
 package com.spring.teamProject.controller;
 
 import com.spring.teamProject.service.ReservationService;
@@ -14,12 +13,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession; // HttpSession import 추가
+import jakarta.servlet.http.HttpSession;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/reservation/customer")
@@ -46,8 +46,21 @@ public class ReservationCustomerController {
     public String showBookingForm(@RequestParam("storeId") Long storeId,
                                   @RequestParam(value = "date", required = false)
                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                  @RequestParam(value = "reservationTime", required = false)
+                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
+                                  @RequestParam(value = "tableId", required = false) Long tableId,
+                                  @RequestParam(value = "guestCount", required = false, defaultValue = "1") Integer guestCount,
                                   Model model) {
         logger.info("고객 예약 폼 요청 - storeId: {}", storeId);
+
+        // 전달받은 파라미터가 있으면 모델에 추가하여 JSP에 전달
+        if (reservationTime != null) {
+            model.addAttribute("selectedReservationTime", reservationTime);
+        }
+        if (tableId != null) {
+            model.addAttribute("selectedTableId", tableId);
+        }
+        model.addAttribute("guestCount", guestCount);
 
         if (date == null) {
             date = LocalDate.now();
@@ -86,11 +99,14 @@ public class ReservationCustomerController {
      */
     @PostMapping("/book")
     public String processBookingForm(@ModelAttribute("reservationVO") ReservationVO reservation,
+                                     @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
+
+        reservation.setReservationTime(reservationTime);
+
         logger.info("예약 폼 제출됨 - ReservationVO: {}", reservation);
 
-        // TODO: 로그인된 사용자 ID를 세션에서 가져와야 함 (더미 데이터 사용)
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
             memberId = 1L; // 테스트용 임시 memberId
@@ -99,6 +115,23 @@ public class ReservationCustomerController {
         reservation.setStatus("PENDING");
 
         try {
+            // **추가된 로직: tableId가 null인 경우 서버에서 직접 할당**
+            if (reservation.getTableId() == null) {
+                Optional<Long> availableTableId = reservationService.findAvailableTable(
+                    reservation.getStoreId(),
+                    reservation.getReservationTime(),
+                    reservation.getGuestCount()
+                );
+
+                if (availableTableId.isPresent()) {
+                    reservation.setTableId(availableTableId.get());
+                    logger.info("사용 가능한 테이블 ID가 할당되었습니다: {}", reservation.getTableId());
+                } else {
+                    redirectAttributes.addFlashAttribute("errorMessage", "해당 시간에 예약 가능한 테이블이 없습니다. 다른 시간을 선택해주세요.");
+                    return "redirect:/reservation/customer/bookForm?storeId=" + reservation.getStoreId();
+                }
+            }
+
             reservationService.addReservation(reservation);
             logger.info("예약 성공: {}", reservation.getReservationId());
             redirectAttributes.addFlashAttribute("message", "예약이 성공적으로 접수되었습니다!");

@@ -26,9 +26,21 @@ public class StoreServiceImpl implements StoreService{
 	}
 	
 	@Override
-	public List<StoreVO> selectStoreByType(String keyword) throws Exception {
-		List<StoreVO> storelist = storeDAO.selectStoreByType(keyword);
-		return storelist;
+	public List<StoreVO> selectStoreByMenu(String keyword) throws Exception {
+		List<StoreVO> menulist = storeDAO.selectStoreByMenu(keyword);
+		return menulist;
+	}
+	
+	@Override
+	public List<StoreVO> selectStoreByAddr(String keyword) throws Exception{
+		List<StoreVO> addrlist = storeDAO.selectStoreByAddr(keyword);
+		return addrlist;
+	}
+	
+	@Override
+	public List<StoreVO> selectStoreByName(String keyword) throws Exception{
+		List<StoreVO> namelist = storeDAO.selectStoreByName(keyword);
+		return namelist;
 	}
 	
 	@Override
@@ -51,7 +63,7 @@ public class StoreServiceImpl implements StoreService{
 //		storeMap.put("reservation", reservation);
 		
 		System.out.println(storeId);
-		System.out.println(store.getAddress());
+		System.out.println(store.getStoreId());
 		
 		return storeMap;
 	}

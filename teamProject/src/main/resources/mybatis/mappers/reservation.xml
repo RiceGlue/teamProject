@@ -69,4 +69,20 @@
             reservation_time ASC
     </select>
 
+	<select id="findAvailableTables" resultType="com.spring.teamProject.vo.StoreTableVO">
+        SELECT *
+        FROM store_tables st
+        WHERE st.store_id = #{storeId}
+        AND st.capacity >= #{guestCount}
+        AND st.table_id NOT IN (
+            SELECT table_id
+            FROM reservations
+            WHERE store_id = #{storeId}
+            AND reservation_time = #{reservationTime}
+            AND status != 'CANCELLED'
+        )
+        LIMIT 1
+    </select>
+
+
 </mapper>
