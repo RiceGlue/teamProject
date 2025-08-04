@@ -25,15 +25,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String registrationId = userRequest.getClientRegistration().getRegistrationId(); // "google"
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-
         String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
         String socialId = oAuth2User.getAttribute(userNameAttributeName);
 
         MemberVO member = memberDAO.findByEmail(email);
-        String role;
+        String role;	//사용자 분류
 
         if (member != null) {
             // 이미 가입된 사용자인 경우
@@ -41,14 +39,30 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 // (수정) 역할이 점주나 관리자이면 소셜 로그인을 차단하고 예외를 발생시킵니다.
                 throw new OAuth2AuthenticationException("가맹점주 및 관리자 계정은 소셜 로그인을 이용할 수 없습니다.");
             }
-            role = member.getRole(); // 기존 'USER' 역할 부여
+            
+            // (신규) 일반 회원이 처음 소셜 로그인을 시도하는 경우, 계정을 연동합니다.
+            if (member.getSocialProvider() == null) {
+                member.setSocialProvider(registrationId.toUpperCase());
+                member.setSocialId(socialId);
+                memberDAO.updateSocialInfo(member); // DB에 소셜 정보 업데이트
+            }
+            
+            role = member.getRole();
         } else {
             // 처음 방문한 사용자는 추가 정보 입력을 위해 임시 역할 'GUEST'를 부여합니다.
             role = "GUEST"; 
         }
 
         Map<String, Object> attributes = new java.util.HashMap<>(oAuth2User.getAttributes());
-        attributes.put("role", role); // 역할 정보 추가
+        attributes.put("role", role);
+        
+        // (수정) 빠져있던 이 코드를 다시 추가하여, 세션에 소셜 제공자 정보를 저장합니다.
+        attributes.put("socialProvider", registrationId.toUpperCase());
+        
+        // (신규) 디버깅용 로그: 세션에 저장하기 직전의 attributes 맵 내용을 콘솔에 출력합니다.
+        System.out.println("--- CustomOAuth2UserService DEBUG ---");
+        System.out.println("Attributes to be saved in session: " + attributes);
+        System.out.println("-------------------------------------");
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role)),

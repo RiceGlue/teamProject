@@ -1,6 +1,52 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+// DOM(Document Object Model)이 완전히 로드된 후에, 중괄호 안의 코드를 실행합니다.
+$(function() {
+    // id가 'profileImageFile'인 요소에 'change' 이벤트가 발생하면 실행될 함수를 연결합니다.
+    $('#profileImageFile').on('change', function() {
+        validateImage(this);
+    });
+
+    // 이미지 유효성 검사 및 미리보기 함수
+    function validateImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
+            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+            resetInput(input);
+            return;
+        }
+
+        const maxResolution = 500; // 최대 가로/세로 500px
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 이미지 입력 초기화 함수
+    function resetInput(input) {
+        input.value = '';
+        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
+    }
+});
+</script>
+
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">일반 회원가입</h2>
     
@@ -12,7 +58,7 @@
             <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
             <div>
                 <label for="profileImageFile" class="form-label">프로필 이미지 (2MB / 500x500px 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" accept="image/*">
             </div>
         </div>
         
@@ -104,11 +150,6 @@
             <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
         </div>
         
-        <%-- (신규) 디버깅용 코드: 사이트 키가 제대로 전달되는지 화면에 직접 출력해봅니다. --%>
-        <div class="alert alert-info">
-            <strong>디버깅용 사이트 키:</strong> [${recaptchaSiteKey}]
-        </div>
-        
         <%-- (신규) reCAPTCHA 위젯 추가 --%>
         <div class="mb-3 d-flex justify-content-center">
             <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
@@ -119,39 +160,3 @@
         </div>
     </form>
 </div>
-
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-    function validateImage(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSizeInBytes) {
-            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-            resetInput(input);
-            return;
-        }
-
-        const maxResolution = 500; // 최대 가로/세로 500px
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const image = new Image();
-            image.src = e.target.result;
-            image.onload = function() {
-                if (this.width > maxResolution || this.height > maxResolution) {
-                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
-                    resetInput(input);
-                    return;
-                }
-                document.getElementById('preview').src = e.target.result;
-            };
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function resetInput(input) {
-        input.value = '';
-        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
-    }
-</script>

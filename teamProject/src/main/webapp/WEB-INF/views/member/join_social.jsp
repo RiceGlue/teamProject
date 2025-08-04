@@ -1,6 +1,48 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+$(function() {
+    $('#profileImageFile').on('change', function() {
+        validateImage(this);
+    });
+
+    function validateImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
+            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+            resetInput(input);
+            return;
+        }
+
+        const maxResolution = 500; // 최대 가로/세로 500px
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function resetInput(input) {
+        input.value = '';
+        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
+    }
+});
+</script>
+
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">추가 정보 입력</h2>
     <p class="text-center text-muted mb-4">정확한 서비스 이용을 위해 추가 정보를 입력해주세요.</p>
@@ -12,7 +54,7 @@
             <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
             <div>
                 <label for="profileImageFile" class="form-label">프로필 이미지 (2MB / 500x500px 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" accept="image/*">
             </div>
         </div>
         <div class="mb-3">
@@ -103,39 +145,3 @@
         </div>
     </form>
 </div>
-
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-    function validateImage(input) {
-        const file = input.files[0];
-        if (!file) return;
-
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSizeInBytes) {
-            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-            resetInput(input);
-            return;
-        }
-
-        const maxResolution = 500; // 최대 가로/세로 500px
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const image = new Image();
-            image.src = e.target.result;
-            image.onload = function() {
-                if (this.width > maxResolution || this.height > maxResolution) {
-                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
-                    resetInput(input);
-                    return;
-                }
-                document.getElementById('preview').src = e.target.result;
-            };
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function resetInput(input) {
-        input.value = '';
-        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
-    }
-</script>

@@ -29,6 +29,16 @@
 		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
 	
+	<!-- (신규) 소셜 정보 업데이트 (계정 연동용) -->
+	<update id="updateSocialInfo" parameterType="com.spring.teamProject.vo.MemberVO">
+		UPDATE members
+		SET
+			social_provider = #{socialProvider},
+			social_id = #{socialId}
+		WHERE
+			member_id = #{memberId}
+	</update>
+	
     <!-- (신규) memberId로 회원 정보 조회 -->
     <select id="findById" parameterType="long" resultMap="memberResultMap">
         SELECT * FROM members WHERE member_id = #{memberId}

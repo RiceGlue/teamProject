@@ -27,6 +27,8 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("name", memberVO.getMemberName()); // 'name' 키에 사용자 이름을 저장
         attributes.put("email", memberVO.getEmail());
+        // (신규) 소셜 로그인 제공자 정보를 추가합니다. 일반 회원은 이 값이 null입니다.
+        attributes.put("socialProvider", memberVO.getSocialProvider());
         // 필요한 다른 정보들도 여기에 추가할 수 있습니다.
         return attributes;
     }
