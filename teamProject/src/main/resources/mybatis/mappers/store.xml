@@ -23,15 +23,12 @@
 		<result property="storePhoneNumber" column="store_phone_number" />
 		<result property="address" column="address" />
 		<result property="breakTime" column="break_time" />
-		<result property="dayOff" column="day_off" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
 		<result property="mainImage" column="main_image" />
-		<result property="startHour" column="start_hour" />
-		<result property="startMin" column="start_min" />
-		<result property="endHour" column="end_hour" />
-		<result property="endMin" column="end_min" />
-		<result property="openDay" column="open_day" />
+		<result property="closed" column="closed" />
+		<result property="operatingHours" column="operating_hours" />
+		<result property="lastOrder" column="last_order" />
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>

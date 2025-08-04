@@ -55,7 +55,7 @@
 	<h4>${store.storeName } </h4>
 	<p>⭐${store.avgRating} 리뷰 ${store.countRating}개</p>
 	<p>${store.address}
-	<p>${store.startHour}:${store.startMin}~${store.endHour}:${store.endMin}
+	<p>${operatingHours}
 </div>
 
 <div class="tab_container">

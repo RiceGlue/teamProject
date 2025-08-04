@@ -58,11 +58,11 @@
 		amenities.push(amenOption);
 	})
 	
-	const brakeTime =  //브레이크 타임
-	 	padTime(document.getElementById("brakeStartHour").value) + " : " +
-	  	padTime(document.getElementById("brakeStartMin").value) + " ~ " +
-	  	padTime(document.getElementById("brakeEndHour").value) + " : " +
-	  	padTime(document.getElementById("brakeEndMin").value);
+	const breakTime =  //브레이크 타임
+	 	padTime(document.getElementById("breakStartHour").value) + " : " +
+	  	padTime(document.getElementById("breakStartMin").value) + " ~ " +
+	  	padTime(document.getElementById("breakEndHour").value) + " : " +
+	  	padTime(document.getElementById("breakEndMin").value);
 
 	const operatingHours =  //운영 시간
 		padTime(document.getElementById("startHour").value) + " : " +

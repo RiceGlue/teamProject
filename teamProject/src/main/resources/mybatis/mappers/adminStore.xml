@@ -65,7 +65,7 @@
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="map" >
-	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, day_off, description, amenities, created_at, update_at, main_image, start_hour, start_min, end_hour, end_min, open_day) values
+	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, description, amenities, main_image, created_at, update_at, operating_hours, closed, last_order ) values
 	    <foreach collection="storelist" item="store" separator=",">
 	        (
 	            #{store.storeId},
@@ -74,17 +74,14 @@
 	            #{store.operationType},
 	            #{store.storePhoneNumber},
 	            #{store.breakTime},
-	            #{store.dayOff},
 	            #{store.description},
 	            #{store.amenities},
 	            #{store.mainImage},
 	            now(),
 	            now(),
-	            #{store.startHour},
-	            #{store.startMin},
-	            #{store.endHour},
-	            #{store.endMin},
-	            #{store.openDay}
+	            #{store.operatingHours},
+	            #{store.closed},
+	            #{store.lastOrder}
 	        )
 	    </foreach> 
 	    <selectKey>

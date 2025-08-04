@@ -110,8 +110,6 @@
 	</style>
 
 	<script>
-		
-	
 		let map;
 
 	    function initMap() {
@@ -409,7 +407,7 @@
 			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.storePhoneNumber } </p>
 		</div>
 		<div style="color: green;">
-			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"> ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin} </p>
+			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"> ${store.operatingHours} </p>
 		</div>
 
 		<div class="tab_container">
@@ -509,7 +507,7 @@
 									<div class="rating_bar_container">
 										<span class="rating_label">${detailReview.rating}점 ${detailReview.countScoreRating}</span>
 										<div class="rating_bar_bg">
-											<div class="rating_bar_fill" style="width: ${detailReview.countScoreRating}px;"></div>
+											<div class="rating_bar_fill" style="width:20px;"></div>
 										</div>
 									</div>
 								</c:forEach>
@@ -544,15 +542,19 @@
 							<h4>상세정보</h4>
 							<div>
 								<p><strong>영업시간</strong></p>
-								<p>${store.dayOff }
+								<p>${store.operatingHours }
 							</div>
 							<div>
 								<P><strong>정기휴무</strong></P>
-								<p>${store.dayOff }</p>
+								<p>${store.closed }</p>
 							</div>
 							<div>
 								<P><strong>브레이크 타임</strong></P>
-								<p>${store.brakeTime }</p>
+								<p>${store.breakTime }</p>
+							</div>
+							<div>
+								<P><strong>라스트 오더</strong></P>
+								<p>${store.lastOrder }</p>
 							</div>
 						</div>
 					</div>
