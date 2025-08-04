@@ -1,0 +1,34 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Black+Han+Sans&family=Noto+Sans+KR:wght@100..900&display=swap');
+
+/* concept-color */
+:root {
+	--cc-white  : #f8f2f7;
+	--cc-orange : #ff7a5c;
+	--cc-green  : #5a8a72;
+	--cc-black  : #3d3d3d;
+	--text-size : 14px;
+	--font-noto-sans-kr: 'Noto Sans KR', sans-serif;
+    --font-black-han-sans: 'Black Han Sans', sans-serif;
+    --font-bagel-fat-one: 'Bagel Fat One', system-ui;
+
+}
+body {
+	font-family: var(--font-noto-sans-kr) !important;
+	font-weight: 400  !important;
+	font-style: normal  !important;
+	line-height: 1.6  !important; }
+
+.noto-sans {
+    font-family: var(--font-noto-sans-kr);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .bagel-fat {
+    font-family: var(--font-bagel-fat-one);
+    font-weight: 400;
+    font-style: normal;
+  }

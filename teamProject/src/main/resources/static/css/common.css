@@ -5,12 +5,23 @@
 .row > .container {border: 2px solid olivedrab; border-radius: 20px; padding: 15px;}
 
 /* table {border:1px solid cornflowerblue;} */
+/* table td {border:1px solid coral;} */
+
 table th {padding: 5px 10px;}
 table td {vertical-align: middle; padding: 5px 10px;}
 
+
 table th,
-/* table td {border:1px solid coral;} */
 table thead th {text-align: center;}
+
+form table {width: 100%;}
+form table th,
+form table td {height:50px; font-size: var(--text-size); border-bottom: 1px solid var(--cc-black);}
+form table td > * {height: 28px;}
+form table td > input:not(type="file"),
+form table td > select,
+form table td > textarea {border: 1px solid var(--cc-black);}
+form table td > *:not(input, textarea) {cursor: pointer;}
 
 .search-container {
       width: 100%;
