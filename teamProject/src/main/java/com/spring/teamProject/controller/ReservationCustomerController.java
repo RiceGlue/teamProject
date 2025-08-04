@@ -41,36 +41,32 @@ public class ReservationCustomerController {
 
     /**
      * 예약 신청 폼을 보여주는 메서드
+     * storeDetail.jsp에서 전송한 GET 요청을 처리
      */
     @GetMapping("/bookForm")
     public String showBookingForm(@RequestParam("storeId") Long storeId,
-                                  @RequestParam(value = "date", required = false)
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                  @RequestParam(value = "reservationTime", required = false)
-                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
+                                  @RequestParam(value = "reservationTime", required = false) String reservationTime,
                                   @RequestParam(value = "tableId", required = false) Long tableId,
                                   @RequestParam(value = "guestCount", required = false, defaultValue = "1") Integer guestCount,
                                   Model model) {
-        logger.info("고객 예약 폼 요청 - storeId: {}", storeId);
+        logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableId: {}, guestCount: {}",
+                storeId, reservationTime, tableId, guestCount);
 
-        // 전달받은 파라미터가 있으면 모델에 추가하여 JSP에 전달
-        if (reservationTime != null) {
-            model.addAttribute("selectedReservationTime", reservationTime);
-        }
-        if (tableId != null) {
-            model.addAttribute("selectedTableId", tableId);
-        }
+        // StoreDetail.jsp에서 넘겨받은 파라미터를 Model에 담아 bookingForm.jsp로 전달
+        model.addAttribute("storeId", storeId);
+        model.addAttribute("selectedReservationTime", reservationTime);
+        model.addAttribute("selectedTableId", tableId);
         model.addAttribute("guestCount", guestCount);
 
-        if (date == null) {
-            date = LocalDate.now();
-        }
+        // reservationTime 파라미터에서 날짜 부분만 추출하여 bookingForm.jsp에 전달
+        String currentDate = (reservationTime != null && reservationTime.length() >= 10)
+                             ? reservationTime.substring(0, 10)
+                             : LocalDate.now().toString();
+        model.addAttribute("currentDate", currentDate);
 
+        // DB에서 Store 정보를 조회하여 Model에 추가 (임시 데이터 사용)
         StoreVO store = getDummyStoreInfo(storeId);
         model.addAttribute("store", store);
-        model.addAttribute("storeId", storeId);
-        model.addAttribute("reservationVO", new ReservationVO());
-        model.addAttribute("currentDate", date);
 
         return "reservation/customer/bookingForm";
     }

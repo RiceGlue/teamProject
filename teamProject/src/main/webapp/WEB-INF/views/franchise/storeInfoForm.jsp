@@ -1,16 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <style>
-	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
-	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
-	.tabs li:last-child { border-right: none; }
-	.tabs li.active { background-color: white; }
-	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; }
-	.tabs li.active a { color: black; }
-	.tabs ul { background-color:#3f3f3f; }
-	.tabs li:hover { background-color: white; color:black; }
-	.tabs li a:hover { color:black; }
-	.tab_content { padding: 20px; background-color: #fff; }
-	.info_container { text-align:left; }
+/* 	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;} */
+/* 	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; } */
+/* 	.tabs li:last-child { border-right: none; } */
+/* 	.tabs li.active { background-color: white; } */
+/* 	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; } */
+/* 	.tabs li.active a { color: black; } */
+/* 	.tabs ul { background-color:#3f3f3f; } */
+/* 	.tabs li:hover { background-color: white; color:black; } */
+/* 	.tabs li a:hover { color:black; } */
+/* 	.tab_content { padding: 20px; background-color: #fff; } */
+/* 	.info_container { text-align:left; } */
 </style>
 
 <script>
@@ -149,7 +149,7 @@
 				<form action="${contextPath}/franchise/addStoreInfo?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
 					<input type="hidden" id="storeId" value="${storeId}" />
 					<input type="hidden" id="storeName" value="${storeName}" />
-					<h3 style="text-align:center">가게 정보 등록</h3>
+					<!-- <h3 style="text-align:center">가게 정보 등록</h3> -->
 					<table class="info_container">
 						<colgroup>
 							<col style="width: 200px;">
@@ -236,7 +236,7 @@
 
 			<div class="tab_content" id="tab2">
 				<form action="${contextPath}/franchisor/addMenuInfo?storeId=${storeId}" method="post" enctype="multipart/form-data">
-					<h3 style="text-align:center">메뉴 등록</h3>
+					<!-- <h3 style="text-align:center">메뉴 등록</h3> -->
 					<table class="info_container">
 						<colgroup>
 							<col style="width:200px;">

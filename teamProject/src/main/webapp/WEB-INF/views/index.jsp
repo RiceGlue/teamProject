@@ -2,7 +2,7 @@
 
 <div class="row">
 	<!-- test 섹션 -->
-	<div class="container my-4">
+	<div class="container my-4" style="display: none;">
 	    <h2>test 링크</h2>
 	    <div class="row row-cols-2 row-cols-md-2 g-3">
 	        <div class="col">
