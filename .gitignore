@@ -53,3 +53,5 @@ bin/com/spring/teamProject/vo/WaitingVO.class
 teamProject/server.log
 *.class
 .project
+teamProject/bootrun.log
+crash_log.txt

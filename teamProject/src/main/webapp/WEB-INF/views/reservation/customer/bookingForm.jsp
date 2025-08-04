@@ -65,7 +65,7 @@
     <input type="hidden" name="storeId" value="${storeId}" />
     <input type="hidden" name="reservationTimeStr" id="selectedReservationTime" value="${selectedReservationTime}" />
     <input type="hidden" name="tableId" id="selectedTableId" value="${selectedTableId}" />
-    <div class="mb-3">
+    <input type="hidden" name="paymentId" id="paymentIdInput" /> <div class="mb-3">
         <label for="reservationDate" class="form-label">예약 날짜:</label>
         <input type="text" class="form-control" id="reservationDate" placeholder="날짜를 선택하세요" required="true" value="${currentDate}">
     </div>
@@ -90,27 +90,26 @@
         <textarea class="form-control" id="request" name="request" rows="3" placeholder="특별히 요청할 사항이 있다면 입력해주세요."></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">예약 신청하기</button>
+    <button type="button" id="payment-button" class="btn btn-primary mt-3">예약 신청하기</button>
     <a href="${contextPath}/store/storeDetail?storeId=${storeId}" class="btn btn-secondary mt-3">취소</a>
 </form>
 </div>
 
+<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     $(function() {
-        // JSP 변수인 contextPath를 JavaScript 변수로 저장
         var contextPath = '${contextPath}';
         var preselectedDate = '${currentDate}';
         var preselectedTime = '${selectedReservationTime}'.split('T')[1];
         var preselectedTableId = '${selectedTableId}';
 
-        // jQuery UI Datepicker 초기화
         $("#reservationDate").datepicker({
             dateFormat: 'yy-mm-dd',
-            minDate: 0, // 오늘 날짜부터 선택 가능
+            minDate: 0,
             onSelect: function(dateText, inst) {
                 fetchAvailableSlots(dateText);
             }
@@ -129,7 +128,6 @@
                 data: { storeId: storeId, date: date },
                 success: function(data) {
                     updateTimeSlots(data);
-                    // 이전 페이지에서 선택된 값으로 버튼 자동 선택
                     if (date === preselectedDate && preselectedTime) {
                         const timeButton = $(`#time-slots-container button[data-time="${preselectedTime}"]`);
                         if(timeButton.length) {
@@ -214,7 +212,6 @@
             }
         }
 
-        // 초기 로드 시 예약 정보를 불러옴
         if (preselectedDate) {
             $("#reservationDate").val(preselectedDate);
             fetchAvailableSlots(preselectedDate);
@@ -232,7 +229,6 @@
             var selectedTime = $(this).data('time').replace(':', '');
             $('#table-area-' + selectedTime).show();
 
-            // 시간 선택 시 테이블 선택 및 폼 필드 초기화
             $('.table-slot-btn').removeClass('selected');
             $('#selectedTableId').val('');
 
@@ -254,12 +250,66 @@
             $('#selectedTableId').val(tableId);
         });
 
-        $('#reservationForm').on('submit', function(e) {
+        $('#payment-button').on('click', function(e) {
             if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
-                e.preventDefault();
                 alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
+                return;
             }
+            requestPay();
         });
+
+     // PortOne을 사용하여 결제를 요청하는 함수 (수정된 버전)
+        function requestPay() {
+            if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
+                alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
+                return;
+            }
+
+            const { PortOne } = window;
+            const storeName = '${store.storeName}';
+            const storeId = $('[name="storeId"]').val();
+            const orderId = `reservation_${storeId}_${Date.now()}`;
+
+            $('#paymentIdInput').val(orderId);
+
+            PortOne.requestPayment({
+                // 1. 가맹점 식별코드: 포트원 대시보드에서 발급받은 실제 값 사용
+                // 이미지의 storeId가 'store-b124e965...'라면 해당 값 사용
+                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
+
+                // 2. PG사 정보
+                // 연동 정보 스크린샷에 나온 PG Provider 'inicis_v2'를 기반으로
+                // pg 파라미터는 'inicis'로만 지정합니다.
+                pg: 'inicis',
+                payMethod: 'card', // 필수 파라미터: 결제 수단 (예: 'card')
+
+                // 3. 결제 정보
+                name: `${storeName} 예약 결제`,
+                amount: 100, // 테스트 금액 100원
+                orderId: orderId,
+
+                // 4. 고객 정보
+                customer: {
+                    fullName: '테스터조원기',
+                    phoneNumber: '010-7277-7829',
+                    email: 'ksd0607@naver.com'
+                },
+
+                // 5. 콜백 및 리다이렉션 설정
+                redirectUrl: window.location.href
+            })
+            .then(function(response) {
+                if (response.code === '0000') {
+                    alert('결제에 성공했습니다.');
+                    $('#reservationForm').submit();
+                } else {
+                    alert(`결제에 실패했습니다. 에러 메시지: ${response.message}`);
+                }
+            })
+            .catch(function(error) {
+                alert(`결제 요청 중 오류가 발생했습니다: ${error.message}`);
+            });
+        }
     });
 </script>
 </body>

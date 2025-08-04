@@ -24,6 +24,9 @@ public interface MemberDAO {
 	// (레거시) 로그인 처리 - Security가 인증을 대신 처리합니다.
 	MemberVO login(MemberVO memberVO);
 	
+    // (신규) 기존 회원의 소셜 정보를 업데이트합니다. (계정 연동용)
+    int updateSocialInfo(MemberVO memberVO);
+	
 	/*
 	 * 회원정보 수정
 	 * MyBatis와 같은 데이터 프레임 워크는 INSERT, UPDATE, DELETE 쿼리를 실행한 후
