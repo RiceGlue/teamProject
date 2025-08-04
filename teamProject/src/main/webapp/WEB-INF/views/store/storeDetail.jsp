@@ -56,7 +56,7 @@
 		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.detail-box { padding:auto 10px; margin:30px; }
-		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
+		#googleMap { width: 100%; height: 300px; border-radius:10px; }
 <<<<<<< HEAD
 		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 		.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
