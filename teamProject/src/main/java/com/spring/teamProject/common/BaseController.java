@@ -56,11 +56,4 @@ public class BaseController {
 	        }
 	    }
 
-	    @RequestMapping(value = "/*.do", method = {RequestMethod.GET, RequestMethod.POST})
-	    protected ModelAndView viewForm(HttpServletRequest request, HttpServletResponse response) throws Exception {
-	        String viewName = (String) request.getAttribute("viewName");
-	        return new ModelAndView(viewName);
-	    }
-
-
 }

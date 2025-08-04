@@ -97,19 +97,44 @@
 			INNER JOIN reviews r ON s.store_id = r.store_id
 			WHERE s.region = #{keyword}
 			GROUP BY s.store_id
-			ORDER BY s.store_id;
+			ORDER BY s.store_id
 		]]>
 	</select>
 	
-	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
+	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
+		<![CDATA[
+		    SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.main_image, s.store_type, s.region,
+		    ROUND(AVG(r.rating), 2) AS avgRating,COUNT(r.review_id) AS countRating
+		    FROM stores s
+		    INNER JOIN menu m ON s.store_id = m.store_id
+		    LEFT JOIN reviews r ON s.store_id = r.store_id
+		    WHERE m.menu_name LIKE CONCAT('%', #{keyword}, '%')
+		    GROUP BY s.store_id
+		    ORDER BY s.store_id
+		]]>
+	</select>
+
+	<select id="selectStoreByAddr" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.main_image, s.store_type, s.region,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.store_type = #{keyword}
+			WHERE s.address LIKE CONCAT('%', #{keyword}, '%')
 			GROUP BY s.store_id
-			ORDER BY s.store_id;
+			ORDER BY s.store_id
+		]]>
+	</select>
+	
+	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
+		<![CDATA[
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.main_image, s.store_type, s.region,
+	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.store_name LIKE CONCAT('%', #{keyword}, '%')
+			GROUP BY s.store_id
+			ORDER BY s.store_id
 		]]>
 	</select>
 	
@@ -128,7 +153,7 @@
 		<![CDATA[
 			select * from image_file
 			where info_id = (select info_id from store_info where store_id=#{storeId} ) or 
-			review_id = (select review_id from reviews where store_id=#{storeId});
+			review_id = (select review_id from reviews where store_id=#{storeId})
 		]]>
 	</select>
 		

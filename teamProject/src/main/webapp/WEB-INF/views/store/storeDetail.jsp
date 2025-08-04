@@ -57,6 +57,18 @@
 		.reservation-box{ text-align:center; }
 		.detail-box { padding:auto 10px; margin:30px; }
 		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
+		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
+		.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+		.home_menu_image img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
+		.home_menu_info { margin-left: 15px; }
+		.home_menu_name { font-size: 18px; font-weight: bold; margin: 5px 0; }
+		.home_menu_price { font-size: 16px; color: #000; }
+		.home_menu_description { color: #555; font-size: 14px; }
+		.home_menu_badge { display: inline-block; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; font-weight: bold; color: white; }
+		.home_menu_badge.red { background-color: red; }
+		.home_menu_badge.orange { background-color: orange; }
+		.home_menu_more_btn_wrap { text-align: center; margin-top: 20px; }
+		.home_menu_more_btn { padding: 10px 20px; color: black; border: 1px solid black; border-radius: 6px; font-size: 16px; cursor: pointer; }		
 	</style>
 
 	<script>
@@ -128,6 +140,8 @@
 		    $("ul.tabs li:first").addClass("active").show();
 		    $(".tab_content:first").show();
 		});
+		
+		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
 	</script>
 
 <!-- Google Maps API (storeMap은 맨 아래에서 선언) -->
@@ -208,13 +222,33 @@
 						<div class="back-link">
 							<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
+						
+						<div class="home_menu_container">
+							<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
+								<c:if test="${status.index < 5}">
+									<div class="home_menu_card">
+										<div class="home_menu_image">
+											<img src="${menu.imageName}" alt="${menu.menuName}">
+										</div>
+										<div class="home_menu_info">
+											<p class="home_menu_name">${menu.menuName}</p>
+											<p class="home_menu_price">${menu.price}원</p>
+											<p class="home_menu_description">${menu.description}</p>
+										</div>
+									</div>
+								</c:if>
+							</c:forEach>
+							<div class="home_menu_more_btn_wrap">
+								<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
+							</div>
+						</div>
 					</div>
 					<div class="tab_content" id="tab2"> <!-- 메뉴 -->
 						<div class="menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}">
 								<div class="menu_card">
 									<div class="menu_image">
-										<img src="${menu.imageName}" alt="${menu.menuName}">
+										<img src="${menu.imageName}" alt="${menu.menuName}" width="100px">
 									</div>
 									<div class="menu_info">
 										<p class="menu_name">${menu.menuName}</p>
@@ -246,9 +280,9 @@
 							<h4>리뷰 ${store.countRating}건</h4>
 							<c:forEach var="review" items="${storeMap.review }" >
 								<div class="review_box">
-									<p>${review.rating }점<p>
-									<p>${review.writerId}<p>
-									<p>${review.content}<p>
+									<p>${review.rating }점<br>
+									${review.writerId}<br>
+									${review.content}
 								</div>
 							</c:forEach>
 						</div>

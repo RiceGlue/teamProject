@@ -8,6 +8,8 @@ import com.spring.teamProject.vo.StoreVO;
 public interface StoreService {
 
 	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception;
-	public List<StoreVO> selectStoreByType(String keyword) throws Exception;
+	public List<StoreVO> selectStoreByMenu(String keyword) throws Exception;
+	public List<StoreVO> selectStoreByAddr(String keyword) throws Exception;
+	public List<StoreVO> selectStoreByName(String keyword) throws Exception;
 	public Map storeDetail(long StoreId) throws Exception;
 }

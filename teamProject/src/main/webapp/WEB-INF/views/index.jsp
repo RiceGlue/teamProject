@@ -49,10 +49,10 @@
 		<div class="col-12">
 			<h2>검색바</h2>
 			<div class="search-container">
-			    <input type="text" class="search-input" placeholder="검색어를 입력하세요...">
-			    <button class="search-button" onclick="goSearch()">
-			    	<img src="https://cdn-icons-png.flaticon.com/512/54/54481.png" alt="검색">
-			    </button>
+				<input type="text" class="search-input" placeholder="검색어를 입력하세요..." id="keyword">
+				<button type="button" class="search-button" onclick="goSearch()">
+				   	<img src="https://cdn-icons-png.flaticon.com/512/54/54481.png" alt="검색">
+				</button>
 			</div>
 		</div>
 	</div>
