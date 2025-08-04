@@ -1,19 +1,23 @@
-<!-- 상단 스크립트 선언 -->
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
+<c:set var="storeId" value="${store.storeId}" />
 
 <html>
 <head>
 	<title>${store.storeName}</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 	<style>
+		/* 기존 CSS 유지 */
 		p { display: flex; align-items: center; gap: 7px;}
-	 	input[type="text"] { width: 50px; text-align: center; }
+	 	input[type="text"]:not(.form-control) { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
 		.rating { font-size: 16px; margin-bottom: 10px; }
@@ -27,9 +31,7 @@
 		.tabs li:hover { background-color: white; color:black; }
 		.tabs li a:hover { color:black; }
 		.tab_content { padding: 20px; background-color: #fff; }
-		.reservation-box { margin-top: 30px; }
-		.time-slot { padding: 10px 15px; margin: 5px; background: #e0dcdc; border-radius: 5px; display: inline-block; }
-		.btn-reserve { margin-top: 15px; width: 120px; padding: 6px 12px; background-color: #f4d6d6; border: none; border-radius: 5px; color: #555; }
+
 		.menu_container { display:flex; flex-wrap:wrap; gap:8px; }
 		.menu_card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
 		.menu_image { width:100%; height:120px; background:#eee; display:flex; justify-content:center; align-items:center; }
@@ -53,10 +55,9 @@
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-		.time-slot.selected { background-color: #ffc107; font-weight: bold; }
-		.reservation-box{ text-align:center; }
 		.detail-box { padding:auto 10px; margin:30px; }
 		#googleMap { width: 100%; height: 300px; border: 1px solid #939393; border-radius:10px; }
+<<<<<<< HEAD
 		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 		.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
 		.home_menu_image img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
@@ -69,6 +70,43 @@
 		.home_menu_badge.orange { background-color: orange; }
 		.home_menu_more_btn_wrap { text-align: center; margin-top: 20px; }
 		.home_menu_more_btn { padding: 10px 20px; color: black; border: 1px solid black; border-radius: 6px; font-size: 16px; cursor: pointer; }		
+=======
+
+		/* 예약 UI 관련 CSS 추가 */
+		.time-slot-btn {
+            width: 130px;
+            margin: 5px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .time-slot-btn.selected {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .time-slot-btn.unavailable {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            border-color: #e9ecef;
+        }
+        .time-slot-btn.selected {
+            border-color: #0d6efd;
+        }
+		.table-select-area {
+            display: none;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+		.table-slot-btn {
+            margin: 5px;
+        }
+        .table-slot-btn.selected {
+            background-color: #198754;
+            color: white;
+        }
+>>>>>>> a795928910aea2df102760a6f8368a58865f3240
 	</style>
 
 	<script>
@@ -76,7 +114,7 @@
 
 	    function initMap() {
 	        const geocoder = new google.maps.Geocoder();
-	        const address = '<c:out value="${store.address}"/>'; // 서버 사이드 템플릿으로 주입되는 값
+	        const address = '<c:out value="${store.address}"/>';
 
 	        if (!address) {
 	        	console.log('address : ',address);
@@ -101,7 +139,23 @@
 	        });
 	    }
 
+		// 인원수 변경 함수
+		function changeGuestCount(change) {
+			let guestCountInput = $('#guestCount');
+			let guestCountHiddenInput = $('#guestCountInput');
+			let currentCount = parseInt(guestCountInput.val());
+			let newCount = currentCount + change;
+
+			if (newCount >= 1 && newCount <= 10) {
+				guestCountInput.val(newCount);
+				guestCountHiddenInput.val(newCount);
+			}
+		}
+
 		document.addEventListener('DOMContentLoaded', function () {
+			// JSP 변수인 contextPath를 JavaScript 변수로 저장
+            var contextPath = '${contextPath}';
+            var storeId = '${storeId}';
 
 		    // 탭 클릭 시 지도 resize
 		    $("ul.tabs li a").click(function () {
@@ -139,12 +193,181 @@
 		    $(".tab_content").hide();
 		    $("ul.tabs li:first").addClass("active").show();
 		    $(".tab_content:first").show();
+
+
+			// jQuery UI Datepicker 초기화
+			$("#reservationDate").datepicker({
+				dateFormat: 'yy-mm-dd',
+				minDate: 0, // 오늘 날짜부터 선택 가능
+				onSelect: function(dateText, inst) {
+					fetchAvailableSlots(dateText);
+				}
+			});
+
+			// 페이지 로드 시 오늘 날짜의 예약 현황을 불러옴
+			var today = new Date();
+			// -- 수정된 부분: 날짜 형식을 올바르게 수정합니다.
+			var todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+
+			// 날짜 선택 필드에 오늘 날짜를 설정하고 이벤트를 트리거하여 예약 슬롯을 불러옴
+			$("#reservationDate").val(todayFormatted);
+			fetchAvailableSlots(todayFormatted);
+
+			function fetchAvailableSlots(date) {
+				if (!storeId) {
+					console.error("storeId가 유효하지 않습니다.");
+					return;
+				}
+
+				$.ajax({
+					url: contextPath + '/reservation/customer/available-slots',
+					type: 'GET',
+					data: { storeId: storeId, date: date },
+					success: function(data) {
+						updateTimeSlots(data);
+					},
+					error: function(xhr, status, error) {
+						console.error("Failed to fetch available slots: ", error);
+						// -- 기존 알림을 수정하여 더 구체적인 안내를 제공합니다.
+						if (xhr.status === 404) {
+							alert("예약 정보를 불러오는 API를 찾을 수 없습니다.");
+						} else {
+							alert("예약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.");
+						}
+					}
+				});
+			}
+
+			function updateTimeSlots(data) {
+				var timeSlotsContainer = $('#time-slots-container');
+				var tableSelectionContainer = $('#table-selection-container');
+				timeSlotsContainer.empty();
+				tableSelectionContainer.empty();
+
+				// 모든 선택 상태 초기화
+				$('#selectedReservationTime').val('');
+				$('#selectedTableId').val('');
+				$('#bookFormBtn').prop('disabled', true);
+
+				if (data && Object.keys(data).length > 0) {
+					$('#reservation-times-area').show();
+
+					const now = new Date();
+					const reservationDate = $('#reservationDate').val();
+					const isToday = reservationDate === now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+					const currentTimestamp = now.getTime();
+
+					$.each(data, function(time, tables) {
+						const availableTablesCount = tables.length;
+						let isUnavailable = false;
+
+						if (availableTablesCount === 0) {
+							isUnavailable = true;
+						} else if (isToday) {
+							const slotDateTime = new Date(reservationDate + 'T' + time + ':00');
+							// -- 현재 시간의 분을 고려하여 마감 처리
+							if (slotDateTime.getTime() < currentTimestamp) {
+								isUnavailable = true;
+							}
+						}
+
+						var timeButton = $('<button>')
+							.attr('type', 'button')
+							.attr('data-time', time);
+
+						if (isUnavailable) {
+							timeButton.addClass('btn time-slot-btn unavailable');
+							timeButton.prop('disabled', true);
+							timeButton.text(time + ' (마감)');
+						} else {
+							timeButton.addClass('btn btn-outline-secondary time-slot-btn');
+							timeButton.text(time + ' (' + availableTablesCount + '석)');
+						}
+						timeSlotsContainer.append(timeButton);
+
+						var tableArea = $('<div>')
+							.addClass('table-select-area')
+							.attr('id', 'table-area-' + time.replace(':', ''));
+
+						if (tables && tables.length > 0) {
+							$.each(tables, function(index, table) {
+								var tableButton = $('<button>')
+									.addClass('btn btn-outline-success table-slot-btn')
+									.attr('type', 'button')
+									.attr('data-table-id', table.tableId)
+									.attr('data-time', time)
+									.text(table.tableName + ' (' + table.capacity + '인석)');
+								tableArea.append(tableButton);
+							});
+						} else {
+							tableArea.html('<p class="text-muted">예약 가능한 테이블이 없습니다.</p>');
+						}
+						tableSelectionContainer.append(tableArea);
+					});
+
+				} else {
+					$('#reservation-times-area').hide();
+					alert("선택하신 날짜에는 예약 가능한 시간이 없습니다.");
+				}
+			}
+
+			// 시간 슬롯 버튼 클릭 이벤트
+			$('#time-slots-container').on('click', '.time-slot-btn:not(.unavailable)', function() {
+				$('.time-slot-btn').removeClass('selected');
+				$(this).addClass('selected');
+
+				// 테이블 선택 영역 보이기
+				$('#table-selection-area').show();
+				$('.table-select-area').hide();
+				var selectedTime = $(this).data('time').replace(':', '');
+				$('#table-area-' + selectedTime).show();
+
+				// 시간 선택 시 테이블 선택 및 폼 필드 초기화
+				$('.table-slot-btn').removeClass('selected');
+				$('#selectedReservationTime').val('');
+				$('#selectedTableId').val('');
+				$('#bookFormBtn').prop('disabled', true);
+			});
+
+			// 테이블 슬롯 버튼 클릭 이벤트
+			$('#table-selection-container').on('click', '.table-slot-btn', function() {
+				var selectedTime = $('.time-slot-btn.selected').data('time');
+				if (!selectedTime) {
+					alert('먼저 시간을 선택해주세요.');
+					return;
+				}
+
+				$('.table-slot-btn').not(this).removeClass('selected');
+				$(this).toggleClass('selected');
+
+				var tableId = $(this).hasClass('selected') ? $(this).data('table-id') : '';
+
+				$('#selectedTableId').val(tableId);
+
+				var date = $('#reservationDate').val();
+				var reservationDateTime = date + 'T' + selectedTime;
+				$('#selectedReservationTime').val(reservationDateTime);
+
+				// 시간과 테이블이 모두 선택되면 버튼 활성화
+				if ($('#selectedReservationTime').val() && $('#selectedTableId').val()) {
+					$('#bookFormBtn').prop('disabled', false);
+				} else {
+					$('#bookFormBtn').prop('disabled', true);
+				}
+			});
+
+			// 폼 제출 시 유효성 검사
+			$('#reservationForm').on('submit', function(e) {
+				if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
+					e.preventDefault();
+					alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
+				}
+			});
 		});
 		
 		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
 	</script>
 
-<!-- Google Maps API (storeMap은 맨 아래에서 선언) -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
 
 
@@ -153,8 +376,7 @@
 <body>
 
 	<div class="store-info">
-		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <!-- 가게 이미지 캐러셀 -->
-			<div class="carousel-inner">
+		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <div class="carousel-inner">
 				<div class="carousel-item active">
 					<img src="..." class="d-block w-100" alt="...">
 				</div>
@@ -188,8 +410,6 @@
 			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"> ${store.startHour}:${store.startMin} ~ ${store.endHour}:${store.endMin} </p>
 		</div>
 
-
-
 		<div class="tab_container">
 			<div class="tab_container" id="container">
 				<ul class="tabs">
@@ -201,22 +421,40 @@
 				<div class="tab_container">
 					<div class="tab_content" id="tab1">
 						<h5 class="mt-4">예약</h5>
-							<div class="reservation-box">
-								<form action="${contentPath }/reservation/customer/book" id="reservation" method="post">
-									<div class="mt-3" id="timeSlotContainer">
-										<button type="button" onclick="minusGuest()">-</button><input type="text" id="guestCount" value="1" readonly><button type="button" onclick="addGuest()">+</button>
-										<c:forEach var="reservation" items="${storeMap.reservation}">
-											<input type="button" value="${reservation.timeSlot }">
-										</c:forEach>
-									</div>
-									<input type="hidden" id="selectedTimeSlot" value="" />
-									<%-- <button class="btn-reserve" id="reserveBtn" onClick="location.href='${contextPath }/reservation/customer/bookForm?storeId=${store.storeId}'">예약하기</button> --%>
-									<input type="hidden" name="storeId" value="${store.storeId}" />
-									<button type="submit" class="btn-reserve" id="reserveBtn">예약하기</button>
-								</form>
-							</div>
+							<hr>
+							<form action="${contextPath}/reservation/customer/bookForm" method="get" id="reservationForm">
+								<input type="hidden" name="storeId" value="${storeId}" />
+								<input type="hidden" name="reservationTime" id="selectedReservationTime" />
+								<input type="hidden" name="tableId" id="selectedTableId" />
+								<input type="hidden" name="guestCount" id="guestCountInput" value="1" />
 
-						<div class="button-group">
+								<div class="mb-3">
+									<label for="reservationDate" class="form-label">예약 날짜:</label>
+									<input type="text" class="form-control" id="reservationDate" placeholder="날짜를 선택하세요" required>
+								</div>
+
+								<div id="reservation-times-area" class="mb-3" style="display: none;">
+									<label class="form-label">예약 시간대:</label>
+									<div id="time-slots-container" class="d-flex flex-wrap"></div>
+								</div>
+
+								<div id="table-selection-area" class="mb-3" style="display: none;">
+									<label class="form-label">테이블 선택:</label>
+									<div id="table-selection-container" class="d-flex flex-wrap"></div>
+								</div>
+
+								<div class="mb-3 mt-4">
+									<label class="form-label">예약 인원:</label>
+									<div>
+										<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(-1)">-</button>
+										<input type="text" id="guestCount" value="1" readonly style="width: 50px; text-align: center;">
+										<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(1)">+</button>
+									</div>
+								</div>
+
+								<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
+							</form>
+						<div class="button-group mt-5">
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
 						<div class="back-link">
@@ -243,8 +481,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="tab_content" id="tab2"> <!-- 메뉴 -->
-						<div class="menu_container">
+					<div class="tab_content" id="tab2"> <div class="menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}">
 								<div class="menu_card">
 									<div class="menu_image">

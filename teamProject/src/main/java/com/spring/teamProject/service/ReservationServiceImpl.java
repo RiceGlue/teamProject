@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,5 +92,19 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         return availableSlots;
+    }
+
+    @Override
+    public Optional<Long> findAvailableTable(Long storeId, LocalDateTime reservationTime, int guestCount) {
+        // DAO를 통해 예약 가능한 테이블을 DB에서 조회하는 로직을 구현합니다.
+        // 예를 들어, 예약 시간과 인원수에 맞는 테이블 목록을 가져오는 DAO 메서드를 호출합니다.
+
+        // 이 부분은 예시 코드입니다. 실제로는 `reservationDAO`에 이 로직을 담은 쿼리가 필요합니다.
+        List<StoreTableVO> availableTables = reservationDAO.findAvailableTables(storeId, reservationTime, guestCount);
+
+        // 조회된 테이블이 있다면 그 중 첫 번째 테이블의 ID를 반환합니다.
+        return availableTables.stream()
+                .findFirst()
+                .map(StoreTableVO::getTableId);
     }
 }

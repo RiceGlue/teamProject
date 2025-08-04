@@ -63,11 +63,11 @@
 
     <form action="${contextPath}/reservation/customer/book" method="post" id="reservationForm">
     <input type="hidden" name="storeId" value="${storeId}" />
-    <input type="hidden" name="reservationTime" id="selectedReservationTime" />
-    <input type="hidden" name="tableId" id="selectedTableId" />
+    <input type="hidden" name="reservationTimeStr" id="selectedReservationTime" value="${selectedReservationTime}" />
+    <input type="hidden" name="tableId" id="selectedTableId" value="${selectedTableId}" />
     <div class="mb-3">
         <label for="reservationDate" class="form-label">예약 날짜:</label>
-        <input type="text" class="form-control" id="reservationDate" placeholder="날짜를 선택하세요" required="true">
+        <input type="text" class="form-control" id="reservationDate" placeholder="날짜를 선택하세요" required="true" value="${currentDate}">
     </div>
 
     <div id="reservation-times-area" class="mb-3" style="display: none;">
@@ -81,7 +81,7 @@
 
     <div class="mb-3 mt-4">
         <label for="guestCount" class="form-label">예약 인원:</label>
-        <input type="number" class="form-control" id="guestCount" name="guestCount" min="1" max="10" required="true" />
+        <input type="number" class="form-control" id="guestCount" name="guestCount" min="1" max="10" required="true" value="${guestCount}" />
         <small class="form-text text-muted">최소 1명, 최대 10명까지 예약 가능합니다.</small>
     </div>
 
@@ -103,6 +103,9 @@
     $(function() {
         // JSP 변수인 contextPath를 JavaScript 변수로 저장
         var contextPath = '${contextPath}';
+        var preselectedDate = '${currentDate}';
+        var preselectedTime = '${selectedReservationTime}'.split('T')[1];
+        var preselectedTableId = '${selectedTableId}';
 
         // jQuery UI Datepicker 초기화
         $("#reservationDate").datepicker({
@@ -113,33 +116,30 @@
             }
         });
 
-        // 페이지 로드 시 오늘 날짜의 예약 현황을 불러옴
-        var today = new Date();
-        var todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
-
-        // 날짜 선택 필드에 오늘 날짜를 설정하고 이벤트를 트리거하여 예약 슬롯을 불러옴
-        $("#reservationDate").val(todayFormatted);
-        fetchAvailableSlots(todayFormatted);
-
         function fetchAvailableSlots(date) {
             var storeId = $('[name="storeId"]').val();
-
-            // storeId 값이 유효한지 확인
             if (!storeId) {
                 console.error("storeId가 유효하지 않습니다.");
                 return;
             }
 
             $.ajax({
-                // AJAX 요청 URL을 JavaScript 변수를 사용하여 동적으로 생성
                 url: contextPath + '/reservation/customer/available-slots',
                 type: 'GET',
-                data: {
-                    storeId: storeId,
-                    date: date
-                },
+                data: { storeId: storeId, date: date },
                 success: function(data) {
                     updateTimeSlots(data);
+                    // 이전 페이지에서 선택된 값으로 버튼 자동 선택
+                    if (date === preselectedDate && preselectedTime) {
+                        const timeButton = $(`#time-slots-container button[data-time="${preselectedTime}"]`);
+                        if(timeButton.length) {
+                             timeButton.trigger('click');
+                        }
+                        const tableButton = $(`#table-selection-container button[data-table-id="${preselectedTableId}"]`);
+                        if(tableButton.length) {
+                            tableButton.trigger('click');
+                        }
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.error("Failed to fetch available slots: ", error);
@@ -154,31 +154,22 @@
             var tableSelectionContainer = $('#table-selection-container');
             timeSlotsContainer.empty();
             tableSelectionContainer.empty();
+            $('#reservation-times-area').show();
 
             if (data && Object.keys(data).length > 0) {
-                $('#reservation-times-area').show();
-
-                // 현재 시간을 가져와서 지난 시간대인지 체크
                 const now = new Date();
                 const reservationDate = $('#reservationDate').val();
-
-                // 오늘 날짜인지 확인
                 const isToday = reservationDate === now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
-                const currentTimestamp = now.getTime(); // 정확한 시간 비교를 위해 타임스탬프 사용
+                const currentTimestamp = now.getTime();
 
                 $.each(data, function(time, tables) {
-                    // 예약 가능한 테이블 개수 계산
                     const availableTablesCount = tables.length;
-
-                    // 예약 마감 또는 지난 시간대 여부 판단
                     let isUnavailable = false;
 
                     if (availableTablesCount === 0) {
-                        isUnavailable = true; // 예약 테이블이 없으면 마감
-                    }
-                    // 오늘 날짜인 경우, 현재 시간보다 이전 시간대는 마감 처리
-                    else if (isToday) {
-                        const slotDateTime = new Date(reservationDate + 'T' + time + ':00'); // 초 단위 추가
+                        isUnavailable = true;
+                    } else if (isToday) {
+                        const slotDateTime = new Date(reservationDate + 'T' + time + ':00');
                         if (slotDateTime.getTime() < currentTimestamp) {
                             isUnavailable = true;
                         }
@@ -191,12 +182,11 @@
                     if (isUnavailable) {
                         timeButton.removeClass('btn-outline-secondary').addClass('btn time-slot-btn unavailable');
                         timeButton.prop('disabled', true);
-                        timeButton.text(time + ' (예약 마감)'); // + 연산자로 문자열 연결
+                        timeButton.text(time + ' (예약 마감)');
                     } else {
                          timeButton.addClass('btn btn-outline-secondary time-slot-btn');
-                         timeButton.text(time + ' (' + availableTablesCount + '석)'); // + 연산자로 문자열 연결
+                         timeButton.text(time + ' (' + availableTablesCount + '석)');
                     }
-
                     timeSlotsContainer.append(timeButton);
 
                     var tableArea = $('<div>')
@@ -220,50 +210,50 @@
                 });
 
             } else {
-                $('#reservation-times-area').hide();
                 alert("선택하신 날짜에는 예약 가능한 시간이 없습니다.");
             }
         }
 
-        // 시간 슬롯 버튼 클릭 이벤트 (기존과 동일)
-        // '.unavailable' 클래스가 없는 버튼만 클릭 이벤트에 반응하도록 수정
+        // 초기 로드 시 예약 정보를 불러옴
+        if (preselectedDate) {
+            $("#reservationDate").val(preselectedDate);
+            fetchAvailableSlots(preselectedDate);
+        } else {
+             var today = new Date();
+             var todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+             $("#reservationDate").val(todayFormatted);
+             fetchAvailableSlots(todayFormatted);
+        }
+
         $('#time-slots-container').on('click', '.time-slot-btn:not(.unavailable)', function() {
             $('.time-slot-btn').removeClass('selected');
             $(this).addClass('selected');
-
             $('.table-select-area').hide();
             var selectedTime = $(this).data('time').replace(':', '');
             $('#table-area-' + selectedTime).show();
 
-            // 시간 선택 시 모든 테이블 선택 및 폼 필드 초기화
+            // 시간 선택 시 테이블 선택 및 폼 필드 초기화
             $('.table-slot-btn').removeClass('selected');
-            $('#selectedReservationTime').val('');
-            $('#selectedTableId').val(''); // 단일 테이블 선택 필드 초기화
+            $('#selectedTableId').val('');
+
+            var date = $('#reservationDate').val();
+            var reservationDateTime = date + 'T' + $(this).data('time');
+            $('#selectedReservationTime').val(reservationDateTime);
         });
 
-        // ★★ 테이블 슬롯 버튼 클릭 이벤트 (단일 선택으로 원복) ★★
         $('#table-selection-container').on('click', '.table-slot-btn', function() {
             var selectedTime = $('.time-slot-btn.selected').data('time');
             if (!selectedTime) {
                 alert('먼저 시간을 선택해주세요.');
                 return;
             }
-
-            // 다른 테이블 선택 해제
             $('.table-slot-btn').not(this).removeClass('selected');
-
-            $(this).toggleClass('selected'); // 선택 클래스 토글
+            $(this).toggleClass('selected');
 
             var tableId = $(this).hasClass('selected') ? $(this).data('table-id') : '';
-
             $('#selectedTableId').val(tableId);
-
-            var date = $('#reservationDate').val();
-            var reservationDateTime = date + 'T' + selectedTime;
-            $('#selectedReservationTime').val(reservationDateTime);
         });
 
-        // 폼 제출 시 유효성 검사 (단일 선택으로 원복)
         $('#reservationForm').on('submit', function(e) {
             if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
                 e.preventDefault();
