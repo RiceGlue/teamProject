@@ -40,7 +40,7 @@
 		  <tr><td>메뉴 이름 </td><td><input type="text" name="menuName"></td></tr>
 		  <tr><td>메뉴 가격 </td><td><input type="text" name="price"></td></tr>
 		  <tr><td>메뉴 설명 </td><td><textarea name="description" rows="2" cols="40"></textarea></td></tr>
-		  <tr><td>메뉴 사진 </td><td><input type="file" mame="image_name" accept="image/*" /></td></tr>
+		  <tr><td>메뉴 사진 </td><td><input type="file" name="image_name" accept="image/*" /></td></tr>
 		`);
 	}
 
@@ -85,7 +85,16 @@
 	        const endMin = document.getElementById("endMin").value.trim();
 	        const lastOrderHour = document.getElementById("lastOrderHour").value.trim();
 	        const lastOrderMin = document.getElementById("lastOrderMin").value.trim();
-	        const mainImage = document.getElementById("mainmIage").files[0];
+	        const mainImage = document.getElementById("mainImage").files[0];
+
+	        if (!mainImage) {
+	            alert("메인 이미지를 업로드해주세요.");
+	            return;
+	        }
+
+	        alert("정보가 정상적으로 등록되었습니다.");
+	        document.forms['storeInfo'].submit();
+
 		        // 전화번호 유효성 (숫자, 하이픈 허용)
 	        const phonePattern = /^[0-9\-]+$/;
 		    if (!phone || !phonePattern.test(phone)) {
@@ -133,6 +142,11 @@
 		    alert("정보가 정상적으로 등록되었습니다.");
 		    form.submit();
 		}
+
+		document.getElementById('mainImage').addEventListener('change', function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			document.getElementById('mainImageName').textContent = fileName;
+		});
 </script>
 
 
@@ -226,10 +240,14 @@
 						</tr>
 						<tr>
 							<td>메인 이미지</td>
-							<td><input type="file" id="mainmIage" accept="image/*" /></td>
+							<td>
+								<input type="file" id="mainmIage" accept="image/*" />
+								<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+							    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+							</td>
 						</tr>
 					</table>
-					<input type="button" onClick="submit" value="정보 등록">
+					<input type="button" onClick="checkStoreInfo()" value="정보 등록">
 				</form>
 			</div>
 

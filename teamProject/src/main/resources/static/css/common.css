@@ -59,11 +59,9 @@ form table td > *:not(input, textarea) {cursor: pointer;}
       width: 20px;
       height: 20px;
     }
-
-
 	.tabs {
 		display: flex;
-		margin-top: 20px;
+		margin: 0px;
 		padding: 0;
 		list-style: none;
 		background-color: #2c2c2c;
@@ -76,37 +74,37 @@ form table td > *:not(input, textarea) {cursor: pointer;}
 		flex: 1;
 		text-align: center;
 		cursor: pointer;
-		background-color: #2c2c2c;
+		background-color: var(--cc-white);
 		transition: background-color 0.3s ease, color 0.3s ease;
 	}
 
 	.tabs li:not(:last-child) {
-		border-right: 1px solid #444;
+		/* border-right: 1px solid #444; */
 	}
 
 	.tabs li a {
 		display: block;
 		padding: 12px 0;
-		color: #ccc;
+		color: var(--cc-black);
 		text-decoration: none;
 		font-weight: 500;
 	}
 
 	.tabs li:hover {
-		background-color: #444;
+		background-color: var(--cc-green);
 	}
 
 	.tabs li:hover a {
-		color: #fff;
+		color: var(--cc-white);
 	}
 
 	.tabs li.active {
-		background-color: #fff;
-		border-top: 3px solid #007bff;
+		background-color: var(--cc-orange);
+		/* border-top: 3px solid #007bff; */
 	}
 
 	.tabs li.active a {
-		color: #222;
+		color: var(--cc-white);
 		font-weight: bold;
 	}
 
@@ -135,7 +133,7 @@ form table td > *:not(input, textarea) {cursor: pointer;}
 	.info_container select {
 		/* width: 90%;
 		padding: 6px 10px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--cc-black);
 		border-radius: 4px;
 		font-size: 14px; */
 	}
@@ -159,3 +157,7 @@ form table td > *:not(input, textarea) {cursor: pointer;}
 	.info_container input[type="button"]:hover {
 		background-color: #0056b3;
 	}
+
+	form table tbody td input[type="file"] {display: none;}
+
+
