@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,6 +59,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@Override
 	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
 	public ResponseEntity addStoreInfo (@RequestParam("storeId") long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
+		
 		multiReq.setCharacterEncoding("utf-8");
 		res.setContentType("text/html; charset=UTF-8");
 		String imageFileName=null;
@@ -98,7 +100,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			}
 			message= "<script>";
 			message += " alert('가게 정보가 등록되었습니다.');";
-			message +=" location.href='"+multiReq.getContextPath()+"/admin/goods/addNewGoodsForm.do';";
+			message +=" location.href='"+multiReq.getContextPath()+"/franchise/addStoreInfo';";
 			message +="</script>";
 		}catch(Exception e) {
 			if(imageFileList!=null && imageFileList.size()!=0) {
@@ -111,7 +113,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			
 			message= "<script>";
 			message += " alert('오류가 발생했습니다. 다시 시도해 주세요.');";
-			message +=" location.href='"+multiReq.getContextPath()+"/admin/goods/addNewGoodsForm.do';";
+			message +=" location.href='"+multiReq.getContextPath()+"/franchise/addStoreInfo';";
 			message +=("</script>");
 			e.printStackTrace();
 		}

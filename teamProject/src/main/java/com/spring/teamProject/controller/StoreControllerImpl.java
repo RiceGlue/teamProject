@@ -31,23 +31,26 @@ public class StoreControllerImpl implements StoreController {
 	public ModelAndView storeList (@RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		
-		List<StoreVO> storelist = null ;
+		List<StoreVO> regionlist = null ;
 		List<StoreVO> menulist = null ;
 		List<StoreVO> addrlist = null ;
 		List<StoreVO> namelist = null ;
+		List<StoreVO> typelist = null ;
 		
 		if(option.equals("region")) {
-			storelist = storeService.selectStoreByRegion(keyword);
+			regionlist = storeService.selectStoreByRegion(keyword);
 		} else if(option.equals("search")) {
 			menulist = storeService.selectStoreByMenu(keyword);
 			addrlist = storeService.selectStoreByAddr(keyword);
 			namelist = storeService.selectStoreByName(keyword);
+		} else if(option.equals("storeType")) {
+			typelist = storeService.selectStoreByType(keyword);
 		}
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("option", option);
 		mav.addObject("keyword",keyword);
-		mav.addObject("storelist",storelist);
+		mav.addObject("regionlist",regionlist);
 		mav.addObject("menulist",menulist);
 		mav.addObject("addrlist",addrlist);
 		mav.addObject("namelist",namelist);

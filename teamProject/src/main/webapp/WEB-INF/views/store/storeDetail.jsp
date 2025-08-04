@@ -21,7 +21,7 @@
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
 		.rating { font-size: 16px; margin-bottom: 10px; }
-		.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;}
+		.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
 		.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
 		.tabs li:last-child { border-right: none; }
 		.tabs li.active { background-color: white; }
@@ -110,6 +110,8 @@
 	</style>
 
 	<script>
+		
+	
 		let map;
 
 	    function initMap() {
@@ -368,8 +370,8 @@
 		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
 	</script>
 
+<!-- 구글 맵 API -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
-
 
 </head>
 
@@ -378,7 +380,7 @@
 	<div class="store-info">
 		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <div class="carousel-inner">
 				<div class="carousel-item active">
-					<img src="..." class="d-block w-100" alt="...">
+					<img src="${store.mainImage }" class="d-block w-100" alt=${store.mainImage }">
 				</div>
 				<div class="carousel-item">
 					<img src="..." class="d-block w-100" alt="...">
@@ -547,6 +549,10 @@
 							<div>
 								<P><strong>정기휴무</strong></P>
 								<p>${store.dayOff }</p>
+							</div>
+							<div>
+								<P><strong>브레이크 타임</strong></P>
+								<p>${store.brakeTime }</p>
 							</div>
 						</div>
 					</div>

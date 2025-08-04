@@ -41,9 +41,10 @@ dependencies {
 	implementation 'org.apache.commons:commons-dbcp2:2.9.0'
 	//implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-	
+
 
 	// JSP / Servlet 관련
+	developmentOnly 'org.springframework.boot:spring-boot-devtools' //화면 변경 코드 시 귀찮은 서버 재시작을 줄이고 브라우저 캐시만 삭제하여 리로드
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
@@ -55,7 +56,7 @@ dependencies {
 	    exclude group: 'commons-logging', module: 'commons-logging'
 	}
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'       // JSP 컴파일러
-	
+
 	// 로깅 (Spring Boot 기본 logback 사용. slf4j-log4j12, log4j 제거)
 //	implementation 'org.slf4j:slf4j-api:1.7.36' // 선택 사항 (이미 포함됨)
 
@@ -78,18 +79,18 @@ dependencies {
 //	implementation 'net.sf.json-lib:json-lib:2.4'
 //	implementation 'net.sf.ezmorph:ezmorph:1.0.6'
 
-	// JUnit4 Spring-boot-starter-test에 JUnit 5(jupiter)가 포함되어있음 
+	// JUnit4 Spring-boot-starter-test에 JUnit 5(jupiter)가 포함되어있음
 //	testImplementation 'junit:junit:4.12'
-	
+
 	// Firebase Admin SDK
-    
+
 
     // Jackson (종종 필요함)
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
-    
+
     // Firebase Admin SDK 추가
     implementation 'com.google.firebase:firebase-admin:9.3.0' // 최신 버전
-	
+
 }
 // **추가된 부분: Java 컴파일 시 -parameters 플래그 추가**
 tasks.withType(JavaCompile) {
