@@ -41,7 +41,7 @@ public class BaseController {
 	                        file.createNewFile();
 	                    }
 	                }
-	                mFile.transferTo(new File(CURR_IMAGE_REPO_PATH + File.separator + "temp" + File.separator + originalFileName));
+	                mFile.transferTo(new File(CURR_IMAGE_REPO_PATH + File.separator + originalFileName));
 	            }
 	        }
 	        return fileList;

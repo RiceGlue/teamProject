@@ -49,6 +49,8 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		storeVO.setStoreName(storeName);
 		
 		long storeId = adminStoreService.selectStoreId(storeVO);
+		
+		System.out.println(storeId);
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeId", storeId);
@@ -57,7 +59,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@Override
-	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
+	@RequestMapping(value="/addStoreInfo", method= {RequestMethod.POST,RequestMethod.GET})
 	public ResponseEntity addStoreInfo (@RequestParam("storeId") long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
 		
 		multiReq.setCharacterEncoding("utf-8");
@@ -72,14 +74,14 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			storeInfoMap .put(name,value);
 		}
 		
-		HttpSession session = multiReq.getSession();
-		MemberVO memberVO = (MemberVO) session.getAttribute("memberInfo");
-		long reg_id = memberVO.getMemberId();
+//		HttpSession session = multiReq.getSession();
+//		MemberVO memberVO = (MemberVO) session.getAttribute("memberInfo");
+//		long reg_id = memberVO.getMemberId();
 		
 		List<ImageFileVO> imageFileList =upload(multiReq);
 		if(imageFileList!= null && imageFileList.size()!=0) {
 			for(ImageFileVO imageFileVO : imageFileList) {
-				imageFileVO.setRegId(reg_id);
+				imageFileVO.setRegId(1);
 			}
 			storeInfoMap .put("imageFileList", imageFileList);
 		}
@@ -89,7 +91,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Content-Type", "text/html; charset=utf-8");
 		try {
-			long info_id = adminStoreService.addStoreInfo(storeInfoMap );
+			long info_id = adminStoreService.addStoreInfo(storeInfoMap);
 			if(imageFileList!=null && imageFileList.size()!=0) {
 				for(ImageFileVO  imageFileVO:imageFileList) {
 					imageFileName = imageFileVO.getFileName();
@@ -112,7 +114,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			}
 			
 			message= "<script>";
-			message += " alert('오류가 발생했습니다. 다시 시도해 주세요.');";
+			message += " alert('1오류가 발생했습니다. 다시 시도해 주세요.');";
 			message +=" location.href='"+multiReq.getContextPath()+"/franchise/addStoreInfo';";
 			message +=("</script>");
 			e.printStackTrace();

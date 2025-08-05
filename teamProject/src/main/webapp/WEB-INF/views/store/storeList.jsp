@@ -145,7 +145,6 @@
 								<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
 								<p class="meta-info">${menu.storeType} · ${menu.region}</p>
 								<p class="meta-info">${menu.description}</p>
-								<%--       <p class="meta-info">${menu.openHour}:${menu.openMin}~${menu.endHour}:${menu.endMin}</p> --%>
 							</div>
 						</div>
 					</c:forEach>
@@ -167,7 +166,6 @@
 								<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
 								<p class="meta-info">${addr.storeType} · ${addr.region}</p>
 								<p class="meta-info">${addr.description}</p>
-								<%--       <p class="meta-info">${addr.openHour}:${addr.openMin}~${addr.endHour}:${addr.endMin}</p> --%>
 							</div>
 						</div>
 					</c:forEach>
@@ -189,7 +187,6 @@
 								<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
 								<p class="meta-info">${name.storeType} · ${name.region}</p>
 								<p class="meta-info">${name.description}</p>
-								<%--       <p class="meta-info">${name.openHour}:${name.openMin}~${name.endHour}:${name.endMin}</p> --%>
 							</div>
 						</div>
 					</c:forEach>
@@ -225,7 +222,6 @@
 	      </p>
 	      <p class="meta-info">${region.storeType} · ${region.region}</p>
 	      <p class="meta-info">${region.description}</p>
-	<%--       <p class="meta-info">${region.openHour}:${region.openMin}~${region.endHour}:${region.endMin}</p> --%>
 	    </div>
 	  </div>
 	</c:forEach>

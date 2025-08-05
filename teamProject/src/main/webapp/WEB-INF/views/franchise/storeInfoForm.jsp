@@ -36,6 +36,12 @@
 			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
 			$("#mainImageName").text(fileName);
 		});
+		
+		// 파일 선택 시 파일명 표시
+		$("#imageName").on("change", function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			$("#imageFileName").text(fileName);
+		});
 	});
 
 	function padTime(value) { return value.toString().padStart(2, '0'); }  //숫자 한자리수 입력시 두자릿수로 바꿔줌
@@ -45,7 +51,7 @@
 		  <tr><td>메뉴 이름 </td><td><input type="text" name="menuName"></td></tr>
 		  <tr><td>메뉴 가격 </td><td><input type="text" name="price"></td></tr>
 		  <tr><td>메뉴 설명 </td><td><textarea name="description" rows="2" cols="40"></textarea></td></tr>
-		  <tr><td>메뉴 사진 </td><td><input type="file" name="image_name" accept="image/*" /></td></tr>
+		  <tr><td>메뉴 사진 </td><td><input type="file" id="imageName" accept="image/*"><label for="imageName" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label><span id="imageFileName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></td></tr>
 		`);
 	}
 
@@ -145,12 +151,17 @@
 		        return;
 		    }
 		    alert("정보가 정상적으로 등록되었습니다.");
-		    form.submit();
+		    document.storeInfo.submit();
 		}
 
 		document.getElementById('mainImage').addEventListener('change', function() {
 			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
 			document.getElementById('mainImageName').textContent = fileName;
+		});
+		
+		document.getElementById('imageName').addEventListener('change', function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			document.getElementById('imageFileName').textContent = fileName;
 		});
 </script>
 
@@ -166,8 +177,9 @@
 		<div class="tab_container">
 			<div class="tab_content" id="tab1">
 				<form action="${contextPath}/franchise/addStoreInfo?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
-					<input type="hidden" id="storeId" value="${storeId}" />
-					<input type="hidden" id="storeName" value="${storeName}" />
+					<input type="hidden" id="storeId" name="storeId" value="${storeId}" />
+					<p>${storeId }
+					<input type="hidden" id="storeName" name="storeName" value="${storeName}" />
 					<!-- <h3 style="text-align:center">가게 정보 등록</h3> -->
 					<table class="info_container">
 						<colgroup>
@@ -177,7 +189,7 @@
 						<tr>
 							<td width=200 >가게 유형</td>
 							<td width=500>
-								<select id="storeType">
+								<select id="storeType" name="storeType">
 									<option value="한식" selected>한식
 									<option value="양식">양식
 									<option value="일식">일식
@@ -191,7 +203,7 @@
 						<tr>
 							<td width=200 >운영 방식</td>
 							<td width=500>
-								<select id="operationType">
+								<select id="operationType" name="operationType">
 									<option value="ALL" selected>모두
 									<option value="WAITING_ONLY">웨이팅만
 									<option value="RESERVATION_ONLY">예약만
@@ -200,11 +212,11 @@
 						</tr>
 						<tr >
 							<td>매장 전화번호</td>
-							<td><input id="storePhoneNumber" type="text" maxLength="15" /></td>
+							<td><input id="storePhoneNumber" name="storePhoneNumber" type="text" maxLength="15" /></td>
 						</tr>
 						<tr>
 							<td>매장 소개 </td>
-							<td><textarea id="description" rows="2" cols="40"></textarea></td>
+							<td><textarea id="description" name="description" rows="2" cols="40"></textarea></td>
 						</tr>
 						<tr>
 							<td>정기 휴무<small>(복수 선택 가능)</small></td>
@@ -246,7 +258,7 @@
 						<tr>
 							<td>메인 이미지</td>
 							<td>
-								<input type="file" id="mainImage" accept="image/*" />
+								<input type="file" id="mainImage" name="mainImage" accept="image/*" />
 								<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
 							    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 							</td>
@@ -280,7 +292,12 @@
 							</tr>
 							<tr>
 								<td>메뉴 사진 </td>
-								<td><input type="file" name="image_name" accept="image/*" /></td>
+<!-- 								<td><input type="file" name="image_name" accept="image/*" /></td> -->
+								<td>
+									<input type="file" id="mainImage" accept="image/*">
+									<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+								    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+								</td>
 							</tr>
 							<tr>
 								<td>메뉴 이름 </td>
@@ -296,7 +313,12 @@
 							</tr>
 							<tr>
 								<td>메뉴 사진 </td>
-								<td><input type="file" name="image_name" accept="image/*" /></td>
+<!-- 								<td><input type="file" name="image_name" accept="image/*" /></td> -->
+								<td>
+									<input type="file" id="mainImage" accept="image/*">
+									<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+								    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+								</td>
 							</tr>
 							<tr>
 								<td>메뉴 이름 </td>
@@ -312,7 +334,12 @@
 							</tr>
 							<tr>
 								<td>메뉴 사진 </td>
-								<td><input type="file" name="image_name" accept="image/*" /></td>
+<!-- 								<td><input type="file" name="image_name" accept="image/*" /></td> -->
+								<td>
+								<input type="file" id="imageName" accept="image/*">
+									<label for="imageName" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+								    <span id="imageFileName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+								</td>
 							</tr>
 						</tbody>
 						<tbody id="moreMenu" class="menu_container" ></tbody>

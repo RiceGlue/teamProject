@@ -60,7 +60,7 @@
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.detail-box { padding:auto 10px; margin:30px; }
 		
-		.wating_container {margin:10px; text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
+		.wating_container { text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
 		
 		#googleMap { width: 100%; height: 300px; border-radius:10px; }
 		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }

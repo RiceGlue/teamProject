@@ -4,52 +4,81 @@
 	
 <mapper namespace="com.spring.teamProject.dao.AdminStoreDAO">
 	<resultMap id="storelist" type="StoreVO">
-		<result property="storeId" column="storeId"/>
-		<result property="ownerId" column="ownerId"/>
-		<result property="storeName" column="storeName"/>
+		<result property="storeId" column="store_id"/>
+		<result property="ownerId" column="owner_id"/>
+		<result property="storeName" column="store_Name"/>
 		<result property="address" column="address"/>
 		<result property="region" column="region"/>
-		<result property="createdAt" column="createdAt"/>
-		<result property="updatedAt" column="updatedAt"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
-	<resultMap id="storeinfo" type="StoreVO">
-		<result property="storeId" column="storeId" />
-		<result property="storeName" column="storeName"/>
-		<result property="storeType" column="storeType" />
-		<result property="operationType" column="operationType" />
-		<result property="storePhoneNumber" column="storePhoneNumber" />
-		<result property="storeHours" column="storeHours" />
-		<result property="breakTime" column="breakTime" />
-		<result property="dayOff" column="dayOff" />
+	<resultMap id="storeInfo" type="StoreVO">
+		<result property="storeId" column="store_id" />
+		<result property="storeName" column="store_name" />
+		<result property="storeType" column="store_type" />
+		<result property="operationType" column="operation_type" />
+		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="address" column="address" />
+		<result property="breakTime" column="break_time" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
-		<result property="mainImage" column="mainImage" />
+		<result property="mainImage" column="main_image" />
+		<result property="closed" column="closed" />
+		<result property="operatingHours" column="operating_hours" />
+		<result property="lastOrder" column="last_order" />
+		<result property="avgRating" column="avgRating"/>
+		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
+	
 	<resultMap id="imagelist" type="ImageFileVO">
-		<result property="imageId" column="imageId"/>
-		<result property="storeId" column="storeId"/>
-		<result property="reviewId" column="reviewId"/>
-		<result property="fileName" column="fileName"/>
-		<result property="fileType" column="fileType"/>
-		<result property="displayNo" column="displayNo"/>
-		<result property="createdAt" column="createdAt"/>
-		<result property="regId" column="regId"/>
+		<result property="imageId" column="image_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="reviewId" column="review_id"/>
+		<result property="fileName" column="file_name"/>
+		<result property="fileType" column="file_type"/>
+		<result property="displayNo" column="display_no"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="regId" column="reg_id"/>
 	</resultMap>
 	
 	<resultMap type="MenuVO" id="menulist">
-		<result property="menuId" column="menuId" />
-		<result property="storeId" column="storeId" />
-		<result property="displayNo" column="displayNo" />
-		<result property="menuName" column="menuName" />
+		<result property="menuId" column="menu_id" />
+		<result property="storeId" column="store_id" />
+		<result property="displayNo" column="display_no" />
+		<result property="menuName" column="menu_name" />
 		<result property="price" column="price" />
 		<result property="description" column="description" />
-		<result property="imageName" column="imageName" />
-		<result property="createdAt" column="createdAt" />
-		<result property="updatedAt" column="updatedAt" />
+		<result property="imageName" column="image_name" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+	
+	<resultMap id="reservationlist" type="ReservationSettingVO">
+		<result property="settingId" column="setting_id" />
+		<result property="storeId" column="store_id"/>
+		<result property="dayOfWeek" column="day_of_week"/>
+		<result property="timeSlot" column="time_slot"/>
+		<result property="isActive" column="is_active"/>
+	</resultMap>
+	
+	<resultMap id="reviewlist" type="ReviewVO">
+		<result property="reviewId" column="review_id" />
+		<result property="memberId" column="member_id" />
+		<result property="writerId" column="writerId" />
+		<result property="storeId" column="store_id" />
+		<result property="reservationId" column="reservation_id" />
+		<result property="waitingId" column="waiting_id" />
+		<result property="rating" column="rating" />
+		<result property="content" column="content" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="avgRating" column="avgRating" />
+		<result property="countRating" column="countRating" />
+		<result property="countScoreRating" column="countScoreRating" />
 	</resultMap>
 	
 	<select id="selectStoreId" parameterType="storeVO" resultType="long">
