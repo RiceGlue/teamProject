@@ -7,6 +7,7 @@ import org.springframework.dao.DataAccessException;
 
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.ReservationSettingVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 
@@ -26,7 +27,7 @@ public interface StoreDAO {
 	public List<MenuVO> selectStoreMenu(long storeId) throws DataAccessException;
 	public List<ReviewVO> selectDetailReview(long storeId) throws DataAccessException;
 	public List<ReviewVO> selectStoreReview(long storeId) throws DataAccessException;
-//	public ReservationVO selectStoreReservatioin(long storeId) throws DataAccessException;
+//	public List<ReservationSettingVO> selectStoreReservatioin(long storeId) throws DataAccessException;
 
 	
 }

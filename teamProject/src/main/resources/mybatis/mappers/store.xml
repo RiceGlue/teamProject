@@ -56,7 +56,7 @@
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
 	
-	<resultMap id="reservationlist" type="ReservationVO">
+	<resultMap id="reservationlist" type="ReservationSettingVO">
 		<result property="settingId" column="setting_id" />
 		<result property="storeId" column="store_id"/>
 		<result property="dayOfWeek" column="day_of_week"/>
@@ -188,12 +188,12 @@
 		]]>
 	</select>
 	
-<!-- 	<select id="selectStoreReservatioin" parameterType="long" resultMap="reservationlist" > -->
-<!-- 		<![CDATA[ -->
-<!-- 			select * from reservation_setting -->
-<!-- 			where store_id=#{storeId} -->
-<!-- 		]]> -->
-<!-- 	</select> -->
+	<select id="selectStoreReservatioin" parameterType="long" resultMap="reservationlist" >
+		<![CDATA[
+ 			select * from reservation_settings
+ 			where store_id=#{storeId}
+		]]>
+	</select>
 
 
 	
