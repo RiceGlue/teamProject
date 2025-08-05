@@ -31,6 +31,11 @@
 			$(activeTab).fadeIn(); //Fade in the active ID content
 			return false;
 		});
+		// 파일 선택 시 파일명 표시
+		$("#mainImage").on("change", function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			$("#mainImageName").text(fileName);
+		});
 	});
 
 	function padTime(value) { return value.toString().padStart(2, '0'); }  //숫자 한자리수 입력시 두자릿수로 바꿔줌
@@ -220,7 +225,7 @@
 						<tr>
 							<td>브레이크 타임</td>
 							<td>
-								<input id="brakeStartHour" type="text" size="4" /> : <input id="brakeStartMin" type="text" size="4" /> ~ <input id="brakeEndHour" type="text" size="4" /> : <input id="brakeEndMin" type="text" size="4" />
+								<input id="breakStartHour" type="text" size="4" /> : <input id="breakStartMin" type="text" size="4" /> ~ <input id="breakEndHour" type="text" size="4" /> : <input id="breakEndMin" type="text" size="4" />
 							</td>
 						</tr>
 						<tr>
@@ -241,7 +246,7 @@
 						<tr>
 							<td>메인 이미지</td>
 							<td>
-								<input type="file" id="mainmIage" accept="image/*" />
+								<input type="file" id="mainImage" accept="image/*" />
 								<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
 							    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 							</td>

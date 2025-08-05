@@ -16,7 +16,7 @@ table thead th {text-align: center;}
 
 form table {width: 100%;}
 form table th,
-form table td {height:50px; font-size: var(--text-size); border-bottom: 1px solid var(--cc-black);}
+form table td {vertical-align:middle !important; height:50px; font-size: var(--text-size); border-bottom: 1px solid var(--cc-black);}
 form table td > * {height: 28px;}
 form table td > input:not(type="file"),
 form table td > select,
