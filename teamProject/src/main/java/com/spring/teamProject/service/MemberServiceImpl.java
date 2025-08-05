@@ -122,6 +122,16 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.findByEmail(email);
     }
 
+    /**
+     * 아이디 중복 여부를 확인합니다.
+     * @param loginId 확인할 아이디
+     * @return 중복된 아이디의 개수 (0 또는 1)
+     */
+    @Override
+    public int checkIdDuplicate(String loginId) {
+        return memberDAO.checkIdDuplicate(loginId);
+    }
+
     // --- private 헬퍼 메소드 ---
 
     /**

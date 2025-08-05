@@ -29,7 +29,7 @@
 		<result property="updatedAt" column="updated_at"/>
 	</resultMap>
 	
-	<!-- (신규) 소셜 정보 업데이트 (계정 연동용) -->
+	<!-- 소셜 정보 업데이트 (계정 연동용) -->
 	<update id="updateSocialInfo" parameterType="com.spring.teamProject.vo.MemberVO">
 		UPDATE members
 		SET
@@ -39,7 +39,7 @@
 			member_id = #{memberId}
 	</update>
 	
-    <!-- (신규) memberId로 회원 정보 조회 -->
+    <!-- memberId로 회원 정보 조회 -->
     <select id="findById" parameterType="long" resultMap="memberResultMap">
         SELECT * FROM members WHERE member_id = #{memberId}
     </select>
@@ -56,6 +56,11 @@
 		]]>
 	</select>
 	
+	<!-- (신규) 아이디 중복 확인 쿼리 -->
+	<select id="checkIdDuplicate" parameterType="String" resultType="int">
+		SELECT count(*) FROM members WHERE login_id = #{loginId}
+	</select>
+
 	<!-- (수정) insertMember 쿼리에 누락된 country_code와 알림 동의 컬럼들을 추가합니다. -->
 	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
 		INSERT INTO members (

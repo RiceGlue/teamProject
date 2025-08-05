@@ -19,6 +19,9 @@ public interface MemberService {
 	//회원탈퇴
 	public boolean deleteMember(long memberId);
 	
-	// (신규) 이메일로 회원 정보 조회
+	// 이메일로 회원 정보 조회
 	public MemberVO findByEmail(String email);
+
+	// (신규) 아이디 중복 확인
+	public int checkIdDuplicate(String loginId);
 }

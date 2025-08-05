@@ -1,5 +1,6 @@
 package com.spring.teamProject.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.service.MemberService;
@@ -30,13 +32,25 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
-    // (신규) RecaptchaService 주입
+    // RecaptchaService 주입
     @Autowired
     private RecaptchaService recaptchaService;
 
-    // (신규) application.properties에서 사이트 키 값을 주입받습니다.
+    // application.properties에서 사이트 키 값을 주입받습니다.
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
+
+    // --- (신규) 아이디 중복 확인 API ---
+    @PostMapping("/check-id")
+    @ResponseBody   // 이 메소드는 뷰(JSP)가 아닌, 데이터(JSON)를 반환합니다.
+    public Map<String, Boolean> checkIdDuplicate(@RequestParam("loginId") String loginId) {
+        Map<String, Boolean> response = new HashMap<>();
+        // 아이디가 존재하면 count는 1 이상, 존재하지 않으면 0
+        int count = memberService.checkIdDuplicate(loginId);
+        // isDuplicate 키에 중복 여부(true/false)를 담아 반환
+        response.put("isDuplicate", count > 0);
+        return response;
+    }
 
     // --- 회원가입 및 로그인/로그아웃 관련 메소드 ---
 
@@ -61,7 +75,7 @@ public class MemberController {
         return "redirect:/";
     }
 
-    // (수정) 회원가입 폼을 보여줄 때, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
+    // 회원가입 폼을 보여줄 때, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join")
     public String joinForm(@RequestParam("role") String role, Model model) {
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey); // 사이트 키 추가
@@ -73,7 +87,7 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // (수정) 일반 & 가맹점주 회원가입 처리에 reCAPTCHA 검증 추가
+    // 일반 & 가맹점주 회원가입 처리에 reCAPTCHA 검증 추가
     @PostMapping("/join")
     public String join(MemberVO memberVO, 
                        @RequestParam("g-recaptcha-response") String recaptchaResponse,
@@ -97,7 +111,7 @@ public class MemberController {
         }
     }
     
-    // (수정) 소셜 회원가입 폼을 보여줄 때도, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
+    // 소셜 회원가입 폼을 보여줄 때도, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join_social")
     public String joinSocialForm(Model model, HttpSession session) {
         Object socialUserInfo = session.getAttribute("socialUserInfo");
@@ -110,7 +124,7 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // (수정) 소셜 회원가입 최종 처리에 reCAPTCHA 검증 추가
+    // 소셜 회원가입 최종 처리에 reCAPTCHA 검증 추가
     @PostMapping("/join_social")
     public String joinSocial(MemberVO memberVO, 
                              @RequestParam("g-recaptcha-response") String recaptchaResponse,
