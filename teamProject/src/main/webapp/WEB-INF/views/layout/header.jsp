@@ -12,21 +12,19 @@
     <title>밥풀</title>
 
     <%-- CSS는 link 태그로 직접 로드하는 것이 성능에 유리합니다. --%>
-    <link rel="stylesheet" href="${contextPath}/css/reset.css">
-    <link rel="stylesheet" href="${contextPath}/css/common.css">
     <link rel="stylesheet" href="${contextPath}/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="${contextPath}/js/common.js" defer></script>
 </head>
 <body>
 	<div><a href="#">언어선택</a></div>
-	
+
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="${contextPath}/">메인로고위치</a>
         <ul class="navbar-nav ms-auto">
-            
+
             <%-- 로그아웃 상태일 때 --%>
             <sec:authorize access="isAnonymous()">
                 <li class="nav-item"><a class="nav-link" href="${contextPath}/member/login">로그인</a></li>
@@ -35,7 +33,7 @@
 
             <%-- 로그인 상태일 때 --%>
             <sec:authorize access="isAuthenticated()">
-                <%-- 1. 현재 인증(Authentication) 객체 자체를 'authentication'이라는 이름으로 사용합니다. 
+                <%-- 1. 현재 인증(Authentication) 객체 자체를 'authentication'이라는 이름으로 사용합니다.
                        이것이 JSP에서 Security Taglib이 Principal 객체를 노출하는 기본 방식입니다. --%>
                 <sec:authentication property="principal" var="principal" />
 
@@ -52,7 +50,7 @@
                                 <path fill="none" d="M0 0h48v48H0z"></path>
                             </svg>
                         </c:if>
-                        
+
                         <%-- 3. 이름도 'principal'을 통해 가져옵니다. --%>
                          &nbsp;<sec:authentication property="principal.attributes['name']"/>님 환영합니다.
                     </span>

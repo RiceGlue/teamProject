@@ -5,12 +5,23 @@
 .row > .container {border: 2px solid olivedrab; border-radius: 20px; padding: 15px;}
 
 /* table {border:1px solid cornflowerblue;} */
+/* table td {border:1px solid coral;} */
+
 table th {padding: 5px 10px;}
 table td {vertical-align: middle; padding: 5px 10px;}
 
+
 table th,
-/* table td {border:1px solid coral;} */
 table thead th {text-align: center;}
+
+form table {width: 100%;}
+form table th,
+form table td {vertical-align:middle !important; height:50px; font-size: var(--text-size); border-bottom: 1px solid var(--cc-black);}
+form table td > * {height: 28px;}
+form table td > input:not(type="file"),
+form table td > select,
+form table td > textarea {border: 1px solid var(--cc-black);}
+form table td > *:not(input, textarea) {cursor: pointer;}
 
 .search-container {
       width: 100%;
@@ -48,3 +59,105 @@ table thead th {text-align: center;}
       width: 20px;
       height: 20px;
     }
+	.tabs {
+		display: flex;
+		margin: 0px;
+		padding: 0;
+		list-style: none;
+		background-color: #2c2c2c;
+		border-radius: 6px 6px 0 0;
+		overflow: hidden;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.tabs li {
+		flex: 1;
+		text-align: center;
+		cursor: pointer;
+		background-color: var(--cc-white);
+		transition: background-color 0.3s ease, color 0.3s ease;
+	}
+
+	.tabs li:not(:last-child) {
+		/* border-right: 1px solid #444; */
+	}
+
+	.tabs li a {
+		display: block;
+		padding: 12px 0;
+		color: var(--cc-black);
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.tabs li:hover {
+		background-color: var(--cc-green);
+	}
+
+	.tabs li:hover a {
+		color: var(--cc-white);
+	}
+
+	.tabs li.active {
+		background-color: var(--cc-orange);
+		/* border-top: 3px solid #007bff; */
+	}
+
+	.tabs li.active a {
+		color: var(--cc-white);
+		font-weight: bold;
+	}
+
+	.tab_content {
+		padding: 24px;
+		background-color: #fff;
+		border: 1px solid #ddd;
+		border-top: none;
+		border-radius: 0 0 6px 6px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	}
+
+	.info_container {
+		text-align: left;
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.info_container td {
+		padding: 8px;
+		vertical-align: top;
+	}
+
+	.info_container input[type="text"],
+	.info_container textarea,
+	.info_container select {
+		/* width: 90%;
+		padding: 6px 10px;
+		border: 1px solid var(--cc-black);
+		border-radius: 4px;
+		font-size: 14px; */
+	}
+
+	.info_container input[type="file"] {
+		border: none;
+	}
+
+	.info_container input[type="button"] {
+		margin-top: 12px;
+		background-color: #007bff;
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 14px;
+		transition: background-color 0.3s ease;
+	}
+
+	.info_container input[type="button"]:hover {
+		background-color: #0056b3;
+	}
+
+	form table tbody td input[type="file"] {display: none;}
+
+

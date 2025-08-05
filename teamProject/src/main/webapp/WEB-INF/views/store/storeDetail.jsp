@@ -62,7 +62,6 @@
 		.wating_container { margin:10px; }
 		
 		#googleMap { width: 100%; height: 300px; border-radius:10px; }
-<<<<<<< HEAD
 		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 		.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
 		.home_menu_image img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
@@ -74,8 +73,7 @@
 		.home_menu_badge.red { background-color: red; }
 		.home_menu_badge.orange { background-color: orange; }
 		.home_menu_more_btn_wrap { text-align: center; margin-top: 20px; }
-		.home_menu_more_btn { padding: 10px 20px; color: black; border: 1px solid black; border-radius: 6px; font-size: 16px; cursor: pointer; }		
-=======
+		.home_menu_more_btn { padding: 10px 20px; color: black; border: 1px solid black; border-radius: 6px; font-size: 16px; cursor: pointer; }
 
 		/* 예약 UI 관련 CSS 추가 */
 		.time-slot-btn {
@@ -111,7 +109,6 @@
             background-color: #198754;
             color: white;
         }
->>>>>>> a795928910aea2df102760a6f8368a58865f3240
 	</style>
 
 	<script>
@@ -369,7 +366,7 @@
 				}
 			});
 		});
-		
+
 		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
 	</script>
 
@@ -477,7 +474,7 @@
 						<div class="back-link">
 							<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
-						
+
 						<div class="home_menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
 								<c:if test="${status.index < 5}">

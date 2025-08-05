@@ -107,6 +107,10 @@
         var preselectedTime = '${selectedReservationTime}'.split('T')[1];
         var preselectedTableId = '${selectedTableId}';
 
+        console.log("Preselected Date:", preselectedDate);
+        console.log("Preselected Time:", preselectedTime);
+        console.log("Preselected TableId:", preselectedTableId);
+
         $("#reservationDate").datepicker({
             dateFormat: 'yy-mm-dd',
             minDate: 0,
@@ -128,15 +132,36 @@
                 data: { storeId: storeId, date: date },
                 success: function(data) {
                     updateTimeSlots(data);
-                    if (date === preselectedDate && preselectedTime) {
-                        const timeButton = $(`#time-slots-container button[data-time="${preselectedTime}"]`);
-                        if(timeButton.length) {
-                             timeButton.trigger('click');
+
+                    // --- 수정된 부분: 변수가 유효한지 확인하고, 셀렉터 방식을 변경 ---
+                    // preselectedTime 변수가 null, undefined, 빈 문자열이 아닐 경우에만 실행
+                    if (date === preselectedDate && preselectedTime && preselectedTime.length > 0) {
+                        console.log("--- Pre-selection logic started ---");
+
+                        // jQuery 셀렉터에서 변수 직접 사용
+                        const timeButton = $('#time-slots-container button[data-time="' + preselectedTime + '"]');
+                        console.log(`Searching for time button with data-time="${preselectedTime}"`);
+                        console.log("Found time button length:", timeButton.length);
+
+                        if (timeButton.length) {
+                            timeButton.addClass('selected');
+
+                            var selectedTimeId = timeButton.data('time').replace(':', '');
+                            $(`#table-area-${selectedTimeId}`).show();
+                            console.log(`Table area for ${selectedTimeId} shown.`);
+
+                            if (preselectedTableId && preselectedTableId !== 'null' && preselectedTableId !== '') {
+                                // jQuery 셀렉터에서 변수 직접 사용
+                                const tableButton = $('#table-selection-container button[data-table-id="' + preselectedTableId + '"]');
+                                console.log(`Searching for table button with data-table-id="${preselectedTableId}"`);
+                                console.log("Found table button length:", tableButton.length);
+
+                                if (tableButton.length) {
+                                    tableButton.addClass('selected');
+                                }
+                            }
                         }
-                        const tableButton = $(`#table-selection-container button[data-table-id="${preselectedTableId}"]`);
-                        if(tableButton.length) {
-                            tableButton.trigger('click');
-                        }
+                        console.log("--- Pre-selection logic finished ---");
                     }
                 },
                 error: function(xhr, status, error) {
@@ -147,8 +172,9 @@
             });
         }
 
+        // updateTimeSlots 함수는 동일
         function updateTimeSlots(data) {
-            var timeSlotsContainer = $('#time-slots-container');
+             var timeSlotsContainer = $('#time-slots-container');
             var tableSelectionContainer = $('#table-selection-container');
             timeSlotsContainer.empty();
             tableSelectionContainer.empty();
@@ -274,18 +300,15 @@
 
             PortOne.requestPayment({
                 // 1. 가맹점 식별코드: 포트원 대시보드에서 발급받은 실제 값 사용
-                // 이미지의 storeId가 'store-b124e965...'라면 해당 값 사용
                 storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
 
                 // 2. PG사 정보
-                // 연동 정보 스크린샷에 나온 PG Provider 'inicis_v2'를 기반으로
-                // pg 파라미터는 'inicis'로만 지정합니다.
-                pg: 'inicis',
-                payMethod: 'card', // 필수 파라미터: 결제 수단 (예: 'card')
+                pg: 'inicis.INIpayTest', // 이니시스 테스트 결제를 위해 'inicis.INIpayTest'로 설정
+                payMethod: 'card',
 
                 // 3. 결제 정보
                 name: `${storeName} 예약 결제`,
-                amount: 100, // 테스트 금액 100원
+                amount: 100,
                 orderId: orderId,
 
                 // 4. 고객 정보

@@ -13,22 +13,9 @@
 	.rating { color:#ffa500; font-weight:bold; }
 	.meta-info { font-size:13px; color:#777; }
 	.meta-info i { margin-right:4px; }
-	
-	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
-	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
-	.tabs li:last-child { border-right: none; }
-	.tabs li.active { background-color: white; }
-	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; }
-	.tabs li.active a { color: black; }
-	.tabs ul { background-color:#3f3f3f; }
-	.tabs li:hover { background-color: white; color:black; }
-	.tabs li a:hover { color:black; }
-	.tab_content { padding: 20px; background-color: #fff; }
-	
+
 	#map{ width: 100%; height:300px; margin: 0px auto 20px; position: relative; overflow: hidden; border-radius: 5px;}
 </style>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -39,7 +26,7 @@
 		// 탭 클릭 이벤트
 		$("ul.tabs li").click(function (e) {
 			e.preventDefault();
-			
+
 			$("ul.tabs li").removeClass("active"); // 모든 탭 비활성화
 			$(this).addClass("active"); // 클릭한 탭 활성화
 			$(".tab_content").hide(); // 모든 탭 콘텐츠 숨김
@@ -48,13 +35,13 @@
 			$(activeTab).fadeIn(); // 해당 콘텐츠 표시
 		});
 	});
-	
+
 	const regionStores = [
 		<c:forEach var="region" items="${regionlist}" varStatus="status">
 	    	{ name: "${region.storeName}", address: "${region.address}" }<c:if test="${!status.last}">,</c:if>
 	 	</c:forEach>
-	];   
-	
+	];
+
     const menuStores = [
     	<c:forEach var="menu" items="${menulist}" varStatus="status">
         	{ name: "${menu.storeName}", address: "${menu.address}" }<c:if test="${!status.last}">,</c:if>
@@ -72,9 +59,9 @@
         	{ name: "${name.storeName}", address: "${name.address}" }<c:if test="${!status.last}">,</c:if>
       	</c:forEach>
     ];
-    
+
     let map,markers=[];
-    
+
     function initMap(){map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.5665,lng:126.9780},zoom:11});}
     function showMarkers(storeList){
       const geocoder=new google.maps.Geocoder();
@@ -132,7 +119,7 @@
 <c:when test="${option eq 'search'}">
 	<h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
 
-	
+
 	<div class="tab_container">
 		<div class="tab_container" id="container">
 			<ul class="tabs">
@@ -152,7 +139,7 @@
 								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
 								<%--       </c:if> --%>
 							</div>
-							
+
 							<div class="store-info">
 								<h4>${menu.storeName}</h4>
 								<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
@@ -174,7 +161,7 @@
 								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
 								<%--       </c:if> --%>
 							</div>
-							
+
 							<div class="store-info">
 								<h4>${store.storeName}</h4>
 								<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
@@ -196,7 +183,7 @@
 								<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
 								<%--       </c:if> --%>
 							</div>
-							
+
 							<div class="store-info">
 								<h4>${name.storeName}</h4>
 								<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
@@ -215,7 +202,7 @@
 <c:when test="${option eq 'region'}">
 	<h2>${keyword }</h2>
 	<hr>
-	
+
 	<!-- 반복 렌더링 시작 -->
 	<c:forEach var="region" items="${regionlist}" varStatus="status">
 	<div id="map"></div>
@@ -229,7 +216,7 @@
 	<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
 	<%--       </c:if> --%>
 	    </div>
-	
+
 	    <div class="store-info">
 	      <h4>${region.storeName}</h4>
 	      <p>

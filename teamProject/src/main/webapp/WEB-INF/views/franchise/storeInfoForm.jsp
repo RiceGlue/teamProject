@@ -1,16 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <style>
-	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
-	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
-	.tabs li:last-child { border-right: none; }
-	.tabs li.active { background-color: white; }
-	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; }
-	.tabs li.active a { color: black; }
-	.tabs ul { background-color:#3f3f3f; }
-	.tabs li:hover { background-color: white; color:black; }
-	.tabs li a:hover { color:black; }
-	.tab_content { padding: 20px; background-color: #fff; }
-	.info_container { text-align:left; }
+/* 	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;} */
+/* 	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; } */
+/* 	.tabs li:last-child { border-right: none; } */
+/* 	.tabs li.active { background-color: white; } */
+/* 	.tabs li a { display: block; padding: 10px 0; color: white; text-decoration: none; transition: color 0.3s ease; } */
+/* 	.tabs li.active a { color: black; } */
+/* 	.tabs ul { background-color:#3f3f3f; } */
+/* 	.tabs li:hover { background-color: white; color:black; } */
+/* 	.tabs li a:hover { color:black; } */
+/* 	.tab_content { padding: 20px; background-color: #fff; } */
+/* 	.info_container { text-align:left; } */
 </style>
 
 <script>
@@ -31,16 +31,21 @@
 			$(activeTab).fadeIn(); //Fade in the active ID content
 			return false;
 		});
+		// 파일 선택 시 파일명 표시
+		$("#mainImage").on("change", function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			$("#mainImageName").text(fileName);
+		});
 	});
-	
+
 	function padTime(value) { return value.toString().padStart(2, '0'); }  //숫자 한자리수 입력시 두자릿수로 바꿔줌
-	
+
 	function addMenu() { //메뉴 추가 버튼
 		$("#moreMenu").append(`
 		  <tr><td>메뉴 이름 </td><td><input type="text" name="menuName"></td></tr>
 		  <tr><td>메뉴 가격 </td><td><input type="text" name="price"></td></tr>
 		  <tr><td>메뉴 설명 </td><td><textarea name="description" rows="2" cols="40"></textarea></td></tr>
-		  <tr><td>메뉴 사진 </td><td><input type="file" mame="image_name" accept="image/*" /></td></tr>
+		  <tr><td>메뉴 사진 </td><td><input type="file" name="image_name" accept="image/*" /></td></tr>
 		`);
 	}
 
@@ -51,13 +56,13 @@
 		dayOff.push(closedOption);
 	})
 
-	var amenities=[];	//편의시설 
+	var amenities=[];	//편의시설
 
 	$("input[name=amenOption]:checked").each(function() {
 		var amenOption = $(this).val()+",";
 		amenities.push(amenOption);
 	})
-	
+
 	const breakTime =  //브레이크 타임
 	 	padTime(document.getElementById("breakStartHour").value) + " : " +
 	  	padTime(document.getElementById("breakStartMin").value) + " ~ " +
@@ -69,11 +74,11 @@
 		padTime(document.getElementById("startMin").value) + " ~ " +
 		padTime(document.getElementById("endHour").value) + " : " +
 		padTime(document.getElementById("endMin").value);
-		
+
 	const lastOrder =  //라스트 오더
 		padTime(document.getElementById("lastOrderHour").value) + " : " +
 		padTime(document.getElementById("lastOrderMin").value);
-		
+
 
 	function checkStoreInfo() {
 	        // 필수 항목 검사
@@ -85,14 +90,23 @@
 	        const endMin = document.getElementById("endMin").value.trim();
 	        const lastOrderHour = document.getElementById("lastOrderHour").value.trim();
 	        const lastOrderMin = document.getElementById("lastOrderMin").value.trim();
-	        const mainImage = document.getElementById("mainmIage").files[0];
+	        const mainImage = document.getElementById("mainImage").files[0];
+
+	        if (!mainImage) {
+	            alert("메인 이미지를 업로드해주세요.");
+	            return;
+	        }
+
+	        alert("정보가 정상적으로 등록되었습니다.");
+	        document.forms['storeInfo'].submit();
+
 		        // 전화번호 유효성 (숫자, 하이픈 허용)
 	        const phonePattern = /^[0-9\-]+$/;
 		    if (!phone || !phonePattern.test(phone)) {
 	           	alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
 	           	return;
 	        }
-		    
+
 		    if (!desc) {
 	            alert("매장 소개를 입력해주세요.");
 	            return;
@@ -133,6 +147,11 @@
 		    alert("정보가 정상적으로 등록되었습니다.");
 		    form.submit();
 		}
+
+		document.getElementById('mainImage').addEventListener('change', function() {
+			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+			document.getElementById('mainImageName').textContent = fileName;
+		});
 </script>
 
 
@@ -149,7 +168,7 @@
 				<form action="${contextPath}/franchise/addStoreInfo?storeId=${storeId}" method="post" name="storeInfo" enctype="multipart/form-data">
 					<input type="hidden" id="storeId" value="${storeId}" />
 					<input type="hidden" id="storeName" value="${storeName}" />
-					<h3 style="text-align:center">가게 정보 등록</h3>
+					<!-- <h3 style="text-align:center">가게 정보 등록</h3> -->
 					<table class="info_container">
 						<colgroup>
 							<col style="width: 200px;">
@@ -159,7 +178,7 @@
 							<td width=200 >가게 유형</td>
 							<td width=500>
 								<select id="storeType">
-									<option value="한식" selected>한식 
+									<option value="한식" selected>한식
 									<option value="양식">양식
 									<option value="일식">일식
 									<option value="중식">중식
@@ -168,7 +187,7 @@
 									<option value="카페/베이커리">카페/베이커리
 								</select>
 							</td>
-						</tr>	
+						</tr>
 						<tr>
 							<td width=200 >운영 방식</td>
 							<td width=500>
@@ -178,7 +197,7 @@
 									<option value="RESERVATION_ONLY">예약만
 								</select>
 							</td>
-						</tr>	
+						</tr>
 						<tr >
 							<td>매장 전화번호</td>
 							<td><input id="storePhoneNumber" type="text" maxLength="15" /></td>
@@ -206,7 +225,7 @@
 						<tr>
 							<td>브레이크 타임</td>
 							<td>
-								<input id="brakeStartHour" type="text" size="4" /> : <input id="brakeStartMin" type="text" size="4" /> ~ <input id="brakeEndHour" type="text" size="4" /> : <input id="brakeEndMin" type="text" size="4" />
+								<input id="breakStartHour" type="text" size="4" /> : <input id="breakStartMin" type="text" size="4" /> ~ <input id="breakEndHour" type="text" size="4" /> : <input id="breakEndMin" type="text" size="4" />
 							</td>
 						</tr>
 						<tr>
@@ -221,24 +240,26 @@
 								<label><input type="checkbox" name="amenOption" value="주차장" />주차장 있음</label>
 								<label><input type="checkbox" name="amenOption" value="키즈존" />키즈존</label>
 								<label><input type="checkbox" name="amenOption" value="노키즈존" />노키즈존</label>
-								<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>	
+								<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>
 							</td>
 						</tr>
 						<tr>
 							<td>메인 이미지</td>
-							<td><input type="file" id="mainmIage" accept="image/*" /></td>
-						</tr>
-						<tr>
-							<td><input type="button" onClick="checkStoreInfo()" value="정보 등록"></td>
+							<td>
+								<input type="file" id="mainImage" accept="image/*" />
+								<label for="mainImage" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+							    <span id="mainImageName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+							</td>
 						</tr>
 					</table>
-				</form>	
+					<input type="button" onClick="checkStoreInfo()" value="정보 등록">
+				</form>
 			</div>
-			
-			
+
+
 			<div class="tab_content" id="tab2">
 				<form action="${contextPath}/franchisor/addMenuInfo?storeId=${storeId}" method="post" enctype="multipart/form-data">
-					<h3 style="text-align:center">메뉴 등록</h3>
+					<!-- <h3 style="text-align:center">메뉴 등록</h3> -->
 					<table class="info_container">
 						<colgroup>
 							<col style="width:200px;">
@@ -302,4 +323,4 @@
 			</div>
 		</div>
 	</div>
-</div>	
+</div>
