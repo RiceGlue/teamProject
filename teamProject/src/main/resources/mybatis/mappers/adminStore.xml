@@ -25,7 +25,7 @@
 		<result property="breakTime" column="break_time" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
-		<result property="mainImage" column="main_image" />
+		<result property="fileName" column="file_name" />
 		<result property="closed" column="closed" />
 		<result property="operatingHours" column="operating_hours" />
 		<result property="lastOrder" column="last_order" />
@@ -94,7 +94,7 @@
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="map" >
-	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, description, amenities, main_image, created_at, update_at, operating_hours, closed, last_order ) values
+	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, description, amenities, file_name, created_at, update_at, operating_hours, closed, last_order ) values
 	    <foreach collection="storelist" item="store" separator=",">
 	        (
 	            #{store.storeId},
@@ -105,7 +105,7 @@
 	            #{store.breakTime},
 	            #{store.description},
 	            #{store.amenities},
-	            #{store.mainImage},
+	            #{store.fileName},
 	            now(),
 	            now(),
 	            #{store.operatingHours},

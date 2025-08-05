@@ -39,7 +39,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@Autowired
 	private AdminStoreService adminStoreService;
 	
-	@RequestMapping(value="/storeInfoForm")
+	@RequestMapping(value={"/storeInfoForm","/menuInfoForm"})
 	public ModelAndView form (@RequestParam("ownerId") long ownerId, @RequestParam("storeName") String storeName, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 		
@@ -60,7 +60,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	
 	@Override
 	@RequestMapping(value="/addStoreInfo", method= {RequestMethod.POST,RequestMethod.GET})
-	public ResponseEntity addStoreInfo (@RequestParam("storeId") long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
+	public ResponseEntity addStoreInfo (MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
 		
 		multiReq.setCharacterEncoding("utf-8");
 		res.setContentType("text/html; charset=UTF-8");
@@ -73,6 +73,8 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			String value=multiReq.getParameter(name);
 			storeInfoMap .put(name,value);
 		}
+		String storeId = (String)storeInfoMap.get("storeId");
+		System.out.println(storeId);
 		
 //		HttpSession session = multiReq.getSession();
 //		MemberVO memberVO = (MemberVO) session.getAttribute("memberInfo");
@@ -114,7 +116,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			}
 			
 			message= "<script>";
-			message += " alert('1오류가 발생했습니다. 다시 시도해 주세요.');";
+			message += " alert('오류가 발생했습니다. 다시 시도해 주세요.');";
 			message +=" location.href='"+multiReq.getContextPath()+"/franchise/addStoreInfo';";
 			message +=("</script>");
 			e.printStackTrace();

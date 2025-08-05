@@ -27,7 +27,7 @@ public class StoreVO {
 	private String closed;
 	private String description;
 	private String amenities;
-	private String mainImage;
+	private String fileName;
 	
 	private String operatingHours;
 	private String lastOrder;
@@ -129,11 +129,11 @@ public class StoreVO {
 	public void setAmenities(String amenities) {
 		this.amenities = amenities;
 	}
-	public String getMainImage() {
-		return mainImage;
+	public String getFileName() {
+		return fileName;
 	}
-	public void setMainImage(String mainImage) {
-		this.mainImage = mainImage;
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 	public String getOperatingHours() {
 		return operatingHours;

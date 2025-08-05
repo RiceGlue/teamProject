@@ -10,5 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface AdminStoreController {
 	
-	public ResponseEntity addStoreInfo (@RequestParam("storeId")long storeId, MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
+	public ResponseEntity addStoreInfo (MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
+//	public ResponseEntity addMenuInfo (MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
 }

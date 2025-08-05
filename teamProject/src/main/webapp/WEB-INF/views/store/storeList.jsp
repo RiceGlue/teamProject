@@ -133,7 +133,7 @@
 						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${menu.mainImage}" alt="가게이미지"></a>
+								<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${menu.fileName}" alt="가게이미지"></a>
 								<!--       대기 팀 수 표시 -->
 								<%--       <c:if test="${store.waitCount > 0}"> --%>
 								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
@@ -154,7 +154,7 @@
 						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${addr.mainImage}" alt="가게이미지"></a>
+								<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${addr.fileName}" alt="가게이미지"></a>
 								<!--       대기 팀 수 표시 -->
 								<%--       <c:if test="${store.waitCount > 0}"> --%>
 								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
@@ -175,7 +175,7 @@
 						<div id="map"></div>
 						<div class="store-card">
 							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${name.mainImage}" alt="가게이미지"></a>
+								<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${name.fileName}" alt="가게이미지"></a>
 								<!--       대기 팀 수 표시 -->
 								<%--       <c:if test="${name.waitCount > 0}"> --%>
 								<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
@@ -206,7 +206,7 @@
 	  <div class="store-card">
 	    <div class="store-image">
 	      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
-	        <img src="${region.mainImage}" alt="가게이미지">
+	        <img src="${region.fileName}" alt="가게이미지">
 	      </a>
 	<!--       대기 팀 수 표시 -->
 	<%--       <c:if test="${store.waitCount > 0}"> --%>
