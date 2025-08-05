@@ -201,8 +201,8 @@
 	<hr>
 
 	<!-- 반복 렌더링 시작 -->
-	<c:forEach var="region" items="${regionlist}" varStatus="status">
 	<div id="map"></div>
+	<c:forEach var="region" items="${regionlist}" varStatus="status">
 	  <div class="store-card">
 	    <div class="store-image">
 	      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
