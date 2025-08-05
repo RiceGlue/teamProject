@@ -3,50 +3,111 @@
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
+// DOM(Document Object Model)이 완전히 로드된 후에, 중괄호 안의 코드를 실행합니다.
 $(function() {
+    // id가 'profileImageFile'인 요소에 'change' 이벤트가 발생하면 실행될 함수를 연결합니다.
     $('#profileImageFile').on('change', function() {
         validateImage(this);
     });
 
-    function validateImage(input) {
-        const file = input.files[0];
-        if (!file) return;
+    // --- 아이디 중복 확인 기능 추가 ---
+    // 1. 중복 확인 버튼 클릭 이벤트
+    $('#idCheckBtn').on('click', function() {
+        const loginId = $('#loginId').val();
+        const idCheckMessage = $('#idCheckMessage');
 
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSizeInBytes) {
-            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-            resetInput(input);
+        if (!loginId) {
+            idCheckMessage.html('<span style="color: red;">아이디를 입력해주세요.</span>');
             return;
         }
 
-        const maxResolution = 500; // 최대 가로/세로 500px
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const image = new Image();
-            image.src = e.target.result;
-            image.onload = function() {
-                if (this.width > maxResolution || this.height > maxResolution) {
-                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
-                    resetInput(input);
-                    return;
+        $.ajax({
+            url: '${contextPath}/member/check-id', // (수정) URL 변경
+            type: 'POST',                         // (수정) 요청 방식 변경
+            data: { loginId: loginId },
+            success: function(response) {
+                // (수정) 응답 키를 isDuplicate로 변경하고, 논리를 반대로
+                if (!response.isDuplicate) { // 중복되지 않았다면
+                    idCheckMessage.html('<span style="color: green;">사용 가능한 아이디입니다.</span>');
+                    $('#submitBtn').prop('disabled', false); // 가입 버튼 활성화
+                } else { // 중복되었다면
+                    idCheckMessage.html('<span style="color: red;">이미 사용 중인 아이디입니다.</span>');
+                    $('#submitBtn').prop('disabled', true); // 가입 버튼 비활성화
                 }
-                document.getElementById('preview').src = e.target.result;
-            };
-        };
-        reader.readAsDataURL(file);
+            },
+            error: function() {
+                idCheckMessage.html('<span style="color: red;">오류가 발생했습니다. 다시 시도해주세요.</span>');
+                $('#submitBtn').prop('disabled', true);
+            }
+        });
+    });
+
+    // 2. 아이디 입력란 수정 시, 상태 초기화
+    $('#loginId').on('input', function() {
+        $('#submitBtn').prop('disabled', true);
+        $('#idCheckMessage').html('');
+    });
+});
+
+// 이미지 유효성 검사 및 미리보기 함수 (기존 코드 유지)
+function validateImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSizeInBytes) {
+        alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+        resetInput(input);
+        return;
     }
 
-    function resetInput(input) {
-        input.value = '';
-        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
+    const maxResolution = 500; // 최대 가로/세로 500px
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const image = new Image();
+        image.src = e.target.result;
+        image.onload = function() {
+            if (this.width > maxResolution || this.height > maxResolution) {
+                alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                resetInput(input);
+                return;
+            }
+            document.getElementById('preview').src = e.target.result;
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+// 이미지 입력 초기화 함수 (기존 코드 유지)
+function resetInput(input) {
+    input.value = '';
+    document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
+}
+
+// 폼 제출 유효성 검사 함수 (신규 추가)
+function validateJoinForm() {
+    // 1. 아이디 중복 확인 여부 검사
+    if ($('#submitBtn').is(':disabled')) {
+        alert("아이디 중복 확인을 해주세요.");
+        return false;
     }
-});
+
+    // 2. reCAPTCHA 검사
+    const recaptchaResponse = grecaptcha.getResponse();
+    if (recaptchaResponse.length === 0) {
+        alert("reCAPTCHA를 확인해주세요.");
+        return false;
+    }
+
+    // 모든 검사를 통과하면 폼 제출
+    return true;
+}
 </script>
 
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">가맹점주 회원가입</h2>
     
-    <form action="${contextPath}/member/join" method="post" enctype="multipart/form-data">
+    <form action="${contextPath}/member/join" method="post" enctype="multipart/form-data" onsubmit="return validateJoinForm();">
         <input type="hidden" name="role" value="OWNER">
 
         <div class="text-center mb-4">
@@ -58,10 +119,16 @@ $(function() {
             </div>
         </div>
         
+        <%-- 아이디 입력 (수정) --%>
         <div class="mb-3">
             <label for="loginId" class="form-label">아이디</label>
-            <input type="text" class="form-control" id="loginId" name="loginId" required>
+            <div class="input-group">
+                <input type="text" class="form-control" id="loginId" name="loginId" required>
+                <button class="btn btn-outline-secondary" type="button" id="idCheckBtn">중복 확인</button>
+            </div>
+            <div id="idCheckMessage" class="form-text mt-1"></div>
         </div>
+        
         <div class="mb-3">
             <label for="loginPw" class="form-label">비밀번호</label>
             <input type="password" class="form-control" id="loginPw" name="loginPw" required>
@@ -153,8 +220,9 @@ $(function() {
             <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
         </div>
         
+        <%-- 가입하기 버튼 (수정) --%>
         <div class="d-grid">
-            <button type="submit" class="btn btn-success">가입하기</button>
+            <button type="submit" id="submitBtn" class="btn btn-success" disabled>가입하기</button>
         </div>
     </form>
 </div>
