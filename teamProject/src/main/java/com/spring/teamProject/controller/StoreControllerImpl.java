@@ -46,6 +46,10 @@ public class StoreControllerImpl implements StoreController {
 		} else if(option.equals("storeType")) {
 			typelist = storeService.selectStoreByType(keyword);
 		}
+		
+		for(int i=0;i<regionlist.size();i++) {
+			System.out.println(regionlist.get(i).getStoreName());
+		}
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("option", option);

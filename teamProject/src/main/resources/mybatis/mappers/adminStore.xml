@@ -52,7 +52,7 @@
 		<result property="menuName" column="menu_name" />
 		<result property="price" column="price" />
 		<result property="description" column="description" />
-		<result property="imageName" column="image_name" />
+		<result property="fileName" column="file_name" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
@@ -95,7 +95,6 @@
 	
 	<insert id="insertStoreInfo" parameterType="map" >
 	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, description, amenities, file_name, created_at, update_at, operating_hours, closed, last_order ) values
-	    <foreach collection="storelist" item="store" separator=",">
 	        (
 	            #{store.storeId},
 	            #{store.storeName},
@@ -112,7 +111,6 @@
 	            #{store.closed},
 	            #{store.lastOrder}
 	        )
-	    </foreach> 
 	    <selectKey>
 	        select LAST_INSERT_ID()
 	    </selectKey>

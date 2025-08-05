@@ -1,11 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <script>
-	$(document).ready(function() { //tab 실행
+	$(document).ready(function() {
 		// 파일 선택 시 파일명 표시
 		$("#fileName").on("change", function() {
 			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			$("#imageFileName").text(fileName);
+			$("#showFileName").text(fileName);
 		});
 	
 		document.getElementById('fileName0').addEventListener('change', function () {

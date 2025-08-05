@@ -14,65 +14,55 @@
 </style>
 
 <script>
-	$(document).ready(function() { //tab 실행
-		//When page loads...
-		$(".tab_content").hide(); //Hide all content
-		$("ul.tabs li:first").addClass("active").show(); //Activate first tab
-		$(".tab_content:first").show(); //Show first tab content
-
-		//On Click Event
-		$("ul.tabs li").click(function() {
-
-			$("ul.tabs li").removeClass("active"); //Remove any "active" class
-			$(this).addClass("active"); //Add "active" class to selected tab
-			$(".tab_content").hide(); //Hide all tab content
-
-			var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-			$(activeTab).fadeIn(); //Fade in the active ID content
-			return false;
-		});
-		// 파일 선택 시 파일명 표시
-		$("#fileName").on("change", function() {
+	$(document).ready(function() {
+	    // 탭 처리
+	    $(".tab_content").hide();
+	    $("ul.tabs li:first").addClass("active").show();
+	    $(".tab_content:first").show();
+	    $("ul.tabs li").click(function() {
+	        $("ul.tabs li").removeClass("active");
+	        $(this).addClass("active");
+	        $(".tab_content").hide();
+	        var activeTab = $(this).find("a").attr("href");
+	        $(activeTab).fadeIn();
+	        return false;
+	    });
+	
+	    // 파일명 표시
+	    $("#fileName").on("change", function() {
+	        const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
+	        $("#showFileName").text(fileName);
+	    });
+	});
+	
+	let imgIdx = 1;
+	
+	function addImage() {
+		const subfileIdx = `fileName${menuIdx}`;
+		const subfileNameIdx = `showFileName${menuIdx}`;
+		
+		$("#addImage").append(`
+				<tr><td>서브 이미지</td>
+				<td><input type="file" id="${subfileIdx}" name="fileName" accept="image/*">
+				<label for="${subfileIdx}" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+				<span id="${subfileNameIdx}" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></td></tr>
+		`);
+		
+		document.getElementById(fileIdx).addEventListener('change', function() {
 			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			$("#showFileName").text(fileName);
+			document.getElementById(fileNameIdx).textContent = fileName;
 		});
 		
-	function padTime(value) { return value.toString().padStart(2, '0'); }  //숫자 한자리수 입력시 두자릿수로 바꿔줌
-
-	var closed=[];	//휴일
-
-	$("input[name=closedOption]:checked").each(function() {
-		var closedOption = $(this).val()+",";
-		dayOff.push(closedOption);
-	})
-
-	var amenities=[];	//편의시설
-
-	$("input[name=amenOption]:checked").each(function() {
-		var amenOption = $(this).val()+",";
-		amenities.push(amenOption);
-	})
-
-	const breakTime =  //브레이크 타임
-	 	padTime(document.getElementById("breakStartHour").value) + " : " +
-	  	padTime(document.getElementById("breakStartMin").value) + " ~ " +
-	  	padTime(document.getElementById("breakEndHour").value) + " : " +
-	  	padTime(document.getElementById("breakEndMin").value);
-
-	const operatingHours =  //운영 시간
-		padTime(document.getElementById("startHour").value) + " : " +
-		padTime(document.getElementById("startMin").value) + " ~ " +
-		padTime(document.getElementById("endHour").value) + " : " +
-		padTime(document.getElementById("endMin").value);
-
-	const lastOrder =  //라스트 오더
-		padTime(document.getElementById("lastOrderHour").value) + " : " +
-		padTime(document.getElementById("lastOrderMin").value);
-
-
+		menuIdx++;
+	}
+	
+	// ✅ 전역 스코프에 함수 정의
 	function checkStoreInfo() {
-	        // 필수 항목 검사
-		const phone = document.getElementById("storePhoneNumber").value.trim();
+	    function padTime(value) {
+	        return value.toString().padStart(2, '0');
+	    }
+	
+	    const phone = document.getElementById("storePhoneNumber").value.trim();
 	    const desc = document.getElementById("description").value.trim();
 	    const startHour = document.getElementById("startHour").value.trim();
 	    const startMin = document.getElementById("startMin").value.trim();
@@ -81,68 +71,54 @@
 	    const lastOrderHour = document.getElementById("lastOrderHour").value.trim();
 	    const lastOrderMin = document.getElementById("lastOrderMin").value.trim();
 	    const fileName = document.getElementById("fileName").files[0];
-
-	        if (!fileName) {
-	            alert("메인 이미지를 업로드해주세요.");
+	
+	    if (!fileName) {
+	        alert("메인 이미지를 업로드해주세요.");
+	        return;
+	    }
+	
+	    const phonePattern = /^[0-9\-]+$/;
+	    if (!phone || !phonePattern.test(phone)) {
+	        alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
+	        return;
+	    }
+	
+	    if (!desc) {
+	        alert("매장 소개를 입력해주세요.");
+	        return;
+	    }
+	
+	    const timeFields = [
+	        { value: startHour, label: "운영 시작 시간 (시)" },
+	        { value: startMin, label: "운영 시작 시간 (분)" },
+	        { value: endHour, label: "운영 종료 시간 (시)" },
+	        { value: endMin, label: "운영 종료 시간 (분)" },
+	        { value: lastOrderHour, label: "라스트 오더 (시)" },
+	        { value: lastOrderMin, label: "라스트 오더 (분)" },
+	    ];
+	    for (const field of timeFields) {
+	        if (!/^\d+$/.test(field.value) || parseInt(field.value) < 0) {
+	            alert(`${field.label}은 숫자로 입력해주세요.`);
 	            return;
 	        }
-
-	        alert("정보가 정상적으로 등록되었습니다.");
-	        document.forms['storeInfo'].submit();
-
-		        // 전화번호 유효성 (숫자, 하이픈 허용)
-	        const phonePattern = /^[0-9\-]+$/;
-		    if (!phone || !phonePattern.test(phone)) {
-	           	alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
-	           	return;
-	        }
-
-		    if (!desc) {
-	            alert("매장 소개를 입력해주세요.");
-	            return;
-	        }
-		        // 운영 시간, 라스트 오더 숫자 검사
-	        const timeFields = [
-	            { value: startHour, label: "운영 시작 시간 (시)" },
-	            { value: startMin, label: "운영 시작 시간 (분)" },
-	            { value: endHour, label: "운영 종료 시간 (시)" },
-	            { value: endMin, label: "운영 종료 시간 (분)" },
-	            { value: lastOrderHour, label: "라스트 오더 (시)" },
-	            { value: lastOrderMin, label: "라스트 오더 (분)" },
-	        ];
-		    for (const field of timeFields) {
-	            if (!/^\d+$/.test(field.value) || parseInt(field.value) < 0) {
-	                alert(`${field.label}은 숫자로 입력해주세요.`);
-	                return;
-	            }
-	        }
-		        // 운영 시간 논리적 오류 방지
-	        const startTime = parseInt(startHour) * 60 + parseInt(startMin);
-	        const endTime = parseInt(endHour) * 60 + parseInt(endMin);
-		    if (endTime <= startTime) {
-	            alert("운영 종료 시간이 시작 시간보다 빠를 수 없습니다.");
-	            return;
-	        }
-		        // 라스트 오더는 종료 시간보다 이르거나 같아야 함
-	        const lastOrderTime = parseInt(lastOrderHour) * 60 + parseInt(lastOrderMin);
-	        if (lastOrderTime > endTime) {
-	            alert("라스트 오더는 운영 종료 시간보다 늦을 수 없습니다.");
-	            return;
-	        }
-		        // 이미지 업로드 여부
-		    if (!fileName) {
-		        alert("메인 이미지를 업로드해주세요.");
-		        return;
-		    }
-		    alert("정보가 정상적으로 등록되었습니다.");
-		    document.storeInfo.submit();
-		}
-
-		document.getElementById('fileName').addEventListener('change', function() {
-			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			document.getElementById('showFileName').textContent = fileName;
-		});
-
+	    }
+	
+	    const startTime = parseInt(startHour) * 60 + parseInt(startMin);
+	    const endTime = parseInt(endHour) * 60 + parseInt(endMin);
+	    if (endTime <= startTime) {
+	        alert("운영 종료 시간이 시작 시간보다 빠를 수 없습니다.");
+	        return;
+	    }
+	
+	    const lastOrderTime = parseInt(lastOrderHour) * 60 + parseInt(lastOrderMin);
+	    if (lastOrderTime > endTime) {
+	        alert("라스트 오더는 운영 종료 시간보다 늦을 수 없습니다.");
+	        return;
+	    }
+	
+	    alert("정보가 정상적으로 등록되었습니다.");
+	    document.forms['storeInfo'].submit();
+	}
 </script>
 
 
@@ -157,80 +133,85 @@
 			<col style="width: 200px;">
 			<col style="width: 500px;">
 		</colgroup>
-		<tr>
-			<td>가게 유형</td>
-			<td>
-				<select id="storeType" name="storeType">
-				<option value="한식" selected>한식</option>
-				<option value="양식">양식</option>
-				<option value="일식">일식</option>
-				<option value="중식">중식</option>
-				<option value="분식">분식</option>
-				<option value="세계음식">세계음식</option>
-				<option value="카페/베이커리">카페/베이커리</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>운영 방식</td>
-			<td>
-				<select id="operationType" name="operationType">
-					<option value="ALL" selected>모두</option>
-					<option value="WAITING_ONLY">웨이팅만</option>
-					<option value="RESERVATION_ONLY">예약만</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>매장 전화번호</td>
-			<td><input id="storePhoneNumber" name="storePhoneNumber" type="text" maxLength="15" /></td>
-		</tr>
-		<tr>
-			<td>매장 소개</td>
-			<td><textarea id="description" name="description" rows="2" cols="40"></textarea></td>
-		</tr>
-		<tr>
-			<td>정기 휴무<small>(복수 선택 가능)</small></td>
-			<td>
-				<label><input type="checkbox" name="closedOption" value="월요일" /> 월요일</label>
-				<label><input type="checkbox" name="closedOption" value="화요일" /> 화요일</label>
-				<label><input type="checkbox" name="closedOption" value="수요일" /> 수요일</label>
-				<label><input type="checkbox" name="closedOption" value="목요일" /> 목요일</label>
-				<label><input type="checkbox" name="closedOption" value="금요일" /> 금요일</label>
-				<label><input type="checkbox" name="closedOption" value="토요일" /> 토요일</label>
-				<label><input type="checkbox" name="closedOption" value="일요일" /> 일요일</label>
-			</td>
-		</tr>
-		<tr>
-			<td>운영시간<small>(24시간제로 입력)</small></td>
-			<td><input type="text" id="startHour" size="4">:<input type="text" id="startMin" size="4"> ~ <input type="text" id="endHour" size="4">:<input type="text" id="endMin" size="4"></td>
-		</tr>
-		<tr>
-			<td>브레이크 타임</td>
-			<td><input id="breakStartHour" type="text" size="4" />:<input id="breakStartMin" type="text" size="4" /> ~ <input id="breakEndHour" type="text" size="4" />:<input id="breakEndMin" type="text" size="4" /></td>
-		</tr>
-		<tr>
-			<td>라스트 오더</td>
-			<td><input id="lastOrderHour" type="text" size="4" />:<input id="lastOrderMin" type="text" size="4" /></td>
-		</tr>
-		<tr>
-			<td>편의 시설</td>
-			<td>
-				<label><input type="checkbox" name="amenOption" value="주차장" />주차장 있음</label>
-				<label><input type="checkbox" name="amenOption" value="키즈존" />키즈존</label>
-				<label><input type="checkbox" name="amenOption" value="노키즈존" />노키즈존</label>
-				<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>
-			</td>
-		</tr>
-		<tr>
-			<td>메인 이미지</td>
-			<td>
-				<input type="file" id="fileName" name="fileName" accept="image/*">
-				<label for="fileName" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
-				<span id="showFileName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
-			</td>
-		</tr>
+		<tbody>
+			<tr>
+				<td>가게 유형</td>
+				<td>
+					<select id="storeType" name="storeType">
+					<option value="한식" selected>한식</option>
+					<option value="양식">양식</option>
+					<option value="일식">일식</option>
+					<option value="중식">중식</option>
+					<option value="분식">분식</option>
+					<option value="세계음식">세계음식</option>
+					<option value="카페/베이커리">카페/베이커리</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>운영 방식</td>
+				<td>
+					<select id="operationType" name="operationType">
+						<option value="ALL" selected>모두</option>
+						<option value="WAITING_ONLY">웨이팅만</option>
+						<option value="RESERVATION_ONLY">예약만</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>매장 전화번호</td>
+				<td><input id="storePhoneNumber" name="storePhoneNumber" type="text" maxLength="15" /></td>
+			</tr>
+			<tr>
+				<td>매장 소개</td>
+				<td><textarea id="description" name="description" rows="2" cols="40"></textarea></td>
+			</tr>
+			<tr>
+				<td>정기 휴무<small>(복수 선택 가능)</small></td>
+				<td>
+					<label><input type="checkbox" name="closedOption" value="월요일" /> 월요일</label>
+					<label><input type="checkbox" name="closedOption" value="화요일" /> 화요일</label>
+					<label><input type="checkbox" name="closedOption" value="수요일" /> 수요일</label>
+					<label><input type="checkbox" name="closedOption" value="목요일" /> 목요일</label>
+					<label><input type="checkbox" name="closedOption" value="금요일" /> 금요일</label>
+					<label><input type="checkbox" name="closedOption" value="토요일" /> 토요일</label>
+					<label><input type="checkbox" name="closedOption" value="일요일" /> 일요일</label>
+				</td>
+			</tr>
+			<tr>
+				<td>운영시간<small>(24시간제로 입력)</small></td>
+				<td><input type="text" id="startHour" size="4">:<input type="text" id="startMin" size="4"> ~ <input type="text" id="endHour" size="4">:<input type="text" id="endMin" size="4"></td>
+			</tr>
+			<tr>
+				<td>브레이크 타임</td>
+				<td><input id="breakStartHour" type="text" size="4" />:<input id="breakStartMin" type="text" size="4" /> ~ <input id="breakEndHour" type="text" size="4" />:<input id="breakEndMin" type="text" size="4" /></td>
+			</tr>
+			<tr>
+				<td>라스트 오더</td>
+				<td><input id="lastOrderHour" type="text" size="4" />:<input id="lastOrderMin" type="text" size="4" /></td>
+			</tr>
+			<tr>
+				<td>편의 시설</td>
+				<td>
+					<label><input type="checkbox" name="amenOption" value="주차장" />주차장 있음</label>
+					<label><input type="checkbox" name="amenOption" value="키즈존" />키즈존</label>
+					<label><input type="checkbox" name="amenOption" value="노키즈존" />노키즈존</label>
+					<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>
+				</td>
+			</tr>
+			<tr>
+				<td>메인 이미지</td>
+				<td>
+					<input type="file" id="fileName0" name="fileName" accept="image/*">
+					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
+					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				</td>
+			</tr>
+
+		</tbody>
+		<tbody id="addImage"></tbody>
+		
 	</table>
-	
+	<input type="button" value="이미지 추가" onClick="addImage()">
 	<input type="button" onClick="checkStoreInfo()" value="정보 등록">
 </form>
