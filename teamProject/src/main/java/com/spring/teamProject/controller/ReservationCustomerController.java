@@ -1,25 +1,31 @@
 package com.spring.teamProject.controller;
 
-import com.spring.teamProject.service.ReservationService;
-import com.spring.teamProject.vo.ReservationVO;
-import com.spring.teamProject.vo.StoreVO;
-import com.spring.teamProject.vo.StoreTableVO;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession;
+import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.StoreTableVO;
+import com.spring.teamProject.vo.StoreVO;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/reservation/customer")
@@ -30,7 +36,7 @@ public class ReservationCustomerController {
     @Autowired
     private ReservationService reservationService;
 
-    // JSP에 전달할 가데이터 StoreVO 생성
+    // JSP에 전달할 가데이터 StoreVO 생성 (사용자 기존 코드)
     private StoreVO getDummyStoreInfo(Long storeId) {
         StoreVO store = new StoreVO();
         store.setStoreId(storeId);
@@ -40,7 +46,7 @@ public class ReservationCustomerController {
     }
 
     /**
-     * 예약 신청 폼을 보여주는 메서드
+     * 예약 신청 폼을 보여주는 메서드 (사용자 기존 코드)
      * storeDetail.jsp에서 전송한 GET 요청을 처리
      */
     @GetMapping("/bookForm")
@@ -52,33 +58,33 @@ public class ReservationCustomerController {
         logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableId: {}, guestCount: {}",
                 storeId, reservationTime, tableId, guestCount);
 
-        // StoreDetail.jsp에서 넘겨받은 파라미터를 Model에 담아 bookingForm.jsp로 전달
         model.addAttribute("storeId", storeId);
         model.addAttribute("selectedReservationTime", reservationTime);
         model.addAttribute("selectedTableId", tableId);
         model.addAttribute("guestCount", guestCount);
 
-        // reservationTime 파라미터에서 날짜 부분만 추출하여 bookingForm.jsp에 전달
         String currentDate = (reservationTime != null && reservationTime.length() >= 10)
                              ? reservationTime.substring(0, 10)
                              : LocalDate.now().toString();
         model.addAttribute("currentDate", currentDate);
 
-        // DB에서 Store 정보를 조회하여 Model에 추가 (임시 데이터 사용)
         StoreVO store = getDummyStoreInfo(storeId);
         model.addAttribute("store", store);
+
+        // --- 이 로그를 추가해서 storeName이 잘 넘어오는지 확인해 보세요. ---
+        logger.info("JSP에 전달될 storeName: {}", store.getStoreName());
+        // -------------------------------------------------------------
 
         return "reservation/customer/bookingForm";
     }
 
     /**
-     * 예약 가능한 시간대 및 테이블 정보를 JSON 형태로 반환하는 AJAX 엔드포인트
+     * 예약 가능한 시간대 및 테이블 정보를 JSON 형태로 반환하는 AJAX 엔드포인트 (사용자 기존 코드)
      */
     @GetMapping("/available-slots")
     @ResponseBody
     public Map<String, List<StoreTableVO>> getAvailableSlots(@RequestParam("storeId") Long storeId,
-                                                             @RequestParam("date")
-                                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+                                                             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         logger.info("예약 가능한 시간대 요청 - storeId: {}, date: {}", storeId, date);
 
         try {
@@ -91,17 +97,20 @@ public class ReservationCustomerController {
 
 
     /**
-     * 예약 신청 폼 제출 처리 메소드 (단일 테이블 선택으로 원복)
+     * 예약 신청 폼 제출 처리 메소드 (PortOne 결제 연동 로직 추가)
      */
     @PostMapping("/book")
     public String processBookingForm(@ModelAttribute("reservationVO") ReservationVO reservation,
                                      @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
+                                     @RequestParam("paymentId") String paymentId, // --- 수정: paymentId 파라미터 추가 ---
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
 
         reservation.setReservationTime(reservationTime);
+        reservation.setPaymentId(paymentId); // --- 수정: reservationVO에 paymentId 저장 ---
 
         logger.info("예약 폼 제출됨 - ReservationVO: {}", reservation);
+        logger.info("결제 ID: {}", paymentId);
 
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
@@ -111,7 +120,6 @@ public class ReservationCustomerController {
         reservation.setStatus("PENDING");
 
         try {
-            // **추가된 로직: tableId가 null인 경우 서버에서 직접 할당**
             if (reservation.getTableId() == null) {
                 Optional<Long> availableTableId = reservationService.findAvailableTable(
                     reservation.getStoreId(),
@@ -140,7 +148,7 @@ public class ReservationCustomerController {
     }
 
     /**
-     * 임시로 만들 "예약 완료" 페이지
+     * 임시로 만들 "예약 완료" 페이지 (사용자 기존 코드)
      */
     @GetMapping("/bookingConfirm")
     public String bookingConfirm(@RequestParam("storeId") Long storeId,
