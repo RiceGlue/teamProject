@@ -9,6 +9,7 @@
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
 <c:set var="storeId" value="${store.storeId}" />
+<%-- <c:set var="res" value="${storeMap.reservation}" /> --%>
 
 <html>
 <head>
@@ -20,7 +21,7 @@
 	 	input[type="text"]:not(.form-control) { width: 50px; text-align: center; }
 		.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
 		.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
-		.rating { font-size: 16px; margin-bottom: 10px; }
+		
 		.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
 		.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
 		.tabs li:last-child { border-right: none; }
@@ -31,7 +32,8 @@
 		.tabs li:hover { background-color: white; color:black; }
 		.tabs li a:hover { color:black; }
 		.tab_content { padding: 20px; background-color: #fff; }
-
+		
+		/*메뉴*/
 		.menu_container { display:flex; flex-wrap:wrap; gap:8px; }
 		.menu_card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
 		.menu_image { width:100%; height:120px; background:#eee; display:flex; justify-content:center; align-items:center; }
@@ -40,6 +42,9 @@
 		.menu_name { font-weight:bold; margin:4px 0 2px; }
 		.menu_price { color:#555; margin:2px 0; }
 		.menu_description { color:#777; font-size:12px; margin:2px 0 4px; }
+		
+		/*리뷰*/
+		.rating{ font-size: 16px; margin-bottom: 10px; }
 		.card-rating, .card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.review_count {font-weight:bold;margin-bottom:12px;}
 		.countRating {margin-bottom:20px;}
@@ -53,9 +58,10 @@
 		.review_user {font-weight:bold;font-size:13px;margin:4px 0;}
 		.review_text {font-size:14px;color:#333;}
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
-		.card-rating {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-		.card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
 		.detail-box { padding:auto 10px; margin:30px; }
+		
+		.wating_container {margin:10px; text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
+		
 		#googleMap { width: 100%; height: 300px; border-radius:10px; }
 		.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 		.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
@@ -190,8 +196,8 @@
 		    $(".tab_content").hide();
 		    $("ul.tabs li:first").addClass("active").show();
 		    $(".tab_content:first").show();
-
-
+		    
+		    
 			// jQuery UI Datepicker 초기화
 			$("#reservationDate").datepicker({
 				dateFormat: 'yy-mm-dd',
@@ -363,6 +369,7 @@
 		});
 
 		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
+		function openTab3() { document.querySelector('ul.tabs li a[href="#tab3"]').click(); }
 	</script>
 
 <!-- 구글 맵 API -->
@@ -398,15 +405,29 @@
 			<h4 class="mt-3">${store.storeName}</h4>
 			<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 		</div>
-		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지"> ${store.avgRating} 리뷰 ${store.countRating}개</div>
+		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지">${store.avgRating}&nbsp;&nbsp;&nbsp;리뷰 ${store.countRating}개 <button type="button" onClick="openTab3()" class="btn btn-link" style="text-decoration:none; color:black;"><strong>></strong></button></div>
 		<div>
-			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-outline-secondary btn-sm mt-2" id="copyaddress">복사</button></p>
+			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-link btn-sm mt-2" id="copyaddress">위치</button></p>
 			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.storePhoneNumber } </p>
 		</div>
-		<div style="color: green;">
-			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"> ${store.operatingHours} </p>
+		<div>
+			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간">
+<%-- 			<c:choose> --%>
+<%-- 				<c:when test="${res.isActive }"> --%>
+<!-- 					<strong>영업중</strong> -->
+<%-- 				</c:when> --%>
+<%-- 				<c:otherwise> --%>
+<!-- 					<strong>영업종료</strong> -->
+<%-- 				</c:otherwise> --%>
+<%-- 			</c:choose> --%>
+			<strong>영업중</strong>${store.operatingHours} </p>
 		</div>
-
+		
+		<div class="wating_container">
+			<h4>현재 대기</h4>
+			<h6><strong>3</strong>팀</h6>
+			<button type="button" style="width:80%" class="btn btn-danger" onClick="location.href='${contextPath}/waiting/customer/register'">웨이팅하기</button>
+		</div>
 		<div class="tab_container">
 			<div class="tab_container" id="container">
 				<ul class="tabs">
