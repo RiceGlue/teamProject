@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 <style>
 /* 	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;} */
 /* 	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; } */
@@ -28,33 +28,49 @@
 	        return false;
 	    });
 	
-	    // 파일명 표시
-	    $("#fileName").on("change", function() {
-	        const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-	        $("#showFileName").text(fileName);
-	    });
 	});
 	
-	let imgIdx = 1;
+	$(document).on("change", "input[type='file'][name='fileName[]']", function () {
+	    const inputId = $(this).attr("id");
+
+	    // id가 없는 경우는 무시
+	    if (!inputId) return;
+
+	    const fileName = this.files.length > 0 ? this.files[0].name : "선택된 파일 없음";
+	    const spanId = inputId.replace("fileName", "showFileName");
+	    $("#" + spanId).text(fileName);
+	});
+
+
 	
+	let imgIdx = 1;
+
 	function addImage() {
-		const subfileIdx = `fileName${menuIdx}`;
-		const subfileNameIdx = `showFileName${menuIdx}`;
-		
-		$("#addImage").append(`
-				<tr><td>서브 이미지</td>
-				<td><input type="file" id="${subfileIdx}" name="fileName" accept="image/*">
-				<label for="${subfileIdx}" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
-				<span id="${subfileNameIdx}" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></td></tr>
-		`);
-		
-		document.getElementById(fileIdx).addEventListener('change', function() {
-			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			document.getElementById(fileNameIdx).textContent = fileName;
-		});
-		
-		menuIdx++;
+	    const subfileIdx = "fileName" + imgIdx;
+	    const subfileNameIdx = "showFileName" + imgIdx;
+
+	    const html =
+	        '<tr>' +
+	            '<td>서브 이미지</td>' +
+	            '<td>' +
+	                '<label style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택' +
+	                    '<input type="file" id="' + subfileIdx + '" name="fileName[]" accept="image/*" style="display:none;">' +
+	                '</label>' +
+	                '<span id="' + subfileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>' +
+	            '</td>' +
+	        '</tr>';
+
+	    $("#addImage").append(html);
+
+	    // 이벤트 바인딩
+	    $("#" + subfileIdx).on("change", function () {
+	        const fileName = this.files.length > 0 ? this.files[0].name : "선택된 파일 없음";
+	        $("#" + subfileNameIdx).text(fileName);
+	    });
+
+	    imgIdx++;
 	}
+
 	
 	// ✅ 전역 스코프에 함수 정의
 	function checkStoreInfo() {
@@ -202,7 +218,7 @@
 			<tr>
 				<td>메인 이미지</td>
 				<td>
-					<input type="file" id="fileName0" name="fileName" accept="image/*">
+					<input type="file" id="fileName0" name="fileName[]" accept="image/*">
 					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
 					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				</td>

@@ -14,7 +14,7 @@ import com.spring.teamProject.vo.ImageFileVO;
 public class BaseController {
 	private static final String CURR_IMAGE_REPO_PATH = "C://project//file_repo";
 
-	private List<ImageFileVO> upload(MultipartHttpServletRequest multiReq) throws Exception {
+	protected List<ImageFileVO> upload(MultipartHttpServletRequest multiReq) throws Exception {
 	    List<ImageFileVO> imageFileList = new ArrayList<>();
 
 	    Iterator<String> fileNames = multiReq.getFileNames();

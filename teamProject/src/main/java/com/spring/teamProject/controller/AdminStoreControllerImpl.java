@@ -2,7 +2,6 @@ package com.spring.teamProject.controller;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -63,11 +62,8 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq,
 	                                           HttpServletResponse response) throws Exception {
 		
+		int count =1;
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date now = new Date();
-		String date = sdf.format(now);
-
 	    multiReq.setCharacterEncoding("utf-8");
 
 	    Map<String, Object> storeInfoMap = new HashMap<>();
@@ -90,20 +86,19 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	        // 1. 이미지 파일 리스트 추출
 	        List<ImageFileVO> imageFileList = upload(multiReq); // 이 메서드는 아래에서 설명
 
-	        // 2. 이미지 메타정보 추가
+
+	        // 3. 이미지 메타정보 추가
 	        if (imageFileList != null && !imageFileList.isEmpty()) {
 	            for (ImageFileVO imageFileVO : imageFileList) {
-	                imageFileVO.setInfoId(Long.parseLong(storeId));
 	                imageFileVO.setFileType(false); // 가게 이미지
-	                imageFileVO.setCreatedAt(sdf.format(now));
-	                imageFileVO.setDisplayNo(1); // 필요 시 변경
+	                imageFileVO.setDisplayNo(count); // 필요 시 변경
 	                imageFileVO.setRegId(1L); // 추후 세션 유저 ID로 변경
+	                count++;
 	            }
 	            storeInfoMap.put("imageFileList", imageFileList);
 	        }
-
-	        // 3. 서비스 호출
-	        adminStoreService.addStoreInfo(storeInfoMap);
+	        
+	        long infoId = adminStoreService.addStoreInfo(storeInfoMap);
 
 	        // 4. 이미지 실제 저장 (temp → 정식 폴더로)
 	        if (imageFileList != null && !imageFileList.isEmpty()) {
