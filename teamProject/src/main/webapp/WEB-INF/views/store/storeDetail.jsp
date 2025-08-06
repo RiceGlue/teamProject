@@ -382,13 +382,13 @@
 	<div class="store-info">
 		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <div class="carousel-inner">
 				<div class="carousel-item active">
-					<img src="${store.fileName }" class="d-block w-100" alt=${store.fileName }">
+					<img src="https://cdn.pixabay.com/photo/2022/03/04/02/28/window-7046360_1280.jpg" class="d-block w-100" alt=${store.fileName }" height="400px">
 				</div>
 				<div class="carousel-item">
-					<img src="..." class="d-block w-100" alt="...">
+					<img src="https://cdn.pixabay.com/photo/2017/01/26/02/06/christmas-wallpaper-2009590_1280.jpg" alt="..." height="400px">
 				</div>
 				<div class="carousel-item">
-					<img src="..." class="d-block w-100" alt="...">
+					<img src="https://cdn.pixabay.com/photo/2016/04/21/12/52/restaurant-1343327_1280.jpg" class="d-block w-100" alt="..." height="400px">
 				</div>
 			</div>
 			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
@@ -563,16 +563,16 @@
 								<p>${store.operatingHours }
 							</div>
 							<div>
-								<P><strong>정기휴무</strong></P>
-								<p>${store.closed }</p>
-							</div>
-							<div>
 								<P><strong>브레이크 타임</strong></P>
 								<p>${store.breakTime }</p>
 							</div>
 							<div>
 								<P><strong>라스트 오더</strong></P>
 								<p>${store.lastOrder }</p>
+							</div>
+							<div>
+								<P><strong>정기휴무</strong></P>
+								<p>${store.closed }</p>
 							</div>
 						</div>
 					</div>

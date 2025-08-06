@@ -129,67 +129,82 @@
 			</ul>
 			<div class="tab_container">
 				<div class="tab_content" id="tab1">
-					<c:forEach var="menu" items="${menulist}" varStatus="status">
-						<div id="map"></div>
-						<div class="store-card">
-							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${menu.fileName}" alt="가게이미지"></a>
-								<!--       대기 팀 수 표시 -->
-								<%--       <c:if test="${store.waitCount > 0}"> --%>
-								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-								<%--       </c:if> --%>
-							</div>
-
-							<div class="store-info">
-								<h4>${menu.storeName}</h4>
-								<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
-								<p class="meta-info">${menu.storeType} · ${menu.region}</p>
-								<p class="meta-info">${menu.description}</p>
-							</div>
-						</div>
-					</c:forEach>
+					<c:choose>
+						<c:when test="${empty menulist }"><h3>검색 결과 없음</h3></c:when>
+						<c:otherwise>
+							<c:forEach var="menu" items="${menulist}" varStatus="status">
+								<div id="map"></div>
+								<div class="store-card">
+									<div class="store-image">
+										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지"></a>
+										<!--       대기 팀 수 표시 -->
+										<%--       <c:if test="${store.waitCount > 0}"> --%>
+										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
+										<%--       </c:if> --%>
+									</div>
+		
+									<div class="store-info">
+										<h4>${menu.storeName}</h4>
+										<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
+										<p class="meta-info">${menu.storeType} · ${menu.region}</p>
+										<p class="meta-info">${menu.description}</p>
+									</div>
+								</div>
+							</c:forEach>
+						</c:otherwise>
+					</c:choose>
 				</div>
 				<div class="tab_content" id="tab2">
-					<c:forEach var="addr" items="${addrlist}" varStatus="status">
-						<div id="map"></div>
-						<div class="store-card">
-							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${addr.fileName}" alt="가게이미지"></a>
-								<!--       대기 팀 수 표시 -->
-								<%--       <c:if test="${store.waitCount > 0}"> --%>
-								<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-								<%--       </c:if> --%>
-							</div>
-
-							<div class="store-info">
-								<h4>${store.storeName}</h4>
-								<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
-								<p class="meta-info">${addr.storeType} · ${addr.region}</p>
-								<p class="meta-info">${addr.description}</p>
-							</div>
-						</div>
-					</c:forEach>
+					<c:choose>
+						<c:when test="${empty addrlist }"><h3>검색 결과 없음</h3></c:when>
+						<c:otherwise>
+							<c:forEach var="addr" items="${addrlist}" varStatus="status">
+								<div id="map"></div>
+								<div class="store-card">
+									<div class="store-image">
+										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지"></a>
+										<!--       대기 팀 수 표시 -->
+										<%--       <c:if test="${store.waitCount > 0}"> --%>
+										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
+										<%--       </c:if> --%>
+									</div>
+		
+									<div class="store-info">
+										<h4>${store.storeName}</h4>
+										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
+										<p class="meta-info">${addr.storeType} · ${addr.region}</p>
+										<p class="meta-info">${addr.description}</p>
+									</div>
+								</div>
+							</c:forEach>
+						</c:otherwise>
+					</c:choose>
 				</div>
 				<div class="tab_content" id="tab3">
-					<c:forEach var="name" items="${namelist}" varStatus="status">
-						<div id="map"></div>
-						<div class="store-card">
-							<div class="store-image">
-								<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${name.fileName}" alt="가게이미지"></a>
-								<!--       대기 팀 수 표시 -->
-								<%--       <c:if test="${name.waitCount > 0}"> --%>
-								<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
-								<%--       </c:if> --%>
-							</div>
-
-							<div class="store-info">
-								<h4>${name.storeName}</h4>
-								<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
-								<p class="meta-info">${name.storeType} · ${name.region}</p>
-								<p class="meta-info">${name.description}</p>
-							</div>
-						</div>
-					</c:forEach>
+					<c:choose>
+						<c:when test="${empty namelist }"><h3>검색 결과 없음</h3></c:when>
+						<c:otherwise>
+							<c:forEach var="name" items="${namelist}" varStatus="status">
+								<div id="map"></div>
+								<div class="store-card">
+									<div class="store-image">
+										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지"></a>
+										<!--       대기 팀 수 표시 -->
+										<%--       <c:if test="${name.waitCount > 0}"> --%>
+										<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
+										<%--       </c:if> --%>
+									</div>
+		
+									<div class="store-info">
+										<h4>${name.storeName}</h4>
+										<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
+										<p class="meta-info">${name.storeType} · ${name.region}</p>
+										<p class="meta-info">${name.description}</p>
+									</div>
+								</div>
+							</c:forEach>
+						</c:otherwise>
+					</c:choose>
 				</div>
 			</div>
 		</div>
@@ -206,7 +221,7 @@
 	  <div class="store-card">
 	    <div class="store-image">
 	      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
-	        <img src="${region.fileName}" alt="가게이미지">
+	        <img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지">
 	      </a>
 	<!--       대기 팀 수 표시 -->
 	<%--       <c:if test="${store.waitCount > 0}"> --%>
