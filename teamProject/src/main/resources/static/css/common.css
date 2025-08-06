@@ -159,5 +159,6 @@ form table td > *:not(input, textarea) {cursor: pointer;}
 	}
 
 	form table tbody td input[type="file"] {display: none;}
+	form div input[type="file"] {display:none;}
 
 

@@ -94,22 +94,22 @@
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="map" >
-	    insert into stores (store_id, store_name, store_type, operation_type, store_phone_number, break_time, description, amenities, file_name, created_at, update_at, operating_hours, closed, last_order ) values
-	        (
-	            #{store.storeId},
-	            #{store.storeName},
-	            #{store.storeType},
-	            #{store.operationType},
-	            #{store.storePhoneNumber},
-	            #{store.breakTime},
-	            #{store.description},
-	            #{store.amenities},
-	            #{store.fileName},
+	    insert into store_info values
+	        (	        	
+	            #{storeId},
+	            #{storeType},
+	            #{operationType},
+	            #{storePhoneNumber},
+	            #{breakTime},
+	            #{description},
+	            #{amenities},
 	            now(),
 	            now(),
-	            #{store.operatingHours},
-	            #{store.closed},
-	            #{store.lastOrder}
+	            #{fileName},
+	            null,
+	            #{operatingHours},
+	            #{closed},
+	            #{lastOrder}
 	        )
 	    <selectKey>
 	        select LAST_INSERT_ID()
