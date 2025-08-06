@@ -296,15 +296,15 @@
             .then(function(response) {
             	// 결제 요청이 성공적으로 시작되면, 바로 폼을 제출합니다.
                 // 결제 성공 여부는 서버에서 redirectUrl로 돌아온 후 확인합니다.
-                //alert('결제창이 열렸습니다. 결제를 완료해 주세요.');
-                //$('#reservationForm').submit();
+                alert('결제창이 열렸습니다. 결제를 완료해 주세요.');
+                $('#reservationForm').submit();
 
-                if (response.code === '0000') {
-                    alert('결제에 성공했습니다.');
-                    $('#reservationForm').submit();
-                } else {
-                    alert(`결제에 실패했습니다. 에러 메시지: ${response.message}`);
-                }
+//                 if (response.code === '0000') {
+//                     alert('결제에 성공했습니다.');
+//                     $('#reservationForm').submit();
+//                 } else {
+//                     alert(`결제에 실패했습니다. 에러 메시지: ${response.message}`);
+//                 }
             })
             .catch(function(error) {
                 alert(`결제 요청 중 오류가 발생했습니다: ${error.message}`);
