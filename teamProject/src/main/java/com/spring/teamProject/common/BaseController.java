@@ -42,13 +42,12 @@ public class BaseController {
 	}
 
 
-	    protected void deleteFile(String fileName) {
-	        File file = new File(CURR_FILE_REPO_PATH + File.separator + fileName);
-	        try {
-	            file.delete();
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-	    }
+	protected void deleteFile(String fileName) {
+		File file = new File(CURR_FILE_REPO_PATH + File.separator + fileName);
+	    try {
+	    	file.delete();
+	    } catch (Exception e) { e.printStackTrace(); }
+	    
+	}
 
 }
