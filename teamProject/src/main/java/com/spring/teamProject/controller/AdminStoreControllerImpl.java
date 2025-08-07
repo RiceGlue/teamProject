@@ -1,8 +1,6 @@
 package com.spring.teamProject.controller;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping(value="/franchise")
 public class AdminStoreControllerImpl extends BaseController implements AdminStoreController {
 	
-	private static final String CURR_IMAGE_REPO_PATH = "C:\\project\\file_repo";
+	private static final String CURR_FILE_REPO_PATH = "C:\\project\\file_repo";
 	
 	@Autowired
 	private AdminStoreService adminStoreService;
@@ -59,8 +57,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	
 	@Override
 	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)
-	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq,
-	                                           HttpServletResponse response) throws Exception {
+	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq, HttpServletResponse response) throws Exception {
 		
 		int count =1;
 		
@@ -105,8 +102,8 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	            for (ImageFileVO imageFileVO : imageFileList) {
 	                imageFileName = imageFileVO.getFileName();
 
-	                File srcFile = new File(CURR_IMAGE_REPO_PATH + "\\temp\\" + imageFileName);
-	                File destDir = new File(CURR_IMAGE_REPO_PATH + "\\" + storeId);
+	                File srcFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + imageFileName);
+	                File destDir = new File(CURR_FILE_REPO_PATH + "\\" + storeId);
 	                if (!destDir.exists()) destDir.mkdirs();
 
 	                FileUtils.moveFileToDirectory(srcFile, destDir, true);
@@ -122,7 +119,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	        e.printStackTrace();
 
 	        if (imageFileName != null) {
-	            File tempFile = new File(CURR_IMAGE_REPO_PATH + "\\temp\\" + imageFileName);
+	            File tempFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + imageFileName);
 	            tempFile.delete();
 	        }
 

@@ -12,8 +12,9 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.spring.teamProject.vo.ImageFileVO;
 
 public class BaseController {
-	private static final String CURR_IMAGE_REPO_PATH = "C://project//file_repo";
+	private static final String CURR_FILE_REPO_PATH = "C://project//file_repo";
 
+	
 	protected List<ImageFileVO> upload(MultipartHttpServletRequest multiReq) throws Exception {
 	    List<ImageFileVO> imageFileList = new ArrayList<>();
 
@@ -27,7 +28,7 @@ public class BaseController {
 	            String storedFileName = UUID.randomUUID().toString() + "_" + originalName;
 
 	            // 파일 저장: temp 폴더
-	            File tempFile = new File(CURR_IMAGE_REPO_PATH + "\\temp\\" + storedFileName);
+	            File tempFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + storedFileName);
 	            if (!tempFile.getParentFile().exists()) tempFile.getParentFile().mkdirs();
 	            file.transferTo(tempFile);
 
@@ -41,13 +42,12 @@ public class BaseController {
 	}
 
 
-	    protected void deleteFile(String fileName) {
-	        File file = new File(CURR_IMAGE_REPO_PATH + File.separator + fileName);
-	        try {
-	            file.delete();
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-	    }
+	protected void deleteFile(String fileName) {
+		File file = new File(CURR_FILE_REPO_PATH + File.separator + fileName);
+	    try {
+	    	file.delete();
+	    } catch (Exception e) { e.printStackTrace(); }
+	    
+	}
 
 }

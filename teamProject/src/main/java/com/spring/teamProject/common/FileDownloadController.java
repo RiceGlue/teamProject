@@ -13,14 +13,14 @@ import net.coobird.thumbnailator.Thumbnails;
 
 @Controller
 public class FileDownloadController {
-	private static String CURR_IMAGE_REPO_PATH="c://project//image_repo";
+	private static String CURR_FILE_REPO_PATH="c://project//file_repo";
 	
 	@RequestMapping("/download")
 	protected void download(@RequestParam("fileName") String fileName,
 		                 	@RequestParam("storeId") String storeId,
 			                 HttpServletResponse response) throws Exception {
 		OutputStream out = response.getOutputStream();
-		String filePath=CURR_IMAGE_REPO_PATH+"\\"+storeId+"\\"+fileName;
+		String filePath=CURR_FILE_REPO_PATH+"\\"+storeId+"\\"+fileName;
 		File image=new File(filePath);
 
 		response.setHeader("Cache-Control","no-cache");
@@ -41,7 +41,7 @@ public class FileDownloadController {
 	protected void showImage(@RequestParam("fileName") String fileName,
 	                         @RequestParam("storeId") String storeId,
 	                         HttpServletResponse response) throws Exception {
-	    String filePath = CURR_IMAGE_REPO_PATH + "\\" + storeId + "\\" + fileName;
+	    String filePath = CURR_FILE_REPO_PATH + "\\" + storeId + "\\" + fileName;
 	    File image = new File(filePath);
 
 	    if (image.exists()) {
