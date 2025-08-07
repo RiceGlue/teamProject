@@ -68,7 +68,14 @@
 
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">프로필 수정</h2>
-    
+
+    <!-- 컨트롤러에서 보낸 에러 메시지가 있을 경우, 이 부분을 화면에 보여줍니다. -->
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger" role="alert">
+            ${error}
+        </div>
+    </c:if>
+        
     <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validatePassword();">
         
         <div class="text-center mb-4">
