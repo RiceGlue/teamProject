@@ -28,7 +28,14 @@ public class StoreVO {
 	private String description;
 	private String amenities;
 	private String fileName;
+	private long infoId;
 	
+	public long getInfoId() {
+		return infoId;
+	}
+	public void setInfoId(long infoId) {
+		this.infoId = infoId;
+	}
 	private String operatingHours;
 	private String lastOrder;
 	

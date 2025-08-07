@@ -43,7 +43,7 @@
 	    	'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 				'<div class="form-label" style="width: 200px;">서브이미지</div>'+
 				'<div class="form-input" style="flex: 1;">'+
-					'<input type="file" id="'+ subfileIdx +'" name="fileName[]" accept="image/*" multiple onchange="validateImages(this);"> '+
+					'<input type="file" id="'+ subfileIdx +'" name="fileName" accept="image/*" multiple onchange="validateImages(this);"> '+
 					'<label for="'+ subfileIdx +'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label> '+
 					'<span id="' + subfileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span> '+
 					'<br />'+
@@ -58,82 +58,6 @@
 	    });
 
 	    imgIdx++;
-	}
-
-	
-	// ✅ 전역 스코프에 함수 정의
-	function checkStoreInfo() {
-	    function padTime(value) {
-	        return value.toString().padStart(2, '0');
-	    }
-	
-	    const phone = document.getElementById("storePhoneNumber").value.trim();
-	    const desc = document.getElementById("description").value.trim();
-	    const fileName0 = document.getElementById("fileName0").files[0];
-	
-	    if (!fileName0) {
-	        alert("메인 이미지를 업로드해주세요.");
-	        return;
-	    }
-	
-	    const phonePattern = /^[0-9\-]+$/;
-	    if (!phone || !phonePattern.test(phone)) {
-	        alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
-	        return;
-	    }
-	
-	    if (!desc) {
-	        alert("매장 소개를 입력해주세요.");
-	        return;
-	    }
-	    
-	    const startHour = $("#startHour").val().trim();
-	    const startMin = $("#startMin").val().trim();
-	    const endHour = $("#endHour").val().trim();
-	    const endMin = $("#endMin").val().trim();
-
-	    const breakStartHour = $("#breakStartHour").val().trim();
-	    const breakStartMin = $("#breakStartMin").val().trim();
-	    const breakEndHour = $("#breakEndHour").val().trim();
-	    const breakEndMin = $("#breakEndMin").val().trim();
-
-	    const lastOrderHour = $("#lastOrderHour").val().trim();
-	    const lastOrderMin = $("#lastOrderMin").val().trim();
-
-	    const operatingHours = padTime(startHour) + ":" + padTime(startMin) + " ~ " + padTime(endHour) + ":" + padTime(endMin);
-	    const breakTime = padTime(breakStartHour) + ":" + padTime(breakStartMin) + " ~ " + padTime(breakEndHour) + ":" + padTime(breakEndMin);
-	    const lastOrder = padTime(lastOrderHour) + ":" + padTime(lastOrderMin);
-
-	    // hidden input으로 추가 (서버로 전송할 값)
-	    if (!document.getElementById("operatingHours")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'operatingHours',
-	            name: 'operatingHours',
-	            value: operatingHours
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    if (!document.getElementById("breakTime")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'breakTime',
-	            name: 'breakTime',
-	            value: breakTime
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    if (!document.getElementById("lastOrder")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'lastOrder',
-	            name: 'lastOrder',
-	            value: lastOrder
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    alert("정보가 정상적으로 등록되었습니다.");
-	    document.forms['storeInfo'].submit();
 	}
 	
 	function validateImages(input) {
@@ -226,6 +150,82 @@
 	    // 기본 이미지 또는 이전 프로필 이미지로 초기화
 	    const currentImage = '${(not empty memberInfo.profileImageUrl) ? contextPath.concat(memberInfo.profileImageUrl) : contextPath.concat("/images/default_profile.png")}';
 	    document.getElementById('preview').src = currentImage;
+	}
+	
+	
+	// ✅ 전역 스코프에 함수 정의
+	function checkStoreInfo() {
+	    function padTime(value) {
+	        return value.toString().padStart(2, '0');
+	    }
+	
+	    const phone = document.getElementById("storePhoneNumber").value.trim();
+	    const desc = document.getElementById("description").value.trim();
+	    const fileName0 = document.getElementById("fileName0").files[0];
+	
+	    if (!fileName0) {
+	        alert("메인 이미지를 업로드해주세요.");
+	        return;
+	    }
+	
+	    const phonePattern = /^[0-9\-]+$/;
+	    if (!phone || !phonePattern.test(phone)) {
+	        alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
+	        return;
+	    }
+	
+	    if (!desc) {
+	        alert("매장 소개를 입력해주세요.");
+	        return;
+	    }
+	    
+	    const startHour = $("#startHour").val().trim();
+	    const startMin = $("#startMin").val().trim();
+	    const endHour = $("#endHour").val().trim();
+	    const endMin = $("#endMin").val().trim();
+
+	    const breakStartHour = $("#breakStartHour").val().trim();
+	    const breakStartMin = $("#breakStartMin").val().trim();
+	    const breakEndHour = $("#breakEndHour").val().trim();
+	    const breakEndMin = $("#breakEndMin").val().trim();
+
+	    const lastOrderHour = $("#lastOrderHour").val().trim();
+	    const lastOrderMin = $("#lastOrderMin").val().trim();
+
+	    const operatingHours = padTime(startHour) + ":" + padTime(startMin) + " ~ " + padTime(endHour) + ":" + padTime(endMin);
+	    const breakTime = padTime(breakStartHour) + ":" + padTime(breakStartMin) + " ~ " + padTime(breakEndHour) + ":" + padTime(breakEndMin);
+	    const lastOrder = padTime(lastOrderHour) + ":" + padTime(lastOrderMin);
+
+	    // hidden input으로 추가 (서버로 전송할 값)
+	    if (!document.getElementById("operatingHours")) {
+	        $('<input>').attr({
+	            type: 'hidden',
+	            id: 'operatingHours',
+	            name: 'operatingHours',
+	            value: operatingHours
+	        }).appendTo('form[name="storeInfo"]');
+	    }
+
+	    if (!document.getElementById("breakTime")) {
+	        $('<input>').attr({
+	            type: 'hidden',
+	            id: 'breakTime',
+	            name: 'breakTime',
+	            value: breakTime
+	        }).appendTo('form[name="storeInfo"]');
+	    }
+
+	    if (!document.getElementById("lastOrder")) {
+	        $('<input>').attr({
+	            type: 'hidden',
+	            id: 'lastOrder',
+	            name: 'lastOrder',
+	            value: lastOrder
+	        }).appendTo('form[name="storeInfo"]');
+	    }
+
+	    alert("정보가 정상적으로 등록되었습니다.");
+	    document.forms['storeInfo'].submit();
 	}
 </script>
 
@@ -396,7 +396,7 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메인 이미지</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName0" name="fileName[]" accept="image/*" multiple onchange="validateImages(this);" >
+				<input type="file" id="fileName0" name="fileName" accept="image/*" multiple onchange="validateImages(this);" >
 				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
 				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				<br />

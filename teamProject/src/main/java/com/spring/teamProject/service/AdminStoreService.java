@@ -9,4 +9,6 @@ public interface AdminStoreService {
 	
 	public long selectStoreId(StoreVO storeVO) throws Exception;
 	public long addStoreInfo(Map newStoreMap) throws Exception;
+	public long selectOwnerId(long storeId) throws Exception;
+	public void addStoreInfoImage(List imgfile) throws Exception;
 }
