@@ -6,7 +6,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -212,15 +215,19 @@ public class MemberController {
     @PostMapping("/edit-profile")
     public String editProfile(MemberVO memberVO, @AuthenticationPrincipal Object principal, RedirectAttributes redirectAttributes) {
         long currentMemberId = 0;
+        String currentEmail = null; // (수정) 이메일 조회를 위해 변수 추가
         
         if (principal instanceof UserDetailsVO) {
-            currentMemberId = ((UserDetailsVO) principal).getMemberVO().getMemberId();
+            UserDetailsVO userDetails = (UserDetailsVO) principal;
+            currentMemberId = userDetails.getMemberVO().getMemberId();
+            currentEmail = userDetails.getMemberVO().getEmail();
         } else if (principal instanceof OAuth2User) {
             OAuth2User oauth2User = (OAuth2User) principal;
             String email = oauth2User.getAttribute("email");
             MemberVO currentMember = memberService.findByEmail(email);
             if (currentMember != null) {
                 currentMemberId = currentMember.getMemberId();
+                currentEmail = currentMember.getEmail();
             }
         }
 
@@ -234,9 +241,24 @@ public class MemberController {
         
         if (isSuccess) {
             redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
+            
+            // --- ? 여기가 핵심 수정 부분입니다 ? ---
+            // 1. DB에서 최신 회원 정보를 다시 조회합니다. (수정된 이메일로 조회)
+            MemberVO updatedMember = memberService.findByEmail(memberVO.getEmail());
+            
+            // 2. 현재 사용자의 인증 정보를 가져옵니다.
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            
+            // 3. 새로운 인증 정보를 생성합니다.
+            UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
+            
+            // 4. SecurityContext에 새로운 인증 정보를 설정하여 세션을 갱신합니다.
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            
             return "redirect:/member/mypage";
         } else {
-            redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않습니다. 다시 확인해주세요.");
+            redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않거나, 정보 수정에 실패했습니다.");
             return "redirect:/member/edit-profile";
         }
     }
