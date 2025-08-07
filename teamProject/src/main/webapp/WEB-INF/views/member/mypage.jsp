@@ -2,6 +2,17 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
+
+<!-- 컨트롤러에서 보낸 성공 메시지(msg)가 있을 경우, alert 창을 띄웁니다. -->
+<c:if test="${not empty msg}">
+    <script>
+        // 페이지 로드가 완료된 후 alert를 띄워 안정성을 높입니다.
+        window.onload = function() {
+            alert("${msg}");
+        };
+    </script>
+</c:if>
+
 <style>
     /* 가로 스크롤을 위한 스타일 */
     .scroll-container {

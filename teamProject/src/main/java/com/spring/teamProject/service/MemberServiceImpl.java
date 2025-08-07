@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.teamProject.dao.MemberDAO;
@@ -73,33 +74,56 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * 회원 정보 수정을 처리합니다.
-     * 비밀번호 변경 요청이 있을 경우, 현재 비밀번호를 검증한 후 새 비밀번호를 암호화하여 업데이트합니다.
-     * @param memberVO 수정할 정보가 담긴 객체
-     * @return 수정 성공 시 true, 실패(현재 비밀번호 불일치 등) 시 false
+     * (수정) 회원 정보 수정 로직을 안전하게 변경합니다.
+     * 1. DB에서 현재 사용자 정보를 불러옵니다.
+     * 2. 폼에서 제출된 새로운 값들만 기존 정보 위에 덮어씁니다.
+     * 3. 이렇게 하면 폼에 없던 정보나 수정되지 않은 정보가 유실되지 않습니다.
+     * @param updatedInfoVO 수정할 정보가 담긴 객체
+     * @return 수정 성공 시 true, 실패 시 false
      */
     @Override
-    public boolean updateMember(MemberVO memberVO) {
-        // 새 비밀번호 필드에 값이 있는지 확인
-        String newPassword = memberVO.getNewLoginPw();
-        if (newPassword != null && !newPassword.isEmpty()) {
-            // DB에서 현재 사용자의 정보를 가져옵니다.
-            MemberVO currentUser = memberDAO.findById(memberVO.getMemberId());
-            // 입력된 현재 비밀번호와 DB의 암호화된 비밀번호를 비교합니다.
-            if (currentUser != null && passwordEncoder.matches(memberVO.getCurrentLoginPw(), currentUser.getLoginPw())) {
-                // 새 비밀번호를 암호화하여 VO에 설정합니다.
+    public boolean updateMember(MemberVO updatedInfoVO) {
+        // 1. DB에서 현재 사용자의 온전한 정보를 가져옵니다.
+        MemberVO currentUser = memberDAO.findById(updatedInfoVO.getMemberId());
+        if (currentUser == null) {
+            return false; // 사용자가 없으면 실패
+        }
+
+        // 2. 비밀번호 변경 로직: 새 비밀번호가 입력되었을 때만 실행
+        String newPassword = updatedInfoVO.getNewLoginPw();
+        if (StringUtils.hasText(newPassword)) {
+            // 소셜 로그인 사용자는 비밀번호가 없으므로 이 로직을 건너뜁니다.
+            if (currentUser.getLoginPw() != null && passwordEncoder.matches(updatedInfoVO.getCurrentLoginPw(), currentUser.getLoginPw())) {
                 String encodedNewPassword = passwordEncoder.encode(newPassword);
-                memberVO.setLoginPw(encodedNewPassword);
-            } else {
+                currentUser.setLoginPw(encodedNewPassword);
+            } else if (currentUser.getLoginPw() == null) {
+                // 소셜 로그인 사용자가 비밀번호를 설정하려는 경우 (향후 기능)
+                // 현재는 아무 작업도 하지 않음
+            }
+            else {
                 return false; // 현재 비밀번호가 일치하지 않으면 실패
             }
         }
         
-        // 프로필 이미지가 새로 업로드되었으면 저장합니다.
-        saveProfileImage(memberVO);
+        // 3. 폼에서 넘어온 다른 정보들을 currentUser 객체에 덮어씁니다.
+        currentUser.setMemberName(updatedInfoVO.getMemberName());
+        currentUser.setEmail(updatedInfoVO.getEmail());
+        currentUser.setCountryCode(updatedInfoVO.getCountryCode());
+        currentUser.setPhone(updatedInfoVO.getPhone());
         
-        // DAO를 통해 DB에 최종 업데이트하고, 성공 여부(1이면 true)를 반환합니다.
-        return memberDAO.updateMember(memberVO) == 1;
+        // 3-1. 전화번호 포맷팅 (하이픈 제거 등)
+        processPhoneNumber(currentUser);
+        
+        currentUser.setAgreeEmail(updatedInfoVO.isAgreeEmail());
+        currentUser.setAgreeSms(updatedInfoVO.isAgreeSms());
+        currentUser.setAgreeKakao(updatedInfoVO.isAgreeKakao());
+        
+        // 4. 프로필 이미지가 새로 업로드되었으면 저장하고 URL을 설정합니다.
+        currentUser.setProfileImageFile(updatedInfoVO.getProfileImageFile());
+        saveProfileImage(currentUser);
+        
+        // 5. 최종적으로 모든 정보가 업데이트된 currentUser 객체를 DB에 전달합니다.
+        return memberDAO.updateMember(currentUser) == 1;
     }
     
     /**

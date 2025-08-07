@@ -33,12 +33,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         MemberVO member = memberDAO.findByEmail(email);
         String role;	//사용자 분류
 
+        // 구글로부터 받은 사용자 정보로 attributes 맵을 먼저 생성합니다.
+        Map<String, Object> attributes = new java.util.HashMap<>(oAuth2User.getAttributes());
+
         if (member != null) {
             // 이미 가입된 사용자인 경우
             if ("OWNER".equals(member.getRole()) || "ADMIN".equals(member.getRole())) {
                 // (수정) 역할이 점주나 관리자이면 소셜 로그인을 차단하고 예외를 발생시킵니다.
                 throw new OAuth2AuthenticationException("가맹점주 및 관리자 계정은 소셜 로그인을 이용할 수 없습니다.");
             }
+            
             
             // (신규) 일반 회원이 처음 소셜 로그인을 시도하는 경우, 계정을 연동합니다.
             if (member.getSocialProvider() == null) {
@@ -48,12 +52,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
             
             role = member.getRole();
+            attributes.put("name", member.getMemberName()); // 이름을 우리 DB 값으로 덮어쓰기
         } else {
             // 처음 방문한 사용자는 추가 정보 입력을 위해 임시 역할 'GUEST'를 부여합니다.
             role = "GUEST"; 
         }
 
-        Map<String, Object> attributes = new java.util.HashMap<>(oAuth2User.getAttributes());
         attributes.put("role", role);
         
         // (수정) 빠져있던 이 코드를 다시 추가하여, 세션에 소셜 제공자 정보를 저장합니다.

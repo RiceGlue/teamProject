@@ -296,7 +296,7 @@
             .then(function(response) {
             	// 결제 요청이 성공적으로 시작되면, 바로 폼을 제출합니다.
                 // 결제 성공 여부는 서버에서 redirectUrl로 돌아온 후 확인합니다.
-                alert('결제창이 열렸습니다. 결제를 완료해 주세요.');
+                alert('결제를 완료했습니다.');
                 $('#reservationForm').submit();
 
 //                 if (response.code === '0000') {

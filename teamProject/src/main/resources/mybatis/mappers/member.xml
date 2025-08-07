@@ -104,6 +104,7 @@
 			<if test="profileImageUrl != null">
 				profile_image_url = #{profileImageUrl},
 			</if>
+			country_code = #{countryCode},
 			phone = #{phone},
 			email = #{email},
 			agree_email = #{agreeEmail},
