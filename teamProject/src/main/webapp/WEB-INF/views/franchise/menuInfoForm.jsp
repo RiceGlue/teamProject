@@ -2,25 +2,13 @@
 
 <script>
 	$(document).ready(function() {
-		// 파일 선택 시 파일명 표시
-		$("#fileName").on("change", function() {
+		$("#fileName0").on("change", function() {
 			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			$("#showFileName").text(fileName);
+			$("#showFileName0").text(fileName);
 		});
-	
-		document.getElementById('fileName0').addEventListener('change', function () {
-			document.getElementById('showFileName0').textContent = this.files[0]?.name || '선택된 파일 없음';
-		});
-		document.getElementById('fileName1').addEventListener('change', function () {
-			document.getElementById('showFileName1').textContent = this.files[0]?.name || '선택된 파일 없음';
-		});
-		document.getElementById('fileName2').addEventListener('change', function () {
-			document.getElementById('showFileName2').textContent = this.files[0]?.name || '선택된 파일 없음';
-		});
-
 	});
 	
-	let menuIdx = 3;
+	let menuIdx = 1;
 	
 	function addMenu() {
 		const menuNameIdx = `menuName${menuIdx}`;
@@ -28,99 +16,193 @@
 		const desIdx = `description${menuIdx}`;
 		const fileIdx = `fileName${menuIdx}`;
 		const fileNameIdx = `showFileName${menuIdx}`;
+		const previewIdx = `preview${menuIdx}`;
 		
-		$("#moreMenu").append(`
-			<tr><td>메뉴 이름 </td><td><input type="text" name="menuName" id="${menuNameIdx}"></td></tr>
-			<tr><td>메뉴 가격 </td><td><input type="text" name="price" id="${priceIdx}"></td></tr>
-			<tr><td>메뉴 설명 </td><td><textarea name="description" id="${desIdx}" rows="2" cols="40"></textarea></td></tr>
-			<tr><td>메뉴 사진 </td><input type="file" id="${fileIdx}" name="fileName" accept="image/*"><label for="${fileIdx}" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label><span id="${fileNameIdx}" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></tr>
-		`);
-		
-		document.getElementById(fileIdx).addEventListener('change', function() {
-			const fileName = this.files.length > 0 ? this.files[0].name : '선택된 파일 없음';
-			document.getElementById(fileNameIdx).textContent = fileName;
-		});
-		
+		const html = 
+			'<div class="menu-item" style="border-top:1px solid #ddd; padding-top:10px; margin-top:10px;">'+
+			'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
+			'<div class="form-label" style="width: 200px;">메뉴 이름</div>'+
+			'<div class="form-input" style="flex: 1;">'+
+			'<input id="'+ menuNameIdx +'" name="menuName[]" type="text" maxLength="15" />'+
+			'</div></div>'+
+			'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
+			'<div class="form-label" style="width: 200px;">메뉴 가격</div>'+
+			`<div class="form-input" style="flex: 1;">`+
+			`<input id="${priceIdx}" name="price[]" type="text" maxLength="15" />`+
+			`</div>`+
+			`</div>`+
+			`<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">`+
+			`<div class="form-label" style="width: 200px;">메뉴 설명</div>`+
+			`<div class="form-input" style="flex: 1;">`+
+			`<textarea id="${desIdx}" name="description[]" rows="2" cols="40"></textarea>`+
+			`</div>`+
+			`</div>`+
+			`<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">`+
+			`<div class="form-label" style="width: 200px;">메인 이미지</div>`+
+			`<div class="form-input" style="flex: 1;">`+
+			`<input type="file" id="${fileIdx}" name="fileName[]" accept="image/*" onchange="validateImages(this);" />`+
+			`<label for="`+ fileIdx +`" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>`+
+			`<span id="`+${fileNameIdx}`+" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span><br />`+
+			`</div>`+
+			`<div class="image-preview" style="max-width:200px;">`+
+			`<img id="${previewIdx}" src="" style="max-width: 200px; display: block;" />`+
+			`</div>`+
+			`</div>`+
+			`</div>` ;
+		$("#moreMenu").append(html);
 		menuIdx++;
 	}
 	
-	
+	function validateImages(input) {
+		  const files = input.files;
+		  const maxFiles = 20;
+		  const maxSizeInBytes = 2 * 1024 * 1024;
+		  const maxResolution = 500;
+
+		  const parentDiv = input.parentElement;
+		  const fileNameSpan = parentDiv.querySelector('span');
+		  if (fileNameSpan) {
+		    fileNameSpan.textContent = files.length > 0 ? files[0].name : '선택된 파일 없음';
+		  }
+
+		  if (files.length > maxFiles) {
+		    alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+		    resetInput(input);
+		    return;
+		  }
+
+		  let errorMessage = null;
+		  for (let i = 0; i < files.length; i++) {
+		    const file = files[i];
+		    if (!file.type.startsWith("image/")) {
+		      errorMessage = "이미지 파일만 업로드할 수 있습니다.";
+		      break;
+		    }
+		    if (file.size > maxSizeInBytes) {
+		      errorMessage = `각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})`;
+		      break;
+		    }
+		  }
+
+		  if (errorMessage) {
+		    alert(errorMessage);
+		    resetInput(input);
+		    return;
+		  }
+
+		  const promises = [];
+		  for (let i = 0; i < files.length; i++) {
+		    promises.push(checkImageResolution(files[i], maxResolution));
+		  }
+
+		  Promise.all(promises).then(results => {
+		    if (results.includes(false)) {
+		      alert(`모든 이미지의 해상도는 최대 ${maxResolution}x${maxResolution} 픽셀을 초과할 수 없습니다.`);
+		      resetInput(input);
+		      return;
+		    }
+
+		    if (files.length > 0) {
+		      const reader = new FileReader();
+		      reader.onload = function (e) {
+		        const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
+
+		        if (imagePreviewDiv) {
+		          // 기존 이미지 제거
+		          imagePreviewDiv.innerHTML = '';
+
+		          // 새로운 이미지 생성 및 삽입
+		          const img = document.createElement('img');
+		          img.src = e.target.result;
+		          img.style.maxWidth = '200px';
+		          img.style.display = 'block';
+
+		          imagePreviewDiv.appendChild(img);
+		        }
+		      };
+		      reader.readAsDataURL(files[0]);
+		    }
+		  });
+		}
+
+		// 해상도 체크 함수 (비동기)
+		function checkImageResolution(file, maxResolution) {
+		  return new Promise((resolve) => {
+		    const reader = new FileReader();
+		    reader.onload = function (e) {
+		      const img = new Image();
+		      img.onload = function () {
+		        if (img.width > maxResolution || img.height > maxResolution) {
+		          resolve(false);
+		        } else {
+		          resolve(true);
+		        }
+		      };
+		      img.onerror = () => resolve(false);
+		      img.src = e.target.result;
+		    };
+		    reader.onerror = () => resolve(false);
+		    reader.readAsDataURL(file);
+		  });
+		}
+
+		// input 리셋 함수
+		function resetInput(input) {
+		  input.value = '';
+		  const fileNameSpan = input.parentElement.querySelector('span');
+		  if (fileNameSpan) {
+		    fileNameSpan.textContent = '선택된 파일 없음';
+		  }
+
+		  const previewDiv = input.closest('.form-row').querySelector('.image-preview');
+		  if (previewDiv) {
+		    previewDiv.innerHTML = '';
+		  }
+		}
+
 </script>
 
 <h1>정보 등록</h1>
 <form action="${contextPath}/franchisor/addMenuInfo" method="post" enctype="multipart/form-data">
-	<input type="hidden" id="storeId" name="storeId" value="${storeId }">
-	<table class="info_container">
-		<colgroup>
-			<col style="width:200px;">
-			<col style="width: 500px;">
-		</colgroup>
-		<tbody>
-			<tr>
-				<td>메뉴 이름 </td>
-				<td><input type="text" name="menuName" id="menuName0"></td>
-			</tr>
-			<tr>
-				<td>메뉴 가격 </td>
-				<td><input type="text" name="price" id="price0"></td>
-			</tr>
-			<tr>
-				<td>메뉴 설명 </td>
-				<td><textarea name="description" id="description0" rows="2" cols="40"></textarea></td>
-			</tr>
-			<tr>
-				<td>메뉴 사진 </td>
-				<td>
-					<input type="file" id="fileName0" name="fileName" accept="image/*">
-					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
-					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
-				</td>
-			</tr>
-			<tr>
-				<td>메뉴 이름 </td>
-				<td><input type="text" name="menuName" id="menuName1"></td>
-			</tr>
-			<tr>
-				<td>메뉴 가격 </td>
-				<td><input type="text" name="price" id="price1"></td>
-			</tr>
-			<tr>
-				<td>메뉴 설명 </td>
-				<td><textarea name="description" id="description1" rows="2" cols="40"></textarea></td>
-			</tr>
-			<tr>
-				<td>메뉴 사진 </td>
-				<td>
-					<input type="file" id="fileName1" name="fileName" accept="image/*">
-					<label for="fileName1" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
-					<span id="showFileName1" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
-				</td>
-			</tr>
-			<tr>
-				<td>메뉴 이름 </td>
-				<td><input type="text" name="menuName" id="menuName2"></td>
-			</tr>
-			<tr>
-				<td>메뉴 가격 </td>
-				<td><input type="text" name="price" id="price2"></td>
-			</tr>
-			<tr>
-				<td>메뉴 설명 </td>
-				<td><textarea name="description" id="description2" rows="2" cols="40"></textarea></td>
-			</tr>
-			<tr>
-				<td>메뉴 사진 </td>
-				<td>
-					<input type="file" id="fileName2" name="fileName" accept="image/*">
-					<label for="fileName2" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px;">파일 선택</label>
-					<span id="showFileName2" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
-				</td>
-			</tr>
-		</tbody>
+	<input type="hidden" id="storeId" name="storeId" value="${storeId}">
+	
+	<div class="info_container" style="max-width: 700px;">
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+			<div class="form-label" style="width: 200px;">메뉴 이름</div>
+			<div class="form-input" style="flex: 1;">
+				<input id="menuName0" name="menuName[]" type="text" maxLength="15" />
+			</div>
+		</div>
 		
-		<tbody id="moreMenu" class="menu_container"></tbody>
-	</table>
-	<input type="button" value="메뉴 추가" onClick="addMenu()">
-	<input type="button" onClick="checkMenu()" value="메뉴 등록">
-</form>
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+			<div class="form-label" style="width: 200px;">메뉴 가격</div>
+			<div class="form-input" style="flex: 1;">
+				<input id="price0" name="price[]" type="text" maxLength="15" />
+			</div>
+		</div>
+		
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+			<div class="form-label" style="width: 200px;">메뉴 설명</div>
+			<div class="form-input" style="flex: 1;">
+				<textarea id="description0" name="description[]" rows="2" cols="40"></textarea>
+			</div>
+		</div>
+		
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+			<div class="form-label" style="width: 200px;">메인 이미지</div>
+			<div class="form-input" style="flex: 1;">
+				<input type="file" id="fileName0" name="fileName[]" accept="image/*" onchange="validateImages(this);" >
+				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
+				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				<br />
+			</div>
+			<div class="image-preview" style="max-width:200px;"></div>
+		</div>
+		<div id="moreMenu" class="menu_container"></div>
+	</div>
 
+	<div style="margin-top: 15px;">
+		<input type="button" value="메뉴 추가" onClick="addMenu()">
+		<input type="button" onClick="checkMenu()" value="메뉴 등록">
+	</div>
+</form>
