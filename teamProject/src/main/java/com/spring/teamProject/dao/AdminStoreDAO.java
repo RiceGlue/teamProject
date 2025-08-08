@@ -1,5 +1,6 @@
 package com.spring.teamProject.dao;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -12,4 +13,6 @@ public interface AdminStoreDAO {
 	
 	long selectStoreId(StoreVO storeVO) throws DataAccessException;
 	public long insertStoreInfo(Map newStoreMap) throws DataAccessException;
+	long selectOwnerId(long storeId) throws DataAccessException;
+	public void insertStoreImageFile(List imgfile) throws DataAccessException;
 }

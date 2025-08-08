@@ -4,50 +4,54 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.spring.teamProject.vo.ImageFileVO;
 
-public class BaseController {
-	private static final String CURR_FILE_REPO_PATH = "C://project//file_repo";
-
+public abstract class BaseController {
 	
-	protected List<ImageFileVO> upload(MultipartHttpServletRequest multiReq) throws Exception {
-	    List<ImageFileVO> imageFileList = new ArrayList<>();
-
-	    Iterator<String> fileNames = multiReq.getFileNames();
-	    while (fileNames.hasNext()) {
-	        String fileName = fileNames.next();
-	        MultipartFile file = multiReq.getFile(fileName);
-
-	        if (file != null && !file.isEmpty()) {
-	            String originalName = file.getOriginalFilename();
-	            String storedFileName = UUID.randomUUID().toString() + "_" + originalName;
-
-	            // 파일 저장: temp 폴더
-	            File tempFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + storedFileName);
-	            if (!tempFile.getParentFile().exists()) tempFile.getParentFile().mkdirs();
-	            file.transferTo(tempFile);
-
-	            // DB용 VO
-	            ImageFileVO image = new ImageFileVO();
-	            image.setFileName(storedFileName);
-	            imageFileList.add(image);
-	        }
-	    }
-	    return imageFileList;
+	private static final String CURR_FILE_REPO_PATH = "C:\\project\\file_repo";
+	
+	protected List<ImageFileVO> upload (MultipartHttpServletRequest multireq) throws Exception {
+		int maxFileCount = 10;
+		int filecount = 0;
+		
+		List<ImageFileVO> fileList = new ArrayList<>();
+		Iterator<String> fileNames = multireq.getFileNames();
+		
+		while (fileNames.hasNext()) {
+			
+			if(++filecount>maxFileCount ) {
+				throw new IllegalStateException("최대 " + maxFileCount + "개의 파일만 업로드 할 수 있습니다.");
+			}
+			ImageFileVO imgfileVO = new ImageFileVO();
+			String fileName = fileNames.next();
+			
+			imgfileVO.setFileName(fileName);
+			MultipartFile mFile = multireq.getFile(fileName);
+			String originalFileName = mFile.getOriginalFilename();
+			imgfileVO.setFileName(originalFileName);
+			fileList.add(imgfileVO);
+			
+			File file = new File(CURR_FILE_REPO_PATH + File.separator + fileName);
+			if(mFile.getSize()!=0) {
+				if(!file.exists()) {
+					if(file.getParentFile().mkdir()) {
+						file.createNewFile();
+					}
+				}
+				mFile.transferTo(new File(CURR_FILE_REPO_PATH+ File.separator +"temp" + File.separator + originalFileName));
+			}
+		}
+		return fileList;
 	}
-
-
+	
 	protected void deleteFile(String fileName) {
-		File file = new File(CURR_FILE_REPO_PATH + File.separator + fileName);
-	    try {
-	    	file.delete();
-	    } catch (Exception e) { e.printStackTrace(); }
-	    
+		File file = new File(CURR_FILE_REPO_PATH + File.separator+fileName);
+		try {
+			file.delete();
+		} catch (Exception e) { e.printStackTrace(); }
 	}
-
 }

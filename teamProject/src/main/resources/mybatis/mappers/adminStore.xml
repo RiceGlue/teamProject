@@ -25,7 +25,10 @@
 		<result property="breakTime" column="break_time" />
 		<result property="description" column="description" />
 		<result property="amenities" column="amenities" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
 		<result property="fileName" column="file_name" />
+		<result property="infoId" column="info_id" />
 		<result property="closed" column="closed" />
 		<result property="operatingHours" column="operating_hours" />
 		<result property="lastOrder" column="last_order" />
@@ -87,6 +90,12 @@
 		]]>
 	</select>
 	
+	<select id="selectOwnerId" parameterType="long" resultType="long">
+		<![CDATA[
+			select owner_id from stores where store_id=#{storeId}
+		]]>
+	</select>
+	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
@@ -111,10 +120,12 @@
 	            #{closed},
 	            #{lastOrder}
 	        )
-	    <selectKey>
+	    <selectKey keyProperty="infoId" resultType="long" order="AFTER">
 	        select LAST_INSERT_ID()
 	    </selectKey>
 	</insert>
+	
+<!-- 	<insert id="insertStoreImage" parameterType="list" -->
 
 	
 </mapper>

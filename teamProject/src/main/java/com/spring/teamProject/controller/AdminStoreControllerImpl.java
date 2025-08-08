@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -55,84 +54,71 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		return mav;
 	}
 	
-	@Override
-	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)
-	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq, HttpServletResponse response) throws Exception {
+	public ResponseEntity addStoreInfo(MultipartHttpServletRequest multireq, HttpServletResponse res) throws Exception {
+		multireq.setCharacterEncoding("UTF-8");
+		res.setContentType("text/html; charset=UTF-8");
 		
-		int count =1;
+		String fileName = null;
 		
-	    multiReq.setCharacterEncoding("utf-8");
-
-	    Map<String, Object> storeInfoMap = new HashMap<>();
-
-	    Enumeration<?> enu = multiReq.getParameterNames();
-	    while (enu.hasMoreElements()) {
-	        String name = (String) enu.nextElement();
-	        String value = multiReq.getParameter(name);
-	        storeInfoMap.put(name, value);
-	    }
-
-	    String storeId = (String) storeInfoMap.get("storeId");
-	    String imageFileName = null;
-	    String message;
-	    ResponseEntity<String> resEntity;
-	    HttpHeaders responseHeaders = new HttpHeaders();
-	    responseHeaders.add("Content-Type", "text/html; charset=utf-8");
-
-	    try {
-	        // 1. 이미지 파일 리스트 추출
-	        List<ImageFileVO> imageFileList = upload(multiReq); // 이 메서드는 아래에서 설명
-
-
-	        // 3. 이미지 메타정보 추가
-	        if (imageFileList != null && !imageFileList.isEmpty()) {
-	            for (ImageFileVO imageFileVO : imageFileList) {
-	                imageFileVO.setFileType(false); // 가게 이미지
-	                imageFileVO.setDisplayNo(count); // 필요 시 변경
-	                imageFileVO.setRegId(1L); // 추후 세션 유저 ID로 변경
-	                count++;
-	            }
-	            storeInfoMap.put("imageFileList", imageFileList);
-	        }
-	        
-	        long infoId = adminStoreService.addStoreInfo(storeInfoMap);
-
-	        // 4. 이미지 실제 저장 (temp → 정식 폴더로)
-	        if (imageFileList != null && !imageFileList.isEmpty()) {
-	            for (ImageFileVO imageFileVO : imageFileList) {
-	                imageFileName = imageFileVO.getFileName();
-
-	                File srcFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + imageFileName);
-	                File destDir = new File(CURR_FILE_REPO_PATH + "\\" + storeId);
-	                if (!destDir.exists()) destDir.mkdirs();
-
-	                FileUtils.moveFileToDirectory(srcFile, destDir, true);
-	            }
-	        }
-
-	        message = "<script>";
-	        message += "alert('가게 정보가 등록되었습니다.');";
-	        message += "location.href='" + multiReq.getContextPath() + "/franchise/addStoreInfo';";
-	        message += "</script>";
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-
-	        if (imageFileName != null) {
-	            File tempFile = new File(CURR_FILE_REPO_PATH + "\\temp\\" + imageFileName);
-	            tempFile.delete();
-	        }
-
-	        message = "<script>";
-	        message += "alert('오류가 발생했습니다. 다시 시도해 주세요.');";
-	        message += "location.href='" + multiReq.getContextPath() + "/franchise/addStoreInfo';";
-	        message += "</script>";
-	    }
-
-	    resEntity = new ResponseEntity<>(message, responseHeaders, HttpStatus.OK);
-	    return resEntity;
+		Map storeInfo = new HashMap<>();
+		
+		Enumeration enu = multireq.getParameterNames();
+		while(enu.hasMoreElements()) {
+			String name = (String)enu.nextElement();
+			String value = multireq.getParameter(name);
+			
+			storeInfo.put(name, value);
+		}
+		
+		long storeId = (long) storeInfo.get("storeId");
+		long ownerId = adminStoreService.selectOwnerId(storeId);
+		
+		List<ImageFileVO> imgfile = upload(multireq);
+		if(imgfile!=null && imgfile.size()!=0) {
+			for(ImageFileVO imgfileVO : imgfile) {
+				imgfileVO.setRegId(ownerId);
+			}
+			
+			storeInfo.put("imgfile", imgfile);
+		}
+		
+		String message = null;
+		ResponseEntity resEntity = null;
+		HttpHeaders resHeaders = new HttpHeaders();
+		resHeaders.add("Content-Type","text/html; charset=UTF-8");
+		
+		try {
+			long infoId = adminStoreService.addStoreInfo(storeInfo);
+			if(imgfile!=null&&imgfile.size()!=0) {
+				for(ImageFileVO imgfileVO:imgfile) {
+					fileName = imgfileVO.getFileName();
+					File srcFile = new File(CURR_FILE_REPO_PATH+"\\"+"temp"+"\\"+fileName);
+					File destDir = new File(CURR_FILE_REPO_PATH+"\\"+infoId);
+					FileUtils.moveFileToDirectory(srcFile, destDir, true);
+				}
+			}
+			message = "<script>";
+			message += " alert('정보 입력 성공.');";
+			message += " location.href='" + multireq.getContextPath() + "/franchise/storeInfoForm';";
+			message += "</script>";
+			
+		} catch(Exception e) {
+			if(imgfile!=null&&imgfile.size()!=0) {
+				for(ImageFileVO imgfileVO : imgfile) {
+					fileName = imgfileVO.getFileName();
+					File srcFile = new File(CURR_FILE_REPO_PATH+"\\"+"temp"+"\\"+fileName);
+					srcFile.delete();
+				}
+			}
+			message = "<script>";
+			message += " alert('정보 입력 실패. 다시 시도해 주세요');";
+			message += " location.href='" + multireq.getContextPath() + "/franchise/storeInfoForm';";
+			message += "</script>";
+			
+			e.printStackTrace();
+		}
+		resEntity = new ResponseEntity(message, resHeaders, HttpStatus.OK);
+		return resEntity; 
 	}
-
-
-
+	
 }
