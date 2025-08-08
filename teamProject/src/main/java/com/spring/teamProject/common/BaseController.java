@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -53,5 +55,16 @@ public abstract class BaseController {
 		try {
 			file.delete();
 		} catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	@Bean
+	public TomcatServletWebServerFactory tomcatFactory() {
+	    return new TomcatServletWebServerFactory() {
+	        @Override
+	        protected void customizeConnector(org.apache.catalina.connector.Connector connector) {
+	            super.customizeConnector(connector);
+	            connector.setMaxPostSize(50 * 1024 * 1024); // 50MB
+	        }
+	    };
 	}
 }

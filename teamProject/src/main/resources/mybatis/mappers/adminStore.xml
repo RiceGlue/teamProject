@@ -7,35 +7,25 @@
 		<result property="storeId" column="store_id"/>
 		<result property="ownerId" column="owner_id"/>
 		<result property="storeName" column="store_Name"/>
+		<result property="storeType" column="store_type" />
+		<result property="zipcode" column="zipcode" />
 		<result property="address" column="address"/>
-		<result property="region" column="region"/>
+		<result property="detailAddress" column="detail_address"/>
+		<result property="extraAddress" column="extra_address"/>
+		<result property="operationType" column="operation_type" />
+		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="description" column="description" />
+		<result property="closed" column="closed" />
+		<result property="operatingTime" column="operating_time" />
+		<result property="breakTime" column="break_time" />
+		<result property="lastOrder" column="last_order" />
+		<result property="amenities" column="amenities" />
+		<result property="fileName" column="file_name" />
 		<result property="createdAt" column="created_at"/>
 		<result property="updatedAt" column="updated_at"/>
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
-	
-	<resultMap id="storeInfo" type="StoreVO">
-		<result property="storeId" column="store_id" />
-		<result property="storeName" column="store_name" />
-		<result property="storeType" column="store_type" />
-		<result property="operationType" column="operation_type" />
-		<result property="storePhoneNumber" column="store_phone_number" />
-		<result property="address" column="address" />
-		<result property="breakTime" column="break_time" />
-		<result property="description" column="description" />
-		<result property="amenities" column="amenities" />
-		<result property="createdAt" column="created_at" />
-		<result property="updatedAt" column="updated_at" />
-		<result property="fileName" column="file_name" />
-		<result property="infoId" column="info_id" />
-		<result property="closed" column="closed" />
-		<result property="operatingHours" column="operating_hours" />
-		<result property="lastOrder" column="last_order" />
-		<result property="avgRating" column="avgRating"/>
-		<result property="countRating" column="countRating"/>
-	</resultMap>
-	
 	
 	<resultMap id="imagelist" type="ImageFileVO">
 		<result property="imageId" column="image_id"/>
@@ -84,48 +74,76 @@
 		<result property="countScoreRating" column="countScoreRating" />
 	</resultMap>
 	
-	<select id="selectStoreId" parameterType="storeVO" resultType="long">
-		<![CDATA[
-			select store_id from stores where owner_id = #{ownerId} and store_name=#{storeName}
-		]]>
-	</select>
-	
-	<select id="selectOwnerId" parameterType="long" resultType="long">
-		<![CDATA[
-			select owner_id from stores where store_id=#{storeId}
-		]]>
-	</select>
-	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
 		]]>
 	</select>
 	
-	<insert id="insertStoreInfo" parameterType="map" >
-	    insert into store_info values
-	        (	        	
-	            #{storeId},
-	            #{storeType},
-	            #{operationType},
-	            #{storePhoneNumber},
-	            #{breakTime},
-	            #{description},
-	            #{amenities},
-	            now(),
-	            now(),
-	            #{fileName},
-	            null,
-	            #{operatingHours},
-	            #{closed},
-	            #{lastOrder}
-	        )
-	    <selectKey keyProperty="infoId" resultType="long" order="AFTER">
-	        select LAST_INSERT_ID()
-	    </selectKey>
+	<insert id="insertStoreInfo" parameterType="StoreVO" >
+		<![CDATA[
+			insert into stores
+			(
+				store_id,
+				owner_id,
+				store_name,
+				store_type,
+				zipcode,
+				address,
+				detail_address,
+				extra_address, 
+				operation_type, 
+				store_phone_number, 
+				description, 
+				closed, 
+				operating_time, 
+				break_time, 
+				last_order, 
+				amenities, 
+				file_name, 
+				created_at
+			)
+			values
+			(
+				null,
+				#{ownerId},
+				#{storeName},
+				#{storeType},
+				#{zipcode},
+				#{address},
+				#{detailAddress},
+				#{extraAddress},
+				#{operationType},
+				#{storePhoneNumber},
+				#{description},
+				#{closed},
+				#{operatingTime},
+				#{breakTime},
+				#{lastOrder},
+				#{amenities},
+				#{fileName},
+				now()
+			)
+				
+				
+			
+		]]>
 	</insert>
 	
-<!-- 	<insert id="insertStoreImage" parameterType="list" -->
+	<insert id="insertStoreImage" parameterType="list" >
+			insert into image_file (image_id, info_id, file_name, file_type, display_no, created_at, reg_id) values
+			(
+			<foreach collection="list" item="item" separator=",">
+					null,
+					#{infoId},
+					#{fileName},
+					#{fileType},
+					#{displayNo},
+					now(),
+					#{ownerId}
+			</foreach>
+			)
+	</insert>
 
 	
 </mapper>

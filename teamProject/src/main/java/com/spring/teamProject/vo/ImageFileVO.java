@@ -8,7 +8,7 @@ public class ImageFileVO {
 	private long imageId;
 	
 	//가게,리뷰 고유 아이디
-	private long infoId;
+	private long storeId;
 	private long reviewId;
 	
 	//파일 이름
@@ -32,12 +32,12 @@ public class ImageFileVO {
 		this.imageId = imageId;
 	}
 
-	public long getInfoId() {
-		return infoId;
+	public long getStoreId() {
+		return storeId;
 	}
 
-	public void setInfoId(long infoId) {
-		this.infoId = infoId;
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
 	}
 
 	public long getReviewId() {

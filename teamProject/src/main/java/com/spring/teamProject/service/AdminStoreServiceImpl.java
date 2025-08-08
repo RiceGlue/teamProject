@@ -19,28 +19,10 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	
 	@Autowired
 	private AdminStoreDAO adminStoreDAO;
-	
+
 	@Override
-	public long selectStoreId(StoreVO storeVO) throws Exception {
-		long storeId = adminStoreDAO.selectStoreId(storeVO);
-		return storeId;
-	}
-	
-	@Override
-	public long selectOwnerId(long storeId) throws Exception {
-		long ownerId = adminStoreDAO.selectOwnerId(storeId);
-		return ownerId;
-	}
-	
-	@Override
-	public long addStoreInfo(Map newStoreMap) throws Exception {
-		long infoId = adminStoreDAO.insertStoreInfo(newStoreMap);
-		ArrayList<ImageFileVO> imgfile = (ArrayList)newStoreMap.get("imgfile");
-		for(ImageFileVO imageFileVO : imgfile ) {
-			imageFileVO.setInfoId(infoId);
-		}
-		adminStoreDAO.insertStoreImageFile(imgfile);
-		return infoId;
+	public void addStoreInfo(StoreVO storeVO) throws Exception {
+		adminStoreDAO.insertStoreInfo(storeVO);
 	}
 	
 	@Override

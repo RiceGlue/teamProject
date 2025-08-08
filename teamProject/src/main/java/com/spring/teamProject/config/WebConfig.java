@@ -25,15 +25,5 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new ViewNameInterceptor())
                 .addPathPatterns("/**");
     }
-    
-    @Bean
-    public MultipartConfigElement multipartConfigElement() {
-        MultipartConfigFactory factory = new MultipartConfigFactory();
-        factory.setMaxFileSize(DataSize.ofMegabytes(5));
-        factory.setMaxRequestSize(DataSize.ofMegabytes(10));
-//        factory.setFileSizeThreshold(DataSize.ofKilobytes(2));
-        return factory.createMultipartConfig();
-    }
-
 
 }

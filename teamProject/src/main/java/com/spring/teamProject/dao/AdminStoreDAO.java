@@ -12,7 +12,7 @@ import com.spring.teamProject.vo.StoreVO;
 public interface AdminStoreDAO {
 	
 	long selectStoreId(StoreVO storeVO) throws DataAccessException;
-	public long insertStoreInfo(Map newStoreMap) throws DataAccessException;
+	public void insertStoreInfo(StoreVO storeVO) throws DataAccessException;
 	long selectOwnerId(long storeId) throws DataAccessException;
 	public void insertStoreImageFile(List imgfile) throws DataAccessException;
 }

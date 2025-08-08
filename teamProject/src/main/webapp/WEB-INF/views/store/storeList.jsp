@@ -146,7 +146,7 @@
 									<div class="store-info">
 										<h4>${menu.storeName}</h4>
 										<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
-										<p class="meta-info">${menu.storeType} · ${menu.region}</p>
+										<p class="meta-info">${menu.storeType} · ${menu.address}</p>
 										<p class="meta-info">${menu.description}</p>
 									</div>
 								</div>
@@ -172,7 +172,7 @@
 									<div class="store-info">
 										<h4>${store.storeName}</h4>
 										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
-										<p class="meta-info">${addr.storeType} · ${addr.region}</p>
+										<p class="meta-info">${addr.storeType} · ${addr.address}</p>
 										<p class="meta-info">${addr.description}</p>
 									</div>
 								</div>
@@ -198,7 +198,7 @@
 									<div class="store-info">
 										<h4>${name.storeName}</h4>
 										<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
-										<p class="meta-info">${name.storeType} · ${name.region}</p>
+										<p class="meta-info">${name.storeType} · ${name.address}</p>
 										<p class="meta-info">${name.description}</p>
 									</div>
 								</div>
@@ -235,7 +235,7 @@
 	        <span class="rating">★ ${region.avgRating}</span>
 	        리뷰 ${region.countRating}개
 	      </p>
-	      <p class="meta-info">${region.storeType} · ${region.region}</p>
+	      <p class="meta-info">${region.storeType} · ${region.address}</p>
 	      <p class="meta-info">${region.description}</p>
 	    </div>
 	  </div>
