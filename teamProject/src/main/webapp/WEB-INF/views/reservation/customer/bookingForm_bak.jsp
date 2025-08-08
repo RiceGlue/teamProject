@@ -57,11 +57,12 @@
         </div>
     </c:if>
 
-    <form id="reservationForm">
+    <form action="${contextPath}/reservation/customer/book" method="post" id="reservationForm">
         <input type="hidden" name="storeId" value="${storeId}" />
         <input type="hidden" name="reservationTimeStr" id="selectedReservationTime" value="${selectedReservationTime}" />
         <input type="hidden" name="tableId" id="selectedTableId" value="${selectedTableId}" />
         <input type="hidden" name="paymentId" id="paymentIdInput" />
+        <input type="hidden" name="guestCount" value="${guestCount}" />
 
         <input type="hidden" id="storeNameHidden" value="${store.storeName}">
 
@@ -88,7 +89,7 @@
         </div>
 
         <button type="button" id="payment-button" class="btn btn-primary mt-3">예약 신청하기</button>
-        <a href="${pageContext.request.contextPath}/store/storeDetail?storeId=${storeId}" class="btn btn-secondary mt-3">취소</a>
+        <a href="${contextPath}/store/storeDetail?storeId=${storeId}" class="btn btn-secondary mt-3">취소</a>
     </form>
 </div>
 
@@ -99,7 +100,7 @@
 
 <script>
     $(function() {
-        var contextPath = '${pageContext.request.contextPath}';
+        var contextPath = '${contextPath}';
         const urlParams = new URLSearchParams(window.location.search);
         const preselectedDate = urlParams.get('reservationTime')?.split('T')[0] || '';
         const preselectedTime = urlParams.get('reservationTime')?.split('T')[1] || '';
@@ -240,87 +241,72 @@
             $('#selectedTableId').val(tableId);
         });
         $('#payment-button').on('click', function(e) {
-            // 필수 정보 유효성 검사
             if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
                 alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
                 return;
             }
-            if ($('#guestCount').val() < 1) {
-                alert('예약 인원은 1명 이상이어야 합니다.');
+            requestPay();
+        });
+     // bookForm.jsp의 <script> 태그 안
+        function requestPay() {
+            if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
+                alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
                 return;
             }
 
-            // 임시 예약 정보를 서버에 저장 후 결제 시작
-            saveTempReservationAndRequestPay();
-        });
-
-        function saveTempReservationAndRequestPay() {
-            var formData = {
-                storeId: $('[name="storeId"]').val(),
-                reservationTimeStr: $('#selectedReservationTime').val(),
-                tableId: $('#selectedTableId').val(),
-                guestCount: $('#guestCount').val(),
-                request: $('#request').val()
-            };
-
-            $.ajax({
-                url: contextPath + '/reservation/customer/book-temp',
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    if (response === "success") {
-                        console.log("임시 예약 정보 저장 성공. 결제 시작.");
-                        requestPay(); // 임시 예약 정보 저장 성공 시 결제 시작
-                    } else {
-                        alert("예약 정보를 저장하는 데 실패했습니다. 다시 시도해주세요.");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("임시 예약 정보 저장 오류: ", error);
-                    alert("예약 정보를 저장하는 중 오류가 발생했습니다.");
-                }
-            });
-        }
-
-        function requestPay() {
             const storeName = $('#storeNameHidden').val();
             const storeId = $('[name="storeId"]').val();
 
+            // PortOne API에서 요구하는 새로운 파라미터 이름에 맞춰 변수명을 변경합니다.
             const paymentId = 'reservation_' + storeId + '_' + Date.now();
             const orderName = storeName + ' 예약 결제';
-            const totalAmount = 1000; // 실제 예약 금액으로 변경 필요
+            const totalAmount = 1000; // 테스트용 금액
+
+            console.log("--- PortOne Request Parameters (Updated) ---");
+            console.log("orderName:", orderName);
+            console.log("paymentId:", paymentId);
+            console.log("totalAmount:", totalAmount);
+            console.log("-----------------------------------");
 
             $('#paymentIdInput').val(paymentId);
+
             const { PortOne } = window;
-
-            // 웹훅 기반 결제 흐름에서는 이 URL이 결제 완료 후 사용자에게 보여질 페이지를 지정합니다.
-            // 실제 결제 검증은 웹훅에서 처리되므로, 이 페이지는 '결제 처리 중' 메시지를 보여주기만 하면 됩니다.
-            const myRedirectUrl = window.location.origin + contextPath + '/reservation/customer/processing';
-
-            console.log("Redirect URL:", myRedirectUrl);
-
             PortOne.requestPayment({
-                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5', // 실제 PortOne 상점 ID로 변경
-                channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31', // 실제 PortOne 채널 키로 변경
-                payMethod: 'CARD', // 결제 수단 (카카오페이 사용 시 'KAKAO_PAY' 또는 'CARD' 등 설정)
+                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
+
+                // --- 이 부분을 수정합니다. `pg` 대신 `channelKey`를 사용합니다. ---
+                // PortOne 관리자 페이지에서 발급받은 채널 키를 여기에 넣어주세요.
+                channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31', // 예시: 'channel-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+
+                payMethod: 'CARD', // `CARD`는 `payMethod`에 사용되는 올바른 값입니다.
+
+                // --- 이 부분을 수정합니다. `name`과 `amount`, `orderId` 대신 새로운 파라미터를 사용합니다. ---
                 orderName: orderName,
                 totalAmount: totalAmount,
                 paymentId: paymentId,
-                currency: 'CURRENCY_KRW',
+                currency: 'CURRENCY_KRW', // 통화 코드 추가 (필수)
+
                 customer: {
                     fullName: '테스터조원기',
                     phoneNumber: '010-7277-7829',
                     email: 'ksd0607@naver.com'
                 },
-                redirectUrl: myRedirectUrl
+                redirectUrl: window.location.href
             })
             .then(function(response) {
-                console.log("PortOne 결제 요청이 성공적으로 시작되었습니다.", response);
-                // 결제창이 열렸으므로 추가적인 클라이언트 리다이렉션은 하지 않습니다.
-                // 결제 완료 후 PortOne이 redirectUrl로 사용자를 리다이렉트합니다.
+            	// 결제 요청이 성공적으로 시작되면, 바로 폼을 제출합니다.
+                // 결제 성공 여부는 서버에서 redirectUrl로 돌아온 후 확인합니다.
+                alert('결제를 완료했습니다.');
+                $('#reservationForm').submit();
+
+//                 if (response.code === '0000') {
+//                     alert('결제에 성공했습니다.');
+//                     $('#reservationForm').submit();
+//                 } else {
+//                     alert(`결제에 실패했습니다. 에러 메시지: ${response.message}`);
+//                 }
             })
             .catch(function(error) {
-            	console.error("PortOne 결제 요청 오류:", error);
                 alert(`결제 요청 중 오류가 발생했습니다: ${error.message}`);
             });
         }

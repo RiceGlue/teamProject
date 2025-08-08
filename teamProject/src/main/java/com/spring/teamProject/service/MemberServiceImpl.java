@@ -53,19 +53,6 @@ public class MemberServiceImpl implements MemberService {
     }
     
     /**
-     * 소셜 로그인 후 추가 정보를 받아 최종 회원가입 처리를 담당합니다.
-     * 프로필 이미지 저장, 전화번호 포맷팅 후 DB에 저장합니다. (비밀번호 암호화 과정 없음)
-     * @param memberVO 추가 정보 폼에서 넘어온 사용자 정보
-     */
-    @Override
-    public void joinSocial(MemberVO memberVO) {
-        saveProfileImage(memberVO);
-        processPhoneNumber(memberVO);
-        
-        memberDAO.insertSocialMember(memberVO);
-    }
-    
-    /**
      * (사용되지 않음) 스프링 시큐리티를 사용하므로, 이 메소드는 직접 호출되지 않습니다.
      */
     @Override
@@ -132,8 +119,8 @@ public class MemberServiceImpl implements MemberService {
      * @return 탈퇴 성공 시 true, 실패 시 false
      */
     @Override
-    public boolean deleteMember(long memberId) {
-        return memberDAO.deleteMember(memberId) == 1;
+    public boolean deactivateMember(long memberId) {
+        return memberDAO.deactivateMember(memberId) == 1;
     }
 
     /**

@@ -12,7 +12,6 @@ public class ReservationVO {
     private String status; // ENUM 값은 PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
     private String cancelledReason; // DDL상 DEFAULT NULL
     private LocalDateTime createdAt; // ★ 이 필드를 추가해야 합니다! ★
-    private String paymentId; // --- 이 필드를 추가했습니다! (결제 고유 ID) ---
 
     // DDL에 없는 필드지만, 예약 신청 시 필요할 수 있는 정보 (VO에 유지)
     private String customerName; // 예약자 이름 (DB 저장 시 memberId와 연결 또는 별도 필드 필요)
@@ -51,8 +50,6 @@ public class ReservationVO {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     // --- paymentId 필드에 대한 Getter, Setter 추가 ---
-    public String getPaymentId() { return paymentId; }
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
 
     // DDL에 없는 필드들에 대한 Getter, Setter (유지)
     public String getCustomerName() { return customerName; }
@@ -76,7 +73,6 @@ public class ReservationVO {
                 ", status='" + status + '\'' +
                 ", cancelledReason='" + cancelledReason + '\'' +
                 ", createdAt=" + createdAt +
-                ", paymentId='" + paymentId + '\'' + // toString에도 추가
                 ", customerName='" + customerName + '\'' +
                 ", customerPhoneNumber='" + customerPhoneNumber + '\'' +
                 ", request='" + request + '\'' +
