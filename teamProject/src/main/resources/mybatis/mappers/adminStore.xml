@@ -80,8 +80,7 @@
 		]]>
 	</select>
 	
-	<insert id="insertStoreInfo" parameterType="StoreVO" >
-		<![CDATA[
+	<insert id="insertStoreInfo" parameterType="java.util.Map" >
 			insert into stores
 			(
 				store_id,
@@ -124,10 +123,9 @@
 				#{fileName},
 				now()
 			)
-				
-				
-			
-		]]>
+		<selectKey order="AFTER" resultType="long" keyProperty="storeId">
+			select last_insert_store_id()
+		</selectKey>
 	</insert>
 	
 	<insert id="insertStoreImage" parameterType="list" >

@@ -7,6 +7,6 @@ import com.spring.teamProject.vo.StoreVO;
 
 public interface AdminStoreService {
 	
-	public void addStoreInfo(StoreVO storeVO) throws Exception;
+	public long addStoreInfo(Map storeInfo) throws Exception;
 	public void addStoreInfoImage(List imgfile) throws Exception;
 }
