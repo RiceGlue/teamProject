@@ -75,7 +75,7 @@
             ${error}
         </div>
     </c:if>
-        
+    
     <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validatePassword();">
         
         <div class="text-center mb-4">
@@ -98,7 +98,7 @@
             <input type="text" class="form-control" id="memberName" name="memberName" value="${memberInfo.memberName}" required>
         </div>
 
-        <!-- (신규) 전화번호, 이메일 수정 필드 추가 -->
+        <!-- 전화번호, 이메일 수정 필드 추가 -->
         <div class="mb-3">
             <label for="phone" class="form-label">연락처</label>
             <div class="input-group">
@@ -107,7 +107,25 @@
                     <option value="1"  ${memberInfo.countryCode == '1' ? 'selected' : ''}>+1 (United States)</option>
                     <option value="81" ${memberInfo.countryCode == '81' ? 'selected' : ''}>+81 (日本)</option>
                     <option value="86" ${memberInfo.countryCode == '86' ? 'selected' : ''}>+86 (中?)</option>
-                    <!-- 다른 국가 코드들도 필요 시 위와 같이 추가 -->
+                    <option value="44" ${memberInfo.countryCode == '44' ? 'selected' : ''}>+44 (United Kingdom)</option>
+                    <option value="49" ${memberInfo.countryCode == '49' ? 'selected' : ''}>+49 (Deutschland)</option>
+                    <option value="33" ${memberInfo.countryCode == '33' ? 'selected' : ''}>+33 (France)</option>
+                    <option value="1" ${memberInfo.countryCode == '1' ? 'selected' : ''}>+1 (Canada)</option>
+                    <option value="61" ${memberInfo.countryCode == '61' ? 'selected' : ''}>+61 (Australia)</option>
+                    <option value="7" ${memberInfo.countryCode == '7' ? 'selected' : ''}>+7 (Россия)</option>
+                    <option value="34" ${memberInfo.countryCode == '34' ? 'selected' : ''}>+34 (Espana)</option>
+                    <option value="39" ${memberInfo.countryCode == '39' ? 'selected' : ''}>+39 (Italia)</option>
+                    <option value="84" ${memberInfo.countryCode == '84' ? 'selected' : ''}>+84 (Vi?t Nam)</option>
+                    <option value="66" ${memberInfo.countryCode == '66' ? 'selected' : ''}>+66 (?????????)</option>
+                    <option value="63" ${memberInfo.countryCode == '63' ? 'selected' : ''}>+63 (Pilipinas)</option>
+                    <option value="886" ${memberInfo.countryCode == '886' ? 'selected' : ''}>+886 (台灣)</option>
+                    <option value="852" ${memberInfo.countryCode == '852' ? 'selected' : ''}>+852 (Hong Kong)</option>
+                    <option value="65" ${memberInfo.countryCode == '65' ? 'selected' : ''}>+65 (Singapore)</option>
+                    <option value="60" ${memberInfo.countryCode == '60' ? 'selected' : ''}>+60 (Malaysia)</option>
+                    <option value="62" ${memberInfo.countryCode == '62' ? 'selected' : ''}>+62 (Indonesia)</option>
+                    <option value="91" ${memberInfo.countryCode == '91' ? 'selected' : ''}>+91 (India)</option>
+                    <option value="55" ${memberInfo.countryCode == '55' ? 'selected' : ''}>+55 (Brasil)</option>
+                    <option value="52" ${memberInfo.countryCode == '52' ? 'selected' : ''}>+52 (Mexico)</option>
                 </select>
                 <input type="tel" class="form-control" id="phone" name="phone" value="${memberInfo.phone}" placeholder="'-' 없이 숫자만 입력" required>
             </div>
@@ -118,8 +136,9 @@
             <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" placeholder="name@example.com" required>
         </div>
         
-        <!-- (수정) 소셜 로그인 사용자가 아닐 때만 비밀번호 변경 섹션을 보여줍니다. -->
-        <c:if test="${empty memberInfo.socialProvider}">
+        <!-- ? 여기가 핵심 수정 부분입니다 ? -->
+        <!-- [수정] 소셜 계정 연동 여부를 socialAccounts 리스트가 비어있는지로 확인합니다. -->
+        <c:if test="${empty memberInfo.socialAccounts}">
             <hr class="my-4">
             
             <h5 class="mb-3">비밀번호 변경</h5>

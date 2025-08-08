@@ -3,14 +3,14 @@ package com.spring.teamProject.vo;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User; // OAuth2User import
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-// (수정) OAuth2User 인터페이스를 함께 구현하도록 변경
 public class UserDetailsVO implements UserDetails, OAuth2User {
 
     private final MemberVO memberVO;
@@ -23,19 +23,23 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
 
     @Override
     public Map<String, Object> getAttributes() {
-        // (신규) 소셜 로그인 사용자와 데이터 구조를 통일하기 위해 attributes 맵을 생성하여 반환합니다.
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put("name", memberVO.getMemberName()); // 'name' 키에 사용자 이름을 저장
+        attributes.put("name", memberVO.getMemberName());
         attributes.put("email", memberVO.getEmail());
-        // (신규) 소셜 로그인 제공자 정보를 추가합니다. 일반 회원은 이 값이 null입니다.
-        attributes.put("socialProvider", memberVO.getSocialProvider());
-        // 필요한 다른 정보들도 여기에 추가할 수 있습니다.
+        
+        // [수정] socialAccounts 리스트를 확인하여 소셜 연동 정보를 추가합니다.
+        List<SocialAccountVO> socialAccounts = memberVO.getSocialAccounts();
+        if (socialAccounts != null && !socialAccounts.isEmpty()) {
+            // 여러 개가 연동될 수 있지만, 우선 첫 번째 것을 대표로 사용합니다.
+            attributes.put("socialProvider", socialAccounts.get(0).getProvider());
+        }
+        
         return attributes;
     }
 
     @Override
     public String getName() {
-        // UserDetails의 getUsername과 동일하게 로그인 ID를 반환하도록 설정
+        // 소셜 로그인의 경우 고유 ID를 반환해야 하지만, 일반 로그인의 Principal에서는 loginId를 반환합니다.
         return memberVO.getLoginId();
     }
 
@@ -67,7 +71,10 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        // [수정] 논리적 삭제를 위해 status가 'ACTIVE'인 경우에만 계정을 활성화합니다.
+        return "ACTIVE".equals(memberVO.getStatus());
+    }
     
     public MemberVO getMemberVO() {
         return memberVO;

@@ -1,126 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-	
-<!-- namespace는 연결할 DAO 인터페이스의 전체 경로와 일치해야 합니다. -->
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
 <mapper namespace="com.spring.teamProject.dao.MemberDAO">
 
-	<!-- (수정) property 속성을 MemberVO의 camelCase 필드명과 정확히 일치시킵니다. -->
-	<resultMap id="memberResultMap" type="com.spring.teamProject.vo.MemberVO">
-		<result property="memberId" column="member_id"/>
-		<result property="loginId" column="login_id"/>
-		<result property="loginPw" column="login_pw"/>
-		<result property="socialProvider" column="social_provider"/>
-		<result property="socialId" column="social_id"/>
-		<result property="memberName" column="member_name"/>
-		<result property="birth" column="birth"/>
-		<result property="sex" column="sex"/>
-		<result property="countryCode" column="country_code"/>
-		<result property="phone" column="phone"/>
-		<result property="email" column="email"/>
-		<result property="role" column="role"/>
-		<result property="profileImageUrl" column="profile_image_url"/>
-		<result property="mannerTemperature" column="manner_temperature"/>
-        <!-- (신규) 알림 동의 컬럼 매핑 추가 -->
+    <!-- 
+      [수정] resultMap에 <collection>을 추가하여, 회원 정보 조회 시 연동된 소셜 계정 목록도 함께 가져오도록 설정합니다.
+      select 속성은 다른 Mapper의 쿼리를 호출하는 MyBatis의 강력한 기능입니다.
+    -->
+    <resultMap id="memberResultMap" type="com.spring.teamProject.vo.MemberVO">
+        <id property="memberId" column="member_id"/>
+        <result property="loginId" column="login_id"/>
+        <result property="loginPw" column="login_pw"/>
+        <result property="memberName" column="member_name"/>
+        <result property="birth" column="birth"/>
+        <result property="sex" column="sex"/>
+        <result property="countryCode" column="country_code"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="role" column="role"/>
+        <result property="profileImageUrl" column="profile_image_url"/>
+        <result property="mannerTemperature" column="manner_temperature"/>
         <result property="agreeEmail" column="agree_email"/>
         <result property="agreeSms" column="agree_sms"/>
         <result property="agreeKakao" column="agree_kakao"/>
-		<result property="createdAt" column="created_at"/>
-		<result property="updatedAt" column="updated_at"/>
-	</resultMap>
-	
-	<!-- 소셜 정보 업데이트 (계정 연동용) -->
-	<update id="updateSocialInfo" parameterType="com.spring.teamProject.vo.MemberVO">
-		UPDATE members
-		SET
-			social_provider = #{socialProvider},
-			social_id = #{socialId}
-		WHERE
-			member_id = #{memberId}
-	</update>
-	
-    <!-- memberId로 회원 정보 조회 -->
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <collection property="socialAccounts"
+                    ofType="com.spring.teamProject.vo.SocialAccountVO"
+                    select="com.spring.teamProject.dao.SocialAccountDAO.findByMemberId"
+                    column="member_id"/>
+    </resultMap>
+    
+    <!-- [삭제] updateSocialInfo 쿼리 제거 -->
+    
+    <!-- memberId로 회원 정보 조회 (논리적으로 삭제되지 않은 회원만) -->
     <select id="findById" parameterType="long" resultMap="memberResultMap">
-        SELECT * FROM members WHERE member_id = #{memberId}
+        SELECT * FROM members WHERE member_id = #{memberId} AND status = 'ACTIVE'
     </select>
-	
-	<!-- 이메일로 회원 정보 조회 -->
-	<select id="findByEmail" parameterType="String" resultMap="memberResultMap">
-		SELECT * FROM members WHERE email = #{email}
-	</select>
-	
-	<!-- loginId로 회원 정보 조회 (스프링 시큐리티용) -->
-	<select id="findByLoginId" parameterType="String" resultMap="memberResultMap">
-		<![CDATA[
-			SELECT * FROM members WHERE login_id = #{loginId}
-		]]>
-	</select>
-	
-	<!-- (신규) 아이디 중복 확인 쿼리 -->
-	<select id="checkIdDuplicate" parameterType="String" resultType="int">
-		SELECT count(*) FROM members WHERE login_id = #{loginId}
-	</select>
+    
+    <!-- 이메일로 회원 정보 조회 (논리적으로 삭제되지 않은 회원만) -->
+    <select id="findByEmail" parameterType="String" resultMap="memberResultMap">
+        SELECT * FROM members WHERE email = #{email} AND status = 'ACTIVE'
+    </select>
+    
+    <!-- loginId로 회원 정보 조회 (논리적으로 삭제되지 않은 회원만) -->
+    <select id="findByLoginId" parameterType="String" resultMap="memberResultMap">
+        SELECT * FROM members WHERE login_id = #{loginId} AND status = 'ACTIVE'
+    </select>
+    
+    <select id="checkIdDuplicate" parameterType="String" resultType="int">
+        SELECT count(*) FROM members WHERE login_id = #{loginId}
+    </select>
 
-	<!-- (수정) insertMember 쿼리에 누락된 country_code와 알림 동의 컬럼들을 추가합니다. -->
-	<insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		INSERT INTO members (
-			login_id, login_pw, member_name, birth, sex, country_code, phone, email, role,
-			agree_email, agree_sms, agree_kakao
-		) VALUES (
-			#{loginId}, #{loginPw}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role},
-			#{agreeEmail}, #{agreeSms}, #{agreeKakao}
-		)
-	</insert>
-	
-	<!-- (수정) insertSocialMember 쿼리에 알림 동의 컬럼 추가 -->
-	<insert id="insertSocialMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		INSERT INTO members (
-			social_provider, social_id, member_name, birth, sex, country_code, phone, email, role,
-			agree_email, agree_sms, agree_kakao
-		) VALUES (
-			#{socialProvider}, #{socialId}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role},
-			#{agreeEmail}, #{agreeSms}, #{agreeKakao}
-		)
-	</insert>
-	
-	<!-- 로그인 (login 메소드와 연결) - 시큐리티 사용 시 직접 호출되지 않음 -->
-	<select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
-		<![CDATA[
-			SELECT * FROM members 
-			WHERE login_id = #{loginId} AND login_pw = #{loginPw}
-		]]>
-	</select>
-	
-	<!-- (수정) updateMember 쿼리에 알림 동의 컬럼 추가 -->
-	<update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
-		UPDATE members
-		<set>
-			<if test="loginPw != null and loginPw != ''">
-				login_pw = #{loginPw},
-			</if>
-			<if test="memberName != null and memberName != ''">
-				member_name = #{memberName},
-			</if>
-			<if test="profileImageUrl != null">
-				profile_image_url = #{profileImageUrl},
-			</if>
-			country_code = #{countryCode},
-			phone = #{phone},
-			email = #{email},
-			agree_email = #{agreeEmail},
-			agree_sms = #{agreeSms},
-			agree_kakao = #{agreeKakao}
-		</set>
-		WHERE 
-			member_id = #{memberId}
-	</update>
-	
-	<!-- 회원탈퇴 (deleteMember 메소드와 연결) -->
-	<delete id="deleteMember" parameterType="long">
-		<![CDATA[
-			DELETE FROM members
-			WHERE member_id = #{memberId}
-		]]>
-	</delete>
-	
+    <!-- [수정] insertMember 쿼리에서 social 관련 필드 제거 -->
+    <insert id="insertMember" parameterType="com.spring.teamProject.vo.MemberVO" useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO members (
+            login_id, login_pw, member_name, birth, sex, country_code, phone, email, role,
+            agree_email, agree_sms, agree_kakao
+        ) VALUES (
+            #{loginId}, #{loginPw}, #{memberName}, #{birth, jdbcType=DATE}, #{sex}, #{countryCode}, #{phone}, #{email}, #{role},
+            #{agreeEmail}, #{agreeSms}, #{agreeKakao}
+        )
+    </insert>
+    
+    <!-- [삭제] insertSocialMember 쿼리 제거 -->
+    
+    <select id="login" parameterType="com.spring.teamProject.vo.MemberVO" resultMap="memberResultMap">
+        SELECT * FROM members 
+        WHERE login_id = #{loginId} AND login_pw = #{loginPw} AND status = 'ACTIVE'
+    </select>
+    
+    <update id="updateMember" parameterType="com.spring.teamProject.vo.MemberVO">
+        UPDATE members
+        <set>
+            <if test="loginPw != null and loginPw != ''">
+                login_pw = #{loginPw},
+            </if>
+            <if test="memberName != null and memberName != ''">
+                member_name = #{memberName},
+            </if>
+            <if test="profileImageUrl != null">
+                profile_image_url = #{profileImageUrl},
+            </if>
+            country_code = #{countryCode},
+            phone = #{phone},
+            email = #{email},
+            agree_email = #{agreeEmail},
+            agree_sms = #{agreeSms},
+            agree_kakao = #{agreeKakao}
+        </set>
+        WHERE 
+            member_id = #{memberId}
+    </update>
+    
+    <!-- [수정] 회원 탈퇴 (DELETE -> UPDATE) -->
+    <update id="deactivateMember" parameterType="long">
+        UPDATE members
+        SET status = 'DEACTIVATED'
+        WHERE member_id = #{memberId}
+    </update>
+    
 </mapper>
