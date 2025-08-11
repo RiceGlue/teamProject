@@ -144,7 +144,7 @@ public class MemberController {
         Map<String, Object> socialUserInfo = (Map<String, Object>) session.getAttribute("socialUserInfo");
         
         if (socialUserInfo != null) {
-            // 1. memberVO에 기본 정보 설정 (비밀번호, 아이디는 없음)
+        	// 1. memberVO에 기본 정보 설정 (비밀번호, 아이디는 없음)
             memberVO.setEmail((String) socialUserInfo.get("email"));
             memberVO.setRole("USER");
 
@@ -175,15 +175,33 @@ public class MemberController {
 
     // --- 마이페이지, 프로필 수정, 회원 탈퇴 ---
     
+    /**
+     * [수정] 마이페이지 요청 시, 사용자의 역할(Role)에 따라 다른 뷰를 반환합니다.
+     */
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
         MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
         if (memberInfo == null) {
             return "redirect:/member/login";
         }
-        model.addAttribute("memberInfo", memberInfo);
-        model.addAttribute("body", "member/mypage.jsp");
-        return "layout/layout";
+
+        String role = memberInfo.getRole();
+
+        // ? --- 여기가 핵심 수정 부분입니다 --- ?
+        if ("ADMIN".equals(role)) {
+            // TODO: 관리자 대시보드 JSP 파일 생성 필요
+            // model.addAttribute("body", "admin/dashboard.jsp");
+            return "admin/dashboard"; // 관리자 전용 레이아웃을 사용할 경우
+        } else if ("OWNER".equals(role)) {
+            // TODO: 점주 대시보드 JSP 파일 생성 필요
+            // model.addAttribute("body", "owner/dashboard.jsp");
+            return "owner/dashboard"; // 점주 전용 레이아웃을 사용할 경우
+        } else {
+            // 일반 사용자의 경우 기존 마이페이지를 보여줍니다.
+            model.addAttribute("memberInfo", memberInfo);
+            model.addAttribute("body", "member/mypage.jsp");
+            return "layout/layout";
+        }
     }
 
     @GetMapping("/edit-profile")

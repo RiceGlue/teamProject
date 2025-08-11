@@ -20,9 +20,10 @@ public class SecurityConfig {
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
     
-    @Autowired
-    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-	
+    // [삭제] 로그인 성공 후 리다이렉션을 담당하던 핸들러는 더 이상 사용하지 않습니다.
+    // @Autowired
+    // private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    
     // 비밀번호 암호화를 위한 Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -36,9 +37,9 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 // 2. 접근 권한 설정: 가장 구체적인 규칙부터 순서대로
-                .requestMatchers("/admin/**").hasRole("ADMIN")      // /admin 경로는 ADMIN만
-                .requestMatchers("/mypage/**").authenticated()    // /mypage 경로는 로그인한 사용자만
-                .anyRequest().permitAll()                           // (핵심) 그 외 모든 요청은 일단 모두 허용
+                .requestMatchers("/admin/**").hasRole("ADMIN")	// /admin 경로는 ADMIN만
+                .requestMatchers("/mypage/**").authenticated()	// /mypage 경로는 로그인한 사용자만
+                .anyRequest().permitAll()						// (핵심) 그 외 모든 요청은 일단 모두 허용
             )
             .formLogin(form -> form
                 // 3. 커스텀 로그인 설정
@@ -50,16 +51,18 @@ public class SecurityConfig {
                 .failureUrl("/member/login?error=true")		// 실패 시 이동 경로
             )
             .oauth2Login(oauth2 -> oauth2
-            		//소셜 로그인
-                    .loginPage("/member/login")
-                    .userInfoEndpoint(userInfo -> userInfo
-                        .userService(customOAuth2UserService)
-                    )
-                    // (수정) 로그인 성공 시 우리가 만든 핸들러를 사용하도록 설정
-                    .successHandler(oAuth2AuthenticationSuccessHandler)
+                // 4. 소셜 로그인 설정
+                .loginPage("/member/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
                 )
+                // --- ? 여기가 핵심 수정 부분입니다 ? ---
+                // [수정] 역할에 따라 다른 페이지로 보내던 핸들러를 제거하고,
+                // 모든 소셜 로그인을 메인 페이지로 보내도록 통일합니다.
+                .defaultSuccessUrl("/", true)
+            )
             .logout(logout -> logout
-                // 4. 로그아웃 설정
+                // 5. 로그아웃 설정
                 .logoutUrl("/member/logout")
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
