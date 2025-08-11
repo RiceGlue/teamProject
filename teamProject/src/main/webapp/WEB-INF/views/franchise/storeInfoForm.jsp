@@ -1,5 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<c:if test="${param.success eq 'true'}">
+    <script>alert("정보 등록 완료!");</script>
+</c:if>
+<c:if test="${param.error eq 'true'}">
+    <script>alert("정보 등록 실패!");</script>
+</c:if>
+
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
@@ -13,7 +22,7 @@
 	    const spanId = inputId.replace("fileName", "showFileName");
 	    $("#" + spanId).text(fileName);
 	});
-	
+
     function sample6_execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
@@ -62,7 +71,37 @@
         }).open();
     }
 	
+	let imgIdx = 2;
 	
+	function addSubImage() {
+		const fileNameIdx = "fileName"+imgIdx;
+	    const showFileNameIdx = "showFileName"+imgIdx;
+
+		const html = 
+			'<div id="subImagesContainer"> <div class="sub-image-input" style="margin-bottom:10px;">'+
+			'<input type="file" id="'+fileNameIdx+'" name="fileName[]" accept="image/*" onchange="validateImages(this);">'+
+			'<label for="'+fileNameIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
+			'<span id="'+showFileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></div></div>';
+		$("#subImagesContainer").append(html);
+		
+		console.log("현재 imgIdx:",fileNameIdx);
+		
+		imgIdx++;
+	}
+	
+    // 파일 선택 시 파일명 표시 기능 (기존 validateImages 함수 내에서 showFileName 업데이트가 필요함)
+    function validateImages(input) {
+      const file = input.files[0];
+      const span = input.parentNode.querySelector('.showFileName');
+      if(file) {
+        span.textContent = file.name;
+        // 이미지 미리보기 기능도 추가하려면 여기서 구현 가능
+      } else {
+        span.textContent = '선택된 파일 없음';
+      }
+      // 여기에 기존 validate 이미지 체크 로직도 넣어주세요
+    }
+    
 	function validateImages(input) {
 	    const files = input.files;
 	    const maxFiles = 20;              // 최대 파일 개수
@@ -89,7 +128,7 @@
 
 	        // 파일 크기 체크
 	        if (file.size > maxSizeInBytes) {
-	            errorMessage = `각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})`;
+	            errorMessage = "각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})";
 	            break;
 	        }
 	    }
@@ -155,87 +194,112 @@
 	    document.getElementById('preview').src = currentImage;
 	}
 	
-	
-	// ✅ 전역 스코프에 함수 정의
-	function checkStoreInfo() {
-	    function padTime(value) {
-	        return value.toString().padStart(2, '0');
-	    }
-		const storeName = document.getElementById("storeName").value.trim();
-	    const phone = document.getElementById("storePhoneNumber").value.trim();
-	    const desc = document.getElementById("description").value.trim();
-	    const fileName = document.getElementById("fileName").files[0];
-	
-	    if (!fileName) {
-	        alert("메인 이미지를 업로드해주세요.");
-	        return;
-	    }
-	
-	    const phonePattern = /^[0-9\-]+$/;
-	    if (!phone || !phonePattern.test(phone)) {
-	        alert("유효한 전화번호를 입력해주세요. (숫자와 '-'만 허용)");
-	        return;
-	    }
-	
-	    if (!desc) {
-	        alert("매장 소개를 입력해주세요.");
-	        return;
-	    }
-	    
-	    const startHour = $("#startHour").val().trim();
-	    const startMin = $("#startMin").val().trim();
-	    const endHour = $("#endHour").val().trim();
-	    const endMin = $("#endMin").val().trim();
-
-	    const breakStartHour = $("#breakStartHour").val().trim();
-	    const breakStartMin = $("#breakStartMin").val().trim();
-	    const breakEndHour = $("#breakEndHour").val().trim();
-	    const breakEndMin = $("#breakEndMin").val().trim();
-
-	    const lastOrderHour = $("#lastOrderHour").val().trim();
-	    const lastOrderMin = $("#lastOrderMin").val().trim();
-
-	    const operatingTime = padTime(startHour) + ":" + padTime(startMin) + " ~ " + padTime(endHour) + ":" + padTime(endMin);
-	    const breakTime = padTime(breakStartHour) + ":" + padTime(breakStartMin) + " ~ " + padTime(breakEndHour) + ":" + padTime(breakEndMin);
-	    const lastOrder = padTime(lastOrderHour) + ":" + padTime(lastOrderMin);
-
-	    // hidden input으로 추가 (서버로 전송할 값)
-	    if (!document.getElementById("operatingTime")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'operatingTime',
-	            name: 'operatingTime',
-	            value: operatingTime
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    if (!document.getElementById("breakTime")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'breakTime',
-	            name: 'breakTime',
-	            value: breakTime
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    if (!document.getElementById("lastOrder")) {
-	        $('<input>').attr({
-	            type: 'hidden',
-	            id: 'lastOrder',
-	            name: 'lastOrder',
-	            value: lastOrder
-	        }).appendTo('form[name="storeInfo"]');
-	    }
-
-	    alert("정보가 정상적으로 등록되었습니다.");
-	    document.forms['storeInfo'].submit();
+	function checkStoreInfo(){
+		
+		//매장 전화번호 유효성
+		const localNumber=document.getElementById('localNumber').value.trim(); 
+		const number1=document.getElementById('number1').value.trim();
+		const number2=document.getElementById('number2').value.trim();
+		
+		if(!localNumber){
+			alert('지역번호를 선택해주세요.');
+			return false;
+		}
+		if(!number1||!/^\d+$/.test(number1)){
+			alert('전화번호 가운데 번호를 숫자로 입력해주세요.');
+			return false;
+		}
+		if(!number2||!/^\d+$/.test(number2)){
+			alert('전화번호 마지막 번호를 숫자로 입력해주세요.');
+			return false;
+		}
+		const storePhoneNumber=localNumber+'-'+number1+'-'+number2;
+		console.log('매장 전화번호:',storePhoneNumber);
+		
+		//정기휴무 유효썽
+		const closedOptions=[...document.querySelectorAll('input[name="closedOption"]:checked')].map(el=>el.value);
+		const closed=closedOptions.join(', ');
+		console.log('정기 휴무:',closed);
+		
+		//영업시간 유효성
+		const startHour=document.getElementById('startHour').value;
+		const startMin=document.getElementById('startMin').value;
+		const endHour=document.getElementById('endHour').value;
+		const endMin=document.getElementById('endMin').value;
+		
+		if(!startHour||!startMin||!endHour||!endMin){
+			alert('영업시간을 모두 선택해주세요.');
+			return false;
+		}
+		const operatingHour = startHour.padStart(2, '0') + " : " + startMin.padStart(2, '0') + " ~ " + endHour.padStart(2, '0') + " : " + endMin.padStart(2, '0');
+		console.log('영업시간:',operatingHour);
+		
+		//브레이크 타임 유효성
+		const breakStartHour=document.getElementById('breakStartHour').value;
+		const breakStartMin=document.getElementById('breakStartMin').value;
+		const breakEndHour=document.getElementById('breakEndHour').value;
+		const breakEndMin=document.getElementById('breakEndMin').value;
+		
+		let breakTime='';
+		if(breakStartHour&&breakStartMin&&breakEndHour&&breakEndMin){
+			breakTime= breakStartHour.padStart(2,'0')+" : "+breakStartMin.padStart(2,'0')+" ~ "+breakEndHour.padStart(2,'0')+" : "+breakEndMin.padStart(2,'0');
+		}
+		console.log('브레이크 타임:',breakTime);
+		
+		//라스트 오더 유효성
+		const lastOrderHour=document.getElementById('lastOrderHour').value;
+		const lastOrderMin=document.getElementById('lastOrderMin').value;
+		
+		let lastOrder='';
+		if(lastOrderHour&&lastOrderMin){
+			lastOrder = lastOrderHour.padStart(2, '0') + " : " + lastOrderMin.padStart(2, '0');
+		}
+		console.log('라스트 오더:',lastOrder);
+		
+		//편의시설 유효성
+		const amenOptions=[...document.querySelectorAll('input[name="amenOption"]:checked')].map(el=>el.value);
+		const amenities=amenOptions.join(', ');
+		console.log('편의시설:',amenities);
+		
+		//이미지 파일 유효성
+		const files=document.querySelectorAll('input[name="fileName[]"]');
+		let hasFile=false;
+		files.forEach(input=>{
+			if(input.files.length>0)hasFile=true;
+		});
+		if(!hasFile){
+			alert('최소 한 개 이상의 이미지를 선택해주세요.');
+			return false;
+		}
+		
+		setHiddenInput('storePhoneNumber',storePhoneNumber);
+		setHiddenInput('closed',closed);
+		setHiddenInput('operatingHour',operatingHour);
+		setHiddenInput('breakTime',breakTime);
+		setHiddenInput('lastOrder',lastOrder);
+		setHiddenInput('amenities',amenities);
+		
+		return true;
 	}
+	
+	function setHiddenInput(name,value){
+		let input=document.querySelector(`input[name="${name}"]`);
+		if(!input){
+			input=document.createElement('input');
+			input.type='hidden';
+			input.name=name;
+			document.forms['storeInfo'].appendChild(input);
+		}
+		
+		input.value=value;
+	}
+
 </script>
 
 
 <h1>정보 등록</h1>
 
-<form action="${contextPath}/franchise/addStoreInfo" method="post" name="storeInfo" enctype="multipart/form-data">
+<form action="${contextPath}/franchise/addStoreInfo" method="post" name="storeInfo" enctype="multipart/form-data" onsubmit="return checkStoreInfo()">
 	<input type="hidden" id="ownerId" name="ownerId" value="${ownerId}" />
 	
 	<div class="info_container" style="max-width: 700px;">
@@ -267,9 +331,9 @@
 			<div class="form-input" style="flex: 1;">
 				<input type="text" id="zipcode" placeholder="우편번호">
 				<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-				<input type="text" id="address" placeholder="주소"><br>
-				<input type="text" id="detailAddress" placeholder="상세주소">
-				<input type="text" id="extraAddress" placeholder="참고항목">
+				<input type="text" id="address" name="address" placeholder="주소"><br>
+				<input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소">
+				<input type="text" id="extraAddress" name="extraAddress" placeholder="참고항목">
 			</div>
 		</div>
 		
@@ -287,7 +351,25 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 매장 전화번호 -->
 			<div class="form-label" style="width: 200px;">매장 전화번호</div>
 			<div class="form-input" style="flex: 1;">
-				<input id="storePhoneNumber" name="storePhoneNumber" type="text" maxLength="15" />
+				<select id="localNumber" name="localNumber">
+					<option value="02" selected>02</option>
+					<option value="051">051</option>
+					<option value="053">053</option>
+					<option value="032">032</option>
+					<option value="062">062</option>
+					<option value="042">042</option>
+					<option value="052">052</option>
+					<option value="044">044</option>
+					<option value="031">031</option>
+					<option value="033">033</option>
+					<option value="043">043</option>
+					<option value="041">041</option>
+					<option value="063">063</option>
+					<option value="061">061</option>
+					<option value="054">054</option>
+					<option value="055">055</option>
+					<option value="064">064</option>
+				</select>-<input type="text" id="number1" name="number1" size="4">-<input type="text" id="number2" name="number2" size="4">
 			</div>
 		</div>
 		
@@ -312,7 +394,7 @@
 		</div>
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">  <!--  운영 시간 -->
-			<div class="form-label" style="width: 200px;">운영시간<small>(24시간제로 입력)</small></div>
+			<div class="form-label" style="width: 200px;">영업시간 <small>(24시간제로 입력)</small></div>
 			<div class="form-input" style="flex: 1;">
 				<select id="startHour" name="startHour">
 					<option value="">시</option>
@@ -417,9 +499,9 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메인 이미지</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName" name="fileName" accept="image/*" onchange="validateImages(this);" >
-				<label for="fileName" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-				<span id="showFileName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				<input type="file" id="fileName0" name="fileName[]" accept="image/*" onchange="validateImages(this);" >
+				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
+				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				<br />
 			</div>
 			<div class="image-preview" style="max-width:200px;">
@@ -427,8 +509,23 @@
 			</div>
 		</div>
 		
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+			<div class="form-label" style="width: 200px;">서브 이미지</div>
+			<div class="form-input" style="flex: 1;">
+				<div id="subImagesContainer">
+					<div class="sub-image-input" style="margin-bottom:10px;">
+						<input type="file" id="fileName1" name="fileName[]" accept="image/*" onchange="validateImages(this);">
+						<label for="fileName1" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
+						<span id="showFileName1" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+					</div>
+				</div>				
+			</div>
+		</div>
+
+		
 		<div style="margin-top: 15px;">
-			<input type="button" onClick="checkStoreInfo()" value="정보 등록">
+			<input type="button" value="서브이미지추가" onClick="addSubImage()">
+			<input type="submit" value="정보 등록">
 		</div>
 	</div>
 </form>

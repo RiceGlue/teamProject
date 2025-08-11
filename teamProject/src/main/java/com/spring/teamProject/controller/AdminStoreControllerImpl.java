@@ -8,9 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,69 +41,60 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		return mav;
 	}
 	
-	@RequestMapping(value="/storeInfoForm", method=RequestMethod.POST)
-	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception {
-		
+	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
+	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
 		multiReq.setCharacterEncoding("UTF-8");
-		
 		String imageFileName = null;
-		Map<String, Object> storeInfo = new HashMap<>();
 		
+		Map<String, Object> storeInfo = new HashMap<>();
 		Enumeration<?> enu = multiReq.getParameterNames();
 		while (enu.hasMoreElements()) {
 			String name = (String) enu.nextElement();
 			String value = multiReq.getParameter(name);
-			
 			storeInfo.put(name, value);
 		}
-		
+
 		long regId = (long)storeInfo.get("ownerId");
-		
+		System.out.println("등록자 아이디: "+regId);
+
 		List<ImageFileVO> imgFileList = upload(multiReq);
-		if(imgFileList !=null && !imgFileList.isEmpty()) {
-			for(ImageFileVO imageFileVO : imgFileList ) {
+		if (imgFileList != null && !imgFileList.isEmpty()) {
+			for (ImageFileVO imageFileVO : imgFileList) {
 				imageFileVO.setRegId(regId);
+			}
+			for(int i=0;i<imgFileList.size();i++) {
+				System.out.print("이미지 파일 리스트 사이즈 : "+ imgFileList.size());
+				System.out.println(imgFileList.get(i).getFileName());
 			}
 			storeInfo.put("imgFileList", imgFileList);
 		}
-		
-		String message;
-		ResponseEntity resEntity = null;
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.add("Content-Type", "text/html; charset=utf-8");
-		
+
 		try {
 			long storeId = adminStoreService.addStoreInfo(storeInfo);
-			
-			if(imgFileList != null && imgFileList.isEmpty()) {
-				for(ImageFileVO imageFileVO : imgFileList ) {
+			if (imgFileList != null && !imgFileList.isEmpty()) {
+				for (ImageFileVO imageFileVO : imgFileList) {
 					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator+"temp"+File.separator+imageFileName);
-					File destDir = new File(CURR_FILE_REPO_PATH+File.separator+storeId);
+					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
+					File destDir = new File(CURR_FILE_REPO_PATH + File.separator + storeId);
 					FileUtils.moveFileToDirectory(srcFile, destDir, true);
 				}
 			}
-			message ="<script>";
-			message ="alert('정보 등록 완료')";
-			message ="location.href'"+multiReq.getContextPath()+"/franchise/storeInfoForm';";
-			message ="</script>";
+			// ✅ 등록 성공 시 redirect
+			return new ModelAndView("redirect:/franchise/storeInfoForm?success=true");
 		} catch (Exception e) {
-			if(imgFileList!=null && imgFileList.size()!=0) {
-				for(ImageFileVO imageFileVO : imgFileList) {
+			if (imgFileList != null && !imgFileList.isEmpty()) {
+				for (ImageFileVO imageFileVO : imgFileList) {
 					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File (CURR_FILE_REPO_PATH+File.separator+"temp"+File.separator+imageFileName);
-					srcFile.delete();
+					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
+					if (srcFile.exists()) {
+						srcFile.delete();
+					}
 				}
 			}
-			message ="<script>";
-			message ="alert('정보 등록 실패')";
-			message ="location.href'"+multiReq.getContextPath()+"/franchise/storeInfoForm';";
-			message ="</script>";
 			e.printStackTrace();
+			// 실패 시에도 redirect
+			return new ModelAndView("redirect:/franchise/storeInfoForm?error=true");
 		}
-		
-		resEntity = new ResponseEntity(message, responseHeaders, HttpStatus.OK);
-		return resEntity;	
 	}
-	
+
 }

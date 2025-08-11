@@ -44,7 +44,7 @@ public class ImageFileVO {
 		return reviewId;
 	}
 
-	public void setReviewId(int reviewId) {
+	public void setReviewId(long reviewId) {
 		this.reviewId = reviewId;
 	}
 

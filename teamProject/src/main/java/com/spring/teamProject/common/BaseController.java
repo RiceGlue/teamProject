@@ -17,30 +17,34 @@ public abstract class BaseController {
     private static final String CURR_IMAGE_REPO_PATH = "C:\\project\\file_repo";
 
     protected List<ImageFileVO> upload(MultipartHttpServletRequest req) throws Exception {
-        
-    	List<ImageFileVO> fileList = new ArrayList<>();
-    	Iterator<String> fileNames = req.getFileNames();
-    	
-        while (fileNames.hasNext()) {
-            ImageFileVO imageFileVO = new ImageFileVO();
-            String fileName = fileNames.next();
-            MultipartFile mFile = req.getFile(fileName);
-            String originalFileName = mFile.getOriginalFilename();
-            imageFileVO.setFileName(originalFileName);
-            fileList.add(imageFileVO);
+        List<ImageFileVO> fileList = new ArrayList<>();
+        Iterator<String> fileNames = req.getFileNames();
 
-            File file = new File(CURR_IMAGE_REPO_PATH + File.separator + fileName);
-            if (mFile.getSize() != 0) {
-                if (!file.exists()) {
-                    if (file.getParentFile().mkdirs()) {
-                        file.createNewFile();
-                    }
-                }
-                mFile.transferTo(new File(CURR_IMAGE_REPO_PATH + File.separator + "temp" + File.separator + originalFileName));
+        File tempDir = new File(CURR_IMAGE_REPO_PATH + File.separator + "temp");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs(); // temp 폴더 생성
+        }
+
+        while (fileNames.hasNext()) {
+            String paramName = fileNames.next();
+            MultipartFile mFile = req.getFile(paramName);
+
+            if (mFile != null && mFile.getSize() > 0) {
+                String originalFileName = mFile.getOriginalFilename();
+
+                ImageFileVO imageFileVO = new ImageFileVO();
+                imageFileVO.setFileName(originalFileName);
+                fileList.add(imageFileVO);
+
+                // 저장 경로
+                File saveFile = new File(tempDir, originalFileName);
+                mFile.transferTo(saveFile);
             }
         }
+
         return fileList;
     }
+
 
     protected void deleteFile(String fileName) {
         File file = new File(CURR_IMAGE_REPO_PATH + File.separator + fileName);
