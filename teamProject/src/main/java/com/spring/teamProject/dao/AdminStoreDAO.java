@@ -13,4 +13,5 @@ public interface AdminStoreDAO {
 	
 	long insertStoreInfo(Map storeInfo) throws DataAccessException;
 	public void insertStoreImageFile(List imgfile) throws DataAccessException;
+	public void deleteStoreInfo(long storeId) throws DataAccessException;
 }

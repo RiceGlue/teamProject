@@ -13,7 +13,9 @@
 		<result property="detailAddress" column="detail_address"/>
 		<result property="extraAddress" column="extra_address"/>
 		<result property="operationType" column="operation_type" />
-		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="localNumber" column="local_number" />
+		<result property="number1" column="number1" />
+		<result property="number2" column="number2" />
 		<result property="description" column="description" />
 		<result property="closed" column="closed" />
 		<result property="operatingTime" column="operating_time" />
@@ -92,7 +94,9 @@
 				detail_address,
 				extra_address, 
 				operation_type, 
-				store_phone_number, 
+				local_number,
+				number1,
+				number2, 
 				description, 
 				closed, 
 				operating_time, 
@@ -113,7 +117,9 @@
 				#{detailAddress},
 				#{extraAddress},
 				#{operationType},
-				#{storePhoneNumber},
+				#{localNumber},
+				#{number1},
+				#{number2},
 				#{description},
 				#{closed},
 				#{operatingTime},
@@ -142,6 +148,12 @@
 			</foreach>
 			)
 	</insert>
+	
+	<delete id="deleteStoreInfo" parameterType="long">
+		<![CDATA[
+			delete from stores where store_id=#{storeId}
+		]]>
+	</delete>
 
 	
 </mapper>

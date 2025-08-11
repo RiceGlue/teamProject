@@ -16,7 +16,9 @@ public class StoreVO {
 	private String extraAddress;
 	
 	private String operationType;
-	private String storePhoneNumber;
+	private String localNumber;
+	private String number1;
+	private String number2;
 	private String description;
 	
 	private String closed;
@@ -86,11 +88,23 @@ public class StoreVO {
 	public void setOperationType(String operationType) {
 		this.operationType = operationType;
 	}
-	public String getStorePhoneNumber() {
-		return storePhoneNumber;
+	public String getLocalNumber() {
+		return localNumber;
 	}
-	public void setStorePhoneNumber(String storePhoneNumber) {
-		this.storePhoneNumber = storePhoneNumber;
+	public void setLocalNumber(String localNumber) {
+		this.localNumber = localNumber;
+	}
+	public String getNumber1() {
+		return number1;
+	}
+	public void setNumber1(String number1) {
+		this.number1 = number1;
+	}
+	public String getNumber2() {
+		return number2;
+	}
+	public void setNumber2(String number2) {
+		this.number2 = number2;
 	}
 	public String getDescription() {
 		return description;

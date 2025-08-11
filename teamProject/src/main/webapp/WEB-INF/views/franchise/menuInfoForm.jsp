@@ -18,6 +18,7 @@
 	    const fileIdx = "fileName"+menuIdx;
 	    const fileNameIdx ="showFileName"+menuIdx;
 	    const previewIdx ="preview"+menuIdx;
+	    const displayNoIdx ="displayNo"+menuIdx;
 		
 		const html = 
 			'<div class="menu-item" style="border-top:1px solid #ddd; padding-top:10px; margin-top:10px;">'+
@@ -37,6 +38,7 @@
 			'<div class="form-input" style="flex: 1;">'+
 			'<textarea id="'+desIdx+'" name="description[]" rows="2" cols="40"></textarea>'+
 			'</div>'+
+			'<input type="hidden" id="'+displayNoIdx+'" name="displayNo[]" value="'+menuIdx+'" >'+
 			'</div>'+
 			'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 			'<div class="form-label" style="width: 200px;">메인 이미지</div>'+
@@ -192,6 +194,8 @@
 			</div>
 		</div>
 		
+		<input type="hidden" id="displayNo0" name="displayNo[]" value="0" >
+		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메인 이미지</div>
 			<div class="form-input" style="flex: 1;">
@@ -202,6 +206,7 @@
 			</div>
 			<div class="image-preview" style="max-width:200px;"></div>
 		</div>
+		
 		<div id="moreMenu" class="menu_container"></div>
 	</div>
 

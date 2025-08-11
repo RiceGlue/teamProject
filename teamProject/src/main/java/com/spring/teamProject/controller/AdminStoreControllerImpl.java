@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -19,6 +20,7 @@ import com.spring.teamProject.common.BaseController;
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.MenuVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,6 +40,15 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("ownerId", ownerId);
+		return mav;
+	}
+	
+	@RequestMapping(value={"/updateStoreInfoForm","/updateMenuInfoForm"})
+	public ModelAndView updateform (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+		String viewName = (String)req.getAttribute("viewName");
+
+		ModelAndView mav = ViewUtil.layout(viewName);
+		mav.addObject("storeId", storeId);
 		return mav;
 	}
 	
@@ -100,7 +111,54 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	
 	@Override
 	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception {
-		
+		multiReq.setCharacterEncoding("UTF-8");
+
+		long storeId = Long.parseLong(multiReq.getParameter("storeId"));
+
+		String[] menuName = multiReq.getParameterValues("menuName");
+		String[] price = multiReq.getParameterValues("price");
+		String[] description = multiReq.getParameterValues("description");
+		String[] displayNo = multiReq.getParameterValues("displayNo");
+
+		List<MultipartFile> fileList = multiReq.getFiles("fileName");
+
+		for (int i = 0; i < menuName.length; i++) {
+			// 1. 메뉴 저장
+			MenuVO menuVO = new MenuVO();
+			menuVO.setMenuName(menuName[i]);
+			menuVO.setPrice(price[i]);
+			menuVO.setDescription(description[i]);
+			menuVO.setDisplayNo(Integer.parseInt(displayNo[i]));
+			menuVO.setStoreId(storeId);
+
+			long menuId = adminStoreService.addMenuInfo(menuVO); // menuId 반환
+
+			// 2. 해당 메뉴에 대한 파일 추출
+			MultipartFile file = fileList.get(i);
+			if (file != null && !file.isEmpty()) {
+				String originalFileName = file.getOriginalFilename();
+
+				// 3. 저장 경로 구성 및 실제 저장
+				File tempDir = new File(CURR_FILE_REPO_PATH + File.separator + "temp");
+				if (!tempDir.exists()) tempDir.mkdirs();
+
+				File saveFile = new File(tempDir, originalFileName);
+				file.transferTo(saveFile);
+
+				// 4. 이미지 정보 객체 생성 및 DB 저장
+				ImageFileVO imageFileVO = new ImageFileVO();
+				imageFileVO.setFileName(originalFileName);
+				imageFileVO.setMenuId(menuId);   // menuId 연결!
+				imageFileVO.setStoreId(storeId);
+
+				adminStoreService.saveImage(imageFileVO);
+			}
+
+			System.out.println("메뉴 저장됨: " + menuName[i]);
+		}
+
+		return new ModelAndView("redirect:/somewhere");
 	}
+
 
 }

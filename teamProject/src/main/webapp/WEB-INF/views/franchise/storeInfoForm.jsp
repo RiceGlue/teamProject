@@ -213,8 +213,6 @@
 			alert('전화번호 마지막 번호를 숫자로 입력해주세요.');
 			return false;
 		}
-		const storePhoneNumber=localNumber+'-'+number1+'-'+number2;
-		console.log('매장 전화번호:',storePhoneNumber);
 		
 		//정기휴무 유효썽
 		const closedOptions=[...document.querySelectorAll('input[name="closedOption"]:checked')].map(el=>el.value);
@@ -272,7 +270,6 @@
 			return false;
 		}
 		
-		setHiddenInput('storePhoneNumber',storePhoneNumber);
 		setHiddenInput('closed',closed);
 		setHiddenInput('operatingTime',operatingTime);
 		setHiddenInput('breakTime',breakTime);
@@ -328,7 +325,7 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 주소 -->
 			<div class="form-label" style="width: 200px;">주소</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="text" id="zipcode" placeholder="우편번호">
+				<input type="text" id="zipcode" name="zipcode" placeholder="우편번호">
 				<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
 				<input type="text" id="address" name="address" placeholder="주소"><br>
 				<input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소">

@@ -13,7 +13,9 @@
 		<result property="detailAddress" column="detail_address"/>
 		<result property="extraAddress" column="extra_address"/>
 		<result property="operationType" column="operation_type" />
-		<result property="storePhoneNumber" column="store_phone_number" />
+		<result property="localNumber" column="local_number" />
+		<result property="number1" column="number1" />
+		<result property="number2" column="number2" />
 		<result property="description" column="description" />
 		<result property="closed" column="closed" />
 		<result property="operatingTime" column="operating_time" />
@@ -82,7 +84,7 @@
 	
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -94,7 +96,7 @@
 	
 	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
 		<![CDATA[
-		    SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
+		    SELECT s.store_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 		    ROUND(AVG(r.rating), 2) AS avgRating,COUNT(r.review_id) AS countRating
 		    FROM stores s
 		    INNER JOIN menu m ON s.store_id = m.store_id
@@ -107,7 +109,7 @@
 
 	<select id="selectStoreByAddr" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -119,7 +121,7 @@
 	
 	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -131,7 +133,7 @@
 	
 	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
