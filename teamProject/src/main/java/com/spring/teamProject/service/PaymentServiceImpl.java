@@ -1,5 +1,3 @@
-// src/main/java/com/spring/teamProject/service/PaymentServiceImpl.java
-
 package com.spring.teamProject.service;
 
 import com.spring.teamProject.dao.PaymentDAO;
@@ -19,7 +17,7 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentDAO paymentDAO;
 
     @Autowired
-    private ReservationDAO reservationDAO; // 예약 상태 업데이트를 위해 ReservationDAO 주입
+    private ReservationDAO reservationDAO;
 
     @Override
     public void addPayment(PaymentVO payment) throws Exception {
@@ -31,16 +29,20 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentDAO.selectByTransactionId(transactionId);
     }
 
+    // ⭐ 추가해야 할 메서드 구현
+    @Override
+    public PaymentVO getPaymentByReservationId(Long reservationId) throws Exception {
+        return paymentDAO.selectByReservationId(reservationId);
+    }
+
     @Override
     public void updatePaymentStatus(PaymentVO payment) throws Exception {
-        // 결제 상태 업데이트 (paidAt은 이전에 Controller에서 설정)
         paymentDAO.updatePaymentStatus(payment.getPaymentId(), payment.getStatus());
 
-        // 결제 상태에 따라 예약 상태도 업데이트합니다.
         if ("COMPLETED".equals(payment.getStatus())) {
             reservationDAO.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
-        } else if ("FAILED".equals(payment.getStatus()) || "REFUNDED".equals(payment.getStatus())) {
-            reservationDAO.updateReservationStatus(payment.getReservationId(), payment.getStatus());
+        } else if ("CANCELED".equals(payment.getStatus()) || "FAILED".equals(payment.getStatus()) || "REFUNDED".equals(payment.getStatus())) {
+            reservationDAO.updateReservationStatus(payment.getReservationId(), "CANCELLED");
         }
     }
 }
