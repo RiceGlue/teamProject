@@ -250,17 +250,24 @@
                 return;
             }
 
-            // 임시 예약 정보를 서버에 저장 후 결제 시작
             saveTempReservationAndRequestPay();
         });
 
         function saveTempReservationAndRequestPay() {
+            const storeId = $('[name="storeId"]').val();
+            const transactionId = 'reservation_' + storeId + '_' + Date.now();
+            const totalAmount = 1000;
+            const paymentMethod = 'CARD';
+
             var formData = {
-                storeId: $('[name="storeId"]').val(),
+                storeId: storeId,
                 reservationTimeStr: $('#selectedReservationTime').val(),
                 tableId: $('#selectedTableId').val(),
                 guestCount: $('#guestCount').val(),
-                request: $('#request').val()
+                request: $('#request').val(),
+                amount: totalAmount,
+                paymentMethod: paymentMethod,
+                transactionId: transactionId
             };
 
             $.ajax({
@@ -270,7 +277,7 @@
                 success: function(response) {
                     if (response === "success") {
                         console.log("임시 예약 정보 저장 성공. 결제 시작.");
-                        requestPay(); // 임시 예약 정보 저장 성공 시 결제 시작
+                        requestPay(transactionId, totalAmount);
                     } else {
                         alert("예약 정보를 저장하는 데 실패했습니다. 다시 시도해주세요.");
                     }
@@ -282,30 +289,26 @@
             });
         }
 
-        function requestPay() {
+        function requestPay(transactionId, totalAmount) {
             const storeName = $('#storeNameHidden').val();
-            const storeId = $('[name="storeId"]').val();
-
-            const paymentId = 'reservation_' + storeId + '_' + Date.now();
             const orderName = storeName + ' 예약 결제';
-            const totalAmount = 1000; // 실제 예약 금액으로 변경 필요
 
-            $('#paymentIdInput').val(paymentId);
             const { PortOne } = window;
 
-            // 웹훅 기반 결제 흐름에서는 이 URL이 결제 완료 후 사용자에게 보여질 페이지를 지정합니다.
-            // 실제 결제 검증은 웹훅에서 처리되므로, 이 페이지는 '결제 처리 중' 메시지를 보여주기만 하면 됩니다.
-            const myRedirectUrl = window.location.origin + contextPath + '/reservation/customer/processing';
+            //const myRedirectUrl = window.location.origin + contextPath + '/reservation/customer/payment-result?transactionId=' + transactionId;
+            const myRedirectUrl = 'https://273eaabf9571.ngrok-free.app' + contextPath + '/reservation/customer/payment-result?transactionId=' + transactionId; //ngrok 실행해야함
 
             console.log("Redirect URL:", myRedirectUrl);
 
             PortOne.requestPayment({
-                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5', // 실제 PortOne 상점 ID로 변경
-                channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31', // 실제 PortOne 채널 키로 변경
-                payMethod: 'CARD', // 결제 수단 (카카오페이 사용 시 'KAKAO_PAY' 또는 'CARD' 등 설정)
+                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
+                channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31',
+                payMethod: 'CARD',
                 orderName: orderName,
                 totalAmount: totalAmount,
-                paymentId: paymentId,
+                // ⭐⭐ transactionId 대신 paymentId를 사용합니다. PortOne SDK의 요구사항입니다.
+                paymentId: transactionId,
+                // transactionId: transactionId, // 이 줄은 선택적으로 남겨두거나 제거할 수 있습니다.
                 currency: 'CURRENCY_KRW',
                 customer: {
                     fullName: '테스터조원기',
@@ -316,11 +319,9 @@
             })
             .then(function(response) {
                 console.log("PortOne 결제 요청이 성공적으로 시작되었습니다.", response);
-                // 결제창이 열렸으므로 추가적인 클라이언트 리다이렉션은 하지 않습니다.
-                // 결제 완료 후 PortOne이 redirectUrl로 사용자를 리다이렉트합니다.
             })
             .catch(function(error) {
-            	console.error("PortOne 결제 요청 오류:", error);
+                console.error("PortOne 결제 요청 오류:", error);
                 alert(`결제 요청 중 오류가 발생했습니다: ${error.message}`);
             });
         }

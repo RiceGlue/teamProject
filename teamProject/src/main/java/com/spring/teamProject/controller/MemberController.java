@@ -212,7 +212,7 @@ public class MemberController {
             redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
             
             // 세션 갱신 로직
-            MemberVO updatedMember = memberService.findByEmail(memberVO.getEmail());
+            MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
             Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
