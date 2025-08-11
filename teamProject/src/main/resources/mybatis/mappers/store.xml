@@ -7,28 +7,22 @@
 		<result property="storeId" column="store_id"/>
 		<result property="ownerId" column="owner_id"/>
 		<result property="storeName" column="store_Name"/>
-		<result property="address" column="address"/>
-		<result property="region" column="region"/>
-		<result property="createdAt" column="created_at"/>
-		<result property="updatedAt" column="updated_at"/>
-		<result property="avgRating" column="avgRating"/>
-		<result property="countRating" column="countRating"/>
-	</resultMap>
-	
-	<resultMap id="storeInfo" type="StoreVO">
-		<result property="storeId" column="store_id" />
-		<result property="storeName" column="store_name" />
 		<result property="storeType" column="store_type" />
+		<result property="zipcode" column="zipcode" />
+		<result property="address" column="address"/>
+		<result property="detailAddress" column="detail_address"/>
+		<result property="extraAddress" column="extra_address"/>
 		<result property="operationType" column="operation_type" />
 		<result property="storePhoneNumber" column="store_phone_number" />
-		<result property="address" column="address" />
-		<result property="breakTime" column="break_time" />
 		<result property="description" column="description" />
+		<result property="closed" column="closed" />
+		<result property="operatingTime" column="operating_time" />
+		<result property="breakTime" column="break_time" />
+		<result property="lastOrder" column="last_order" />
 		<result property="amenities" column="amenities" />
 		<result property="fileName" column="file_name" />
-		<result property="closed" column="closed" />
-		<result property="operatingHours" column="operating_hours" />
-		<result property="lastOrder" column="last_order" />
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
@@ -88,11 +82,11 @@
 	
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type, s.region,
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.region = #{keyword}
+			WHERE s.address LIKE CONCAT('%', #{keyword}, '%')
 			GROUP BY s.store_id
 			ORDER BY s.store_id
 		]]>
@@ -100,7 +94,7 @@
 	
 	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
 		<![CDATA[
-		    SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type, s.region,
+		    SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
 		    ROUND(AVG(r.rating), 2) AS avgRating,COUNT(r.review_id) AS countRating
 		    FROM stores s
 		    INNER JOIN menu m ON s.store_id = m.store_id
@@ -113,7 +107,7 @@
 
 	<select id="selectStoreByAddr" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type, s.region,
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -125,7 +119,7 @@
 	
 	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type, s.region,
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -137,7 +131,7 @@
 	
 	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type, s.region,
+			SELECT s.store_id, s.store_name, s.address, s.store_phone_number, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -147,21 +141,20 @@
 		]]>
 	</select>
 	
-	<select id="selectStoreDetail" parameterType="long" resultMap="storeInfo" >
+	<select id="selectStoreDetail" parameterType="long" resultMap="storelist" >
 		<![CDATA[
-			SELECT s.*, a.store_name, a.address, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
-			FROM store_info s
-			LEFT JOIN stores a ON s.store_id = a.store_id
-			LEFT JOIN reviews r ON s.store_id = r.store_id
+			SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN reviews r ON s.store_id = r.store_id
 			WHERE s.store_id = #{storeId}
-			GROUP BY s.store_id, a.address;
+			GROUP BY s.store_id;
 		]]>
 	</select>
 	
 	<select id="selectStoreImage" parameterType="long" resultMap="imagelist" >
 		<![CDATA[
 			select * from image_file
-			where info_id = (select info_id from store_info where store_id=#{storeId} ) or 
+			where store_id = #{storeId}  or 
 			review_id = (select review_id from reviews where store_id=#{storeId})
 		]]>
 	</select>

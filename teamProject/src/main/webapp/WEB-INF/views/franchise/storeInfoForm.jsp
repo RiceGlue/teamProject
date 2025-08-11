@@ -1,25 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
-<style>
-.image-preview {}
-</style>
+
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
-	$(document).ready(function() {
-	    // 탭 처리
-	    $(".tab_content").hide();
-	    $("ul.tabs li:first").addClass("active").show();
-	    $(".tab_content:first").show();
-	    $("ul.tabs li").click(function() {
-	        $("ul.tabs li").removeClass("active");
-	        $(this).addClass("active");
-	        $(".tab_content").hide();
-	        var activeTab = $(this).find("a").attr("href");
-	        $(activeTab).fadeIn();
-	        return false;
-	    });
-	
-	});
-	
 	$(document).on("change", "input[type='file'][name='fileName[]']", function () {
 	    const inputId = $(this).attr("id");
 
@@ -30,35 +13,55 @@
 	    const spanId = inputId.replace("fileName", "showFileName");
 	    $("#" + spanId).text(fileName);
 	});
-
-
 	
-	let imgIdx = 1;
+    function sample6_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
 
-	function addImage() {
-	    const subfileIdx = "fileName" + imgIdx;
-	    const subfileNameIdx = "showFileName" + imgIdx;
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
 
-	    const html =
-	    	'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
-				'<div class="form-label" style="width: 200px;">서브이미지</div>'+
-				'<div class="form-input" style="flex: 1;">'+
-					'<input type="file" id="'+ subfileIdx +'" name="fileName" accept="image/*" multiple onchange="validateImages(this);"> '+
-					'<label for="'+ subfileIdx +'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label> '+
-					'<span id="' + subfileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span> '+
-					'<br />'+
-				'</div> </div> ';
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
 
-	    $("#addImage").append(html);
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("extraAddress").value = extraAddr;
+                
+                } else {
+                    document.getElementById("extraAddress").value = '';
+                }
 
-	    // 이벤트 바인딩
-	    $("#" + subfileIdx).on("change", function () {
-	        const fileName = this.files.length > 0 ? this.files[0].name : "선택된 파일 없음";
-	        $("#" + subfileNameIdx).text(fileName);
-	    });
-
-	    imgIdx++;
-	}
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('zipcode').value = data.zonecode;
+                document.getElementById("address").value = addr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("detailAddress").focus();
+            }
+        }).open();
+    }
+	
 	
 	function validateImages(input) {
 	    const files = input.files;
@@ -158,12 +161,12 @@
 	    function padTime(value) {
 	        return value.toString().padStart(2, '0');
 	    }
-	
+		const storeName = document.getElementById("storeName").value.trim();
 	    const phone = document.getElementById("storePhoneNumber").value.trim();
 	    const desc = document.getElementById("description").value.trim();
-	    const fileName0 = document.getElementById("fileName0").files[0];
+	    const fileName = document.getElementById("fileName").files[0];
 	
-	    if (!fileName0) {
+	    if (!fileName) {
 	        alert("메인 이미지를 업로드해주세요.");
 	        return;
 	    }
@@ -192,17 +195,17 @@
 	    const lastOrderHour = $("#lastOrderHour").val().trim();
 	    const lastOrderMin = $("#lastOrderMin").val().trim();
 
-	    const operatingHours = padTime(startHour) + ":" + padTime(startMin) + " ~ " + padTime(endHour) + ":" + padTime(endMin);
+	    const operatingTime = padTime(startHour) + ":" + padTime(startMin) + " ~ " + padTime(endHour) + ":" + padTime(endMin);
 	    const breakTime = padTime(breakStartHour) + ":" + padTime(breakStartMin) + " ~ " + padTime(breakEndHour) + ":" + padTime(breakEndMin);
 	    const lastOrder = padTime(lastOrderHour) + ":" + padTime(lastOrderMin);
 
 	    // hidden input으로 추가 (서버로 전송할 값)
-	    if (!document.getElementById("operatingHours")) {
+	    if (!document.getElementById("operatingTime")) {
 	        $('<input>').attr({
 	            type: 'hidden',
-	            id: 'operatingHours',
-	            name: 'operatingHours',
-	            value: operatingHours
+	            id: 'operatingTime',
+	            name: 'operatingTime',
+	            value: operatingTime
 	        }).appendTo('form[name="storeInfo"]');
 	    }
 
@@ -233,12 +236,19 @@
 <h1>정보 등록</h1>
 
 <form action="${contextPath}/franchise/addStoreInfo" method="post" name="storeInfo" enctype="multipart/form-data">
-	<input type="hidden" id="storeId" name="storeId" value="${storeId}" />
-	<input type="hidden" id="storeName" name="storeName" value="${storeName}" />
+	<input type="hidden" id="ownerId" name="ownerId" value="${ownerId}" />
 	
 	<div class="info_container" style="max-width: 700px;">
-		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 가게 유형 -->
-			<div class="form-label" style="width: 200px;">가게 유형</div>
+	
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 매장 전화번호 -->
+			<div class="form-label" style="width: 200px;">상호명</div>
+			<div class="form-input" style="flex: 1;">
+				<input id="storeName" name="storeName" type="text" maxLength="15" />
+			</div>
+		</div>
+		
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 유형 -->
+			<div class="form-label" style="width: 200px;">유형</div>
 			<div class="form-input" style="flex: 1;">
 				<select id="storeType" name="storeType">
 					<option value="한식" selected>한식</option>
@@ -249,6 +259,17 @@
 					<option value="세계음식">세계음식</option>
 					<option value="카페/베이커리">카페/베이커리</option>
 				</select>
+			</div>
+		</div>		
+		
+		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 주소 -->
+			<div class="form-label" style="width: 200px;">주소</div>
+			<div class="form-input" style="flex: 1;">
+				<input type="text" id="zipcode" placeholder="우편번호">
+				<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+				<input type="text" id="address" placeholder="주소"><br>
+				<input type="text" id="detailAddress" placeholder="상세주소">
+				<input type="text" id="extraAddress" placeholder="참고항목">
 			</div>
 		</div>
 		
@@ -396,20 +417,17 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메인 이미지</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName0" name="fileName" accept="image/*" multiple onchange="validateImages(this);" >
-				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				<input type="file" id="fileName" name="fileName" accept="image/*" onchange="validateImages(this);" >
+				<label for="fileName" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
+				<span id="showFileName" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				<br />
 			</div>
 			<div class="image-preview" style="max-width:200px;">
 				<img id="preview" src="" style="max-width: 200px; display: block;" />
 			</div>
 		</div>
-
-		<div id="addImage"></div>
 		
 		<div style="margin-top: 15px;">
-			<input type="button" value="이미지 추가" onClick="addImage()">
 			<input type="button" onClick="checkStoreInfo()" value="정보 등록">
 		</div>
 	</div>

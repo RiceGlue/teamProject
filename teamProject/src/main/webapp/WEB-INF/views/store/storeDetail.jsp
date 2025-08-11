@@ -420,7 +420,7 @@
 <!-- 					<strong>영업종료</strong> -->
 <%-- 				</c:otherwise> --%>
 <%-- 			</c:choose> --%>
-			<strong>영업중</strong>${store.operatingHours} </p>
+			<strong>영업중</strong>${store.operatingTime} </p>
 		</div>
 		
 		<div class="wating_container">
@@ -560,7 +560,7 @@
 							<h4>상세정보</h4>
 							<div>
 								<p><strong>영업시간</strong></p>
-								<p>${store.operatingHours }
+								<p>${store.operatingTime }
 							</div>
 							<div>
 								<P><strong>브레이크 타임</strong></P>

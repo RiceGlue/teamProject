@@ -1,38 +1,40 @@
 package com.spring.teamProject.vo;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 public class PaymentVO {
-	private String payment_id;
-	private String reservation_id;
-	private String amount;
-	private String payment_method;
-	private String status;
-	private String transaction_id;
-	private String paid_at;
-	private String created_at;
-	
-	public String getPayment_id() {
-		return payment_id;
+    private Long paymentId;
+    private Long reservationId;
+    private BigDecimal amount;
+    private String paymentMethod;
+    private String status; // 'PENDING', 'COMPLETED' 등
+    private String transactionId;
+    private LocalDateTime paidAt;
+    private LocalDateTime createdAt;
+	public Long getPaymentId() {
+		return paymentId;
 	}
-	public void setPayment_id(String payment_id) {
-		this.payment_id = payment_id;
+	public void setPaymentId(Long paymentId) {
+		this.paymentId = paymentId;
 	}
-	public String getReservation_id() {
-		return reservation_id;
+	public Long getReservationId() {
+		return reservationId;
 	}
-	public void setReservation_id(String reservation_id) {
-		this.reservation_id = reservation_id;
+	public void setReservationId(Long reservationId) {
+		this.reservationId = reservationId;
 	}
-	public String getAmount() {
+	public BigDecimal getAmount() {
 		return amount;
 	}
-	public void setAmount(String amount) {
+	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
-	public String getPayment_method() {
-		return payment_method;
+	public String getPaymentMethod() {
+		return paymentMethod;
 	}
-	public void setPayment_method(String payment_method) {
-		this.payment_method = payment_method;
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
 	}
 	public String getStatus() {
 		return status;
@@ -40,23 +42,24 @@ public class PaymentVO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public String getTransaction_id() {
-		return transaction_id;
+	public String getTransactionId() {
+		return transactionId;
 	}
-	public void setTransaction_id(String transaction_id) {
-		this.transaction_id = transaction_id;
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
 	}
-	public String getPaid_at() {
-		return paid_at;
+	public LocalDateTime getPaidAt() {
+		return paidAt;
 	}
-	public void setPaid_at(String paid_at) {
-		this.paid_at = paid_at;
+	public void setPaidAt(LocalDateTime paidAt) {
+		this.paidAt = paidAt;
 	}
-	public String getCreated_at() {
-		return created_at;
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
 	}
-	public void setCreated_at(String created_at) {
-		this.created_at = created_at;
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
+
 
 }
