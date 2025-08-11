@@ -1,17 +1,10 @@
 package com.spring.teamProject.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.spring.teamProject.vo.StoreVO;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.ModelAndView;
 
 public interface AdminStoreController {
 	
-	public ResponseEntity<String> addStoreInfo(MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
-//	public ResponseEntity addMenuInfo (MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
+	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception;
+	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception;
 }

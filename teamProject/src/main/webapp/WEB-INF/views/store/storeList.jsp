@@ -217,30 +217,34 @@
 
 	<!-- 반복 렌더링 시작 -->
 	<div id="map"></div>
-	<c:forEach var="region" items="${regionlist}" varStatus="status">
-	  <div class="store-card">
-	    <div class="store-image">
-	      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
-	        <img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지">
-	      </a>
-	<!--       대기 팀 수 표시 -->
-	<%--       <c:if test="${store.waitCount > 0}"> --%>
-	<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-	<%--       </c:if> --%>
-	    </div>
-
-	    <div class="store-info">
-	      <h4>${region.storeName}</h4>
-	      <p>
-	        <span class="rating">★ ${region.avgRating}</span>
-	        리뷰 ${region.countRating}개
-	      </p>
-	      <p class="meta-info">${region.storeType} · ${region.address}</p>
-	      <p class="meta-info">${region.description}</p>
-	    </div>
-	  </div>
-	</c:forEach>
+	<c:choose>
+		<c:when test="${empty regionlist }"><h3>검색 결과 없음</h3></c:when>
+		<c:otherwise>
+			<c:forEach var="region" items="${regionlist}" varStatus="status">
+			  <div class="store-card">
+			    <div class="store-image">
+			      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
+			        <img src="https://cdn.pixabay.com/photo/2020/08/27/07/31/restaurant-5521372_1280.jpg" alt="가게이미지">
+			      </a>
+			<!--       대기 팀 수 표시 -->
+			<%--       <c:if test="${store.waitCount > 0}"> --%>
+			<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
+			<%--       </c:if> --%>
+			    </div>
+		
+			    <div class="store-info">
+			      <h4>${region.storeName}</h4>
+			      <p>
+			        <span class="rating">★ ${region.avgRating}</span>
+			        리뷰 ${region.countRating}개
+			      </p>
+			      <p class="meta-info">${region.storeType} · ${region.address}</p>
+			      <p class="meta-info">${region.description}</p>
+			    </div>
+			  </div>
+			</c:forEach>
+		</c:otherwise>
+	</c:choose>
 </c:when>
-
 <c:otherwise></c:otherwise>
 </c:choose>

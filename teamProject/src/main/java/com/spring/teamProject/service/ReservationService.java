@@ -1,5 +1,3 @@
-// src/main/java/com/spring/teamProject/service/ReservationService.java
-
 package com.spring.teamProject.service;
 
 import java.time.LocalDate;

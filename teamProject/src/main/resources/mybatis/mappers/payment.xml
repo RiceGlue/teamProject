@@ -24,13 +24,48 @@
         )
     </insert>
 
-    <select id="selectByTransactionId" parameterType="String" resultMap="paymentResultMap">
-        SELECT * FROM payments WHERE transaction_id = #{transactionId}
+	<select id="selectByTransactionId" resultType="com.spring.teamProject.vo.PaymentVO">
+        SELECT
+            paymentId,
+            reservationId,
+            amount,
+            paymentMethod,
+            transactionId,
+            status,
+            paidAt,
+            createdAt
+        FROM payments
+        WHERE transactionId = #{transactionId}
     </select>
 
-    <update id="updatePaymentStatus">
+<!--     <select id="selectByTransactionId" parameterType="String" resultMap="paymentResultMap"> -->
+<!--         SELECT -->
+<!--             payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at -->
+<!--         FROM -->
+<!--             payments -->
+<!--         WHERE transaction_id = #{transactionId} -->
+<!--     </select> -->
+
+    <update id="updatePaymentStatus" parameterType="com.spring.teamProject.vo.PaymentVO">
         UPDATE payments
-        SET status = #{status}, paid_at = #{paidAt}
-        WHERE payment_id = #{paymentId}
+        SET
+            status = #{status},
+            paid_at = #{paidAt}  WHERE
+            payment_id = #{paymentId}
     </update>
+
+    <select id="selectByReservationId" resultType="com.spring.teamProject.vo.PaymentVO">
+        SELECT
+            paymentId,
+            reservationId,
+            amount,
+            paymentMethod,
+            transactionId,
+            status,
+            paidAt,
+            createdAt
+        FROM payments
+        WHERE reservationId = #{reservationId}
+        LIMIT 1 -- 예약 1개당 결제 정보는 1개여야 하므로 LIMIT 1
+    </select>
 </mapper>

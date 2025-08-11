@@ -39,7 +39,12 @@
                             <p><strong>매장 이름:</strong> ${store.storeName}</p>
                             <p><strong>매장 주소:</strong> ${store.address}</p>
                             <p><strong>예약 번호:</strong> ${confirmedReservation.reservationId}</p>
-                            <p><strong>결제 ID:</strong> ${confirmedReservation.paymentId}</p>
+                            <c:if test="${not empty paymentId}">
+                                <p><strong>결제 ID:</strong> ${paymentId}</p>
+                            </c:if>
+                            <c:if test="${not empty transactionId}">
+                                <p><strong>거래 ID:</strong> ${transactionId}</p>
+                            </c:if>
                         </div>
                         <div class="col-md-6">
                             <p><strong>예약 날짜:</strong>

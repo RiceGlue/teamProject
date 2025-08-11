@@ -19,11 +19,7 @@ public class SecurityConfig {
     // @Autowired를 사용하여 필요한 서비스들을 주입
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
-    
-    // [삭제] 로그인 성공 후 리다이렉션을 담당하던 핸들러는 더 이상 사용하지 않습니다.
-    // @Autowired
-    // private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    
+
     // 비밀번호 암호화를 위한 Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,7 +29,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable) // 1. CSRF 보호 비활성화
+	     	// 1. CSRF 보호 설정 수정: 특정 URL만 CSRF 보호 예외 처리
+//	        .csrf(csrf -> csrf
+//	            .ignoringRequestMatchers("/payment/webhook") // ⭐ 이 부분이 핵심 ⭐
+//	            .ignoringRequestMatchers("/payment/webhook", "/reservation/customer/book-temp")
+//	        )
+	        .csrf(AbstractHttpConfigurer::disable) // <- 이 코드는 제거 또는 주석 처리
+            //.csrf(AbstractHttpConfigurer::disable) // 1. CSRF 보호 비활성화
 
             .authorizeHttpRequests(auth -> auth
                 // 2. 접근 권한 설정: 가장 구체적인 규칙부터 순서대로

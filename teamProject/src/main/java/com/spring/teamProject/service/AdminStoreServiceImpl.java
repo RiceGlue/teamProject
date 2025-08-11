@@ -31,4 +31,8 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 		adminStoreDAO.insertStoreImageFile(imgfile);
 	}
 
+	@Override
+	public void deleteInfo(long storeId) throws Exception {
+		adminStoreDAO.deleteStoreInfo(storeId);
+	}
 }

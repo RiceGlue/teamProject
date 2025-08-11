@@ -1,12 +1,23 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
+<%@ page import="java.util.*" %>
+<%
+    List<String> storeTypes = Arrays.asList("한식", "양식", "일식", "중식", "분식", "세계음식", "카페/베이커리");
+	List<String> operationTypes = Arrays.asList("ALL", "WAITING_ONLY","RESERVATION_ONLY");
+	List<String> localNumbers = Arrays.asList("02", "051", "053", "032", "062", "042", "052", "044", "031", "033", "043", "041", "063", "061", "054", "055", "064");
+	
+	request.setAttribute("storeTypes", storeTypes);
+	request.setAttribute("operationTypes", operationTypes);
+	request.setAttribute("localNumbers", localNumbers);
+%>
+
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("정보 등록 완료!");</script>
+    <script>alert("정보 수정 완료!");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("정보 등록 실패!");</script>
+    <script>alert("정보 수절 실패!");</script>
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -213,6 +224,8 @@
 			alert('전화번호 마지막 번호를 숫자로 입력해주세요.');
 			return false;
 		}
+		const storePhoneNumber=localNumber+'-'+number1+'-'+number2;
+		console.log('매장 전화번호:',storePhoneNumber);
 		
 		//정기휴무 유효썽
 		const closedOptions=[...document.querySelectorAll('input[name="closedOption"]:checked')].map(el=>el.value);
@@ -270,6 +283,7 @@
 			return false;
 		}
 		
+		setHiddenInput('storePhoneNumber',storePhoneNumber);
 		setHiddenInput('closed',closed);
 		setHiddenInput('operatingTime',operatingTime);
 		setHiddenInput('breakTime',breakTime);
@@ -303,7 +317,7 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 매장 전화번호 -->
 			<div class="form-label" style="width: 200px;">상호명</div>
 			<div class="form-input" style="flex: 1;">
-				<input id="storeName" name="storeName" type="text" maxLength="15" />
+				<input id="storeName" name="storeName" type="text" maxLength="15" placeholder="${storeName }"/>
 			</div>
 		</div>
 		
@@ -311,13 +325,9 @@
 			<div class="form-label" style="width: 200px;">유형</div>
 			<div class="form-input" style="flex: 1;">
 				<select id="storeType" name="storeType">
-					<option value="한식" selected>한식</option>
-					<option value="양식">양식</option>
-					<option value="일식">일식</option>
-					<option value="중식">중식</option>
-					<option value="분식">분식</option>
-					<option value="세계음식">세계음식</option>
-					<option value="카페/베이커리">카페/베이커리</option>
+				    <c:forEach var="type" items="${storeTypes}">
+				        <option value="${type}" <c:if test="${type == storeType}">selected</c:if>>${type}</option>
+				    </c:forEach>
 				</select>
 			</div>
 		</div>		
@@ -327,9 +337,9 @@
 			<div class="form-input" style="flex: 1;">
 				<input type="text" id="zipcode" name="zipcode" placeholder="우편번호">
 				<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-				<input type="text" id="address" name="address" placeholder="주소"><br>
-				<input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소">
-				<input type="text" id="extraAddress" name="extraAddress" placeholder="참고항목">
+				<input type="text" id="address" name="address" placeholder="${address }"><br>
+				<input type="text" id="detailAddress" name="detailAddress" placeholder="${detailAddress }">
+				<input type="text" id="extraAddress" name="extraAddress" placeholder="${extraAddress }">
 			</div>
 		</div>
 		
@@ -337,9 +347,9 @@
 			<div class="form-label" style="width: 200px;">운영 방식</div>
 			<div class="form-input" style="flex: 1;">
 				<select id="operationType" name="operationType">
-					<option value="ALL" selected>모두</option>
-					<option value="WAITING_ONLY">웨이팅만</option>
-					<option value="RESERVATION_ONLY">예약만</option>
+				    <c:forEach var="type" items="${operationTypes}">
+				        <option value="${type}" <c:if test="${type == operationType}">selected</c:if>>${type}</option>
+				    </c:forEach>
 				</select>
 			</div>
 		</div>
@@ -348,24 +358,12 @@
 			<div class="form-label" style="width: 200px;">매장 전화번호</div>
 			<div class="form-input" style="flex: 1;">
 				<select id="localNumber" name="localNumber">
-					<option value="02" selected>02</option>
-					<option value="051">051</option>
-					<option value="053">053</option>
-					<option value="032">032</option>
-					<option value="062">062</option>
-					<option value="042">042</option>
-					<option value="052">052</option>
-					<option value="044">044</option>
-					<option value="031">031</option>
-					<option value="033">033</option>
-					<option value="043">043</option>
-					<option value="041">041</option>
-					<option value="063">063</option>
-					<option value="061">061</option>
-					<option value="054">054</option>
-					<option value="055">055</option>
-					<option value="064">064</option>
-				</select>-<input type="text" id="number1" name="number1" size="4">-<input type="text" id="number2" name="number2" size="4">
+				    <c:forEach var="num" items="${localNumbers}">
+				        <option value="${num}" <c:if test="${num == localNumber}">selected</c:if>>${num}</option>
+				    </c:forEach>
+				</select>
+				- <input type="text" id="number1" name="number1" size="4" placeholder="${ }">- <input type="text" id="number2" name="number2" size="4">
+
 			</div>
 		</div>
 		
