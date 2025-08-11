@@ -26,4 +26,10 @@
         VALUES (#{memberId}, #{provider}, #{socialId})
     </insert>
 
+    <!-- [신규] 소셜 계정 연동 해제 쿼리 -->
+    <delete id="deleteSocialAccount">
+        DELETE FROM social_accounts
+        WHERE member_id = #{memberId} AND provider = #{provider}
+    </delete>
+
 </mapper>

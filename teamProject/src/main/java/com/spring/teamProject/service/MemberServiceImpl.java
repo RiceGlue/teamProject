@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.teamProject.dao.MemberDAO;
+import com.spring.teamProject.dao.SocialAccountDAO;
 import com.spring.teamProject.vo.MemberVO;
+import com.spring.teamProject.vo.SocialAccountVO;
 
 /**
  * MemberService 인터페이스를 구현한 클래스.
@@ -26,6 +29,9 @@ public class MemberServiceImpl implements MemberService {
     // MemberDAO Bean을 자동으로 주입받아 사용합니다.
     @Autowired
     private MemberDAO memberDAO;
+
+    @Autowired
+    private SocialAccountDAO socialAccountDAO;
     
     // SecurityConfig에 Bean으로 등록된 PasswordEncoder를 자동으로 주입받아 사용합니다.
     @Autowired
@@ -41,15 +47,24 @@ public class MemberServiceImpl implements MemberService {
      * @param memberVO 회원가입 폼에서 넘어온 사용자 정보
      */
     @Override
+    @Transactional
     public void join(MemberVO memberVO) {
         saveProfileImage(memberVO);
         processPhoneNumber(memberVO);
         
-        // 사용자가 입력한 비밀번호를 암호화합니다.
-        String encodedPassword = passwordEncoder.encode(memberVO.getLoginPw());
-        memberVO.setLoginPw(encodedPassword);
+        if (StringUtils.hasText(memberVO.getLoginPw())) {
+            String encodedPassword = passwordEncoder.encode(memberVO.getLoginPw());
+            memberVO.setLoginPw(encodedPassword);
+        }
         
         memberDAO.insertMember(memberVO);
+        
+        if (memberVO.getSocialAccounts() != null && !memberVO.getSocialAccounts().isEmpty()) {
+            for (SocialAccountVO socialAccount : memberVO.getSocialAccounts()) {
+                socialAccount.setMemberId(memberVO.getMemberId());
+                socialAccountDAO.insertSocialAccount(socialAccount);
+            }
+        }
     }
     
     /**
@@ -133,6 +148,12 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.findByEmail(email);
     }
 
+    // [신규] findById 메소드 구현
+    @Override
+    public MemberVO findById(long memberId) {
+        return memberDAO.findById(memberId);
+    }
+
     /**
      * 아이디 중복 여부를 확인합니다.
      * @param loginId 확인할 아이디
@@ -143,7 +164,22 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.checkIdDuplicate(loginId);
     }
 
-    // --- private 헬퍼 메소드 ---
+    /**
+     * [신규] 소셜 계정 연동 해제 로직 구현
+     */
+    @Override
+    @Transactional
+    public boolean unlinkSocialAccount(long memberId, String provider) {
+        MemberVO member = memberDAO.findById(memberId);
+
+        // 안전장치: 비밀번호가 없고, 연동된 소셜 계정이 1개뿐이면 해제 불가
+        if (!StringUtils.hasText(member.getLoginPw()) && member.getSocialAccounts() != null && member.getSocialAccounts().size() <= 1) {
+            return false; // 마지막 로그인 수단이므로 실패 처리
+        }
+
+        socialAccountDAO.deleteSocialAccount(memberId, provider);
+        return true;
+    }
 
     /**
      * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.

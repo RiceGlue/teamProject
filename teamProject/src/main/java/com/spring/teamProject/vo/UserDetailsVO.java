@@ -27,20 +27,31 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
         attributes.put("name", memberVO.getMemberName());
         attributes.put("email", memberVO.getEmail());
         
-        // [수정] socialAccounts 리스트를 확인하여 소셜 연동 정보를 추가합니다.
         List<SocialAccountVO> socialAccounts = memberVO.getSocialAccounts();
         if (socialAccounts != null && !socialAccounts.isEmpty()) {
-            // 여러 개가 연동될 수 있지만, 우선 첫 번째 것을 대표로 사용합니다.
             attributes.put("socialProvider", socialAccounts.get(0).getProvider());
         }
         
         return attributes;
     }
 
+    /**
+     * [수정] Spring Security가 사용자를 식별하는 대표 이름을 반환합니다.
+     * 일반 회원은 login_id를, 소셜 전용 회원은 social_id를 반환하여
+     * 'principalName cannot be empty' 오류를 해결합니다.
+     */
     @Override
     public String getName() {
-        // 소셜 로그인의 경우 고유 ID를 반환해야 하지만, 일반 로그인의 Principal에서는 loginId를 반환합니다.
-        return memberVO.getLoginId();
+        // 일반 계정인 경우 login_id를 반환
+        if (memberVO.getLoginId() != null && !memberVO.getLoginId().isEmpty()) {
+            return memberVO.getLoginId();
+        }
+        // 소셜 전용 계정인 경우, 연동된 첫 번째 소셜 계정의 ID를 반환
+        if (memberVO.getSocialAccounts() != null && !memberVO.getSocialAccounts().isEmpty()) {
+            return memberVO.getSocialAccounts().get(0).getSocialId();
+        }
+        // 예외 케이스 (이런 경우는 없어야 함)
+        return String.valueOf(memberVO.getMemberId());
     }
 
 
@@ -56,9 +67,16 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
         return memberVO.getLoginPw();
     }
 
+    /**
+     * [수정] UserDetails의 username은 null이 아니어야 합니다.
+     * login_id가 없는 소셜 전용 회원의 경우, 고유값인 email을 대신 반환합니다.
+     */
     @Override
     public String getUsername() {
-        return memberVO.getLoginId();
+        if (memberVO.getLoginId() != null && !memberVO.getLoginId().isEmpty()) {
+            return memberVO.getLoginId();
+        }
+        return memberVO.getEmail();
     }
 
     @Override
@@ -72,7 +90,6 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
 
     @Override
     public boolean isEnabled() {
-        // [수정] 논리적 삭제를 위해 status가 'ACTIVE'인 경우에만 계정을 활성화합니다.
         return "ACTIVE".equals(memberVO.getStatus());
     }
     

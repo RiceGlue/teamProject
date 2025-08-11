@@ -41,21 +41,15 @@
         // 이 함수는 form 태그의 onsubmit 이벤트에 의해 호출되므로,
         // DOM 요소들이 모두 로드된 이후에 실행되어 id로 요소를 찾는데 문제가 없습니다.
         const newPasswordInput = document.getElementById('newLoginPw');
-        const confirmPasswordInput = document.getElementById('newLoginPwConfirm');
-        const currentPasswordInput = document.getElementById('currentLoginPw');
-
-        // 비밀번호 변경 섹션이 화면에 없을 경우(소셜 로그인 사용자) newPasswordInput이 null이 됩니다.
-        // null 체크를 통해 일반 사용자인 경우에만 유효성 검사를 수행합니다.
         if (newPasswordInput) {
             const newPassword = newPasswordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-
+            const confirmPassword = document.getElementById('newLoginPwConfirm').value;
             if (newPassword || confirmPassword) {
                 if (newPassword !== confirmPassword) {
                     alert("새 비밀번호가 일치하지 않습니다.");
                     return false;
                 }
-                const currentPassword = currentPasswordInput.value;
+                const currentPassword = document.getElementById('currentLoginPw').value;
                 if (!currentPassword) {
                     alert("비밀번호를 변경하려면 현재 비밀번호를 입력해야 합니다.");
                     return false;
@@ -69,15 +63,17 @@
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">프로필 수정</h2>
 
-    <!-- 컨트롤러에서 보낸 에러 메시지가 있을 경우, 이 부분을 화면에 보여줍니다. -->
+    <%-- 성공 또는 에러 메시지를 표시하는 영역 --%>
     <c:if test="${not empty error}">
-        <div class="alert alert-danger" role="alert">
-            ${error}
-        </div>
+        <div class="alert alert-danger" role="alert">${error}</div>
+    </c:if>
+    <c:if test="${not empty msg}">
+        <div class="alert alert-success" role="alert">${msg}</div>
     </c:if>
     
     <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validatePassword();">
         
+        <%-- 프로필 이미지, 이름, 연락처, 이메일 등 공통 정보 수정 필드 --%>
         <div class="text-center mb-4">
             <c:choose>
                 <c:when test="${not empty memberInfo.profileImageUrl}">
@@ -106,7 +102,7 @@
                     <option value="82" ${memberInfo.countryCode == '82' ? 'selected' : ''}>+82 (대한민국)</option>
                     <option value="1"  ${memberInfo.countryCode == '1' ? 'selected' : ''}>+1 (United States)</option>
                     <option value="81" ${memberInfo.countryCode == '81' ? 'selected' : ''}>+81 (日本)</option>
-                    <option value="86" ${memberInfo.countryCode == '86' ? 'selected' : ''}>+86 (中?)</option>
+                    <option value="86" ${memberInfo.countryCode == '86' ? 'selected' : ''}>+86 (中國)</option>
                     <option value="44" ${memberInfo.countryCode == '44' ? 'selected' : ''}>+44 (United Kingdom)</option>
                     <option value="49" ${memberInfo.countryCode == '49' ? 'selected' : ''}>+49 (Deutschland)</option>
                     <option value="33" ${memberInfo.countryCode == '33' ? 'selected' : ''}>+33 (France)</option>
@@ -136,14 +132,13 @@
             <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" placeholder="name@example.com" required>
         </div>
         
-        <!-- ? 여기가 핵심 수정 부분입니다 ? -->
-        <!-- [수정] 소셜 계정 연동 여부를 socialAccounts 리스트가 비어있는지로 확인합니다. -->
-        <c:if test="${empty memberInfo.socialAccounts}">
-            <hr class="my-4">
-            
+        
+        <!-- --- 1. 비밀번호 섹션 분기 처리 --- -->
+        <hr class="my-4">
+        
+        <c:if test="${not empty memberInfo.loginPw}">
             <h5 class="mb-3">비밀번호 변경</h5>
             <p class="text-muted small mb-3">비밀번호를 변경하지 않으려면 아래 항목을 비워두세요.</p>
-            
             <div class="mb-3">
                 <label for="currentLoginPw" class="form-label">현재 비밀번호</label>
                 <input type="password" class="form-control" id="currentLoginPw" name="currentLoginPw">
@@ -157,7 +152,55 @@
                 <input type="password" class="form-control" id="newLoginPwConfirm" name="newLoginPwConfirm">
             </div>
         </c:if>
+
+        <%-- Case B: 소셜 로그인으로만 가입하여 비밀번호가 없는 계정 --%>
+        <c:if test="${empty memberInfo.loginPw}">
+            <h5 class="mb-3">비밀번호 설정</h5>
+            <p class="text-muted small mb-3">비밀번호를 설정하면 이메일과 비밀번호로도 로그인할 수 있습니다.</p>
+			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
+            <div class="d-grid">
+                <button type="button" class="btn btn-outline-primary" onclick="alert('비밀번호 설정 기능은 개발 예정입니다.');">비밀번호 설정하기</button>
+            </div>
+        </c:if>
         
+        <!-- ? --- [위치 이동 및 URL 수정] 소셜 계정 연동 섹션 --- ? -->
+        <hr class="my-4">
+        <h5 class="mb-3">소셜 계정 연동</h5>
+        
+        <%-- Google 연동 상태 확인 --%>
+        <c:set var="googleLinked" value="${false}" />
+        <c:forEach var="account" items="${memberInfo.socialAccounts}">
+            <c:if test="${account.provider == 'GOOGLE'}"><c:set var="googleLinked" value="${true}" /></c:if>
+        </c:forEach>
+
+        <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                    <span class="ms-2 fw-bold">Google</span>
+                </div>
+                <div>
+                    <c:choose>
+                        <c:when test="${googleLinked}">
+                            <span class="badge bg-success me-2">연동됨</span>
+                            <c:if test="${not empty memberInfo.loginPw}">
+                                <form action="${contextPath}/member/unlink-social" method="post" style="display: inline;" onsubmit="return confirm('정말로 Google 계정 연동을 해제하시겠습니까?');">
+                                    <input type="hidden" name="provider" value="GOOGLE">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">연동 해제</button>
+                                </form>
+                            </c:if>
+                        </c:when>
+                        <c:otherwise>
+                            <c:if test="${not empty memberInfo.loginPw}">
+                                <%-- [수정] 계정 연동 준비 URL로 변경 --%>
+                                <a href="${contextPath}/member/prepare-link/google" class="btn btn-sm btn-outline-secondary">연동하기</a>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </div>
+
         <hr class="my-4">
         
         <div class="mb-3">
@@ -178,7 +221,7 @@
             </div>
             <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
         </div>
-        
+
         <div class="d-grid gap-2 mt-4">
             <button type="submit" class="btn btn-primary">수정 완료</button>
             <a href="${contextPath}/member/mypage" class="btn btn-secondary">취소</a>

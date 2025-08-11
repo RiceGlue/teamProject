@@ -21,7 +21,18 @@ public interface MemberService {
     
     // 이메일로 회원 정보 조회
     public MemberVO findByEmail(String email);
+    
+    // [신규] memberId로 회원 정보를 조회하는 메소드 추가 (내부 로직용)
+    public MemberVO findById(long memberId);
 
     // 아이디 중복 확인
     public int checkIdDuplicate(String loginId);
+
+    /**
+     * [신규] 소셜 계정 연동을 해제합니다.
+     * @param memberId 회원 ID
+     * @param provider 소셜 서비스 제공자
+     * @return 성공 여부
+     */
+    public boolean unlinkSocialAccount(long memberId, String provider);
 }

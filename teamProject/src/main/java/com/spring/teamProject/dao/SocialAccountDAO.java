@@ -30,4 +30,11 @@ public interface SocialAccountDAO {
      * @param socialAccountVO 연동할 소셜 계정 정보
      */
     void insertSocialAccount(SocialAccountVO socialAccountVO);
+
+    /**
+     * [신규] 특정 회원의 소셜 계정 연동 정보를 삭제합니다.
+     * @param memberId 회원 ID
+     * @param provider 소셜 서비스 제공자 (예: GOOGLE)
+     */
+    void deleteSocialAccount(@Param("memberId") long memberId, @Param("provider") String provider);
 }
