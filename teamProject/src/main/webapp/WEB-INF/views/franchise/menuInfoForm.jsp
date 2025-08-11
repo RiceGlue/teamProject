@@ -12,12 +12,12 @@
 	let menuIdx = 1;
 	
 	function addMenu() {
-		const menuNameIdx = `menuName${menuIdx}`;
-	    const priceIdx = `price${menuIdx}`;
-	    const desIdx = `description${menuIdx}`;
-	    const fileIdx = `fileName${menuIdx}`;
-	    const fileNameIdx = `showFileName${menuIdx}`;
-	    const previewIdx = `preview${menuIdx}`;
+		const menuNameIdx = "menuName"+menuIdx;
+	    const priceIdx ="price"+menuIdx;
+	    const desIdx = "description"+menuIdx;
+	    const fileIdx = "fileName"+menuIdx;
+	    const fileNameIdx ="showFileName"+menuIdx;
+	    const previewIdx ="preview"+menuIdx;
 		
 		const html = 
 			'<div class="menu-item" style="border-top:1px solid #ddd; padding-top:10px; margin-top:10px;">'+

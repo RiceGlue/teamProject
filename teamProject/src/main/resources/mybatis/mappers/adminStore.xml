@@ -124,7 +124,7 @@
 				now()
 			)
 		<selectKey order="AFTER" resultType="long" keyProperty="storeId">
-			select last_insert_store_id()
+			select last_insert_id()
 		</selectKey>
 	</insert>
 	

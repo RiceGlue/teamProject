@@ -64,7 +64,7 @@
 	            <div class="card text-center">
 	                <div class="card-body">
 	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=서울">서울</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?ownerId=1">가게 정보 입력</a></h5>
+						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?ownerId=10">가게 정보 입력</a></h5>
 						<h5 class="card-title"><a href="${contextPath}/franchise/menuInfoForm?ownerId=1&storeName=대전자장면">메뉴 입력</a></h5>
 	                </div>
 	            </div>
@@ -72,21 +72,21 @@
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList?region=경기">경기</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=경기">경기</a></h5>
 	                </div>
 	            </div>
 	        </div>
 			<div class="col">
 	            <div class="card text-center">   
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList?region=대전">대전</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=대전">대전</a></h5>
 	                </div>
 	            </div>
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/store/storeRegionList?region=부산">부산</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=부산">부산</a></h5>
 	                </div>
 	            </div>
 	        </div>

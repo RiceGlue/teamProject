@@ -6,5 +6,5 @@ import org.springframework.web.servlet.ModelAndView;
 public interface AdminStoreController {
 	
 	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception;
-//	public ResponseEntity addMenuInfo (MultipartHttpServletRequest multiReq, HttpServletResponse res) throws Exception;
+	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception;
 }

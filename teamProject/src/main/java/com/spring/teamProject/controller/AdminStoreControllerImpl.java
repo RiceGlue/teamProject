@@ -51,11 +51,12 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		while (enu.hasMoreElements()) {
 			String name = (String) enu.nextElement();
 			String value = multiReq.getParameter(name);
+			System.out.println(name+": "+value);
 			storeInfo.put(name, value);
 		}
-
-		long regId = (long)storeInfo.get("ownerId");
-		System.out.println("등록자 아이디: "+regId);
+		
+		String regIdstr = (String) storeInfo.get("ownerId");
+		long regId = Long.parseLong(regIdstr);
 
 		List<ImageFileVO> imgFileList = upload(multiReq);
 		if (imgFileList != null && !imgFileList.isEmpty()) {
@@ -66,7 +67,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 				System.out.print("이미지 파일 리스트 사이즈 : "+ imgFileList.size());
 				System.out.println(imgFileList.get(i).getFileName());
 			}
-			storeInfo.put("imgFileList", imgFileList);
+			storeInfo.put("fileName", imgFileList.get(0).getFileName());
 		}
 
 		try {
@@ -80,7 +81,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 				}
 			}
 			// ✅ 등록 성공 시 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?success=true");
+			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&success=true");
 		} catch (Exception e) {
 			if (imgFileList != null && !imgFileList.isEmpty()) {
 				for (ImageFileVO imageFileVO : imgFileList) {
@@ -93,8 +94,13 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			}
 			e.printStackTrace();
 			// 실패 시에도 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?error=true");
+			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&error=true");
 		}
+	}
+	
+	@Override
+	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception {
+		
 	}
 
 }

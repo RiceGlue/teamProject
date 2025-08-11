@@ -3,10 +3,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("정보 등록 완료!");</script>
+    <script>alert("정보 수정 완료!");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("정보 등록 실패!");</script>
+    <script>alert("정보 수절 실패!");</script>
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -306,13 +306,14 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 매장 전화번호 -->
 			<div class="form-label" style="width: 200px;">상호명</div>
 			<div class="form-input" style="flex: 1;">
-				<input id="storeName" name="storeName" type="text" maxLength="15" />
+				<input id="storeName" name="storeName" type="text" maxLength="15" placeholder="${storeName }"/>
 			</div>
 		</div>
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;"> <!-- 유형 -->
 			<div class="form-label" style="width: 200px;">유형</div>
 			<div class="form-input" style="flex: 1;">
+				<c:choose></c:choose>
 				<select id="storeType" name="storeType">
 					<option value="한식" selected>한식</option>
 					<option value="양식">양식</option>

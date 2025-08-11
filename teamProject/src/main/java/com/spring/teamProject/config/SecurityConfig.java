@@ -33,11 +33,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
 	     	// 1. CSRF 보호 설정 수정: 특정 URL만 CSRF 보호 예외 처리
-	        .csrf(csrf -> csrf
-	            .ignoringRequestMatchers("/payment/webhook") // ⭐ 이 부분이 핵심 ⭐
-	            .ignoringRequestMatchers("/payment/webhook", "/reservation/customer/book-temp")
-	        )
-	        //.csrf(AbstractHttpConfigurer::disable) // <- 이 코드는 제거 또는 주석 처리
+//	        .csrf(csrf -> csrf
+//	            .ignoringRequestMatchers("/payment/webhook") // ⭐ 이 부분이 핵심 ⭐
+//	            .ignoringRequestMatchers("/payment/webhook", "/reservation/customer/book-temp")
+//	        )
+	        .csrf(AbstractHttpConfigurer::disable) // <- 이 코드는 제거 또는 주석 처리
             //.csrf(AbstractHttpConfigurer::disable) // 1. CSRF 보호 비활성화
 
             .authorizeHttpRequests(auth -> auth
