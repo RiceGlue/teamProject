@@ -28,7 +28,7 @@
             <%-- 로그아웃 상태일 때 --%>
             <sec:authorize access="isAnonymous()">
                 <li class="nav-item"><a class="nav-link" href="${contextPath}/member/login">로그인</a></li>
-                <li class="nav-item"><a class="nav-link" href="${contextPath}/member/join-select">회원가입</a></li>
+                <li class="nav-item"><a class="nav-link" href="${contextPath}/member/join?role=USER">회원가입</a></li>
             </sec:authorize>
 
             <%-- 로그인 상태일 때 --%>
