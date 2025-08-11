@@ -60,7 +60,28 @@
                         &nbsp;${principal.memberVO.memberName}님 환영합니다.
                     </span>
                 </li>
-                <li class="nav-item"><a class="nav-link" href="${contextPath}/member/mypage">마이페이지</a></li>
+
+                <!-- ? --- 여기가 핵심 수정 부분입니다 --- ? -->
+                <%-- 사용자의 역할(Role)을 가져와 변수에 저장합니다. --%>
+                <sec:authentication property="principal.memberVO.role" var="userRole" />
+
+                <li class="nav-item">
+                    <c:choose>
+                        <%-- Case 1: 관리자(ADMIN)일 경우 --%>
+                        <c:when test="${userRole == 'ADMIN'}">
+                            <a class="nav-link" href="${contextPath}/admin/dashboard">마이페이지</a>
+                        </c:when>
+                        <%-- Case 2: 가맹점주(OWNER)일 경우 (향후 개발) --%>
+                        <c:when test="${userRole == 'OWNER'}">
+                            <a class="nav-link" href="#">마이페이지</a>
+                        </c:when>
+                        <%-- Case 3: 그 외(USER)일 경우 --%>
+                        <c:otherwise>
+                            <a class="nav-link" href="${contextPath}/member/mypage">마이페이지</a>
+                        </c:otherwise>
+                    </c:choose>
+                </li>
+
                 <li class="nav-item">
                     <form action="${contextPath}/member/logout" method="post" class="d-inline">
                         <button type="submit" class="btn btn-link nav-link">로그아웃</button>

@@ -2,6 +2,7 @@ package com.spring.teamProject.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import com.spring.teamProject.vo.MemberVO;
+import java.util.List;
 
 @Mapper
 public interface MemberDAO {
@@ -35,4 +36,10 @@ public interface MemberDAO {
     
     // [수정] 회원 탈퇴 (논리적 삭제로 변경)
     int deactivateMember(long memberId);
+
+    /**
+     * [신규] 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
+     * @return List<MemberVO>
+     */
+    List<MemberVO> findOwners();
 }

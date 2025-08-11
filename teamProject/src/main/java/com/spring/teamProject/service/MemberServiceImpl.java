@@ -3,6 +3,7 @@ package com.spring.teamProject.service;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 
@@ -136,6 +137,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean deactivateMember(long memberId) {
         return memberDAO.deactivateMember(memberId) == 1;
+    }
+
+    @Override
+    public List<MemberVO> findOwners() {
+        return memberDAO.findOwners();
     }
 
     /**

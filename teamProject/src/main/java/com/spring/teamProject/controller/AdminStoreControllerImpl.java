@@ -148,10 +148,11 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 				// 4. 이미지 정보 객체 생성 및 DB 저장
 				ImageFileVO imageFileVO = new ImageFileVO();
 				imageFileVO.setFileName(originalFileName);
-				imageFileVO.setMenuId(menuId);   // menuId 연결!
+				// * 이거 임시로 주석처리 해두었어요 지수씨
+				//imageFileVO.setMenuId(menuId);   // menuId 연결!
 				imageFileVO.setStoreId(storeId);
 
-				adminStoreService.saveImage(imageFileVO);
+				//adminStoreService.saveImage(imageFileVO);
 			}
 
 			System.out.println("메뉴 저장됨: " + menuName[i]);

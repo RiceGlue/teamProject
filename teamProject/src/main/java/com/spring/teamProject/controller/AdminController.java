@@ -1,6 +1,6 @@
 package com.spring.teamProject.controller;
 
-import java.util.List;
+import java.util.List; // List import 추가
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -27,17 +27,16 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("body", "admin/dashboard.jsp");
-        return "admin/admin_layout"; // 관리자 전용 레이아웃을 사용합니다.
+        return "admin/admin_layout";
     }
 
     /**
-     * [신규] 가맹점주 계정 목록 페이지를 보여줍니다.
+     * 가맹점주 계정 목록을 DB에서 조회하여 뷰로 전달합니다.
      */
     @GetMapping("/owners")
     public String ownerList(Model model) {
-        // TODO: MemberService에 findOwners() 메소드 추가 필요
-        // List<MemberVO> ownerList = memberService.findOwners();
-        // model.addAttribute("ownerList", ownerList);
+        List<MemberVO> ownerList = memberService.findOwners();
+        model.addAttribute("ownerList", ownerList);
         model.addAttribute("body", "admin/owner_list.jsp");
         return "admin/admin_layout";
     }
@@ -60,10 +59,9 @@ public class AdminController {
     @PostMapping("/owners")
     public String createOwner(MemberVO memberVO, RedirectAttributes redirectAttributes) {
         try {
-            // MemberService의 join 메소드는 role 값에 따라 유연하게 동작하므로 그대로 사용합니다.
             memberService.join(memberVO);
             redirectAttributes.addFlashAttribute("msg", "가맹점주 계정이 성공적으로 생성되었습니다.");
-            return "redirect:/admin/owners"; // [수정] 성공 시 목록 페이지로 이동
+            return "redirect:/admin/owners"; // 성공 시 목록 페이지로 이동
         } catch (DuplicateKeyException e) {
             redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
             redirectAttributes.addFlashAttribute("memberVO", memberVO); // 입력 데이터 유지를 위해 전달

@@ -187,15 +187,16 @@ public class MemberController {
 
         String role = memberInfo.getRole();
 
-        // ? --- 여기가 핵심 수정 부분입니다 --- ?
+        // ✨ --- 여기가 핵심 수정 부분입니다 --- ✨
         if ("ADMIN".equals(role)) {
-            // TODO: 관리자 대시보드 JSP 파일 생성 필요
-            // model.addAttribute("body", "admin/dashboard.jsp");
-            return "admin/dashboard"; // 관리자 전용 레이아웃을 사용할 경우
+            // 관리자의 경우, AdminController의 dashboard로 리다이렉트합니다.
+            return "redirect:/admin/dashboard";
         } else if ("OWNER".equals(role)) {
-            // TODO: 점주 대시보드 JSP 파일 생성 필요
-            // model.addAttribute("body", "owner/dashboard.jsp");
-            return "owner/dashboard"; // 점주 전용 레이아웃을 사용할 경우
+            // TODO: 점주 대시보드 컨트롤러 생성 필요
+            // return "redirect:/owner/dashboard"; 
+            model.addAttribute("memberInfo", memberInfo);
+            model.addAttribute("body", "member/mypage.jsp"); // 임시로 일반 마이페이지 표시
+            return "layout/layout";
         } else {
             // 일반 사용자의 경우 기존 마이페이지를 보여줍니다.
             model.addAttribute("memberInfo", memberInfo);

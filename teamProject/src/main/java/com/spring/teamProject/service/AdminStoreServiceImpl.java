@@ -35,4 +35,10 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	public void deleteInfo(long storeId) throws Exception {
 		adminStoreDAO.deleteStoreInfo(storeId);
 	}
+
+	@Override
+	public long addMenuInfo(com.spring.teamProject.vo.MenuVO menuVO) {
+		// * 작동때문에 임시로 빈 메서드 만들어놨어요 지수씨
+		return 0;
+	}
 }
