@@ -1,6 +1,7 @@
 package com.spring.teamProject.controller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +35,8 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@Autowired
 	private AdminStoreService adminStoreService;
 	
-	@RequestMapping(value={"/storeInfoForm","/menuInfoForm"})
-	public ModelAndView form (@RequestParam("ownerId") long ownerId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	@RequestMapping(value="/storeInfoForm")
+	public ModelAndView storeInfoForm (@RequestParam("ownerId") long ownerId,HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 
 		ModelAndView mav = ViewUtil.layout(viewName);
@@ -43,15 +44,18 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		return mav;
 	}
 	
-	@RequestMapping(value={"/updateStoreInfoForm","/updateMenuInfoForm"})
-	public ModelAndView updateform (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	@RequestMapping(value="/menuInfoForm")
+	public ModelAndView menuInfoForm (@RequestParam("storeId") long storeId, @RequestParam("ownerId") long ownerId, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 
 		ModelAndView mav = ViewUtil.layout(viewName);
+		System.out.println(storeId);
 		mav.addObject("storeId", storeId);
+		mav.addObject("ownerId", ownerId);
 		return mav;
 	}
 	
+	@Override
 	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
 	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
 		multiReq.setCharacterEncoding("UTF-8");
@@ -83,6 +87,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 
 		try {
 			long storeId = adminStoreService.addStoreInfo(storeInfo);
+			adminStoreService.addStoreInfoImage(imgFileList);
 			if (imgFileList != null && !imgFileList.isEmpty()) {
 				for (ImageFileVO imageFileVO : imgFileList) {
 					imageFileName = imageFileVO.getFileName();
@@ -110,55 +115,91 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@Override
+	@RequestMapping(value="/addMenuInfo", method=RequestMethod.POST)
 	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception {
-		multiReq.setCharacterEncoding("UTF-8");
+	    multiReq.setCharacterEncoding("UTF-8");
 
-		long storeId = Long.parseLong(multiReq.getParameter("storeId"));
+	    String[] menuName = multiReq.getParameterValues("menuName");
 
-		String[] menuName = multiReq.getParameterValues("menuName");
-		String[] price = multiReq.getParameterValues("price");
-		String[] description = multiReq.getParameterValues("description");
-		String[] displayNo = multiReq.getParameterValues("displayNo");
+	    // menuName 배열이 null인지 확인하는 코드를 추가합니다.
+	    if (menuName == null || menuName.length == 0) {
+	        // 메뉴가 하나도 없는 경우 처리
+	        System.out.println("메뉴 항목이 제출되지 않았습니다.");
+	        // 오류 페이지로 리다이렉트하거나 사용자에게 알릴 수 있는 방법을 선택합니다.
+	        String regIdStr = multiReq.getParameter("regId");
+	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&menu=true");
+	    }
 
-		List<MultipartFile> fileList = multiReq.getFiles("fileName");
+	    String[] price = multiReq.getParameterValues("price");
+	    String[] description = multiReq.getParameterValues("description");
+	    String[] displayNo = multiReq.getParameterValues("displayNo");
+	    
+	    String storeIdStr = multiReq.getParameter("storeId"); 
+	    String regIdStr = multiReq.getParameter("regId");
 
-		for (int i = 0; i < menuName.length; i++) {
-			// 1. 메뉴 저장
-			MenuVO menuVO = new MenuVO();
-			menuVO.setMenuName(menuName[i]);
-			menuVO.setPrice(price[i]);
-			menuVO.setDescription(description[i]);
-			menuVO.setDisplayNo(Integer.parseInt(displayNo[i]));
-			menuVO.setStoreId(storeId);
+	    long storeId = 0;
+	    long regId = 0;
 
-			long menuId = adminStoreService.addMenuInfo(menuVO); // menuId 반환
+	    if(storeIdStr != null && !storeIdStr.trim().isEmpty()) {
+	        storeId = Long.parseLong(storeIdStr);
+	        System.out.println(storeId);
+	    }
 
-			// 2. 해당 메뉴에 대한 파일 추출
-			MultipartFile file = fileList.get(i);
-			if (file != null && !file.isEmpty()) {
-				String originalFileName = file.getOriginalFilename();
+	    if(regIdStr != null && !regIdStr.trim().isEmpty()) {
+	        regId = Long.parseLong(regIdStr);
+	        System.out.println(regId);
+	    }
 
-				// 3. 저장 경로 구성 및 실제 저장
-				File tempDir = new File(CURR_FILE_REPO_PATH + File.separator + "temp");
-				if (!tempDir.exists()) tempDir.mkdirs();
+	    List<MultipartFile> fileList = multiReq.getFiles("fileName");
 
-				File saveFile = new File(tempDir, originalFileName);
-				file.transferTo(saveFile);
+	    try {
+	        for (int i = 0; i < menuName.length; i++) {
+	            // 메뉴 정보 설정
+	            MenuVO menuVO = new MenuVO();
+	            menuVO.setMenuName(menuName[i]);
+	            menuVO.setPrice(price[i]);
+	            menuVO.setDescription(description[i]);
+	            menuVO.setDisplayNo(Integer.parseInt(displayNo[i]));
+	            menuVO.setStoreId(storeId);
 
-				// 4. 이미지 정보 객체 생성 및 DB 저장
-				ImageFileVO imageFileVO = new ImageFileVO();
-				imageFileVO.setFileName(originalFileName);
-				imageFileVO.setMenuId(menuId);   // menuId 연결!
-				imageFileVO.setStoreId(storeId);
+	            // 파일 이름 설정
+	            MultipartFile file = fileList.get(i);
+	            if (file != null && !file.isEmpty()) {
+	                String originalFileName = file.getOriginalFilename();
+	                menuVO.setFileName(originalFileName);
+	            }
 
-				adminStoreService.saveImage(imageFileVO);
-			}
+	            System.out.println(menuName[i]+","+price[i]+","+description[i]+","+displayNo[i]+","+storeId+","+menuVO.getFileName());
+	            // 메뉴 insert (menuId 자동 세팅됨)
+	            long menuId = adminStoreService.addMenuInfo(menuVO);
 
-			System.out.println("메뉴 저장됨: " + menuName[i]);
-		}
+	            // 이미지 저장
+	            if (file != null && !file.isEmpty()) {
+	                File tempDir = new File(CURR_FILE_REPO_PATH + File.separator + "temp");
+	                if (!tempDir.exists()) tempDir.mkdirs();
 
-		return new ModelAndView("redirect:/somewhere");
+	                File saveFile = new File(tempDir, file.getOriginalFilename());
+	                file.transferTo(saveFile);
+
+	                ImageFileVO imageFileVO = new ImageFileVO();
+	                imageFileVO.setFileName(file.getOriginalFilename());
+	                imageFileVO.setMenuId(menuId);   // 연결된 menuId
+	                imageFileVO.setStoreId(storeId);
+
+	                adminStoreService.addMenuInfoImage(imageFileVO);
+	            }
+
+	            System.out.println("메뉴 저장됨: " + menuName[i]);
+	        }
+
+	        // 성공 시 redirect + success 파라미터
+	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&success=true");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+
+	        // 실패 시 redirect + error 파라미터
+	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&error=true");
+	    }
 	}
-
 
 }

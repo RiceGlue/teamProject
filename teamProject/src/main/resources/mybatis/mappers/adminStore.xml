@@ -43,10 +43,10 @@
 	<resultMap type="MenuVO" id="menulist">
 		<result property="menuId" column="menu_id" />
 		<result property="storeId" column="store_id" />
-		<result property="displayNo" column="display_no" />
 		<result property="menuName" column="menu_name" />
 		<result property="price" column="price" />
 		<result property="description" column="description" />
+		<result property="displayNo" column="display_no" />
 		<result property="fileName" column="file_name" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
@@ -149,11 +149,29 @@
 			)
 	</insert>
 	
-	<delete id="deleteStoreInfo" parameterType="long">
-		<![CDATA[
-			delete from stores where store_id=#{storeId}
-		]]>
-	</delete>
-
+	<insert id="insertMenuInfo" parameterType="MenuVO" useGeneratedKeys="true" keyProperty="menuId" keyColumn="menu_id">
+		insert into menu
+		(
+			menu_id,
+			store_id,
+			menu_name,
+			price,
+			description,
+			display_no,
+			file_name,
+			created_at
+		)
+		values
+		(
+			null,
+			#{storeId},
+			#{menuName},
+			#{price}, 
+			#{description},
+			#{displayNo},
+			#{fileName},
+			now()
+		)
+	</insert>
 	
 </mapper>

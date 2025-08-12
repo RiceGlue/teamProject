@@ -65,7 +65,7 @@
 	                <div class="card-body">
 	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=서울">서울</a></h5>
 						<h5 class="card-title"><a href="${contextPath}/franchise/storeInfoForm?ownerId=10">가게 정보 입력</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/menuInfoForm?ownerId=1&storeName=대전자장면">메뉴 입력</a></h5>
+						<h5 class="card-title"><a href="${contextPath}/franchise/menuInfoForm?storeId=4&ownerId=1">메뉴 입력</a></h5>
 	                </div>
 	            </div>
 	        </div>
