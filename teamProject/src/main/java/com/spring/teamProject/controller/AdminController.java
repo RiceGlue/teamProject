@@ -42,6 +42,17 @@ public class AdminController {
     }
 
     /**
+     * [신규] 일반 회원 계정 목록 페이지를 보여줍니다.
+     */
+    @GetMapping("/users")
+    public String userList(Model model) {
+        List<MemberVO> userList = memberService.findUsers();
+        model.addAttribute("userList", userList);
+        model.addAttribute("body", "admin/user_list.jsp");
+        return "admin/admin_layout";
+    }
+
+    /**
      * 가맹점주 계정 생성 폼 페이지를 보여줍니다.
      */
     @GetMapping("/owners/new")
@@ -51,7 +62,7 @@ public class AdminController {
     }
 
     /**
-     * [신규] 가맹점주 계정 생성 요청을 처리합니다.
+     * 가맹점주 계정 생성 요청을 처리합니다.
      * @param memberVO 폼에서 입력된 가맹점주 정보
      * @param redirectAttributes 리다이렉트 시 메시지 전달용
      * @return 성공 시 목록 페이지, 실패 시 다시 생성 폼으로 이동

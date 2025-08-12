@@ -145,6 +145,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
+     * [신규] 역할(role)이 'USER'인 모든 회원 목록을 조회합니다.
+     */
+    @Override
+    public List<MemberVO> findUsers() {
+        return memberDAO.findUsers();
+    }
+
+    /**
      * 이메일 주소로 회원 정보를 조회합니다. (주로 소셜 로그인 시 사용)
      * @param email 조회할 이메일
      * @return 조회된 MemberVO 객체, 없으면 null
@@ -154,7 +162,7 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.findByEmail(email);
     }
 
-    // [신규] findById 메소드 구현
+    // findById 메소드 구현
     @Override
     public MemberVO findById(long memberId) {
         return memberDAO.findById(memberId);
@@ -171,7 +179,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * [신규] 소셜 계정 연동 해제 로직 구현
+     * 소셜 계정 연동 해제 로직 구현
      */
     @Override
     @Transactional
