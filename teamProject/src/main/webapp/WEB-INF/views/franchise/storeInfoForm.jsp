@@ -71,24 +71,39 @@
         }).open();
     }
 	
-	let imgIdx = 2;
-	
-	function addSubImage() {
-		const fileNameIdx = "fileName"+imgIdx;
-	    const showFileNameIdx = "showFileName"+imgIdx;
-
-		const html = 
-			'<div id="subImagesContainer"> <div class="sub-image-input" style="margin-bottom:10px;">'+
-			'<input type="file" id="'+fileNameIdx+'" name="fileName[]" accept="image/*" multiple onchange="validateImages(this);">'+
-			'<label for="'+fileNameIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
-			'<span id="'+showFileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span></div></div>';
-		$("#subImagesContainer").append(html);
-		
-		console.log("현재 imgIdx:",fileNameIdx);
-		
-		imgIdx++;
-	}
-	
+    let imgIdx = 1;
+    
+    function addImage() {
+	    const fileNameIdx = "fileName" + imgIdx;
+	    const showFileNameIdx = "showFileName" + imgIdx;
+	    
+	    const html =
+		    '<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">' +
+		    '<div class="form-label" style="width: 200px;"></div>' +
+		    '<div class="form-input" style="flex: 1;">' +
+		    '<div>' +
+		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)">메인 이미지</label>' +
+		    '<input type="hidden" name="fileType[]" value="false">' +
+		    '</div>' +
+		    '<input type="file" id="' + fileNameIdx + '" name="fileName[]" accept="image/*" onchange="validateImages(this);">' +
+		    '<label for="' + fileNameIdx + '" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>' +
+		    '<span id="' + showFileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>' +
+		    '</div>' +
+		    '</div>';
+	    $("#ImagesContainer").append(html);
+	    imgIdx++;
+    }
+    
+    function setMainImage(selectedRadio) {
+	    const allRows = document.querySelectorAll("#ImagesContainer .form-row");
+	    
+	    allRows.forEach(row => {
+		    const hidden = row.querySelector('input[type="hidden"][name="fileType[]"]');
+		    const radio = row.querySelector('input[type="radio"][name="mainImageRadio"]');
+		    hidden.value = (radio === selectedRadio) ? "true" : "false";
+	    });
+    }
+    
     // 파일 선택 시 파일명 표시 기능 (기존 validateImages 함수 내에서 showFileName 업데이트가 필요함)
     function validateImages(input) {
       const file = input.files[0];
@@ -492,34 +507,28 @@
 			</div>
 		</div>
 		
-		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
-			<div class="form-label" style="width: 200px;">메인 이미지</div>
-			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName0" name="fileName[]" accept="image/*" multiple onchange="validateImages(this);" >
-				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
-				<br />
-			</div>
-			<div class="image-preview" style="max-width:200px;">
-				<img id="preview" src="" style="max-width: 200px; display: block;" />
-			</div>
-		</div>
-		
-		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
-			<div class="form-label" style="width: 200px;">서브 이미지</div>
-			<div class="form-input" style="flex: 1;">
-				<div id="subImagesContainer">
-					<div class="sub-image-input" style="margin-bottom:10px;">
-						<input type="file" id="fileName1" name="fileName[]" accept="image/*" multiple onchange="validateImages(this);">
-						<label for="fileName1" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-						<span id="showFileName1" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+		<div id="ImagesContainer">
+			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
+				<div class="form-label" style="width: 200px;">이미지</div>
+				<div class="form-input" style="flex: 1;">
+					<div>
+						<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" checked>메인 이미지</label>
+						<input type="hidden" name="fileType[]" value="true">
 					</div>
-				</div>				
+					<input type="file" id="fileName0" name="fileName[]" accept="image/*" onchange="validateImages(this);">
+					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
+					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				</div>
+				<div class="image-preview" style="max-width:200px;">
+					<img id="preview" src="" style="max-width: 200px; display: block;" />
+				</div>
 			</div>
 		</div>
-		
+
+
+
 		<div style="margin-top: 15px;">
-			<input type="button" value="서브이미지추가" onClick="addSubImage()">
+			<input type="button" value="이미지추가" onClick="addImage()">
 			<input type="submit" value="정보 등록">
 		</div>
 	</div>
