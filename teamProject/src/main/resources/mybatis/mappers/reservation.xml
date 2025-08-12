@@ -39,6 +39,7 @@
             reservation_time DESC, created_at DESC
     </select>
 
+    <!-- PaymentServiceImpl의 updateReservationStatus에 맞게 매개변수를 Param에 맞도록 수정 -->
     <update id="updateReservationStatus">
         UPDATE reservations
         SET status = #{status}
