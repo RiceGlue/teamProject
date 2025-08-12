@@ -1,6 +1,7 @@
 package com.spring.teamProject.service;
 
 import com.spring.teamProject.vo.MemberVO;
+import java.util.List;
 
 public interface MemberService {
 	
@@ -35,4 +36,10 @@ public interface MemberService {
      * @return 성공 여부
      */
     public boolean unlinkSocialAccount(long memberId, String provider);
+
+    /**
+     * [신규] 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
+     * @return List<MemberVO>
+     */
+    public List<MemberVO> findOwners();
 }

@@ -34,6 +34,7 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	public void deleteInfo(long storeId) throws Exception {
 		adminStoreDAO.deleteStoreInfo(storeId);
 	}
+<<<<<<< HEAD
 	
 	@Override
 	public long addMenuInfo(MenuVO menuVO) throws Exception {
@@ -44,5 +45,12 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	@Override
 	public void addMenuInfoImage(ImageFileVO imgFileVO) throws Exception {
 		adminStoreDAO.insertMenuImageFile(imgFileVO);
+=======
+
+	@Override
+	public long addMenuInfo(com.spring.teamProject.vo.MenuVO menuVO) {
+		// * 작동때문에 임시로 빈 메서드 만들어놨어요 지수씨
+		return 0;
+>>>>>>> fd736abbf7d819c3386861460a382a2305d5bd25
 	}
 }
