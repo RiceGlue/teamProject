@@ -3,6 +3,7 @@ package com.spring.teamProject.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.spring.teamProject.service.PaymentService;
+import com.spring.teamProject.service.ReservationService;
 import com.spring.teamProject.vo.PaymentVO;
 
 import io.portone.sdk.server.errors.WebhookVerificationException;
@@ -42,6 +44,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private ReservationService reservationService; // 예약 상태 업데이트를 위해 추가
 
     // V2 API Secret 키
     private static final String PORTONE_API_SECRET_KEY = "hjPTj28vVQEjpoOdAP2BjPO8iicSxLhvy0i8Fn0zmptLywFYrZreldlomnU46yj9KElbhp6xYiQky544";
@@ -71,7 +76,6 @@ public class PaymentController {
         Gson gson = new Gson();
         Map<String, Object> payloadMap = gson.fromJson(payload, Map.class);
         String status = (String) payloadMap.get("status");
-        // PortOne 웹훅 페이로드가 'merchantUid' 대신 'payment_id'를 사용하므로 수정
         String transactionId = (String) payloadMap.get("payment_id");
         logger.info("웹훅에서 추출한 transactionId: {}", transactionId);
 
@@ -88,7 +92,6 @@ public class PaymentController {
                 String portoneStatus = paymentObject.get("status").getAsString();
 
                 JsonObject amountObject = paymentObject.getAsJsonObject("amount");
-                // `amountObject`에서 `total` 값을 가져와야 합니다.
                 BigDecimal portoneAmount = amountObject.get("total").getAsBigDecimal();
 
                 PaymentVO payment = paymentService.getPaymentByTransactionId(transactionId);
@@ -164,14 +167,13 @@ public class PaymentController {
      * @return 결제 정보 JSON 문자열
      * @throws Exception API 호출 실패 시
      */
-    private String getPaymentInfoByPaymentId(String paymentId) throws Exception { // 메서드명 변경
+    private String getPaymentInfoByPaymentId(String paymentId) throws Exception {
         int maxRetries = 5;
         long retryDelayMillis = 3000;
 
         for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
             HttpURLConnection con = null;
             try {
-                // API 경로를 payments/payment_id 로 수정합니다.
                 URL url = new URL("https://api.portone.io/payments/" + paymentId);
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
@@ -234,6 +236,105 @@ public class PaymentController {
                 response.append(responseLine.trim());
             }
             return response.toString();
+        }
+    }
+
+    /**
+     * 예약 취소 및 환불을 처리하는 API 엔드포인트입니다.
+     * @param reservationId 취소할 예약 ID
+     * @return 처리 결과
+     */
+    @PostMapping("/cancel")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> cancelPayment(@RequestParam("reservationId") Long reservationId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            logger.info("예약 취소 요청 수신: reservationId = {}", reservationId);
+
+            // 1. DB에서 예약 정보와 결제 정보 조회
+            PaymentVO payment = paymentService.getPaymentByReservationId(reservationId);
+            if (payment == null) {
+                response.put("status", "error");
+                response.put("message", "해당 예약에 대한 결제 정보를 찾을 수 없습니다.");
+                logger.warn("결제 정보를 찾을 수 없음: reservationId = {}", reservationId);
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            // 2. 이미 취소된 건인지 확인
+            if ("CANCELED".equalsIgnoreCase(payment.getStatus()) || "REFUNDED".equalsIgnoreCase(payment.getStatus())) {
+                response.put("status", "success");
+                response.put("message", "이미 취소 처리된 예약입니다.");
+                logger.info("이미 취소된 예약: reservationId = {}", reservationId);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+
+            // 3. PortOne API에 환불 요청
+            String refundResponse = requestRefund(payment.getTransactionId(), payment.getAmount());
+            JsonObject refundResult = new Gson().fromJson(refundResponse, JsonObject.class);
+
+            String refundStatus = refundResult.get("status").getAsString();
+
+            if ("REFUNDED".equalsIgnoreCase(refundStatus) || "PAID".equalsIgnoreCase(refundStatus)) {
+                // 환불 요청이 성공하면 DB 상태 업데이트
+                paymentService.updatePaymentStatus(payment.getPaymentId(), "REFUNDED");
+                reservationService.updateReservationStatus(reservationId, "CANCELED");
+
+                response.put("status", "success");
+                response.put("message", "예약이 성공적으로 취소되고 환불되었습니다.");
+                logger.info("예약 취소 및 환불 성공: reservationId = {}", reservationId);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("status", "error");
+                response.put("message", "환불 처리 중 오류가 발생했습니다. 고객센터에 문의해주세요.");
+                logger.error("PortOne 환불 요청 실패: {}", refundResponse);
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (Exception e) {
+            logger.error("예약 취소 및 환불 처리 중 오류 발생: {}", e.getMessage(), e);
+            response.put("status", "error");
+            response.put("message", "예약 취소 처리 중 오류가 발생했습니다.");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * PortOne에 환불을 요청하는 메서드입니다.
+     * @param transactionId 환불할 결제 ID
+     * @param amount 환불 금액
+     * @return 환불 요청 응답 JSON 문자열
+     */
+    private String requestRefund(String transactionId, Long amount) throws Exception {
+        URL url = new URL("https://api.portone.io/payments/merchant_uid/" + transactionId + "/refunds");
+        HttpURLConnection con = null;
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Authorization", "PortOne " + PORTONE_API_SECRET_KEY);
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setDoOutput(true);
+
+            // 환불 요청 본문 생성
+            String jsonInputString = "{\"amount\": " + amount + "}";
+
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = jsonInputString.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = con.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
+                String errorResponse = readResponse(con.getErrorStream());
+                logger.error("PortOne 환불 요청 실패 (응답 코드: {}): {}", responseCode, errorResponse);
+                throw new Exception("PortOne 환불 요청 실패: " + errorResponse);
+            }
+
+            return readResponse(con.getInputStream());
+
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
     }
 }

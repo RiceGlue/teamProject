@@ -100,4 +100,34 @@
     	FROM store_tables
     	WHERE table_id = #{tableId}
     </select>
+
+    <!-- 👇 아래 두 쿼리가 새롭게 추가되었습니다. 👇 -->
+
+    <!-- 특정 매장, 날짜, 상태에 해당하는 예약 목록을 조회합니다. -->
+    <select id="selectReservationsByStoreIdAndDateAndStatus" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            store_id = #{storeId}
+        AND
+            DATE(reservation_time) = #{date}
+        AND
+            status = #{status}
+        ORDER BY
+            reservation_time ASC
+    </select>
+
+    <!-- 예약 상태와 취소 사유를 함께 업데이트합니다. -->
+    <update id="updateReservationStatusAndReason">
+        UPDATE reservations
+        SET
+            status = #{status},
+            cancelled_reason = #{cancelledReason}
+        WHERE
+            reservation_id = #{reservationId}
+    </update>
+
 </mapper>

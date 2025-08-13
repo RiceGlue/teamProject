@@ -1,4 +1,3 @@
-// src/main/java/com/spring/teamProject/dao/ReservationDAO.java
 package com.spring.teamProject.dao;
 
 import java.time.LocalDate;
@@ -84,4 +83,31 @@ public interface ReservationDAO {
      * @return 해당 테이블 VO
      */
     StoreTableVO selectStoreTableById(Long tableId);
+
+    // --- **새로 추가된 메서드** ---
+
+    /**
+     * 특정 매장, 날짜, 상태에 해당하는 예약 목록을 조회합니다.
+     * @param storeId 매장 ID
+     * @param date 조회 날짜
+     * @param status 조회할 예약 상태 (예: CONFIRMED)
+     * @return 조건에 맞는 예약 목록
+     */
+    List<ReservationVO> selectReservationsByStoreIdAndDateAndStatus(
+        @Param("storeId") Long storeId,
+        @Param("date") LocalDate date,
+        @Param("status") String status
+    );
+
+    /**
+     * 예약 상태와 취소 사유를 함께 업데이트합니다.
+     * @param reservationId 예약 ID
+     * @param status 변경할 상태
+     * @param cancelledReason 취소 사유
+     */
+    void updateReservationStatusAndReason(
+        @Param("reservationId") Long reservationId,
+        @Param("status") String status,
+        @Param("cancelledReason") String cancelledReason
+    );
 }

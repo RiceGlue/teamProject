@@ -6,15 +6,31 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface PaymentDAO {
+
+    /**
+     * 새로운 결제 정보를 추가합니다.
+     */
     void insertPayment(PaymentVO payment) throws Exception;
 
-    // ⭐⭐ 이 메서드의 매개변수를 'PaymentVO payment'로 변경하면 더 유연하게 사용할 수 있습니다.
-    // 기존의 코드와 충돌하지 않도록 새로운 메서드를 추가하는 방식을 선택했습니다.
+    /**
+     * 결제 ID와 상태로 결제 상태를 업데이트합니다.
+     * @param paymentId 업데이트할 결제 ID
+     * @param status 새로운 상태 값
+     */
     void updatePaymentStatus(@Param("paymentId") Long paymentId, @Param("status") String status) throws Exception;
 
-    // ⭐⭐ `PaymentServiceImpl`의 `completePayment` 로직에서 사용되는 메서드입니다.
+    /**
+     * transactionId로 결제 정보를 조회합니다.
+     * @param transactionId 포트원에서 받은 고유 거래 ID
+     */
     PaymentVO selectByTransactionId(@Param("transactionId") String transactionId) throws Exception;
 
-    // `ReservationDAO`와 유사하게 예약 ID로 결제 정보를 조회하는 메서드
+    /**
+     * reservationId로 결제 정보를 조회합니다.
+     * @param reservationId 예약 ID
+     */
     PaymentVO selectByReservationId(@Param("reservationId") Long reservationId) throws Exception;
+
+    // 	paymentId로 결제 정보 조회 (새로 추가)
+    PaymentVO selectById(Long paymentId);
 }
