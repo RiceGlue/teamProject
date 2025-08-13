@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <div class="container-fluid">
     <h1 class="h3 mb-2 text-gray-800">일반 회원 관리</h1>
@@ -41,15 +42,26 @@
                                         </td>
                                         <td>${user.memberName}</td>
                                         <td>${user.email}</td>
-                                        <td>${user.phone}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${user.countryCode == '82' and not fn:startsWith(user.phone, '0')}">
+                                                    0${user.phone}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${user.phone}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td><fmt:formatDate value="${user.createdAt}" pattern="yyyy-MM-dd"/></td>
                                         <td>
                                             <c:if test="${user.status == 'ACTIVE'}"><span class="badge bg-success">활성</span></c:if>
                                             <c:if test="${user.status == 'DEACTIVATED'}"><span class="badge bg-secondary">비활성</span></c:if>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-info btn-sm">수정</a>
-                                            <a href="#" class="btn btn-danger btn-sm">비활성화</a>
+                                            <a href="${contextPath}/admin/users/${user.memberId}/edit" class="btn btn-info btn-sm">수정</a>
+                                            <form action="${contextPath}/admin/users/${user.memberId}/deactivate" method="post" style="display:inline;" onsubmit="return confirm('정말로 이 회원을 비활성화하시겠습니까?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">비활성화</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 </c:forEach>
