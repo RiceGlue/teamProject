@@ -35,6 +35,14 @@ public interface ReservationService {
     // 매장 ID로 모든 테이블 목록을 가져오는 메서드 추가
     List<StoreTableVO> getAllTables(int storeId);
 
-    // 	**새로 추가할 사용자 예약 취소 메서드**
+    // 새로 추가할 사용자 예약 취소 메서드
     void cancelReservationByUser(Long reservationId) throws Exception;
+
+    /**
+     * [신규] 사용자 ID로 예약 목록을 조회하는 메서드
+     * @param memberId 사용자 ID
+     * @return 해당 사용자의 예약 목록
+     * @throws Exception DB 접근 오류 발생 시
+     */
+    List<ReservationVO> getReservationsByMemberId(Long memberId);
 }

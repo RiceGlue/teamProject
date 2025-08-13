@@ -130,4 +130,16 @@
             reservation_id = #{reservationId}
     </update>
 
+    <!-- [신규] 사용자 ID로 예약 목록을 조회하는 쿼리 -->
+    <select id="selectReservationsByMemberId" parameterType="long" resultMap="reservationResultMap">
+        SELECT
+            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            status, cancelled_reason, created_at
+        FROM
+            reservations
+        WHERE
+            member_id = #{memberId}
+        ORDER BY
+            reservation_time DESC
+    </select>
 </mapper>

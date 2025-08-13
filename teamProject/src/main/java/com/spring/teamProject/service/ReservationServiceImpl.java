@@ -172,4 +172,15 @@ public class ReservationServiceImpl implements ReservationService {
             "사용자 취소"
         );
     }
+
+    /**
+     * [신규] 사용자 ID로 예약 목록을 조회하는 메서드
+     * @param memberId 사용자 ID
+     * @return 해당 사용자의 예약 목록
+     */
+    @Override
+    public List<ReservationVO> getReservationsByMemberId(Long memberId) {
+        // ReservationDAO를 통해 memberId로 예약 목록을 조회합니다.
+        return reservationDAO.selectReservationsByMemberId(memberId);
+    }
 }
