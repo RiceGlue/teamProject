@@ -30,7 +30,7 @@ public interface MemberService {
     public int checkIdDuplicate(String loginId);
 
     /**
-     * [신규] 소셜 계정 연동을 해제합니다.
+     * 소셜 계정 연동을 해제합니다.
      * @param memberId 회원 ID
      * @param provider 소셜 서비스 제공자
      * @return 성공 여부
@@ -38,8 +38,14 @@ public interface MemberService {
     public boolean unlinkSocialAccount(long memberId, String provider);
 
     /**
-     * [신규] 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
+     * 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
      * @return List<MemberVO>
      */
     public List<MemberVO> findOwners();
+
+    /**
+     * [신규] 역할(role)이 'USER'인 모든 회원 목록을 조회합니다.
+     * @return List<MemberVO>
+     */
+    public List<MemberVO> findUsers();
 }

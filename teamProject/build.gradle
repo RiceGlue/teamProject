@@ -44,6 +44,7 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/io.portone/server-sdk
 	implementation 'io.portone:server-sdk:0.19.2'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	// JSP / Servlet 관련
 	developmentOnly 'org.springframework.boot:spring-boot-devtools' //화면 변경 코드 시 귀찮은 서버 재시작을 줄이고 브라우저 캐시만 삭제하여 리로드

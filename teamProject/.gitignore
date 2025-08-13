@@ -38,3 +38,6 @@ out/
 
 # Firebase secret key - DO NOT TRACK
 teamProject/src/main/resources/firebase-service-account.json
+
+# application.properties
+teamProject/src/main/resources/application.properties
