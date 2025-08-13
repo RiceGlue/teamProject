@@ -8,9 +8,6 @@
 <c:if test="${param.error eq 'true'}">
     <script>alert("정보 등록 실패!");</script>
 </c:if>
-<c:if test="${param.menu eq 'true'}">
-    <script>alert("메뉴 이름 없음!");</script>
-</c:if>
 
 <script>
 	$(document).ready(function() {
@@ -36,25 +33,25 @@
 		'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 		'<div class="form-label" style="width: 200px;">메뉴 이름</div>'+
 		'<div class="form-input" style="flex: 1;">'+
-		'<input id="'+ menuNameIdx +'" name="menuName[]" type="text" maxLength="15" />'+
+		'<input id="'+ menuNameIdx +'" name="menuName" type="text" maxLength="15" />'+
 		'</div></div>'+
 		'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 		'<div class="form-label" style="width: 200px;">메뉴 가격</div>'+
 		'<div class="form-input" style="flex: 1;">'+
-		'<input id="'+priceIdx+'" name="price[]" type="text" maxLength="15" />'+
+		'<input id="'+priceIdx+'" name="price" type="text" maxLength="15" />'+
 		'</div>'+
 		'</div>'+
 		'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 		'<div class="form-label" style="width: 200px;">메뉴 설명</div>'+
 		'<div class="form-input" style="flex: 1;">'+
-		'<textarea id="'+desIdx+'" name="description[]" rows="2" cols="40"></textarea>'+
+		'<textarea id="'+desIdx+'" name="description" rows="2" cols="40"></textarea>'+
 		'</div>'+
-		'<input type="hidden" id="'+displayNoIdx+'" name="displayNo[]" value="'+menuIdx+'" >'+
+		'<input type="hidden" id="'+displayNoIdx+'" name="displayNo" value="'+menuIdx+'" >'+
 		'</div>'+
 		'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
 		'<div class="form-label" style="width: 200px;">메인 이미지</div>'+
 		'<div class="form-input" style="flex: 1;">'+
-		'<input type="file" id="'+fileIdx+'" name="fileName[]" accept="image/*" onchange="validateImages(this);" />'+
+		'<input type="file" id="'+fileIdx+'" name="fileName" accept="image/*" onchange="validateImages(this);" />'+
 		'<label for="'+ fileIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
 		'<span id="'+fileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span><br />'+
 		'</div>'+
@@ -158,8 +155,8 @@
 	
 	function checkMenu() {
 	    const form = document.querySelector('form');
-	    const menuNames = form.querySelectorAll('input[name="menuName[]"]');
-	    const prices = form.querySelectorAll('input[name="price[]"]');
+	    const menuNames = form.querySelectorAll('input[name="menuName"]');
+	    const prices = form.querySelectorAll('input[name="price"]');
 
 	    if (menuNames.length === 0) {
 	        alert("최소 하나 이상의 메뉴를 추가해 주세요.");
@@ -202,30 +199,30 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메뉴 이름</div>
 			<div class="form-input" style="flex: 1;">
-				<input id="menuName0" name="menuName[]" type="text" maxLength="15" />
+				<input id="menuName0" name="menuName" type="text" maxLength="15" />
 			</div>
 		</div>
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메뉴 가격</div>
 			<div class="form-input" style="flex: 1;">
-				<input id="price0" name="price[]" type="text" maxLength="15" />
+				<input id="price0" name="price" type="text" maxLength="15" />
 			</div>
 		</div>
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메뉴 설명</div>
 			<div class="form-input" style="flex: 1;">
-				<textarea id="description0" name="description[]" rows="2" cols="40"></textarea>
+				<textarea id="description0" name="description" rows="2" cols="40"></textarea>
 			</div>
 		</div>
 		
-		<input type="hidden" id="displayNo0" name="displayNo[]" value="0" >
+		<input type="hidden" id="displayNo0" name="displayNo" value="0" >
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메인 이미지</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName0" name="fileName[]" accept="image/*" onchange="validateImages(this);" >
+				<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);" >
 				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
 				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				<br />

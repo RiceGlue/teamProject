@@ -174,4 +174,27 @@
 		)
 	</insert>
 	
+	<insert id="insertMenuImageFile" parameterType="ImageFileVO" >
+		insert into image_file
+		(
+			image_id,
+			file_name,
+			display_no,
+			created_at,
+			reg_id,
+			menu_id,
+			store_id
+		)
+		values
+		(
+			null,
+			#{fileName},
+			#{displayNo},
+			now(),
+			#{regId},
+			#{menuId},
+			#{storeId}
+		)
+	</insert>
+	
 </mapper>
