@@ -1,7 +1,6 @@
 package com.spring.teamProject.controller;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -74,43 +72,50 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		long regId = Long.parseLong(regIdstr);
 
 		List<ImageFileVO> imgFileList = upload(multiReq);
+
+		// 1. regId 세팅
 		if (imgFileList != null && !imgFileList.isEmpty()) {
-			for (ImageFileVO imageFileVO : imgFileList) {
-				imageFileVO.setRegId(regId);
-			}
-			for(int i=0;i<imgFileList.size();i++) {
-				System.out.print("이미지 파일 리스트 사이즈 : "+ imgFileList.size());
-				System.out.println(imgFileList.get(i).getFileName());
-			}
-			storeInfo.put("fileName", imgFileList.get(0).getFileName());
+		    for (ImageFileVO imageFileVO : imgFileList) {
+		        imageFileVO.setRegId(regId); // ✅ regId는 먼저 세팅 가능
+		    }
+		    storeInfo.put("fileName", imgFileList.get(0).getFileName());
 		}
 
 		try {
-			long storeId = adminStoreService.addStoreInfo(storeInfo);
-			adminStoreService.addStoreInfoImage(imgFileList);
-			if (imgFileList != null && !imgFileList.isEmpty()) {
-				for (ImageFileVO imageFileVO : imgFileList) {
-					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
-					File destDir = new File(CURR_FILE_REPO_PATH + File.separator + storeId);
-					FileUtils.moveFileToDirectory(srcFile, destDir, true);
-				}
-			}
-			// ✅ 등록 성공 시 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&success=true");
+		    // 2. store 정보 먼저 등록 후 storeId 받기
+		    long storeId = adminStoreService.addStoreInfo(storeInfo);
+
+		    // 3. 생성된 storeId를 이미지에 추가 세팅
+		    for (ImageFileVO imageFileVO : imgFileList) {
+		    	imageFileVO.setStoreId(storeId);// ✅ storeId는 이 시점에 세팅
+		    }
+
+		    // 4. 이미지 DB 저장
+		    adminStoreService.addStoreInfoImage(imgFileList);
+
+		    // 5. 파일 이동
+		    for (ImageFileVO imageFileVO : imgFileList) {
+		        imageFileName = imageFileVO.getFileName();
+		        File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
+		        File destDir = new File(CURR_FILE_REPO_PATH + File.separator + storeId);
+		        FileUtils.moveFileToDirectory(srcFile, destDir, true);
+		    }
+
+		    return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId=" + regId + "&success=true");
+
 		} catch (Exception e) {
-			if (imgFileList != null && !imgFileList.isEmpty()) {
-				for (ImageFileVO imageFileVO : imgFileList) {
-					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
-					if (srcFile.exists()) {
-						srcFile.delete();
-					}
-				}
-			}
-			e.printStackTrace();
-			// 실패 시에도 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&error=true");
+		    // 삭제 로직 그대로 유지
+		    if (imgFileList != null && !imgFileList.isEmpty()) {
+		        for (ImageFileVO imageFileVO : imgFileList) {
+		            imageFileName = imageFileVO.getFileName();
+		            File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
+		            if (srcFile.exists()) {
+		                srcFile.delete();
+		            }
+		        }
+		    }
+		    e.printStackTrace();
+		    return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId=" + regId + "&error=true");
 		}
 	}
 	
@@ -129,11 +134,15 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	    String storeIdStr = multiReq.getParameter("storeId");
 	    String regIdStr = multiReq.getParameter("regId");
 
-	    long storeId = (storeIdStr != null && !storeIdStr.trim().isEmpty()) ? Long.parseLong(storeIdStr) : 0;
-	    long regId = (regIdStr != null && !regIdStr.trim().isEmpty()) ? Long.parseLong(regIdStr) : 0;
+	    long storeId = Long.parseLong(storeIdStr);
+	    long regId = Long.parseLong(regIdStr);
+	    
+	    System.out.println(storeId +","+regId);
 
 	    // 파일 업로드 메서드 호출
 	    List<ImageFileVO> imgFileList = upload(multiReq);
+	    
+	    ModelAndView mav = new ModelAndView();
 
 	    try {
 	        // 메뉴 개수만큼 반복
@@ -162,6 +171,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	                if (imgFileList != null && i < imgFileList.size()) {
 	                    ImageFileVO imageFileVO = imgFileList.get(i);
 	                    imageFileVO.setStoreId(storeId);
+	                    imageFileVO.setRegId(regId);
 	                    imageFileVO.setMenuId(menuId); // 생성된 menuId를 설정
 	                    imageFileVO.setDisplayNo(Integer.parseInt(displayNos[i]));
 
@@ -171,14 +181,17 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	        }
 	        
 	        // 성공 시 리다이렉트
-	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=" + storeId + "&ownerId=" + regId + "&success=true");
+	        mav.addObject("success", true);
+	        mav.setViewName("redirect:/franchise/menuInfoForm?storeId="+storeId+"&ownerId="+regId);
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        
 	        // 실패 시 리다이렉트
-	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=" + storeId + "&ownerId=" + regId + "&error=true");
+	        mav.addObject("error", true);
+	        mav.setViewName("redirect:/franchise/menuInfoForm?storeId="+storeId+"&ownerId="+regId);
 	    }
+	    return mav;
 	}
 	
 }

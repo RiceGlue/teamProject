@@ -12,7 +12,7 @@
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
-	$(document).on("change", "input[type='file'][name='fileName[]']", function () {
+	$(document).on("change", "input[type='file'][name='fileName']", function () {
 	    const inputId = $(this).attr("id");
 
 	    // id가 없는 경우는 무시
@@ -83,9 +83,9 @@
 		    '<div class="form-input" style="flex: 1;">' +
 		    '<div>' +
 		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)">메인 이미지</label>' +
-		    '<input type="hidden" name="fileType[]" value="false">' +
+		    '<input type="hidden" name="fileType" value="false">' +
 		    '</div>' +
-		    '<input type="file" id="' + fileNameIdx + '" name="fileName[]" accept="image/*" onchange="validateImages(this);">' +
+		    '<input type="file" id="' + fileNameIdx + '" name="fileName" accept="image/*" onchange="validateImages(this);">' +
 		    '<label for="' + fileNameIdx + '" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>' +
 		    '<span id="' + showFileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>' +
 		    '</div>' +
@@ -98,7 +98,7 @@
 	    const allRows = document.querySelectorAll("#ImagesContainer .form-row");
 	    
 	    allRows.forEach(row => {
-		    const hidden = row.querySelector('input[type="hidden"][name="fileType[]"]');
+		    const hidden = row.querySelector('input[type="hidden"][name="fileType"]');
 		    const radio = row.querySelector('input[type="radio"][name="mainImageRadio"]');
 		    hidden.value = (radio === selectedRadio) ? "true" : "false";
 	    });
@@ -275,7 +275,7 @@
 		console.log('편의시설:',amenities);
 		
 		//이미지 파일 유효성
-		const files=document.querySelectorAll('input[name="fileName[]"]');
+		const files=document.querySelectorAll('input[name="fileName"]');
 		let hasFile=false;
 		files.forEach(input=>{
 			if(input.files.length>0)hasFile=true;
@@ -513,9 +513,9 @@
 				<div class="form-input" style="flex: 1;">
 					<div>
 						<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" checked>메인 이미지</label>
-						<input type="hidden" name="fileType[]" value="true">
+						<input type="hidden" name="fileType" value="false">
 					</div>
-					<input type="file" id="fileName0" name="fileName[]" accept="image/*" onchange="validateImages(this);">
+					<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);">
 					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
 					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				</div>
