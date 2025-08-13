@@ -60,3 +60,4 @@ related_files.txt
 related_files_by_type.txt
 /.metadata/
 teamProject/gradle.properties.txt
+teamProject/src/main/resources/application.properties
