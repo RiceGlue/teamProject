@@ -348,7 +348,9 @@
                 try {
                     await pollStatus();
                     alert("결제가 완료되었습니다. 예약이 확정되었습니다.");
-                    window.location.href = contextPath + "/customer/reservationComplete";
+                	// ⭐⭐ 수정: storeId 파라미터 추가 ⭐⭐
+                    const storeId = $('[name="storeId"]').val();
+                    window.location.href = contextPath + `/reservation/customer/bookingConfirm?storeId=${storeId}`;
                 } catch (error) {
                     console.error("결제 완료 처리 실패 (폴링 오류):", error);
                     alert("결제는 성공했으나, 예약 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.");

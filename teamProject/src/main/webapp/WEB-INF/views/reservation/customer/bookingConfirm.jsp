@@ -15,23 +15,23 @@
 <body>
 <div class="container">
     <div class="card shadow-sm">
-        <div class="card-header bg-success text-white text-center">
-            <h4 class="mb-0">✅ 예약이 성공적으로 완료되었습니다!</h4>
-        </div>
-        <div class="card-body p-4">
-            <c:if test="${not empty message}">
-                <div class="alert alert-success" role="alert">
-                        ${message}
-                </div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
-                <div class="alert alert-danger" role="alert">
-                        ${errorMessage}
-                </div>
-            </c:if>
+        <c:if test="${not empty confirmedReservation}">
+            <!-- 예약 정보가 있을 때만 성공 메시지 표시 -->
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">✅ 예약이 성공적으로 완료되었습니다!</h4>
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <!-- 에러 메시지가 있을 때만 경고 헤더 표시 -->
+            <div class="card-header bg-danger text-white text-center">
+                <h4 class="mb-0">❌ 예약 정보를 불러오는 데 실패했습니다.</h4>
+            </div>
+        </c:if>
 
+        <div class="card-body p-4">
             <c:choose>
                 <c:when test="${not empty confirmedReservation}">
+                    <!-- 예약 정보가 있을 때만 상세 정보 표시 -->
                     <h5 class="card-title mt-3">예약 상세 정보</h5>
                     <hr>
                     <div class="row">
@@ -48,21 +48,32 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>예약 날짜:</strong>
-                                <fmt:formatDate value="${confirmedReservation.reservationTime}" pattern="yyyy년 MM월 dd일"/>
+                            	<fmt:formatDate value="${reservationDate}" pattern="yyyy년 MM월 dd일"/>
                             </p>
                             <p><strong>예약 시간:</strong>
-                                <fmt:formatDate value="${confirmedReservation.reservationTime}" pattern="a h시 mm분"/>
+                                <fmt:formatDate value="${reservationDate}" pattern="a h시 mm분"/>
                             </p>
                             <p><strong>예약 인원:</strong> ${confirmedReservation.guestCount}명</p>
-                            <p><strong>테이블:</strong> ${confirmedReservation.tableId}번 테이블</p>
+
+                            <p><strong>테이블:</strong>
+                                <c:choose>
+                                    <c:when test="${not empty tableName}">
+                                        ${tableName} (${confirmedReservation.tableId}번 테이블)
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${confirmedReservation.tableId}번 테이블
+                                    </c:otherwise>
+                                </c:choose>
+                            </p>
                         </div>
                     </div>
-                    <c:if test="${not empty confirmedReservation.request}">
-                        <h5 class="mt-4">요청 사항</h5>
-                        <p class="border p-2 rounded bg-light">${confirmedReservation.request}</p>
-                    </c:if>
+                    <%--                     <c:if test="${not empty confirmedReservation.request}"> --%>
+<!--                         <h5 class="mt-4">요청 사항</h5> -->
+<%--                         <p class="border p-2 rounded bg-light">${confirmedReservation.request}</p> --%>
+<%--                     </c:if> --%>
                 </c:when>
                 <c:otherwise>
+                    <!-- 예약 정보가 없을 때만 에러 메시지 표시 -->
                     <div class="alert alert-warning mt-3" role="alert">
                         예약 정보를 불러오는 데 실패했습니다. 예약 번호로 확인해주세요.
                         <c:if test="${not empty param.reservationId}">

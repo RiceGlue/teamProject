@@ -101,4 +101,15 @@ public class ReservationServiceImpl implements ReservationService {
                 .findFirst()
                 .map(StoreTableVO::getTableId);
     }
+
+    @Override
+    public StoreTableVO getStoreTableInfoById(Long tableId) throws Exception {
+        return storeTableDAO.selectStoreTableById(tableId);
+    }
+
+	@Override
+	public List<StoreTableVO> getAllTables(int storeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
