@@ -77,7 +77,7 @@ public class PaymentController {
 
         if ("PAID".equals(status.toUpperCase())) {
             try {
-                String paymentData = getPaymentInfoByMerchantUid(transactionId);
+                String paymentData = getPaymentInfoByPaymentId(transactionId);
 
                 if (paymentData == null) {
                     logger.warn("PortOne 결제 정보를 찾을 수 없습니다. (API 404 응답). 웹훅 처리를 성공으로 간주합니다. transactionId: {}", transactionId);
@@ -86,7 +86,10 @@ public class PaymentController {
 
                 JsonObject paymentObject = gson.fromJson(paymentData, JsonObject.class);
                 String portoneStatus = paymentObject.get("status").getAsString();
-                BigDecimal portoneAmount = paymentObject.get("amount").getAsBigDecimal();
+
+                JsonObject amountObject = paymentObject.getAsJsonObject("amount");
+                // `amountObject`에서 `total` 값을 가져와야 합니다.
+                BigDecimal portoneAmount = amountObject.get("total").getAsBigDecimal();
 
                 PaymentVO payment = paymentService.getPaymentByTransactionId(transactionId);
 
@@ -134,6 +137,7 @@ public class PaymentController {
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
 
+
     @GetMapping("/checkStatus")
     @ResponseBody
     public Map<String, Object> checkPaymentStatus(@RequestParam("transactionId") String transactionId) {
@@ -155,19 +159,20 @@ public class PaymentController {
 
     /**
      * PortOne V2 API의 결제 정보를 조회하는 메서드입니다.
-     * merchant_uid를 사용하여 결제 정보를 조회합니다.
-     * @param merchantUid 조회할 주문 번호
+     * payment_id를 사용하여 결제 정보를 조회합니다.
+     * @param paymentId 조회할 결제 ID
      * @return 결제 정보 JSON 문자열
      * @throws Exception API 호출 실패 시
      */
-    private String getPaymentInfoByMerchantUid(String merchantUid) throws Exception {
-        int maxRetries = 3;
-        long retryDelayMillis = 2000;
+    private String getPaymentInfoByPaymentId(String paymentId) throws Exception { // 메서드명 변경
+        int maxRetries = 5;
+        long retryDelayMillis = 3000;
 
         for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
             HttpURLConnection con = null;
             try {
-                URL url = new URL("https://api.portone.io/payments/merchant_uid/" + merchantUid);
+                // API 경로를 payments/payment_id 로 수정합니다.
+                URL url = new URL("https://api.portone.io/payments/" + paymentId);
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.setRequestProperty("Authorization", "PortOne " + PORTONE_API_SECRET_KEY);
@@ -180,11 +185,11 @@ public class PaymentController {
                     return readResponse(con.getInputStream());
                 } else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
                     if (retryCount < maxRetries - 1) {
-                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: 404). {}ms 후 재시도합니다. (시도: {}/{}). merchantUid: {}",
-                                    retryDelayMillis, retryCount + 1, maxRetries, merchantUid);
+                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: 404). {}ms 후 재시도합니다. (시도: {}/{}). paymentId: {}",
+                                    retryDelayMillis, retryCount + 1, maxRetries, paymentId);
                         Thread.sleep(retryDelayMillis);
                     } else {
-                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: 404, 재시도 횟수 초과). merchantUid: {}", merchantUid);
+                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: 404, 재시도 횟수 초과). paymentId: {}", paymentId);
                         return null;
                     }
                 } else {
@@ -194,8 +199,8 @@ public class PaymentController {
                     }
 
                     if (retryCount < maxRetries - 1) {
-                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: {}). {}ms 후 재시도합니다. (시도: {}/{}). merchantUid: {}",
-                                    responseCode, retryDelayMillis, retryCount + 1, maxRetries, merchantUid);
+                        logger.warn("PortOne 결제 정보 조회 실패 (응답 코드: {}). {}ms 후 재시도합니다. (시도: {}/{}). paymentId: {}",
+                                    responseCode, retryDelayMillis, retryCount + 1, maxRetries, paymentId);
                         Thread.sleep(retryDelayMillis);
                     } else {
                         logger.error("PortOne 결제 정보 조회 실패 (응답 코드: {}): {}", responseCode, errorResponse);
@@ -204,8 +209,8 @@ public class PaymentController {
                 }
             } catch (IOException e) {
                 if (retryCount < maxRetries - 1) {
-                    logger.warn("PortOne API 호출 중 I/O 오류 발생. {}ms 후 재시도합니다. (시도: {}/{}). merchantUid: {}",
-                                retryDelayMillis, retryCount + 1, maxRetries, merchantUid);
+                    logger.warn("PortOne API 호출 중 I/O 오류 발생. {}ms 후 재시도합니다. (시도: {}/{}). paymentId: {}",
+                                retryDelayMillis, retryCount + 1, maxRetries, paymentId);
                     Thread.sleep(retryDelayMillis);
                 } else {
                     logger.error("PortOne API 호출 중 I/O 오류 발생 (재시도 횟수 초과): {}", e.getMessage());
@@ -217,7 +222,7 @@ public class PaymentController {
                 }
             }
         }
-        return null; // 최종 실패 시 null 반환
+        return null;
     }
 
     private String readResponse(java.io.InputStream is) throws Exception {
