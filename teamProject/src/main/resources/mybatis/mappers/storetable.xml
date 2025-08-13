@@ -24,4 +24,13 @@
             capacity, table_info
     </select>
 
+    <select id="selectStoreTableById" parameterType="java.lang.Long" resultMap="storeTableResultMap">
+    	SELECT
+    		table_id, store_id, table_info, capacity, pos_x, pos_y
+    	FROM
+    		store_tables
+    	WHERE
+    		table_id = #{tableId}
+    </select>
+
 </mapper>

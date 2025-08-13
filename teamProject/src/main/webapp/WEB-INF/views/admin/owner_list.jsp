@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <div class="container-fluid">
     <h1 class="h3 mb-2 text-gray-800">가맹점 회원 관리</h1>
@@ -35,7 +36,16 @@
                                         <td>${owner.loginId}</td>
                                         <td>${owner.memberName}</td>
                                         <td>${owner.email}</td>
-                                        <td>${owner.phone}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${owner.countryCode == '82' and not fn:startsWith(owner.phone, '0')}">
+                                                    0${owner.phone}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${owner.phone}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td><fmt:formatDate value="${owner.createdAt}" pattern="yyyy-MM-dd"/></td>
                                         <td>
                                             <c:if test="${owner.status == 'ACTIVE'}"><span class="badge bg-success">활성</span></c:if>

@@ -17,4 +17,6 @@ public interface StoreTableDAO {
      * @return 해당 매장의 모든 테이블 목록
      */
     List<StoreTableVO> selectAllTablesByStoreId(@Param("storeId") Long storeId);
+
+	StoreTableVO selectStoreTableById(Long tableId);
 }

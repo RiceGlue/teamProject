@@ -5,6 +5,7 @@
 <html lang="ko">
 <head>
     <title>예약하기 - ${store.storeName}</title>
+    <!-- ⭐⭐ 수정: Bootstrap CSS 파일 링크의 확장자를 .css로 수정했습니다. ⭐⭐ -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
@@ -62,7 +63,6 @@
         <input type="hidden" name="reservationTimeStr" id="selectedReservationTime" value="${selectedReservationTime}" />
         <input type="hidden" name="tableId" id="selectedTableId" value="${selectedTableId}" />
         <input type="hidden" name="paymentId" id="paymentIdInput" />
-
         <input type="hidden" id="storeNameHidden" value="${store.storeName}">
 
         <div class="mb-3">
@@ -95,6 +95,7 @@
 <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<!-- ⭐⭐ 수정: Bootstrap JS 파일 링크는 그대로 둡니다. ⭐⭐ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -120,6 +121,7 @@
                 return;
             }
             $.ajax({
+                // ⭐⭐ 수정: contextPath 변수를 사용해 올바른 URL을 구성합니다. ⭐⭐
                 url: contextPath + '/reservation/customer/available-slots',
                 type: 'GET',
                 data: { storeId: storeId, date: date },
@@ -240,7 +242,6 @@
             $('#selectedTableId').val(tableId);
         });
         $('#payment-button').on('click', function(e) {
-            // 필수 정보 유효성 검사
             if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
                 alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
                 return;
@@ -271,6 +272,7 @@
             };
 
             $.ajax({
+                // ⭐⭐ 수정: contextPath 변수를 사용해 올바른 URL을 구성합니다. ⭐⭐
                 url: contextPath + '/reservation/customer/book-temp',
                 type: 'POST',
                 data: formData,
@@ -289,41 +291,75 @@
             });
         }
 
-        function requestPay(transactionId, totalAmount) {
+        async function requestPay(transactionId, totalAmount) {
             const storeName = $('#storeNameHidden').val();
             const orderName = storeName + ' 예약 결제';
-
             const { PortOne } = window;
 
-            //const myRedirectUrl = window.location.origin + contextPath + '/reservation/customer/payment-result?transactionId=' + transactionId;
-            const myRedirectUrl = 'https://273eaabf9571.ngrok-free.app' + contextPath + '/reservation/customer/payment-result?transactionId=' + transactionId; //ngrok 실행해야함
+            try {
+                const paymentResponse = await PortOne.requestPayment({
+                    storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
+                    channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31',
+                    payMethod: 'CARD',
+                    orderName: orderName,
+                    totalAmount: totalAmount,
+                    paymentId: transactionId,
+                    currency: 'CURRENCY_KRW',
+                    customer: {
+                        fullName: '테스터조원기',
+                        phoneNumber: '010-7277-7829',
+                        email: 'ksd0607@naver.com'
+                    }
+                });
 
-            console.log("Redirect URL:", myRedirectUrl);
+                if (paymentResponse.code !== undefined) {
+                    console.error("결제 실패 (code 존재):", paymentResponse.message);
+                    return alert(paymentResponse.message);
+                }
 
-            PortOne.requestPayment({
-                storeId: 'store-b124e965-36a7-42f5-83bf-12be9a8633f5',
-                channelKey: 'channel-key-11881682-d208-4707-8709-1ac268b64c31',
-                payMethod: 'CARD',
-                orderName: orderName,
-                totalAmount: totalAmount,
-                // ⭐⭐ transactionId 대신 paymentId를 사용합니다. PortOne SDK의 요구사항입니다.
-                paymentId: transactionId,
-                // transactionId: transactionId, // 이 줄은 선택적으로 남겨두거나 제거할 수 있습니다.
-                currency: 'CURRENCY_KRW',
-                customer: {
-                    fullName: '테스터조원기',
-                    phoneNumber: '010-7277-7829',
-                    email: 'ksd0607@naver.com'
-                },
-                redirectUrl: myRedirectUrl
-            })
-            .then(function(response) {
-                console.log("PortOne 결제 요청이 성공적으로 시작되었습니다.", response);
-            })
-            .catch(function(error) {
-                console.error("PortOne 결제 요청 오류:", error);
-                alert(`결제 요청 중 오류가 발생했습니다: ${error.message}`);
-            });
+                console.log("결제 성공. paymentId:", paymentResponse.paymentId);
+
+                const pollStatus = () => {
+                    return new Promise((resolve, reject) => {
+                        const intervalId = setInterval(() => {
+                        	$.ajax({
+                        	    url: contextPath + "/reservation/customer/api/payment-status",
+                        	    type: "GET",
+                        	    data: { transactionId: paymentResponse.paymentId },
+                        	    success: function(response) {
+                        	        if (response === "success") {
+                        	            console.log("폴링 응답: success. 웹훅 처리 완료.");
+                        	            clearInterval(intervalId);
+                        	            resolve();
+                        	        } else {
+                        	            console.log("폴링 응답: pending. 웹훅 대기 중...");
+                        	        }
+                        	    },
+                        	    error: function(xhr, status, error) {
+                        	        console.error("폴링 중 오류 발생:", error);
+                        	        clearInterval(intervalId);
+                        	        reject(new Error("폴링 중 서버 오류가 발생했습니다."));
+                        	    }
+                        	});
+                        }, 3000);
+                    });
+                };
+
+                try {
+                    await pollStatus();
+                    alert("결제가 완료되었습니다. 예약이 확정되었습니다.");
+                	// ⭐⭐ 수정: storeId 파라미터 추가 ⭐⭐
+                    const storeId = $('[name="storeId"]').val();
+                    window.location.href = contextPath + `/reservation/customer/bookingConfirm?storeId=${storeId}`;
+                } catch (error) {
+                    console.error("결제 완료 처리 실패 (폴링 오류):", error);
+                    alert("결제는 성공했으나, 예약 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.");
+                }
+
+            } catch (error) {
+                console.error("PortOne 결제 요청 중 오류 발생 또는 취소:", error);
+                alert(`결제가 취소되었거나 실패했습니다. ${error.message || ''}`);
+            }
         }
     });
 

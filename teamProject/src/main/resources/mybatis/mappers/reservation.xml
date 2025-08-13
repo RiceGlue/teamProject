@@ -16,6 +16,16 @@
 		<result property="cancelledReason" column="cancelled_reason"/>
 	</resultMap>
 
+	<!-- ⭐ StoreTableVO를 위한 ResultMap 추가 ⭐ -->
+	<resultMap id="storeTableResultMap" type="com.spring.teamProject.vo.StoreTableVO">
+		<id property="tableId" column="table_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="tableInfo" column="table_info"/>
+		<result property="capacity" column="capacity"/>
+		<result property="pos_x" column="pos_x"/>
+		<result property="pos_y" column="pos_y"/>
+	</resultMap>
+
 	<insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
             useGeneratedKeys="true" keyProperty="reservationId">
         INSERT INTO reservations (
@@ -84,4 +94,10 @@
         LIMIT 1
     </select>
 
+    <!-- ⭐ 추가된 SQL 쿼리: tableId로 테이블 정보를 조회합니다. ⭐ -->
+    <select id="selectStoreTableById" parameterType="long" resultMap="storeTableResultMap">
+    	SELECT *
+    	FROM store_tables
+    	WHERE table_id = #{tableId}
+    </select>
 </mapper>

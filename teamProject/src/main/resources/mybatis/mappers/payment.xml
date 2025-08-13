@@ -24,48 +24,30 @@
         )
     </insert>
 
-	<select id="selectByTransactionId" resultType="com.spring.teamProject.vo.PaymentVO">
+    <!-- transactionId로 결제 정보를 조회하는 쿼리 -->
+    <select id="selectByTransactionId" parameterType="String" resultMap="paymentResultMap">
         SELECT
-            paymentId,
-            reservationId,
-            amount,
-            paymentMethod,
-            transactionId,
-            status,
-            paidAt,
-            createdAt
-        FROM payments
-        WHERE transactionId = #{transactionId}
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+        FROM
+            payments
+        WHERE transaction_id = #{transactionId}
     </select>
 
-<!--     <select id="selectByTransactionId" parameterType="String" resultMap="paymentResultMap"> -->
-<!--         SELECT -->
-<!--             payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at -->
-<!--         FROM -->
-<!--             payments -->
-<!--         WHERE transaction_id = #{transactionId} -->
-<!--     </select> -->
-
-    <update id="updatePaymentStatus" parameterType="com.spring.teamProject.vo.PaymentVO">
+    <!-- PaymentService의 updatePaymentStatus에 맞게 매개변수를 Param에 맞도록 수정 -->
+    <update id="updatePaymentStatus">
         UPDATE payments
         SET
-            status = #{status},
-            paid_at = #{paidAt}  WHERE
+            status = #{status}
+        WHERE
             payment_id = #{paymentId}
     </update>
 
-    <select id="selectByReservationId" resultType="com.spring.teamProject.vo.PaymentVO">
+    <select id="selectByReservationId" parameterType="Long" resultMap="paymentResultMap">
         SELECT
-            paymentId,
-            reservationId,
-            amount,
-            paymentMethod,
-            transactionId,
-            status,
-            paidAt,
-            createdAt
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
         FROM payments
-        WHERE reservationId = #{reservationId}
-        LIMIT 1 -- 예약 1개당 결제 정보는 1개여야 하므로 LIMIT 1
+        WHERE reservation_id = #{reservationId}
+        LIMIT 1
     </select>
+
 </mapper>

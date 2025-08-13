@@ -76,4 +76,12 @@ public interface ReservationDAO {
      * @param status 변경할 상태
      */
     void updateStatusByPaymentId(@Param("paymentId") String paymentId, @Param("status") String status);
+
+    // tableId로 store_tables 정보를 조회
+    /**
+     * 테이블 ID로 테이블 정보를 조회합니다.
+     * @param tableId 테이블 ID
+     * @return 해당 테이블 VO
+     */
+    StoreTableVO selectStoreTableById(Long tableId);
 }

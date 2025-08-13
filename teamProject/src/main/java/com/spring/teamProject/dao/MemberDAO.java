@@ -42,4 +42,6 @@ public interface MemberDAO {
      * @return List<MemberVO>
      */
     List<MemberVO> findOwners();
+
+    List<MemberVO> findUsers();
 }

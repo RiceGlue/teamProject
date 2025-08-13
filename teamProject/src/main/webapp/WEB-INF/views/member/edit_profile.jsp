@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <script>
     function validateImage(input) {
@@ -37,6 +38,32 @@
         document.getElementById('preview').src = currentImage;
     }
 
+    // 폼 제출 시 호출될 메인 유효성 검사 함수
+    function validateForm() {
+        // 전화번호 유효성 검사
+        const countryCode = document.getElementById('countryCode').value;
+        const phone = document.getElementById('phone').value;
+        if (countryCode === '82') {
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+                    alert('올바른 휴대폰 번호 10자리 또는 11자리를 입력해주세요.');
+                    document.getElementById('phone').focus();
+                    return false;
+                }
+            } else {
+                 if (cleanPhone.length < 9 || cleanPhone.length > 10) {
+                    alert('올바른 휴대폰 번호 10자리 또는 11자리를 입력해주세요.');
+                    document.getElementById('phone').focus();
+                    return false;
+                }
+            }
+        }
+
+        // 비밀번호 유효성 검사
+        return validatePassword();
+    }
+
     function validatePassword() {
         // 이 함수는 form 태그의 onsubmit 이벤트에 의해 호출되므로,
         // DOM 요소들이 모두 로드된 이후에 실행되어 id로 요소를 찾는데 문제가 없습니다.
@@ -70,18 +97,16 @@
     <c:if test="${not empty msg}">
         <div class="alert alert-success" role="alert">${msg}</div>
     </c:if>
+
+    <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
         
-    <!-- === 프로필 정보 수정 폼 시작 === -->
-    <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validatePassword();">
-        
-        <%-- 프로필 이미지, 이름, 연락처, 이메일 등 공통 정보 필드 --%>
         <div class="text-center mb-4">
             <c:choose>
                 <c:when test="${not empty memberInfo.profileImageUrl}">
-                    <img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+                	<img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
                 </c:when>
                 <c:otherwise>
-                    <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="기본 프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+                	<img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="기본 프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
                 </c:otherwise>
             </c:choose>
             <div>
@@ -89,17 +114,14 @@
                 <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
             </div>
         </div>
-
         <div class="mb-3">
             <label for="memberName" class="form-label">이름</label>
             <input type="text" class="form-control" id="memberName" name="memberName" value="${memberInfo.memberName}" required>
         </div>
-
-        <!-- 전화번호, 이메일 수정 필드 추가 -->
         <div class="mb-3">
             <label for="phone" class="form-label">연락처</label>
             <div class="input-group">
-                <select class="form-select" name="countryCode" style="max-width: 150px;">
+                <select class="form-select" id="countryCode" name="countryCode" style="max-width: 150px;">
                     <option value="82" ${memberInfo.countryCode == '82' ? 'selected' : ''}>+82 (대한민국)</option>
                     <option value="1"  ${memberInfo.countryCode == '1' ? 'selected' : ''}>+1 (United States)</option>
                     <option value="81" ${memberInfo.countryCode == '81' ? 'selected' : ''}>+81 (日本)</option>
@@ -124,10 +146,13 @@
                     <option value="55" ${memberInfo.countryCode == '55' ? 'selected' : ''}>+55 (Brasil)</option>
                     <option value="52" ${memberInfo.countryCode == '52' ? 'selected' : ''}>+52 (Mexico)</option>
                 </select>
-                <input type="tel" class="form-control" id="phone" name="phone" value="${memberInfo.phone}" placeholder="'-' 없이 숫자만 입력" required>
+                <c:set var="displayPhone" value="${memberInfo.phone}" />
+                <c:if test="${memberInfo.countryCode == '82' and not fn:startsWith(memberInfo.phone, '0')}">
+                    <c:set var="displayPhone" value="0${memberInfo.phone}" />
+                </c:if>
+                <input type="tel" class="form-control" id="phone" name="phone" value="${displayPhone}" placeholder="'-' 없이 숫자만 입력" required>
             </div>
         </div>
-
         <div class="mb-3">
             <label for="email" class="form-label">이메일</label>
             <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" placeholder="name@example.com" required>
@@ -155,7 +180,7 @@
             </div>
         </c:if>
 
-        <%-- 소셜 로그인으로만 가입하여 비밀번호가 없는 계정 --%>
+			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
         <c:if test="${empty memberInfo.loginPw}">
             <h5 class="mb-3">비밀번호 설정</h5>
             <p class="text-muted small mb-3">비밀번호를 설정하면 이메일과 비밀번호로도 로그인할 수 있습니다.</p>
@@ -164,7 +189,7 @@
                 <button type="button" class="btn btn-outline-primary" onclick="alert('비밀번호 설정 기능은 개발 예정입니다.');">비밀번호 설정하기</button>
             </div>
         </c:if>
-
+        
         <hr class="my-4">
         
         <%-- 알림 수신 설정 섹션 --%>
@@ -195,13 +220,16 @@
     <!-- === 프로필 정보 수정 폼 종료 === -->
     
 
-    <!-- ? --- [위치 이동] 소셜 계정 연동 섹션 (폼 바깥으로 이동) --- ? -->
+    <!-- --- 소셜 계정 연동 섹션 --- -->
     <hr class="my-4">
     <h5 class="mb-3">소셜 계정 연동</h5>
     
     <c:set var="googleLinked" value="${false}" />
+    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
     <c:forEach var="account" items="${memberInfo.socialAccounts}">
-        <c:if test="${account.provider == 'GOOGLE'}"><c:set var="googleLinked" value="${true}" /></c:if>
+        <c:if test="${account.provider == 'GOOGLE'}">
+            <c:set var="googleLinked" value="${true}" />
+        </c:if>
     </c:forEach>
 
     <div class="card p-3">

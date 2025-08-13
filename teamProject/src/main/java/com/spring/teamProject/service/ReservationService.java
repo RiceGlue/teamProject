@@ -10,7 +10,8 @@ import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreTableVO;
 
 public interface ReservationService {
-    // 예약 정보를 추가하는 메서드
+
+    // 새로운 예약 정보를 추가하는 메서드 (기존 'addReservation' 사용)
     void addReservation(ReservationVO reservation) throws Exception;
 
     // 매장 ID로 예약 목록을 조회하는 메서드
@@ -27,4 +28,10 @@ public interface ReservationService {
 
     // 특정 시간대에 사용 가능한 테이블을 찾는 메서드
     Optional<Long> findAvailableTable(Long storeId, LocalDateTime reservationTime, int guestCount);
+
+    // tableId로 테이블 상세 정보를 조회
+    StoreTableVO getStoreTableInfoById(Long tableId) throws Exception;
+
+    // 매장 ID로 모든 테이블 목록을 가져오는 메서드 추가
+    List<StoreTableVO> getAllTables(int storeId);
 }

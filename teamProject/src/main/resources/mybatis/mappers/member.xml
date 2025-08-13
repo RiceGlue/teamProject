@@ -72,10 +72,17 @@
         WHERE login_id = #{loginId} AND login_pw = #{loginPw} AND status = 'ACTIVE'
     </select>
     
-    <!-- [신규] 역할이 'OWNER'인 모든 회원을 조회하는 쿼리 -->
+    <!-- 역할이 'OWNER'인 모든 회원을 조회하는 쿼리 -->
     <select id="findOwners" resultMap="memberResultMap">
         SELECT * FROM members
         WHERE role = 'OWNER'
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- [신규] 역할이 'USER'인 모든 회원을 조회하는 쿼리 -->
+    <select id="findUsers" resultMap="memberResultMap">
+        SELECT * FROM members
+        WHERE role = 'USER'
         ORDER BY created_at DESC
     </select>
 
