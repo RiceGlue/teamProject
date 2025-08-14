@@ -1,25 +1,32 @@
 package com.spring.teamProject.vo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ReservationVO {
     private Long reservationId;
     private Long memberId;
     private Long storeId;
-    private Long tableId;
     private LocalDateTime reservationTime;
-    private Integer guestCount;
+    private int guestCount; // int 타입으로 통일
     private String status;
-    private String cancelledReason;
     private LocalDateTime createdAt;
+    private String cancelledReason;
+    private String paymentId;
 
+    // --- 변경점 ---
+    // 단일 테이블 ID(tableId) 필드를 제거했습니다.
+    // 하나의 예약에 여러 테이블이 할당될 수 있도록 List<StoreTableVO> 필드를 유지합니다.
+    private List<StoreTableVO> tables;
+
+    // 기본 생성자
     public ReservationVO() {}
 
-    public ReservationVO(Long reservationId, Long memberId, Long storeId, Long tableId, LocalDateTime reservationTime, Integer guestCount, String status, String cancelledReason, LocalDateTime createdAt) {
+    // --- 변경점: tableId 필드를 제거한 새로운 생성자 ---
+    public ReservationVO(Long reservationId, Long memberId, Long storeId, LocalDateTime reservationTime, int guestCount, String status, String cancelledReason, LocalDateTime createdAt) {
         this.reservationId = reservationId;
         this.memberId = memberId;
         this.storeId = storeId;
-        this.tableId = tableId;
         this.reservationTime = reservationTime;
         this.guestCount = guestCount;
         this.status = status;
@@ -27,30 +34,95 @@ public class ReservationVO {
         this.createdAt = createdAt;
     }
 
-    public Long getReservationId() { return reservationId; }
-    public void setReservationId(Long reservationId) { this.reservationId = reservationId; }
+    // --- getter/setter 메서드 ---
+    // paymentId
+    public String getPaymentId() {
+        return paymentId;
+    }
 
-    public Long getMemberId() { return memberId; }
-    public void setMemberId(Long memberId) { this.memberId = memberId; }
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
 
-    public Long getStoreId() { return storeId; }
-    public void setStoreId(Long storeId) { this.storeId = storeId; }
+    // tables
+    public List<StoreTableVO> getTables() {
+        return tables;
+    }
 
-    public Long getTableId() { return tableId; }
-    public void setTableId(Long tableId) { this.tableId = tableId; }
+    public void setTables(List<StoreTableVO> tables) {
+        this.tables = tables;
+    }
 
-    public LocalDateTime getReservationTime() { return reservationTime; }
-    public void setReservationTime(LocalDateTime reservationTime) { this.reservationTime = reservationTime; }
+    // reservationId
+    public Long getReservationId() {
+        return reservationId;
+    }
 
-    public Integer getGuestCount() { return guestCount; }
-    public void setGuestCount(Integer guestCount) { this.guestCount = guestCount; }
+    public void setReservationId(Long reservationId) {
+        this.reservationId = reservationId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    // memberId
+    public Long getMemberId() {
+        return memberId;
+    }
 
-    public String getCancelledReason() { return cancelledReason; }
-    public void setCancelledReason(String cancelledReason) { this.cancelledReason = cancelledReason; }
+    public void setMemberId(Long memberId) {
+        this.memberId = memberId;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    // storeId
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    // reservationTime
+    public LocalDateTime getReservationTime() {
+        return reservationTime;
+    }
+
+    public void setReservationTime(LocalDateTime reservationTime) {
+        this.reservationTime = reservationTime;
+    }
+
+    // guestCount
+    // int 타입으로 통일
+    public int getGuestCount() {
+        return guestCount;
+    }
+
+    public void setGuestCount(int guestCount) {
+        this.guestCount = guestCount;
+    }
+
+    // status
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // cancelledReason
+    public String getCancelledReason() {
+        return cancelledReason;
+    }
+
+    public void setCancelledReason(String cancelledReason) {
+        this.cancelledReason = cancelledReason;
+    }
+
+    // createdAt
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

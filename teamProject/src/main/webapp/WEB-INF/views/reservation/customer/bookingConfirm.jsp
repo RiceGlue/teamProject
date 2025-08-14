@@ -55,16 +55,17 @@
                             </p>
                             <p><strong>예약 인원:</strong> ${confirmedReservation.guestCount}명</p>
 
-                            <p><strong>테이블:</strong>
-                                <c:choose>
-                                    <c:when test="${not empty tableName}">
-                                        ${tableName} (${confirmedReservation.tableId}번 테이블)
-                                    </c:when>
-                                    <c:otherwise>
-                                        ${confirmedReservation.tableId}번 테이블
-                                    </c:otherwise>
-                                </c:choose>
-                            </p>
+                            <p>
+							    <strong>테이블:</strong>
+							    <c:choose>
+							        <c:when test="${not empty tableNames}">
+							            ${tableNames}
+							        </c:when>
+							        <c:otherwise>
+							            지정되지 않음
+							        </c:otherwise>
+							    </c:choose>
+							</p>
                         </div>
                     </div>
                     <%--                     <c:if test="${not empty confirmedReservation.request}"> --%>

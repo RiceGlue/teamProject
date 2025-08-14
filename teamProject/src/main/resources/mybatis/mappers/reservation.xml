@@ -4,29 +4,52 @@
 
 <mapper namespace="com.spring.teamProject.dao.ReservationDAO">
 
-	<resultMap id="reservationResultMap" type="com.spring.teamProject.vo.ReservationVO">
-		<id property="reservationId" column="reservation_id"/>
-		<result property="memberId" column="member_id"/>
-		<result property="storeId" column="store_id"/>
-		<result property="tableId" column="table_id"/>
-		<result property="reservationTime" column="reservation_time"/>
-		<result property="guestCount" column="guest_count"/>
-		<result property="status" column="status"/>
-		<result property="createdAt" column="created_at"/>
-		<result property="cancelledReason" column="cancelled_reason"/>
-	</resultMap>
-
 	<resultMap id="storeTableResultMap" type="com.spring.teamProject.vo.StoreTableVO">
 		<id property="tableId" column="table_id"/>
 		<result property="storeId" column="store_id"/>
+		<!-- tableName 필드는 DB의 table_info 컬럼에 매핑합니다. -->
+		<result property="tableName" column="table_info"/>
 		<result property="tableInfo" column="table_info"/>
 		<result property="capacity" column="capacity"/>
 		<result property="pos_x" column="pos_x"/>
 		<result property="pos_y" column="pos_y"/>
 	</resultMap>
 
-    <select id="selectReservationsByStoreIdAndDateAndStatuses" resultType="com.spring.teamProject.vo.ReservationVO">
-        SELECT *
+	<resultMap id="reservationResultMap" type="com.spring.teamProject.vo.ReservationVO">
+		<id property="reservationId" column="reservation_id"/>
+		<result property="memberId" column="member_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="reservationTime" column="reservation_time"/>
+		<result property="guestCount" column="guest_count"/>
+		<result property="status" column="status"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="cancelledReason" column="cancelled_reason"/>
+
+		<collection property="tables" ofType="com.spring.teamProject.vo.StoreTableVO"
+					select="selectTablesForReservation" column="reservation_id" />
+	</resultMap>
+
+	<!-- 특정 reservation_id에 연결된 모든 테이블 정보를 조회하는 쿼리 -->
+	<select id="selectTablesForReservation" parameterType="long" resultMap="storeTableResultMap">
+		SELECT
+			st.table_id,
+			st.store_id,
+			st.table_info,
+			st.capacity,
+			st.pos_x,
+			st.pos_y
+		FROM
+			reservation_table rt
+		JOIN
+			store_tables st ON rt.table_id = st.table_id
+		WHERE
+			rt.reservation_id = #{reservationId}
+	</select>
+
+    <select id="selectReservationsByStoreIdAndDateAndStatuses" resultMap="reservationResultMap">
+        SELECT
+			reservation_id, member_id, store_id, reservation_time, guest_count,
+			status, cancelled_reason, created_at
         FROM reservations
         WHERE STORE_ID = #{storeId}
         AND DATE(RESERVATION_TIME) = #{date}
@@ -34,22 +57,31 @@
         <foreach item="status" collection="statuses" open="(" separator="," close=")">
             #{status}
         </foreach>
+        ORDER BY reservation_time ASC
     </select>
 
 	<insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
             useGeneratedKeys="true" keyProperty="reservationId">
         INSERT INTO reservations (
-            member_id, store_id, table_id, reservation_time, guest_count,
+            member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason
         ) VALUES (
-            #{memberId}, #{storeId}, #{tableId}, #{reservationTime}, #{guestCount},
+            #{memberId}, #{storeId}, #{reservationTime}, #{guestCount},
             #{status}, #{cancelledReason}
         )
     </insert>
 
+    <insert id="insertReservationTables">
+        INSERT INTO reservation_table (reservation_id, table_id)
+        VALUES
+        <foreach item="tableId" collection="tableIds" separator=",">
+            (#{reservationId}, #{tableId})
+        </foreach>
+    </insert>
+
     <select id="selectReservationsByStoreId" parameterType="long" resultMap="reservationResultMap">
         SELECT
-            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            reservation_id, member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason, created_at
         FROM
             reservations
@@ -67,7 +99,7 @@
 
     <select id="selectReservationById" parameterType="long" resultMap="reservationResultMap">
         SELECT
-            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            reservation_id, member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason, created_at
         FROM
             reservations
@@ -77,7 +109,7 @@
 
     <select id="selectReservationsByStoreIdAndDate" resultMap="reservationResultMap">
         SELECT
-            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            reservation_id, member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason, created_at
         FROM
             reservations
@@ -89,23 +121,31 @@
             reservation_time ASC
     </select>
 
-	<select id="findAvailableTables" resultType="com.spring.teamProject.vo.StoreTableVO">
-        SELECT *
-        FROM store_tables st
-        WHERE st.store_id = #{storeId}
-        AND st.capacity >= #{guestCount}
-        AND st.table_id NOT IN (
-            SELECT table_id
-            FROM reservations
-            WHERE store_id = #{storeId}
-            AND reservation_time = #{reservationTime}
-            AND status != 'CANCELLED'
-        )
-        LIMIT 1
+	<!-- 매장 ID로 모든 테이블 조회 -->
+	<select id="selectAllTablesByStoreId" parameterType="long" resultMap="storeTableResultMap">
+        SELECT
+            table_id,
+            store_id,
+            table_info,
+            capacity,
+            pos_x,
+            pos_y
+        FROM
+            store_tables
+        WHERE
+            store_id = #{storeId}
+        ORDER BY
+            table_id
     </select>
 
     <select id="selectStoreTableById" parameterType="long" resultMap="storeTableResultMap">
-    	SELECT *
+    	SELECT
+            table_id,
+            store_id,
+            table_info,
+            capacity,
+            pos_x,
+            pos_y
     	FROM store_tables
     	WHERE table_id = #{tableId}
     </select>
@@ -121,7 +161,7 @@
 
     <select id="selectReservationsByMemberId" parameterType="long" resultMap="reservationResultMap">
         SELECT
-            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
+            reservation_id, member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason, created_at
         FROM
             reservations
