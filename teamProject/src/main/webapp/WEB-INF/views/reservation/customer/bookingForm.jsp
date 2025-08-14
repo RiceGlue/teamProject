@@ -322,8 +322,46 @@
                 return;
             }
 
-            saveTempReservationAndRequestPay();
+        	//결제 요청을 먼저 시작합니다.
+            requestPay();
+            //saveTempReservationAndRequestPay();
         });
+
+        function saveFinalReservation(paymentId) {
+            const storeId = $('[name="storeId"]').val();
+            const tableIdsArray = $('#selectedTableIds').val().split(',');
+
+            const formData = {
+                storeId: storeId,
+                reservationTimeStr: $('#selectedReservationTime').val(),
+                tableIds: tableIdsArray,
+                guestCount: $('#guestCount').val(),
+                request: $('#request').val(),
+                amount: 1000,
+                paymentId: paymentId
+            };
+
+            $.ajax({
+                url: '${pageContext.request.contextPath}/reservation/customer/book-final',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response === "success") {
+                        console.log("최종 예약 정보 저장 성공.");
+                        alert("예약이 최종 확정되었습니다.");
+                        const storeId = $('[name="storeId"]').val();
+                        window.location.href = `${contextPath}/reservation/customer/bookingConfirm?storeId=${storeId}`;
+                    } else {
+                        alert("예약 정보를 저장하는 데 실패했습니다. 관리자에게 문의해주세요.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("최종 예약 정보 저장 오류: ", error);
+                    alert("결제는 성공했으나, 예약 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.");
+                }
+            });
+        }
+
 
         function saveTempReservationAndRequestPay() {
             const storeId = $('[name="storeId"]').val();

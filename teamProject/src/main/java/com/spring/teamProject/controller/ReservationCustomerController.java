@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spring.teamProject.service.PaymentService;
 import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.PaymentVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreTableVO;
@@ -47,13 +48,16 @@ public class ReservationCustomerController {
     @Autowired
     private PaymentService paymentService;
 
+    @Autowired
+    private StoreService storeService;
+
     @GetMapping("/bookForm")
     public String showBookingForm(@RequestParam("storeId") Long storeId,
                                   @RequestParam(value = "reservationTime", required = false) String reservationTime,
                                   @RequestParam(value = "tableIds", required = false) List<Long> tableIds,
                                   @RequestParam(value = "guestCount", required = false, defaultValue = "1") Integer guestCount,
                                   Model model,
-                                  HttpSession session) {
+                                  HttpSession session) throws Exception {
         logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableIds: {}, guestCount: {}",
                 storeId, reservationTime, tableIds, guestCount);
 
@@ -67,7 +71,8 @@ public class ReservationCustomerController {
                 : LocalDate.now().toString();
         model.addAttribute("currentDate", currentDate);
 
-        StoreVO store = getDummyStoreInfo(storeId);
+        //StoreVO store = getDummyStoreInfo(storeId);
+        StoreVO store = storeService.getStoreById(storeId);
         model.addAttribute("store", store);
 
         session.removeAttribute("pendingReservation");
@@ -90,57 +95,86 @@ public class ReservationCustomerController {
         }
     }
 
-    @PostMapping("/book-temp")
+
+    // 결제 성공 후 최종 예약을 처리하는 새로운 엔드포인트
+    @PostMapping("/book-final")
     @ResponseBody
-    public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
-                                         @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
-                                         @RequestParam("amount") BigDecimal amount,
-                                         @RequestParam("paymentMethod") String paymentMethod,
-                                         @RequestParam("transactionId") String transactionId,
-                                         @RequestParam("tableIds") List<Long> tableIds,
-                                         HttpSession session) {
+    public String saveFinalReservation(@ModelAttribute ReservationDTO reservationDTO) {
+        logger.info("최종 예약 정보 저장 요청: {}", reservationDTO);
 
         try {
-            reservation.setReservationTime(reservationTime);
-            Long memberId = (Long) session.getAttribute("memberId");
-            if (memberId == null) {
-                memberId = 1L;
+            // 1. 임시 예약 상태를 '확정'으로 업데이트합니다.
+            //    이때 paymentId를 사용하여 정확한 임시 예약을 찾아야 합니다.
+            boolean success = reservationService.updateReservationToConfirmed(reservationDTO);
+
+            if (success) {
+                // 2. 예약 확정 성공 시 'success' 반환
+                return "success";
+            } else {
+                // 3. 예약 확정 실패 시 (e.g., 이미 예약되었거나 존재하지 않는 경우) 'failure' 반환
+                return "failure";
             }
-            reservation.setMemberId(memberId);
-            reservation.setStatus("PENDING");
-
-            List<StoreTableVO> tables = tableIds.stream()
-                .map(id -> {
-                    StoreTableVO table = new StoreTableVO();
-                    table.setTableId(id);
-                    return table;
-                })
-                .collect(Collectors.toList());
-            reservation.setTables(tables);
-
-            reservationService.addReservation(reservation);
-            logger.info("임시 예약 정보 DB 저장 완료. reservationId: {}", reservation.getReservationId());
-
-            PaymentVO payment = new PaymentVO();
-            payment.setReservationId(reservation.getReservationId());
-            payment.setAmount(amount.longValue());
-            payment.setPaymentMethod(paymentMethod);
-            payment.setTransactionId(transactionId);
-            payment.setStatus("PENDING");
-
-            logger.info("임시 결제 정보 DB 저장 시작. transactionId: {}, amount: {}", payment.getTransactionId(), payment.getAmount());
-            paymentService.addPayment(payment);
-            logger.info("임시 결제 정보 DB 저장 완료. transactionId: {}", payment.getTransactionId());
-
-            session.setAttribute("currentReservationId", reservation.getReservationId());
-            session.setAttribute("currentTransactionId", payment.getTransactionId());
-
-            return "success";
         } catch (Exception e) {
-            logger.error("임시 예약 및 결제 정보 저장 중 오류 발생: {}", e.getMessage(), e);
+            logger.error("최종 예약 정보 저장 중 오류 발생", e);
             return "error";
         }
     }
+
+    // book-temp API는 결제 완료 전에 임시 예약 상태를 만드는 용도로는 사용하지 않도록 제거하거나 로직을 수정해야 합니다.
+    // 여기서는 book-final 로직만 새로 추가했습니다.
+    // 기존의 book-temp 로직은 클라이언트 측에서 제거되었으므로, 서버 측 로직도 함께 정리하는 것이 좋습니다.
+    // 따라서 기존의 POST /book-temp 엔드포인트는 더 이상 필요 없습니다.
+//    @PostMapping("/book-temp")
+//    @ResponseBody
+//    public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
+//                                         @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
+//                                         @RequestParam("amount") BigDecimal amount,
+//                                         @RequestParam("paymentMethod") String paymentMethod,
+//                                         @RequestParam("transactionId") String transactionId,
+//                                         @RequestParam("tableIds") List<Long> tableIds,
+//                                         HttpSession session) {
+//
+//        try {
+//            reservation.setReservationTime(reservationTime);
+//            Long memberId = (Long) session.getAttribute("memberId");
+//            if (memberId == null) {
+//                memberId = 1L;
+//            }
+//            reservation.setMemberId(memberId);
+//            reservation.setStatus("PENDING");
+//
+//            List<StoreTableVO> tables = tableIds.stream()
+//                .map(id -> {
+//                    StoreTableVO table = new StoreTableVO();
+//                    table.setTableId(id);
+//                    return table;
+//                })
+//                .collect(Collectors.toList());
+//            reservation.setTables(tables);
+//
+//            reservationService.addReservation(reservation);
+//            logger.info("임시 예약 정보 DB 저장 완료. reservationId: {}", reservation.getReservationId());
+//
+//            PaymentVO payment = new PaymentVO();
+//            payment.setReservationId(reservation.getReservationId());
+//            payment.setAmount(amount.longValue());
+//            payment.setPaymentMethod(paymentMethod);
+//            payment.setTransactionId(transactionId);
+//            payment.setStatus("PENDING");
+//
+//            logger.info("임시 결제 정보 DB 저장 시작. transactionId: {}, amount: {}", payment.getTransactionId(), payment.getAmount());
+//            paymentService.addPayment(payment);
+//            logger.info("임시 결제 정보 DB 저장 완료. transactionId: {}", payment.getTransactionId());
+//
+//            session.setAttribute("currentReservationId", reservation.getReservationId());
+//            session.setAttribute("currentTransactionId", payment.getTransactionId());
+//
+//            return "success";
+//        } catch (Exception e) {
+//            logger.error("임시 예약 및 결제 정보 저장 중 오류 발생: {}", e.getMessage(), e);
+//            return "error";
+//        }
+//    }
 
     @PostMapping("/complete-payment")
     @ResponseBody
@@ -186,8 +220,15 @@ public class ReservationCustomerController {
         }
 
         if (storeId != null) {
-            StoreVO store = getDummyStoreInfo(storeId);
-            model.addAttribute("store", store);
+            try {
+                // 더미 데이터 대신 실제 DB에서 가게 정보를 가져옵니다.
+                StoreVO store = storeService.getStoreById(storeId);
+                model.addAttribute("store", store);
+                logger.info("DB에서 가게 정보 조회 완료: {}", store);
+            } catch (Exception e) {
+                logger.error("가게 정보 조회 오류: {}", e.getMessage(), e);
+                model.addAttribute("errorMessage", "가게 정보를 불러오는 데 실패했습니다.");
+            }
         }
 
         if (reservationId != null) {

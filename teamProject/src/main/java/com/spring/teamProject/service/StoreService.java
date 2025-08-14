@@ -13,4 +13,7 @@ public interface StoreService {
 	public List<StoreVO> selectStoreByName(String keyword) throws Exception;
 	public List<StoreVO> selectStoreByType(String keyword) throws Exception;
 	public Map storeDetail(StoreVO storeVO) throws Exception;
+
+	// 매장 ID로 매장 정보를 가져오는 메서드 추가
+	public StoreVO getStoreById(Long storeId) throws Exception;
 }
