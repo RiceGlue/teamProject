@@ -5,8 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,10 +58,10 @@ public class StoreControllerImpl implements StoreController {
 
 	@Override
 	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
-	public ModelAndView storeDetail(@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 
-		Map storeMap = storeService.storeDetail(storeId);
+		Map storeMap = storeService.storeDetail(storeVO);
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeMap", storeMap);

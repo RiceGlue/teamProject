@@ -51,27 +51,32 @@ public class StoreServiceImpl implements StoreService{
 	}
 	
 	@Override
-	public Map storeDetail(long storeId) throws Exception {
+	public Map storeDetail(StoreVO storeVO) throws Exception {
 		Map storeMap = new HashMap<>();
 		
+		long storeId = storeVO.getStoreId();
+		long ownerId = storeVO.getOwnerId();
+		
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
-		List<ImageFileVO> imagelist = storeDAO.selectStoreImage(storeId);
 		List<ReviewVO> review = storeDAO.selectStoreReview(storeId);
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
 		List<ReviewVO> detailReview = storeDAO.selectDetailReview(storeId);
 //		List<ReservationSettingVO> reservation = storeDAO.selectStoreReservatioin(storeId);
+		
+		//이미지
+		List<ImageFileVO> storeImage = storeDAO.selectStoreImage(storeVO);
+		List<ImageFileVO> reviewImage = storeDAO.selectReviewImage(storeId);
 
 		
 		storeMap.put("store", store);
-		storeMap.put("imagelist", imagelist);
 		storeMap.put("review", review);
 		storeMap.put("menu", menu);
 		storeMap.put("detailReview", detailReview);
 //		storeMap.put("reservation", reservation);
 		
-		System.out.println(storeId);
-		System.out.println(store.getStoreId());
-		
+		storeMap.put("storeImage", storeImage);
+		storeMap.put("reviewImage", reviewImage);
+
 		return storeMap;
 	}
 	

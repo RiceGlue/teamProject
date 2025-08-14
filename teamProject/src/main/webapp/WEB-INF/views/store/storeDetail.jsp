@@ -75,6 +75,8 @@
 		.home_menu_badge.orange { background-color: orange; }
 		.home_menu_more_btn_wrap { text-align: center; margin-top: 20px; }
 		.home_menu_more_btn { padding: 10px 20px; color: black; border: 1px solid black; border-radius: 6px; font-size: 16px; cursor: pointer; }
+		
+		.carousel-item.active {display: flex; justify-content: center; align-items: }
 
 		/* 예약 UI 관련 CSS 추가 */
 		.time-slot-btn {
@@ -380,16 +382,16 @@
 <body>
 
 	<div class="store-info">
-		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel"> <div class="carousel-inner">
+		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+			<div class="carousel-inner">
 				<div class="carousel-item active">
-					<img src="https://cdn.pixabay.com/photo/2022/03/04/02/28/window-7046360_1280.jpg" class="d-block w-100" alt=${store.fileName }" height="400px">
+					<img src="${contextPath }/download?directoryName=store&fileName=${store.fileName}" class="d-block w-100" alt=${store.fileName }" height="400px">
 				</div>
-				<div class="carousel-item">
-					<img src="https://cdn.pixabay.com/photo/2017/01/26/02/06/christmas-wallpaper-2009590_1280.jpg" alt="..." height="400px">
-				</div>
-				<div class="carousel-item">
-					<img src="https://cdn.pixabay.com/photo/2016/04/21/12/52/restaurant-1343327_1280.jpg" class="d-block w-100" alt="..." height="400px">
-				</div>
+				<c:forEach var="storeImage" items="${storeMap.storeImage}" varStatus="status">
+					<div class="carousel-item">
+						<img src="${contextPath }/download?directoryName=store&fileName=${storeImage.fileName}" alt="${storeImage.fileName }" height="400px">
+					</div>
+				</c:forEach>
 			</div>
 			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
 				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -484,7 +486,7 @@
 								<c:if test="${status.index < 5}">
 									<div class="home_menu_card">
 										<div class="home_menu_image">
-											<img src="${menu.fileName}" alt="${menu.menuName}">
+											<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}">
 										</div>
 										<div class="home_menu_info">
 											<p class="home_menu_name">${menu.menuName}</p>
@@ -503,7 +505,7 @@
 							<c:forEach var="menu" items="${storeMap.menu}">
 								<div class="menu_card">
 									<div class="menu_image">
-										<img src="${menu.fileName}" alt="${menu.menuName}" width="100px">
+										<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" width="100px">
 									</div>
 									<div class="menu_info">
 										<p class="menu_name">${menu.menuName}</p>

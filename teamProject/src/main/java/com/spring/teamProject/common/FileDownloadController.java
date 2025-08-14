@@ -16,9 +16,9 @@ public class FileDownloadController {
 	private static final String CURR_FILE_REPO_PATH = "C:\\project\\file_repo";
 	
 	@RequestMapping("/download")
-	protected void download(@RequestParam("fileName") String fileName, HttpServletResponse res) throws Exception {
+	protected void download(@RequestParam("fileName") String fileName,@RequestParam("directoryName") String directoryName, HttpServletResponse res) throws Exception {
 		OutputStream out = res.getOutputStream();
-		String downFile = CURR_FILE_REPO_PATH + "\\"+ fileName;
+		String downFile = CURR_FILE_REPO_PATH + "\\"+ directoryName + "\\"+ fileName;
 		File file = new File(downFile);
 		
 		res.setHeader("Cache-Control", "no-cache");
