@@ -50,6 +50,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void join(MemberVO memberVO) {
+        // DB에 저장하기 전, 전화번호 유효성을 먼저 검사합니다.
+        validatePhoneNumber(memberVO);
+
         saveProfileImage(memberVO);
         processPhoneNumber(memberVO);
         
@@ -67,25 +70,17 @@ public class MemberServiceImpl implements MemberService {
             }
         }
     }
-    
-    /**
-     * (사용되지 않음) 스프링 시큐리티를 사용하므로, 이 메소드는 직접 호출되지 않습니다.
-     */
+
     @Override
     public MemberVO login(MemberVO memberVO) {
         return memberDAO.login(memberVO);
     }
 
-    /**
-     * (수정) 회원 정보 수정 로직을 안전하게 변경합니다.
-     * 1. DB에서 현재 사용자 정보를 불러옵니다.
-     * 2. 폼에서 제출된 새로운 값들만 기존 정보 위에 덮어씁니다.
-     * 3. 이렇게 하면 폼에 없던 정보나 수정되지 않은 정보가 유실되지 않습니다.
-     * @param updatedInfoVO 수정할 정보가 담긴 객체
-     * @return 수정 성공 시 true, 실패 시 false
-     */
     @Override
     public boolean updateMember(MemberVO updatedInfoVO) {
+        // DB에 저장하기 전, 전화번호 유효성을 먼저 검사합니다.
+        validatePhoneNumber(updatedInfoVO);
+
         // 1. DB에서 현재 사용자의 온전한 정보를 가져옵니다.
         MemberVO currentUser = memberDAO.findById(updatedInfoVO.getMemberId());
         if (currentUser == null) {
@@ -102,8 +97,7 @@ public class MemberServiceImpl implements MemberService {
             } else if (currentUser.getLoginPw() == null) {
                 // 소셜 로그인 사용자가 비밀번호를 설정하려는 경우 (향후 기능)
                 // 현재는 아무 작업도 하지 않음
-            }
-            else {
+            } else {
                 return false; // 현재 비밀번호가 일치하지 않으면 실패
             }
         }
@@ -116,7 +110,7 @@ public class MemberServiceImpl implements MemberService {
         
         // 3-1. 전화번호 포맷팅 (하이픈 제거 등)
         processPhoneNumber(currentUser);
-        
+
         currentUser.setAgreeEmail(updatedInfoVO.isAgreeEmail());
         currentUser.setAgreeSms(updatedInfoVO.isAgreeSms());
         currentUser.setAgreeKakao(updatedInfoVO.isAgreeKakao());
@@ -137,19 +131,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean deactivateMember(long memberId) {
         return memberDAO.deactivateMember(memberId) == 1;
-    }
-
-    @Override
-    public List<MemberVO> findOwners() {
-        return memberDAO.findOwners();
-    }
-
-    /**
-     * [신규] 역할(role)이 'USER'인 모든 회원 목록을 조회합니다.
-     */
-    @Override
-    public List<MemberVO> findUsers() {
-        return memberDAO.findUsers();
     }
 
     /**
@@ -193,6 +174,22 @@ public class MemberServiceImpl implements MemberService {
 
         socialAccountDAO.deleteSocialAccount(memberId, provider);
         return true;
+    }
+
+    /**
+     * 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
+     */
+    @Override
+    public List<MemberVO> findOwners() {
+        return memberDAO.findOwners();
+    }
+
+    /**
+     * 역할(role)이 'USER'인 모든 회원 목록을 조회합니다.
+     */
+    @Override
+    public List<MemberVO> findUsers() {
+        return memberDAO.findUsers();
     }
 
     /**
@@ -254,5 +251,22 @@ public class MemberServiceImpl implements MemberService {
             }
             memberVO.setPhone(cleanPhoneNumber);
         }
+    }
+
+    /**
+     * [수정] 전화번호 유효성을 검사하는 헬퍼 메소드
+     */
+    private void validatePhoneNumber(MemberVO memberVO) {
+        if ("82".equals(memberVO.getCountryCode()) && memberVO.getPhone() != null) {
+            String phone = memberVO.getPhone().replaceAll("[^0-9]", "");
+            
+            // ? --- 여기가 핵심 수정 부분입니다 --- ?
+            // [수정] 맨 앞의 '0'을 제거하지 않고, 전체 길이를 기준으로 검사합니다.
+            // 이렇게 하면 011, 016 등도 포함하는 10자리, 11자리 번호를 모두 허용하게 됩니다.
+            if (phone.length() < 10 || phone.length() > 11) {
+                throw new IllegalArgumentException("유효하지 않은 전화번호 형식입니다.");
+            }
+        }
+        // TODO: 다른 국가 코드에 대한 유효성 검사 규칙 추가 가능
     }
 }

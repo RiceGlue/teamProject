@@ -107,6 +107,10 @@ public class MemberController {
             memberService.join(memberVO);
             redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
             return "redirect:/member/login";
+        } catch (IllegalArgumentException e) { // ? --- [핵심 수정] --- ?
+            redirectAttributes.addFlashAttribute("error", e.getMessage()); // 서비스에서 던진 메시지 사용
+            redirectAttributes.addFlashAttribute("memberVO", memberVO);
+            return "redirect:/member/join?role=" + memberVO.getRole();
         } catch (DuplicateKeyException e) {
             redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
             redirectAttributes.addFlashAttribute("memberVO", memberVO);
@@ -164,6 +168,10 @@ public class MemberController {
                 session.removeAttribute("socialUserInfo");
                 redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 다시 로그인해주세요.");
                 return "redirect:/member/login";
+            } catch (IllegalArgumentException e) { // ? --- [핵심 수정] --- ?
+                session.setAttribute("socialUserInfo", socialUserInfo);
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/member/join_social";
             } catch (DuplicateKeyException e) {
                 session.setAttribute("socialUserInfo", socialUserInfo);
                 redirectAttributes.addFlashAttribute("error", "이미 가입된 전화번호 또는 이메일입니다.");
@@ -187,7 +195,7 @@ public class MemberController {
 
         String role = memberInfo.getRole();
 
-        // ✨ --- 여기가 핵심 수정 부분입니다 --- ✨
+        // ? --- 여기가 핵심 수정 부분입니다 --- ?
         if ("ADMIN".equals(role)) {
             // 관리자의 경우, AdminController의 dashboard로 리다이렉트합니다.
             return "redirect:/admin/dashboard";
@@ -197,7 +205,8 @@ public class MemberController {
             model.addAttribute("memberInfo", memberInfo);
             model.addAttribute("body", "member/mypage.jsp"); // 임시로 일반 마이페이지 표시
             return "layout/layout";
-        } else {
+        }
+        else {
             // 일반 사용자의 경우 기존 마이페이지를 보여줍니다.
             model.addAttribute("memberInfo", memberInfo);
             model.addAttribute("body", "member/mypage.jsp");
@@ -225,21 +234,26 @@ public class MemberController {
         
         memberVO.setMemberId(currentMember.getMemberId());
         
-        boolean isSuccess = memberService.updateMember(memberVO);
-        
-        if (isSuccess) {
-            redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
+        try {
+            boolean isSuccess = memberService.updateMember(memberVO);
             
-            // 세션 갱신 로직
-            MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
-            Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(newAuth);
-            
-            return "redirect:/member/mypage";
-        } else {
-            redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않거나, 정보 수정에 실패했습니다.");
+            if (isSuccess) {
+                redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
+                
+                // 세션 갱신 로직
+                MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
+                Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
+                
+                return "redirect:/member/mypage";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않습니다.");
+                return "redirect:/member/edit-profile";
+            }
+        } catch (IllegalArgumentException e) { // ? --- [핵심 수정] --- ?
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/member/edit-profile";
         }
     }
