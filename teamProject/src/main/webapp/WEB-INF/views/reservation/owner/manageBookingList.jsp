@@ -57,7 +57,13 @@
                     <p><strong>예약자 ID:</strong> ${res.memberId}</p>
                     <p><strong>예약 일시:</strong> ${res.reservationTime}</p>
                     <p><strong>예약 인원:</strong> ${res.guestCount}명</p>
-                    <p><strong>예약 테이블:</strong> ${res.tableId}번</p>
+                    <p>
+					    <strong>예약 테이블:</strong>
+					    <c:forEach var="table" items="${res.tables}" varStatus="loop">
+					        ${table.tableName}
+					        <c:if test="${!loop.last}">, </c:if>
+					    </c:forEach>
+					</p>
                     <p><strong>신청 시각:</strong> ${res.createdAt}</p>
                     <c:if test="${not empty res.cancelledReason}">
                         <p><strong>취소 사유:</strong> ${res.cancelledReason}</p>
