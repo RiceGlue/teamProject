@@ -1,29 +1,35 @@
 package com.spring.teamProject.service;
 
 import com.spring.teamProject.dao.ReservationDAO;
-import com.spring.teamProject.dao.StoreDAO;
 import com.spring.teamProject.vo.PaymentVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreTableVO;
-import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
 
+	private static final Logger logger = LoggerFactory.getLogger(ReservationServiceImpl.class);
+
     @Autowired
     private ReservationDAO reservationDAO;
 
+    // PaymentService를 주입받아 사용합니다.
     @Autowired
     private PaymentService paymentService;
 
@@ -64,7 +70,6 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationDAO.selectReservationById(reservationId);
     }
 
-    // 예약 가능 시간대와 테이블을 반환하는 핵심 로직
     @Override
     public Map<String, List<StoreTableVO>> getAvailableTimeSlots(long storeId, String date) {
         // 예약 가능한 시간대 (예시: 10:00부터 21:00까지 30분 간격)
@@ -89,7 +94,6 @@ public class ReservationServiceImpl implements ReservationService {
         // 각 시간대별로 예약 가능한 테이블을 계산
         for (String time : timeSlots) {
             String reservationTimeStr = date + "T" + time;
-            // DateTimeFormatter를 사용하려면 import가 필요합니다.
             LocalDateTime currentSlotTime = LocalDateTime.parse(reservationTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
             List<StoreTableVO> availableTablesInSlot = new ArrayList<>(allTables);
@@ -99,7 +103,7 @@ public class ReservationServiceImpl implements ReservationService {
                 // 예약 시간과 현재 슬롯 시간이 일치하는 경우
                 if (reserved.getReservationTime().equals(currentSlotTime)) {
                     reserved.getTables().forEach(reservedTable ->
-                        availableTablesInSlot.removeIf(table -> table.getTableId() == reservedTable.getTableId())
+                        availableTablesInSlot.removeIf(table -> table.getTableId().equals(reservedTable.getTableId()))
                     );
                 }
             }
@@ -113,49 +117,30 @@ public class ReservationServiceImpl implements ReservationService {
         return availableSlots;
     }
 
-    // ReservationService 인터페이스의 불필요한 메서드를 제거합니다.
     @Override
     public StoreTableVO getStoreTableInfoById(Long tableId) throws Exception {
         return reservationDAO.selectStoreTableById(tableId);
     }
 
-    // 이 메서드는 구현이 불완전하고 사용되지 않으므로 제거합니다.
-    // getAvailableTimeSlots() 메서드가 더 포괄적인 기능을 제공합니다.
-    //@Override
-    //public Optional<Long> findAvailableTable(Long storeId, LocalDateTime reservationTime, int guestCount) {
-    //    List<StoreTableVO> availableTables = reservationDAO.findAvailableTables(storeId, reservationTime, guestCount);
-    //
-    //    return availableTables.stream()
-    //            .findFirst()
-    //            .map(StoreTableVO::getTableId);
-    //}
-
-    // 이 메서드는 구현이 불완전하고 사용되지 않으므로 제거합니다.
-    //@Override
-    //public List<StoreTableVO> getAllTables(int storeId) {
-    //    return null;
-    //}
-
     @Override
+    @Transactional
     public void cancelReservationByUser(Long reservationId) throws Exception {
         ReservationVO reservation = reservationDAO.selectReservationById(reservationId);
-
         if (reservation == null) {
             throw new Exception("예약 정보를 찾을 수 없습니다.");
         }
-
         if (reservation.getStatus().equals(ReservationStatus.CANCELLED.name()) ||
             reservation.getStatus().equals(ReservationStatus.COMPLETED.name())) {
             throw new IllegalStateException("이미 취소되었거나 완료된 예약은 취소할 수 없습니다.");
         }
 
+        // 결제 정보가 없을 수도 있으므로 Optional로 처리
         PaymentVO payment = paymentService.getPaymentByReservationId(reservationId);
-
-        if (payment == null) {
-            throw new Exception("해당 예약에 대한 결제 정보를 찾을 수 없습니다.");
+        if (payment != null) {
+            paymentService.refundPayment(payment.getPaymentId());
+        } else {
+            logger.warn("Reservation {} has no payment associated. Skipping refund process.", reservationId);
         }
-
-        paymentService.refundPayment(payment.getPaymentId());
 
         reservationDAO.updateReservationStatusAndReason(
             reservationId,
@@ -171,13 +156,66 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Override
 	public Optional<Long> findAvailableTable(Long storeId, LocalDateTime reservationTime, int guestCount) {
-		// TODO Auto-generated method stub
 		return Optional.empty();
 	}
 
 	@Override
 	public List<StoreTableVO> getAllTables(int storeId) {
-		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+    @Transactional
+    public boolean updateReservationToConfirmed(String paymentId) {
+        try {
+            Optional<ReservationVO> pendingReservationOpt = reservationDAO.selectPendingReservationByPaymentId(paymentId);
+            if (pendingReservationOpt.isPresent()) {
+                ReservationVO reservation = pendingReservationOpt.get();
+                reservationDAO.updateReservationStatus(reservation.getReservationId(), ReservationStatus.CONFIRMED.name());
+                logger.info("Reservation with ID {} has been confirmed successfully.", reservation.getReservationId());
+                return true;
+            } else {
+                logger.warn("Pending reservation with paymentId {} not found or already processed.", paymentId);
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Error confirming reservation with paymentId {}: {}", paymentId, e.getMessage());
+            throw new RuntimeException("Failed to confirm reservation.", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteTempReservationByTransactionId(String transactionId) {
+        try {
+            // 1. transactionId로 결제 정보 조회
+            PaymentVO payment = paymentService.getPaymentByTransactionId(transactionId);
+            if (payment == null) {
+                logger.warn("Payment information with transactionId {} not found. It might have been deleted already.", transactionId);
+                return true;
+            }
+
+            Long reservationId = payment.getReservationId();
+            if (reservationId != null) {
+                // 2. 예약 테이블 연결 정보 삭제 (외래키 제약조건 때문에 먼저 삭제)
+                int tablesDeleted = reservationDAO.deleteReservationTables(reservationId);
+                logger.info("Deleted {} reservation tables for reservationId: {}.", tablesDeleted, reservationId);
+
+                // 3. 임시 예약 정보 삭제
+                int reservationDeleted = reservationDAO.deleteReservation(reservationId);
+                logger.info("Deleted {} temporary reservation for reservationId: {}.", reservationDeleted, reservationId);
+            }
+
+            // 4. 결제 정보 삭제
+            paymentService.deletePayment(payment.getPaymentId());
+            logger.info("Deleted payment for paymentId: {}.", payment.getPaymentId());
+
+            return true; // 모든 작업이 성공적으로 진행되면 true 반환
+
+        } catch (Exception e) {
+            logger.error("Error deleting temp reservation with transactionId {}: {}", transactionId, e.getMessage());
+            // 예외 발생 시 트랜잭션이 롤백됩니다.
+            throw new RuntimeException("Failed to delete temporary reservation due to a database error.", e);
+        }
+    }
 }

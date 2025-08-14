@@ -99,13 +99,12 @@ public class ReservationCustomerController {
     // 결제 성공 후 최종 예약을 처리하는 새로운 엔드포인트
     @PostMapping("/book-final")
     @ResponseBody
-    public String saveFinalReservation(@ModelAttribute ReservationDTO reservationDTO) {
-        logger.info("최종 예약 정보 저장 요청: {}", reservationDTO);
+    public String saveFinalReservation(@RequestParam("paymentId") String paymentId) {
+        logger.info("최종 예약 정보 저장 요청 (결제 ID): {}", paymentId);
 
         try {
             // 1. 임시 예약 상태를 '확정'으로 업데이트합니다.
-            //    이때 paymentId를 사용하여 정확한 임시 예약을 찾아야 합니다.
-            boolean success = reservationService.updateReservationToConfirmed(reservationDTO);
+            boolean success = reservationService.updateReservationToConfirmed(paymentId);
 
             if (success) {
                 // 2. 예약 확정 성공 시 'success' 반환
@@ -120,63 +119,85 @@ public class ReservationCustomerController {
         }
     }
 
-    // book-temp API는 결제 완료 전에 임시 예약 상태를 만드는 용도로는 사용하지 않도록 제거하거나 로직을 수정해야 합니다.
-    // 여기서는 book-final 로직만 새로 추가했습니다.
-    // 기존의 book-temp 로직은 클라이언트 측에서 제거되었으므로, 서버 측 로직도 함께 정리하는 것이 좋습니다.
-    // 따라서 기존의 POST /book-temp 엔드포인트는 더 이상 필요 없습니다.
-//    @PostMapping("/book-temp")
-//    @ResponseBody
-//    public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
-//                                         @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
-//                                         @RequestParam("amount") BigDecimal amount,
-//                                         @RequestParam("paymentMethod") String paymentMethod,
-//                                         @RequestParam("transactionId") String transactionId,
-//                                         @RequestParam("tableIds") List<Long> tableIds,
-//                                         HttpSession session) {
-//
-//        try {
-//            reservation.setReservationTime(reservationTime);
-//            Long memberId = (Long) session.getAttribute("memberId");
-//            if (memberId == null) {
-//                memberId = 1L;
-//            }
-//            reservation.setMemberId(memberId);
-//            reservation.setStatus("PENDING");
-//
-//            List<StoreTableVO> tables = tableIds.stream()
-//                .map(id -> {
-//                    StoreTableVO table = new StoreTableVO();
-//                    table.setTableId(id);
-//                    return table;
-//                })
-//                .collect(Collectors.toList());
-//            reservation.setTables(tables);
-//
-//            reservationService.addReservation(reservation);
-//            logger.info("임시 예약 정보 DB 저장 완료. reservationId: {}", reservation.getReservationId());
-//
-//            PaymentVO payment = new PaymentVO();
-//            payment.setReservationId(reservation.getReservationId());
-//            payment.setAmount(amount.longValue());
-//            payment.setPaymentMethod(paymentMethod);
-//            payment.setTransactionId(transactionId);
-//            payment.setStatus("PENDING");
-//
-//            logger.info("임시 결제 정보 DB 저장 시작. transactionId: {}, amount: {}", payment.getTransactionId(), payment.getAmount());
-//            paymentService.addPayment(payment);
-//            logger.info("임시 결제 정보 DB 저장 완료. transactionId: {}", payment.getTransactionId());
-//
-//            session.setAttribute("currentReservationId", reservation.getReservationId());
-//            session.setAttribute("currentTransactionId", payment.getTransactionId());
-//
-//            return "success";
-//        } catch (Exception e) {
-//            logger.error("임시 예약 및 결제 정보 저장 중 오류 발생: {}", e.getMessage(), e);
-//            return "error";
-//        }
-//    }
+    // ⭐⭐⭐ 복구된 임시 예약 생성 엔드포인트 ⭐⭐⭐
+    @PostMapping("/book-temp")
+    @ResponseBody
+    public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
+                                         @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
+                                         @RequestParam("amount") BigDecimal amount,
+                                         @RequestParam("paymentMethod") String paymentMethod,
+                                         @RequestParam("transactionId") String transactionId,
+                                         @RequestParam("tableIds") List<Long> tableIds,
+                                         HttpSession session) {
 
-    @PostMapping("/complete-payment")
+        try {
+            reservation.setReservationTime(reservationTime);
+            Long memberId = (Long) session.getAttribute("memberId");
+            if (memberId == null) {
+                memberId = 1L;
+            }
+            reservation.setMemberId(memberId);
+            reservation.setStatus("PENDING");
+
+            List<StoreTableVO> tables = tableIds.stream()
+                .map(id -> {
+                    StoreTableVO table = new StoreTableVO();
+                    table.setTableId(id);
+                    return table;
+                })
+                .collect(Collectors.toList());
+            reservation.setTables(tables);
+
+            reservationService.addReservation(reservation);
+            logger.info("임시 예약 정보 DB 저장 완료. reservationId: {}", reservation.getReservationId());
+
+            PaymentVO payment = new PaymentVO();
+            payment.setReservationId(reservation.getReservationId());
+            payment.setAmount(amount.longValue());
+            payment.setPaymentMethod(paymentMethod);
+            payment.setTransactionId(transactionId);
+            payment.setStatus("PENDING");
+
+            logger.info("임시 결제 정보 DB 저장 시작. transactionId: {}, amount: {}", payment.getTransactionId(), payment.getAmount());
+            paymentService.addPayment(payment);
+            logger.info("임시 결제 정보 DB 저장 완료. transactionId: {}", payment.getTransactionId());
+
+            session.setAttribute("currentReservationId", reservation.getReservationId());
+            session.setAttribute("currentTransactionId", payment.getTransactionId());
+
+            return "success";
+        } catch (Exception e) {
+            logger.error("임시 예약 및 결제 정보 저장 중 오류 발생: {}", e.getMessage(), e);
+            return "error";
+        }
+    }
+
+    // ⭐⭐⭐ 새로 추가된 임시 예약 취소 엔드포인트 ⭐⭐⭐
+    /**
+     * 결제창 취소/실패 시 임시 예약 정보를 삭제하는 엔드포인트
+     * @param transactionId 결제 요청 시 생성된 고유 ID
+     * @return 성공 여부 문자열
+     */
+    @PostMapping("/cancel-temp")
+    @ResponseBody
+    public String cancelTempReservation(@RequestParam("transactionId") String transactionId) {
+        logger.info("결제 취소로 인한 임시 예약 삭제 요청 - transactionId: {}", transactionId);
+        try {
+            boolean success = reservationService.deleteTempReservationByTransactionId(transactionId);
+            if (success) {
+                logger.info("임시 예약 및 결제 정보 삭제 성공. transactionId: {}", transactionId);
+                return "success";
+            } else {
+                logger.warn("해당 transactionId로 임시 예약 정보를 찾을 수 없거나 삭제 실패. transactionId: {}", transactionId);
+                return "failure";
+            }
+        } catch (Exception e) {
+            logger.error("임시 예약 삭제 중 오류 발생: {}", e.getMessage(), e);
+            return "error";
+        }
+    }
+
+    @GetMapping("/complete-payment")
     @ResponseBody
     public Map<String, Object> completePayment(@RequestParam String paymentId) throws Exception {
         Map<String, Object> response = new HashMap<>();
