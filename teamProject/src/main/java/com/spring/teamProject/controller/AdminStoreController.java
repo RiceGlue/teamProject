@@ -7,5 +7,5 @@ public interface AdminStoreController {
 	
 	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception;
 	public ModelAndView addMenu(MultipartHttpServletRequest multiReq) throws Exception;
-//	public void modifyMenu(MultipartHttpServletRequest multiReq) throws Exception;
+//	public ModelAndView modifyMenu(MultipartHttpServletRequest multiReq) throws Exception;
 }

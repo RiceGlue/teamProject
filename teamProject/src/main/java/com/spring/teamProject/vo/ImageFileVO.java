@@ -42,6 +42,7 @@ public class ImageFileVO {
 	public void setFileType(boolean fileType) {
 		this.fileType = fileType;
 	}
+
 	public int getDisplayNo() {
 		return displayNo;
 	}

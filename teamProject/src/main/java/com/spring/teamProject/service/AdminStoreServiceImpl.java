@@ -47,8 +47,16 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 		StoreVO storeInfo = adminStoreDAO.selectStoreInfo(storeId);
 		return storeInfo;
 	}
+	
+	@Override
 	public List<MenuVO> selectMenuList(long storeId) throws Exception {
 		List<MenuVO> menuList = adminStoreDAO.selectMenuList(storeId);
 		return menuList;
+	}
+	
+	@Override
+	public List<ImageFileVO> selectStoreImage(StoreVO storeVO) throws Exception {
+		List<ImageFileVO> imageList = adminStoreDAO.selectStoreImage(storeVO);
+		return imageList;
 	}
 }

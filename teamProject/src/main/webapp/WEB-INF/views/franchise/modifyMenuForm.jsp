@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath }" />
 
 <c:if test="${param.success eq 'true'}">
     <script>alert("수정 완료!");</script>
@@ -75,19 +76,6 @@ function resetInput(input) {
 	document.getElementById("preview" + previewId).innerHTML = "";
 }
 
-function submitMenu(index) {
-	const form = document.getElementById("menuForm" + index);
-	const formData = new FormData(form);
-
-	fetch("/modifyMenu", {
-		method: "POST",
-		body: formData
-	}).then(res => res.json())
-	.then(data => {
-		if (data.success) { alert("메뉴가 성공적으로 수정되었습니다."); }
-		else { alert("수정 실패: " + (data.message || "알 수 없는 오류"));  }
-	}).catch(err => { alert("에러 발생: " + err);});
-}
 </script>
 
 <h1>메뉴 수정</h1>
@@ -124,7 +112,7 @@ function submitMenu(index) {
 			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
 				<div class="form-label" style="width: 200px;">현재 이미지</div>
 				<div class="form-input" style="flex: 1;">
-					<img src="${menu.fileName}" alt="${menu.menuName}" style="max-width: 200px;" />
+					<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" style="max-width: 200px;" />
 				</div>
 			</div>
 			

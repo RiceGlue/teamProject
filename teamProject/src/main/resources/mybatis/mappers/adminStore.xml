@@ -205,4 +205,12 @@
 			from menu where store_id=#{storeId}
 		]]>
 	</select>
+	
+	<select id="selectStoreImage" parameterType="storeVO" resultMap="imagelist" >
+		<![CDATA[
+			select image_id, file_name, file_type, display_no
+			from image_file
+			where store_id=#{storeId} and reg_id=#{ownerId}
+		]]>
+	</select>
 </mapper>
