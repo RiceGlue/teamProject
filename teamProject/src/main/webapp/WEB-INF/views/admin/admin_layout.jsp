@@ -9,6 +9,10 @@
     <meta charset="UTF-8">
     <title>관리자 페이지</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    
+    <!-- Bootstrap Icons CSS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
     
     <style>
@@ -24,6 +28,7 @@
             background-color: #2c3e50;
             padding-top: 20px;
             z-index: 100;
+            overflow-y: auto; /* 메뉴가 길어지면 자동으로 스크롤바 생성 */
         }
         .sidebar .sidebar-brand {
             padding: 1.5rem 1rem;
@@ -44,7 +49,7 @@
             color: #fff;
             background-color: #34495e;
         }
-        /* --- ✨ 아코디언 메뉴 스타일 추가 --- */
+        /* 아코디언 메뉴 스타일 추가 */
         .sidebar .nav-item .nav-link[data-bs-toggle="collapse"]::after {
             content: ' ▼';
             float: right;
@@ -55,7 +60,7 @@
             transform: rotate(-90deg);
         }
         .sidebar .collapse .nav-link {
-            padding-left: 2rem;
+            padding-left: 2.5rem; /* 아이콘 공간 확보를 위해 들여쓰기 조정 */
             background-color: #233140;
             font-size: 0.9rem;
         }
@@ -68,6 +73,11 @@
             padding: 2rem;
             width: calc(100% - 250px);
         }
+        /* 대시보드 카드용 추가 스타일 */
+        .card.border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+        .card.border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+        .card.border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+        .card.border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
     </style>
 </head>
 <body>
@@ -78,15 +88,15 @@
         <hr class="sidebar-divider">
         
         <div class="nav-item">
-            <a class="nav-link" href="${contextPath}/admin/dashboard">대시보드</a>
+            <a class="nav-link" href="${contextPath}/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>대시보드</a>
         </div>
         
         <hr class="sidebar-divider">
 
-        <!-- ✨ --- [수정] 회원 관리 아코디언 메뉴 --- ✨ -->
+        <!-- 회원 관리 아코디언 메뉴 -->
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMembers" aria-expanded="false" aria-controls="collapseMembers">
-                회원
+                <i class="bi bi-people-fill me-2"></i>회원
             </a>
             <div id="collapseMembers" class="collapse">
                 <a class="nav-link" href="${contextPath}/admin/users">- 일반 회원 관리</a>
@@ -96,30 +106,30 @@
             </div>
         </div>
 
-        <!-- ✨ --- [신규] 가맹점 관리 아코디언 메뉴 --- ✨ -->
+        <!-- 가맹점 관리 아코디언 메뉴 -->
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseStores" aria-expanded="false" aria-controls="collapseStores">
-                가맹점
+                <i class="bi bi-shop me-2"></i>가맹점
             </a>
             <div id="collapseStores" class="collapse">
                 <a class="nav-link" href="#">- 가맹점 관리</a>
             </div>
         </div>
 
-        <!-- ✨ --- [신규] 회계 관리 아코디언 메뉴 --- ✨ -->
+        <!-- 회계 관리 아코디언 메뉴 -->
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAccounting" aria-expanded="false" aria-controls="collapseAccounting">
-                회계 관리
+                <i class="bi bi-cash-coin me-2"></i>회계 관리
             </a>
             <div id="collapseAccounting" class="collapse">
                 <a class="nav-link" href="#">- 가맹점 수수료 관리</a>
             </div>
         </div>
 
-        <!-- ✨ --- [신규] 게시판 관리 아코디언 메뉴 --- ✨ -->
+        <!-- 게시판 관리 아코디언 메뉴 -->
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBoards" aria-expanded="false" aria-controls="collapseBoards">
-                게시판 관리
+                <i class="bi bi-clipboard-data-fill me-2"></i>게시판 관리
             </a>
             <div id="collapseBoards" class="collapse">
                 <a class="nav-link" href="#">- 공지사항 관리</a>
@@ -128,10 +138,10 @@
             </div>
         </div>
 
-        <!-- ✨ --- [신규] 광고 관리 아코디언 메뉴 --- ✨ -->
+        <!-- 광고 관리 아코디언 메뉴 -->
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAds" aria-expanded="false" aria-controls="collapseAds">
-                광고
+                <i class="bi bi-megaphone-fill me-2"></i>광고
             </a>
             <div id="collapseAds" class="collapse">
                 <a class="nav-link" href="#">- 배너 관리</a>
@@ -141,10 +151,10 @@
         <hr class="sidebar-divider">
         
         <div class="nav-item">
-            <a class="nav-link" href="${contextPath}/" target="_blank">메인 페이지로</a>
+            <a class="nav-link" href="${contextPath}/" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>메인 페이지로</a>
         </div>
         <div class="nav-item">
-            <a class="nav-link" href="javascript:document.getElementById('logout-form').submit();">로그아웃</a>
+            <a class="nav-link" href="javascript:document.getElementById('logout-form').submit();"><i class="bi bi-box-arrow-right me-2"></i>로그아웃</a>
             <form id="logout-form" action="${contextPath}/member/logout" method="post" style="display: none;"></form>
         </div>
     </div>
