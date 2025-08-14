@@ -1,74 +1,86 @@
-// src/main/java/com/spring/teamProject/vo/StoreTableVO.java
 package com.spring.teamProject.vo;
 
 public class StoreTableVO {
-	private Long tableId;
-	private Long storeId;
-	private String tableName; // table_info -> tableName으로 변경
-	private int capacity;
-	private int posX;
-	private int posY;
 
-	// 기본 생성자
-	public StoreTableVO() {}
+    // 필드
+    private Long tableId;
+    private Long storeId;
+    private String tableName;
+    private int capacity;
+    private String tableInfo;
 
-	// 모든 필드를 포함하는 생성자 (필요 시)
-	public StoreTableVO(Long tableId, Long storeId, String tableName, int capacity, int posX, int posY) {
-		this.tableId = tableId;
-		this.storeId = storeId;
-		this.tableName = tableName;
-		this.capacity = capacity;
-		this.posX = posX;
-		this.posY = posY;
-	}
+    // ⭐ 수정된 부분: 필드 이름을 DB 컬럼과 동일하게 변경
+    private int pos_x;
+    private int pos_y;
 
-	// Getter and Setter methods
-	public Long getTableId() {
-		return tableId;
-	}
-	public void setTableId(Long tableId) {
-		this.tableId = tableId;
-	}
-	public Long getStoreId() {
-		return storeId;
-	}
-	public void setStoreId(Long storeId) {
-		this.storeId = storeId;
-	}
-	public String getTableName() {
-		return tableName;
-	}
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-	public int getCapacity() {
-		return capacity;
-	}
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
-	}
-	public int getPosX() {
-		return posX;
-	}
-	public void setPosX(int posX) {
-		this.posX = posX;
-	}
-	public int getPosY() {
-		return posY;
-	}
-	public void setPosY(int posY) {
-		this.posY = posY;
-	}
+    private boolean isReserved;
 
-	@Override
-	public String toString() {
-		return "StoreTableVO{" +
-				"tableId=" + tableId +
-				", storeId=" + storeId +
-				", tableName='" + tableName + '\'' +
-				", capacity=" + capacity +
-				", posX=" + posX +
-				", posY=" + posY +
-				'}';
-	}
+    // 기본 생성자
+    public StoreTableVO() {}
+
+    // Getter와 Setter
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public String getTableInfo() {
+        return tableInfo;
+    }
+
+    public void setTableInfo(String tableInfo) {
+        this.tableInfo = tableInfo;
+    }
+
+    // ⭐ 수정된 부분: DB 컬럼명에 맞는 Getter와 Setter
+    public int getPos_x() {
+        return pos_x;
+    }
+
+    public void setPos_x(int pos_x) {
+        this.pos_x = pos_x;
+    }
+
+    public int getPos_y() {
+        return pos_y;
+    }
+
+    public void setPos_y(int pos_y) {
+        this.pos_y = pos_y;
+    }
+
+    public boolean getIsReserved() {
+        return isReserved;
+    }
+
+    public void setIsReserved(boolean isReserved) {
+        this.isReserved = isReserved;
+    }
 }

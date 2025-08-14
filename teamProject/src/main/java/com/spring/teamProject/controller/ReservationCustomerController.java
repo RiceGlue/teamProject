@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors; // ⭐ 추가된 import
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +50,16 @@ public class ReservationCustomerController {
     @GetMapping("/bookForm")
     public String showBookingForm(@RequestParam("storeId") Long storeId,
                                   @RequestParam(value = "reservationTime", required = false) String reservationTime,
-                                  @RequestParam(value = "tableId", required = false) Long tableId,
+                                  @RequestParam(value = "tableIds", required = false) List<Long> tableIds,
                                   @RequestParam(value = "guestCount", required = false, defaultValue = "1") Integer guestCount,
                                   Model model,
                                   HttpSession session) {
-        logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableId: {}, guestCount: {}",
-                storeId, reservationTime, tableId, guestCount);
+        logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableIds: {}, guestCount: {}",
+                storeId, reservationTime, tableIds, guestCount);
 
         model.addAttribute("storeId", storeId);
         model.addAttribute("selectedReservationTime", reservationTime);
-        model.addAttribute("selectedTableId", tableId);
+        model.addAttribute("selectedTableIds", tableIds);
         model.addAttribute("guestCount", guestCount);
 
         String currentDate = (reservationTime != null && reservationTime.length() >= 10)
@@ -81,7 +82,8 @@ public class ReservationCustomerController {
                                                              @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         logger.info("예약 가능한 시간대 요청 - storeId: {}, date: {}", storeId, date);
         try {
-            return reservationService.getAvailableTimeSlots(storeId, date);
+            // LocalDate 객체를 String으로 변환하여 서비스 메서드에 전달합니다.
+            return reservationService.getAvailableTimeSlots(storeId, date.toString());
         } catch (Exception e) {
             logger.error("예약 가능 시간대 조회 중 오류 발생: {}", e.getMessage(), e);
             return Map.of();
@@ -95,6 +97,7 @@ public class ReservationCustomerController {
                                          @RequestParam("amount") BigDecimal amount,
                                          @RequestParam("paymentMethod") String paymentMethod,
                                          @RequestParam("transactionId") String transactionId,
+                                         @RequestParam("tableIds") List<Long> tableIds,
                                          HttpSession session) {
 
         try {
@@ -105,6 +108,15 @@ public class ReservationCustomerController {
             }
             reservation.setMemberId(memberId);
             reservation.setStatus("PENDING");
+
+            List<StoreTableVO> tables = tableIds.stream()
+                .map(id -> {
+                    StoreTableVO table = new StoreTableVO();
+                    table.setTableId(id);
+                    return table;
+                })
+                .collect(Collectors.toList());
+            reservation.setTables(tables);
 
             reservationService.addReservation(reservation);
             logger.info("임시 예약 정보 DB 저장 완료. reservationId: {}", reservation.getReservationId());
@@ -184,16 +196,15 @@ public class ReservationCustomerController {
                 if (reservationFromDb != null) {
                     model.addAttribute("confirmedReservation", reservationFromDb);
 
-                    if (reservationFromDb.getTableId() != null) {
-                        StoreTableVO storeTable = reservationService.getStoreTableInfoById(reservationFromDb.getTableId());
-                        if (storeTable != null) {
-                            model.addAttribute("tableName", storeTable.getTableName());
-                        } else {
-                            model.addAttribute("tableName", "정보 없음");
-                        }
+                    if (reservationFromDb.getTables() != null && !reservationFromDb.getTables().isEmpty()) {
+                        String tableNames = reservationFromDb.getTables().stream()
+                            .map(StoreTableVO::getTableName) // ⭐ getTableName()으로 변경
+                            .collect(Collectors.joining(", "));
+                        model.addAttribute("tableNames", tableNames);
                     } else {
-                        model.addAttribute("tableName", "지정되지 않음");
+                        model.addAttribute("tableNames", "지정되지 않음");
                     }
+
                     Date reservationDate = Date.from(reservationFromDb.getReservationTime().atZone(ZoneId.systemDefault()).toInstant());
                     model.addAttribute("reservationDate", reservationDate);
 
@@ -267,9 +278,9 @@ public class ReservationCustomerController {
                 if (reservationId != null) {
                     ReservationVO reservation = reservationService.getReservationById(reservationId);
                     if (reservation != null) {
-                        logger.info("결제 완료 후 세션 대신 URL 파라미터로 예약 ID 전달: {}", reservationId);
+                        logger.info("결제 완료 후 URL 파라미터로 예약 ID 전달: {}", reservationId);
                         redirectAttributes.addAttribute("storeId", reservation.getStoreId());
-                        redirectAttributes.addAttribute("reservationId", reservationId); // ⭐ 이 라인이 추가되었습니다.
+                        redirectAttributes.addAttribute("reservationId", reservationId);
 
                         return "redirect:/reservation/customer/bookingConfirm";
                     }
@@ -305,7 +316,6 @@ public class ReservationCustomerController {
     public Map<String, Object> cancelReservation(@RequestParam("reservationId") Long reservationId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            // Service 계층의 예약 취소 및 환불 로직 호출
             reservationService.cancelReservationByUser(reservationId);
 
             response.put("success", true);
