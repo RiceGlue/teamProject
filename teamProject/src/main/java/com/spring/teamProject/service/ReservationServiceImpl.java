@@ -68,11 +68,11 @@ public class ReservationServiceImpl implements ReservationService {
     public Map<String, List<StoreTableVO>> getAvailableTimeSlots(Long storeId, LocalDate date) throws Exception {
         List<StoreTableVO> allTables = storeTableDAO.selectAllTablesByStoreId(storeId);
 
-        // 예약 확정(CONFIRMED) 상태의 예약만 조회하여 중복 예약을 방지합니다.
-        List<ReservationVO> existingReservations = reservationDAO.selectReservationsByStoreIdAndDateAndStatus(
+        // ⭐⭐ 수정된 부분: PENDING(결제 대기) 상태의 예약도 함께 조회합니다. ⭐⭐
+        List<ReservationVO> existingReservations = reservationDAO.selectReservationsByStoreIdAndDateAndStatuses(
             storeId,
             date,
-            ReservationStatus.CONFIRMED.name() // 예약 확정 상태만 가져오도록 수정
+            List.of(ReservationStatus.CONFIRMED.name(), ReservationStatus.PENDING.name())
         );
 
         Map<Long, List<LocalDateTime>> reservedTableSlots = new HashMap<>();
