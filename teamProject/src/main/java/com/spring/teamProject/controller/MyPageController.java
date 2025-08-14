@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/mypage")
+@RequestMapping("/member/mypage")
 public class MyPageController {
 
     @Autowired
