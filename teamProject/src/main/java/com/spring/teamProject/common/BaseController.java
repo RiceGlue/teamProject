@@ -16,11 +16,11 @@ public abstract class BaseController {
 
     private static final String CURR_IMAGE_REPO_PATH = "C:\\project\\file_repo";
 
-    protected List<ImageFileVO> upload(MultipartHttpServletRequest req) throws Exception {
+    protected List<ImageFileVO> upload(MultipartHttpServletRequest req, String directoryName) throws Exception {
         List<MultipartFile> files = req.getFiles("fileName"); // name 속성 기준으로 파일 전체 가져오기
         List<ImageFileVO> fileList = new ArrayList<>();
 
-        File tempDir = new File(CURR_IMAGE_REPO_PATH + File.separator + "temp");
+        File tempDir = new File(CURR_IMAGE_REPO_PATH + File.separator + directoryName);
         if (!tempDir.exists()) {
             tempDir.mkdirs(); // temp 폴더 생성
         }

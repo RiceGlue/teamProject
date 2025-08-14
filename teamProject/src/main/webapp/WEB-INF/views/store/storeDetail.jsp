@@ -407,8 +407,8 @@
 		</div>
 		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지">${store.avgRating}&nbsp;&nbsp;&nbsp;리뷰 ${store.countRating}개 <button type="button" onClick="openTab3()" class="btn btn-link" style="text-decoration:none; color:black;"><strong>></strong></button></div>
 		<div>
-			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} <button class="btn btn-link btn-sm mt-2" id="copyaddress">위치</button></p>
-			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.storePhoneNumber } </p>
+			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} ${store.detailAddress } ${store.extraAddress }<button class="btn btn-link btn-sm mt-2" id="copyaddress">위치</button></p>
+			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.localNumber } - ${store.number1 } - ${store.number2 }</p>
 		</div>
 		<div>
 			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간">

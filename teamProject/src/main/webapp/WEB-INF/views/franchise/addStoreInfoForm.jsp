@@ -78,32 +78,38 @@
 	    const showFileNameIdx = "showFileName" + imgIdx;
 	    
 	    const html =
-		    '<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">' +
-		    '<div class="form-label" style="width: 200px;"></div>' +
-		    '<div class="form-input" style="flex: 1;">' +
-		    '<div>' +
-		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)">메인 이미지</label>' +
-		    '<input type="hidden" name="fileType" value="false">' +
-		    '</div>' +
-		    '<input type="file" id="' + fileNameIdx + '" name="fileName" accept="image/*" onchange="validateImages(this);">' +
-		    '<label for="' + fileNameIdx + '" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>' +
-		    '<span id="' + showFileNameIdx + '" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>' +
-		    '</div>' +
-		    '</div>';
+	    	'<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">'+
+		    '<div class="form-label" style="width: 200px;">이미지</div>'+
+		    '<div class="form-input" style="flex: 1;"><div>'+
+		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" checked>메인 이미지</label>'+
+		    '<input type="hidden" name="fileType" value="false">'+
+		    '<input type="hidden" name="displayNo" value="'+imgIdx+'"></div>'+
+		    '<input type="file" id="'+fileNameIdx+'" name="fileName" accept="image/*" onchange="validateImages(this);">'+
+		    '<label for="'+fileNameIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
+		    '<span id="'+showFileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>'+
+		    '</div><div class="image-preview" style="max-width:200px;"></div></div>';
+
 	    $("#ImagesContainer").append(html);
 	    imgIdx++;
     }
     
-    function setMainImage(selectedRadio) {
-	    const allRows = document.querySelectorAll("#ImagesContainer .form-row");
-	    
-	    allRows.forEach(row => {
-		    const hidden = row.querySelector('input[type="hidden"][name="fileType"]');
-		    const radio = row.querySelector('input[type="radio"][name="mainImageRadio"]');
-		    hidden.value = (radio === selectedRadio) ? "true" : "false";
-	    });
+    function setMainImage(radio) {
+    	const allRows = document.querySelectorAll('#ImagesContainer .form-row');
+    	allRows.forEach(row => {
+    		const fileTypeInput = row.querySelector('input[type="hidden"][name="fileType"]');
+    		if (fileTypeInput) {
+    			fileTypeInput.value = 'false'; // 일단 모두 false
+    		}
+    	});
+
+    	// 선택된 라디오 버튼이 있는 row의 fileType만 true로
+    	const selectedRow = radio.closest('.form-row');
+    	const selectedFileTypeInput = selectedRow.querySelector('input[type="hidden"][name="fileType"]');
+    	if (selectedFileTypeInput) {
+    		selectedFileTypeInput.value = 'true';
+    	}
     }
-    
+
     // 파일 선택 시 파일명 표시 기능 (기존 validateImages 함수 내에서 showFileName 업데이트가 필요함)
     function validateImages(input) {
       const file = input.files[0];
@@ -171,13 +177,26 @@
 	                return;
 	            }
 
-	            // 여기서 미리보기 또는 업로드 준비 가능
-	            // 예시: 첫번째 이미지 미리보기
-	            const reader = new FileReader();
-	            reader.onload = function(e) {
-	                document.getElementById('preview').src = e.target.result;
-	            };
-	            reader.readAsDataURL(files[0]);
+	            if (files.length > 0) {
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
+						
+						if (imagePreviewDiv) {
+							// 기존 이미지 제거
+							imagePreviewDiv.innerHTML = '';
+							
+							// 새로운 이미지 생성 및 삽입
+							const img = document.createElement('img');
+							img.src = e.target.result;
+							img.style.maxWidth = '200px';
+							img.style.display = 'block';
+							
+							imagePreviewDiv.appendChild(img);
+						}
+					};
+					reader.readAsDataURL(files[0]);
+				}
 	        });
 	}
 
@@ -514,14 +533,13 @@
 					<div>
 						<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" checked>메인 이미지</label>
 						<input type="hidden" name="fileType" value="false">
+						<input type="hidden" name="displayNo" value="0">
 					</div>
 					<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);">
 					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
 					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				</div>
-				<div class="image-preview" style="max-width:200px;">
-					<img id="preview" src="" style="max-width: 200px; display: block;" />
-				</div>
+				<div class="image-preview" style="max-width:200px;"></div>
 			</div>
 		</div>
 

@@ -1,19 +1,15 @@
 package com.spring.teamProject.controller;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,6 +18,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,17 +32,17 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@Autowired
 	private AdminStoreService adminStoreService;
 
-	@RequestMapping(value="/storeInfoForm")
-	public ModelAndView storeInfoForm (@RequestParam("ownerId") long ownerId,HttpServletRequest req, HttpServletResponse res) throws Exception {
+	@RequestMapping(value="/addStoreInfoForm")
+	public ModelAndView addStoreInfoForm (@RequestParam("ownerId") long ownerId,HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
 
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("ownerId", ownerId);
 		return mav;
-	}
+	} 
 
-	@RequestMapping(value="/menuInfoForm")
-	public ModelAndView menuInfoForm (@RequestParam("storeId") long storeId, @RequestParam("ownerId") long ownerId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	@RequestMapping(value="/addMenuForm")
+	public ModelAndView addMenuForm (@RequestParam("storeId") long storeId, @RequestParam("ownerId") long ownerId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
 
 		ModelAndView mav = ViewUtil.layout(viewName);
@@ -54,161 +51,178 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		mav.addObject("ownerId", ownerId);
 		return mav;
 	}
+	
+	@RequestMapping(value={"/modifyStoreInfoForm", "/modifyMenuForm"})
+	public ModelAndView modifyForm (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
+		String viewName = (String)req.getAttribute("viewName");
 
-	@Override
-	@RequestMapping(value="/addStoreInfo", method=RequestMethod.POST)
-	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
-		multiReq.setCharacterEncoding("UTF-8");
-		String imageFileName = null;
-
-		Map<String, Object> storeInfo = new HashMap<>();
-		Enumeration<?> enu = multiReq.getParameterNames();
-		while (enu.hasMoreElements()) {
-			String name = (String) enu.nextElement();
-			String value = multiReq.getParameter(name);
-			System.out.println(name+": "+value);
-			storeInfo.put(name, value);
-		}
-
-		String regIdstr = (String) storeInfo.get("ownerId");
-		long regId = Long.parseLong(regIdstr);
-
-		List<ImageFileVO> imgFileList = upload(multiReq);
-		if (imgFileList != null && !imgFileList.isEmpty()) {
-			for (ImageFileVO imageFileVO : imgFileList) {
-				imageFileVO.setRegId(regId);
-			}
-			for(int i=0;i<imgFileList.size();i++) {
-				System.out.print("이미지 파일 리스트 사이즈 : "+ imgFileList.size());
-				System.out.println(imgFileList.get(i).getFileName());
-			}
-			storeInfo.put("fileName", imgFileList.get(0).getFileName());
-		}
-
-		try {
-			long storeId = adminStoreService.addStoreInfo(storeInfo);
-			adminStoreService.addStoreInfoImage(imgFileList);
-			if (imgFileList != null && !imgFileList.isEmpty()) {
-				for (ImageFileVO imageFileVO : imgFileList) {
-					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
-					File destDir = new File(CURR_FILE_REPO_PATH + File.separator + storeId);
-					FileUtils.moveFileToDirectory(srcFile, destDir, true);
-				}
-			}
-			// ✅ 등록 성공 시 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&success=true");
-		} catch (Exception e) {
-			if (imgFileList != null && !imgFileList.isEmpty()) {
-				for (ImageFileVO imageFileVO : imgFileList) {
-					imageFileName = imageFileVO.getFileName();
-					File srcFile = new File(CURR_FILE_REPO_PATH + File.separator + "temp" + File.separator + imageFileName);
-					if (srcFile.exists()) {
-						srcFile.delete();
-					}
-				}
-			}
-			e.printStackTrace();
-			// 실패 시에도 redirect
-			return new ModelAndView("redirect:/franchise/storeInfoForm?ownerId="+regId+"&error=true");
-		}
+		ModelAndView mav = ViewUtil.layout(viewName);
+		
+		StoreVO storeInfo = adminStoreService.selectStoreInfo(storeId);
+		List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
+		
+		mav.addObject("storeId", storeId);
+		mav.addObject("menuList", menuList);
+		mav.addObject("storeInfo", storeInfo);
+		return mav;
 	}
 
 	@Override
-	@RequestMapping(value="/addMenuInfo", method=RequestMethod.POST)
-	public ModelAndView addMenuInfo(MultipartHttpServletRequest multiReq) throws Exception {
+	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)
+	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
+	    String directoryName = "store";
+	    ModelAndView mav = new ModelAndView();
+	    
 	    multiReq.setCharacterEncoding("UTF-8");
 
-	    String[] menuName = multiReq.getParameterValues("menuName");
-
-	    // menuName 배열이 null인지 확인하는 코드를 추가합니다.
-	    if (menuName == null || menuName.length == 0) {
-	        // 메뉴가 하나도 없는 경우 처리
-	        System.out.println("메뉴 항목이 제출되지 않았습니다.");
-	        // 오류 페이지로 리다이렉트하거나 사용자에게 알릴 수 있는 방법을 선택합니다.
-	        String regIdStr = multiReq.getParameter("regId");
-	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&menu=true");
+	    Map<String, Object> storeInfo = new HashMap<>();
+	    Enumeration<?> enu = multiReq.getParameterNames();
+	    while (enu.hasMoreElements()) {
+	        String name = (String) enu.nextElement();
+	        String value = multiReq.getParameter(name);
+	        System.out.println(name + ": " + value);
+	        storeInfo.put(name, value);
 	    }
 
+	    // regId
+	    String regIdstr = (String) storeInfo.get("ownerId");
+	    long regId = Long.parseLong(regIdstr);
+
+	    // fileType, displayNo
+	    String[] fileTypes = multiReq.getParameterValues("fileType");
+	    String[] displayNos = multiReq.getParameterValues("displayNo");
+
+	    // 파일 업로드
+	    List<ImageFileVO> imgFileList = upload(multiReq, directoryName);
+
+	    // ➤ fileType/displayNo 매핑
+	    for (int i = 0; i < imgFileList.size(); i++) {
+	        ImageFileVO imageFileVO = imgFileList.get(i);
+
+	        if (fileTypes != null && i < fileTypes.length) {
+	            imageFileVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
+	            if(Boolean.parseBoolean(fileTypes[i])) {
+	            	// 메인 이미지 파일 이름을 첫 번째로 지정
+	            	storeInfo.put("fileName", imgFileList.get(i).getFileName());
+	            }
+	        }
+
+	        if (displayNos != null && i < displayNos.length) {
+	            try {
+	                imageFileVO.setDisplayNo(Integer.parseInt(displayNos[i]));
+	            } catch (NumberFormatException e) {
+	                imageFileVO.setDisplayNo(0); // fallback
+	            }
+	        }
+
+	        imageFileVO.setRegId(regId); //regId 설정
+	    }
+
+	    try {
+	        long storeId = adminStoreService.addStoreInfo(storeInfo);
+
+	        if (imgFileList != null && !imgFileList.isEmpty()) {
+	            for (ImageFileVO imageFileVO : imgFileList) {
+	                imageFileVO.setStoreId(storeId); //storeId 설정
+	            }
+
+	            adminStoreService.addStoreInfoImage(imgFileList);
+	        }
+
+	        mav.addObject("success",true);
+	        mav.setViewName("redirect:/franchise/addStoreInfoForm?ownerId=" + regId);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        mav.addObject("error",true);
+	        mav.setViewName("redirect:/franchise/addStoreInfoForm?ownerId=" + regId);
+	    }
+	    return mav;
+	}
+
+
+	@Override
+	@RequestMapping(value = "/addMenu", method = RequestMethod.POST)
+	public ModelAndView addMenu(MultipartHttpServletRequest multiReq) throws Exception { //메뉴 정보 입력
+		String directoryName = "menu";
+		
+		multiReq.setCharacterEncoding("UTF-8");
+
+	    String[] menuName = multiReq.getParameterValues("menuName");
 	    String[] price = multiReq.getParameterValues("price");
 	    String[] description = multiReq.getParameterValues("description");
 	    String[] displayNo = multiReq.getParameterValues("displayNo");
-
+	    
 	    String storeIdStr = multiReq.getParameter("storeId");
 	    String regIdStr = multiReq.getParameter("regId");
+
+	    
+	    // 기본 유효성 검사
+	    if (menuName == null || menuName.length == 0) {
+	        System.out.println("메뉴 항목이 제출되지 않았습니다.");
+	        return new ModelAndView("redirect:/franchise/addMenuForm?storeId=" + storeIdStr + "&ownerId=" + regIdStr + "&error=true");
+	    }
 
 	    long storeId = 0;
 	    long regId = 0;
 
-	    if(storeIdStr != null && !storeIdStr.trim().isEmpty()) {
+	    if (storeIdStr != null && !storeIdStr.trim().isEmpty()) {
 	        storeId = Long.parseLong(storeIdStr);
-	        System.out.println(storeId);
 	    }
 
-	    if(regIdStr != null && !regIdStr.trim().isEmpty()) {
+	    if (regIdStr != null && !regIdStr.trim().isEmpty()) {
 	        regId = Long.parseLong(regIdStr);
-	        System.out.println(regId);
 	    }
 
-	    List<MultipartFile> fileList = multiReq.getFiles("fileName");
+	    List<ImageFileVO> fileList = upload(multiReq,directoryName);
+
+	    ModelAndView mav = new ModelAndView();
 
 	    try {
 	        for (int i = 0; i < menuName.length; i++) {
-	            // 메뉴 정보 설정
 	            MenuVO menuVO = new MenuVO();
-	            menuVO.setMenuName(menuName[i]);
-	            menuVO.setPrice(price[i]);
-	            menuVO.setDescription(description[i]);
-	            menuVO.setDisplayNo(Integer.parseInt(displayNo[i]));
 	            menuVO.setStoreId(storeId);
+	            menuVO.setMenuName(menuName[i]);
+	            menuVO.setPrice(price != null && price.length > i ? price[i] : "0");
+	            menuVO.setDescription(description != null && description.length > i ? description[i] : "");
+	            menuVO.setDisplayNo(displayNo != null && displayNo.length > i ? Integer.parseInt(displayNo[i]) : 0);
 
-	            // 파일 이름 설정
-	            MultipartFile file = fileList.get(i);
-	            if (file != null && !file.isEmpty()) {
-	                String originalFileName = file.getOriginalFilename();
-	                menuVO.setFileName(originalFileName);
+	            if(fileList !=null && i<fileList.size()) {
+	            	menuVO.setFileName(fileList.get(i).getFileName());
 	            }
 
-	            System.out.println(menuName[i]+","+price[i]+","+description[i]+","+displayNo[i]+","+storeId+","+menuVO.getFileName());
-	            // 메뉴 insert (menuId 자동 세팅됨)
-	            long menuId = adminStoreService.addMenuInfo(menuVO);
+	            System.out.println(menuVO.getMenuName() + "," + menuVO.getPrice() + "," + menuVO.getDescription() + "," + menuVO.getDisplayNo() + "," + menuVO.getFileName());
 
-				// 4. 이미지 정보 객체 생성 및 DB 저장
-				ImageFileVO imageFileVO = new ImageFileVO();
-//				imageFileVO.setFileName(originalFileName);
+	            // 메뉴 저장
+	            adminStoreService.addMenu(menuVO);
 
-				imageFileVO.setStoreId(storeId);
+	            long menuId = menuVO.getMenuId();
+	            System.out.println("생성된 메뉴 ID : " + menuId);
 
-				//adminStoreService.saveImage(imageFileVO);
-			}
+	            if(fileList !=null && i<fileList.size()) {
+	            	ImageFileVO imgFileVO = fileList.get(i);
+	            	imgFileVO.setFileName(fileList.get(i).getFileName());
+	            	imgFileVO.setDisplayNo(Integer.parseInt(displayNo[i]));
+	            	imgFileVO.setRegId(regId);
+	            	imgFileVO.setMenuId(menuId);
+	            	imgFileVO.setStoreId(storeId);
+ 	
+	            	adminStoreService.addMenuImage(imgFileVO);
+	            }
 
-	            // 이미지 저장
-//	            if (file != null && !file.isEmpty()) {
-//	                File tempDir = new File(CURR_FILE_REPO_PATH + File.separator + "temp");
-//	                if (!tempDir.exists()) tempDir.mkdirs();
-//
-//	                File saveFile = new File(tempDir, file.getOriginalFilename());
-//	                file.transferTo(saveFile);
-//
-//	                ImageFileVO imageFileVO = new ImageFileVO();
-//	                imageFileVO.setFileName(file.getOriginalFilename());
-//	                imageFileVO.setMenuId(menuId);   // 연결된 menuId
-//	                imageFileVO.setStoreId(storeId);
-//
-//	                adminStoreService.addMenuInfoImage(imageFileVO);
-//	            }
-//
-//	            System.out.println("메뉴 저장됨: " + menuName[i]);
-//	        }
+	            System.out.println("메뉴 저장됨: " + menuName[i]);
+	        }
 
-	        // 성공 시 redirect + success 파라미터
-	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&success=true");
+	        mav.addObject("success", true);
+	        mav.setViewName("redirect:/franchise/addMenuForm?storeId=" + storeId + "&ownerId=" + regId);
+	        
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
-
-	        // 실패 시 redirect + error 파라미터
-	        return new ModelAndView("redirect:/franchise/menuInfoForm?storeId=4&ownerId=1&error=true");
+	        mav.addObject("error", true);
+	        mav.setViewName("redirect:/franchise/addMenuForm?storeId=" + storeId + "&ownerId=" + regId);
 	    }
+	    
+	    return mav;
 	}
 
 }

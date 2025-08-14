@@ -8,13 +8,15 @@ import org.springframework.dao.DataAccessException;
 
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.StoreVO;
 
 @Mapper
 public interface AdminStoreDAO {
 	
 	long insertStoreInfo(Map storeInfo) throws DataAccessException;
-	public void insertStoreImageFile(List<ImageFileVO> imgfile) throws DataAccessException;
-	public void deleteStoreInfo(long storeId) throws DataAccessException;
-	public long insertMenuInfo(MenuVO meunVO) throws DataAccessException;
-	public void insertMenuImageFile(ImageFileVO imgFileVO) throws DataAccessException;
+	public void insertStoreImage(List<ImageFileVO> imgfile) throws DataAccessException;
+	public long insertMenu(MenuVO meunVO) throws DataAccessException;
+	public void insertMenuImage(ImageFileVO imgFileVO) throws DataAccessException;
+	public StoreVO selectStoreInfo(long storeId) throws DataAccessException;
+	public List<MenuVO> selectMenuList(long storeId) throws DataAccessException;
 }

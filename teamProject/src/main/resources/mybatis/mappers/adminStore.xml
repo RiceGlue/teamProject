@@ -134,7 +134,7 @@
 		</selectKey>
 	</insert>
 	
-	<insert id="insertStoreImageFile" parameterType="list">
+	<insert id="insertStoreImage" parameterType="list">
 	    insert into image_file (image_id, file_name, file_type, display_no, reg_id, store_id, created_at)
 	    values
 	    <foreach collection="list" item="item" separator=",">
@@ -149,34 +149,34 @@
 	        )
 	    </foreach>
 	</insert>
-
 	
-	<insert id="insertMenuInfo" parameterType="MenuVO" useGeneratedKeys="true" keyProperty="menuId" keyColumn="menu_id">
-		insert into menu
-		(
-			menu_id,
-			store_id,
-			menu_name,
-			price,
-			description,
-			display_no,
-			file_name,
-			created_at
-		)
-		values
-		(
-			null,
-			#{storeId},
-			#{menuName},
-			#{price}, 
-			#{description},
-			#{displayNo},
-			#{fileName},
-			now()
-		)
+	<insert id="insertMenu" parameterType="MenuVO" useGeneratedKeys="true" keyProperty="menuId">
+	    <selectKey keyProperty="menuId" resultType="int" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	    
+	    <![CDATA[
+	    INSERT INTO menu (
+	        store_id,
+	        menu_name,
+	        price,
+	        description,
+	        display_no,
+	        file_name,
+	        created_at
+	    ) VALUES (
+	        #{storeId},
+	        #{menuName},
+	        #{price},
+	        #{description},
+	        #{displayNo},
+	        #{fileName},
+	        NOW()
+	    )
+	    ]]>
 	</insert>
-	
-	<insert id="insertMenuImageFile" parameterType="ImageFileVO" >
+
+	<insert id="insertMenuImage" parameterType="ImageFileVO" >
 		insert into image_file
 		(
 			image_id,
@@ -199,4 +199,16 @@
 		)
 	</insert>
 	
+	<select id="selectStoreInfo" parameterType="long" resultMap="menulist">
+		<![CDATA[
+			select * from menu where stores where store_id=#{storeId}
+		]]>
+	</select>
+	
+	<select id="selectMenuList" parameterType="long" resultMap="menulist">
+		<![CDATA[
+			select menu_id, menu_name, price, description, display_no, file_name
+			from menu where menu where store_id=#{storeId}
+		]]>
+	</select>
 </mapper>

@@ -191,7 +191,7 @@
 
 
 <h1>정보 등록</h1>
-<form action="${contextPath}/franchise/addMenuInfo" method="post" name="menuInfo" enctype="multipart/form-data" onsubmit="return checkMenu()">
+<form action="${contextPath}/franchise/addMenu" method="post" name="menuInfo" enctype="multipart/form-data" onsubmit="return checkMenu()">
 	<input type="hidden" id="storeId" name="storeId" value="${storeId}">
 	<input type="hidden" id="regId" name="regId" value="${ownerId}">
 	
@@ -220,7 +220,7 @@
 		<input type="hidden" id="displayNo0" name="displayNo" value="0" >
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
-			<div class="form-label" style="width: 200px;">메인 이미지</div>
+			<div class="form-label" style="width: 200px;">메뉴 이미지</div>
 			<div class="form-input" style="flex: 1;">
 				<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);" >
 				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>

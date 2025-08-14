@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.spring.teamProject.dao.AdminStoreDAO;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.StoreVO;
 
 @Service("adminStoreService")
 @Transactional(propagation=Propagation.REQUIRED)
@@ -27,22 +28,27 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 
 	@Override
 	public void addStoreInfoImage(List<ImageFileVO> imgfile) throws Exception {
-		adminStoreDAO.insertStoreImageFile(imgfile);
+		adminStoreDAO.insertStoreImage(imgfile);
 	}
 
 	@Override
-	public void deleteInfo(long storeId) throws Exception {
-		adminStoreDAO.deleteStoreInfo(storeId);
+	public long addMenu(MenuVO menuVO) throws Exception {
+		long menuId = adminStoreDAO.insertMenu(menuVO);
+		return menuId;
 	}
-
+	
 	@Override
-	public long addMenuInfo(MenuVO menuVO) throws Exception {
-		long meunId = adminStoreDAO.insertMenuInfo(menuVO);
-		return meunId;
+	public void addMenuImage(ImageFileVO imgFileVO) throws Exception {
+		adminStoreDAO.insertMenuImage(imgFileVO);
 	}
-
+	
 	@Override
-	public void addMenuInfoImage(ImageFileVO imgFileVO) throws Exception {
-		adminStoreDAO.insertMenuImageFile(imgFileVO);
+	public StoreVO selectStoreInfo(long storeId) throws Exception {
+		StoreVO storeInfo = adminStoreDAO.selectStoreInfo(storeId);
+		return storeInfo;
+	}
+	public List<MenuVO> selectMenuList(long storeId) throws Exception {
+		List<MenuVO> menuList = adminStoreDAO.selectMenuList(storeId);
+		return menuList;
 	}
 }
