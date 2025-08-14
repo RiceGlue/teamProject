@@ -208,7 +208,7 @@ public class MemberController {
             Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-            return "redirect:/mypage";
+            return "redirect:/member/mypage";
         } else {
             redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않거나, 정보 수정에 실패했습니다.");
             return "redirect:/member/edit-profile";

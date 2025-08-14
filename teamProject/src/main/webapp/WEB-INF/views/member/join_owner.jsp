@@ -3,105 +3,118 @@
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
-// DOM(Document Object Model)이 완전히 로드된 후에, 중괄호 안의 코드를 실행합니다.
-$(function() {
-    // id가 'profileImageFile'인 요소에 'change' 이벤트가 발생하면 실행될 함수를 연결합니다.
-    $('#profileImageFile').on('change', function() {
-        validateImage(this);
-    });
+    // DOM(Document Object Model)이 완전히 로드된 후에, 중괄호 안의 코드를 실행합니다.
+    $(function() {
+        // id가 'profileImageFile'인 요소에 'change' 이벤트가 발생하면 실행될 함수를 연결합니다.
+        $('#profileImageFile').on('change', function() {
+            validateImage(this);
+        });
 
-    // --- 아이디 중복 확인 기능 추가 ---
-    // 1. 중복 확인 버튼 클릭 이벤트
-    $('#idCheckBtn').on('click', function() {
-        const loginId = $('#loginId').val();
-        const idCheckMessage = $('#idCheckMessage');
+        // --- 아이디 중복 확인 기능 추가 ---
+        // 1. 중복 확인 버튼 클릭 이벤트
+        $('#idCheckBtn').on('click', function() {
+            const loginId = $('#loginId').val();
+            const idCheckMessage = $('#idCheckMessage');
 
-        if (!loginId) {
-            idCheckMessage.html('<span style="color: red;">아이디를 입력해주세요.</span>');
-            return;
-        }
-
-        $.ajax({
-            url: '${contextPath}/member/check-id', // (수정) URL 변경
-            type: 'POST',                         // (수정) 요청 방식 변경
-            data: { loginId: loginId },
-            success: function(response) {
-                // (수정) 응답 키를 isDuplicate로 변경하고, 논리를 반대로
-                if (!response.isDuplicate) { // 중복되지 않았다면
-                    idCheckMessage.html('<span style="color: green;">사용 가능한 아이디입니다.</span>');
-                    $('#submitBtn').prop('disabled', false); // 가입 버튼 활성화
-                } else { // 중복되었다면
-                    idCheckMessage.html('<span style="color: red;">이미 사용 중인 아이디입니다.</span>');
-                    $('#submitBtn').prop('disabled', true); // 가입 버튼 비활성화
-                }
-            },
-            error: function() {
-                idCheckMessage.html('<span style="color: red;">오류가 발생했습니다. 다시 시도해주세요.</span>');
-                $('#submitBtn').prop('disabled', true);
+            if (!loginId) {
+                idCheckMessage.html('<span style="color: red;">아이디를 입력해주세요.</span>');
+                return;
             }
+
+            $.ajax({
+                url: '${contextPath}/member/check-id',
+                type: 'POST',
+                data: { loginId: loginId },
+                success: function(response) {
+                    // 응답 키를 isDuplicate로 변경하고, 논리를 반대로
+                    if (!response.isDuplicate) { // 중복되지 않았다면
+                        idCheckMessage.html('<span style="color: green;">사용 가능한 아이디입니다.</span>');
+                        $('#submitBtn').prop('disabled', false); // 가입 버튼 활성화
+                    } else { // 중복되었다면
+                        idCheckMessage.html('<span style="color: red;">이미 사용 중인 아이디입니다.</span>');
+                        $('#submitBtn').prop('disabled', true); // 가입 버튼 비활성화
+                    }
+                },
+                error: function() {
+                    idCheckMessage.html('<span style="color: red;">오류가 발생했습니다. 다시 시도해주세요.</span>');
+                    $('#submitBtn').prop('disabled', true);
+                }
+            });
+        });
+
+        // 2. 아이디 입력란 수정 시, 상태 초기화
+        $('#loginId').on('input', function() {
+            $('#submitBtn').prop('disabled', true);
+            $('#idCheckMessage').html('');
         });
     });
 
-    // 2. 아이디 입력란 수정 시, 상태 초기화
-    $('#loginId').on('input', function() {
-        $('#submitBtn').prop('disabled', true);
-        $('#idCheckMessage').html('');
-    });
-});
+    // 이미지 유효성 검사 및 미리보기 함수
+    function validateImage(input) {
+        const file = input.files[0];
+        if (!file) return;
 
-// 이미지 유효성 검사 및 미리보기 함수 (기존 코드 유지)
-function validateImage(input) {
-    const file = input.files[0];
-    if (!file) return;
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
+            alert("프로필 사진은 2MB를 초과할 수 없습니다.");
+            resetInput(input);
+            return;
+        }
 
-    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-    if (file.size > maxSizeInBytes) {
-        alert("프로필 사진은 2MB를 초과할 수 없습니다.");
-        resetInput(input);
-        return;
-    }
-
-    const maxResolution = 500; // 최대 가로/세로 500px
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const image = new Image();
-        image.src = e.target.result;
-        image.onload = function() {
-            if (this.width > maxResolution || this.height > maxResolution) {
-                alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
-                resetInput(input);
-                return;
-            }
-            document.getElementById('preview').src = e.target.result;
+        const maxResolution = 500; // 최대 가로/세로 500px
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = function() {
+                if (this.width > maxResolution || this.height > maxResolution) {
+                    alert("이미지 해상도는 " + maxResolution + "x" + maxResolution + " 픽셀을 초과할 수 없습니다.");
+                    resetInput(input);
+                    return;
+                }
+                document.getElementById('preview').src = e.target.result;
+            };
         };
-    };
-    reader.readAsDataURL(file);
-}
-
-// 이미지 입력 초기화 함수 (기존 코드 유지)
-function resetInput(input) {
-    input.value = '';
-    document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
-}
-
-// 폼 제출 유효성 검사 함수 (신규 추가)
-function validateJoinForm() {
-    // 1. 아이디 중복 확인 여부 검사
-    if ($('#submitBtn').is(':disabled')) {
-        alert("아이디 중복 확인을 해주세요.");
-        return false;
+        reader.readAsDataURL(file);
     }
 
-    // 2. reCAPTCHA 검사
-    const recaptchaResponse = grecaptcha.getResponse();
-    if (recaptchaResponse.length === 0) {
-        alert("reCAPTCHA를 확인해주세요.");
-        return false;
+    // 이미지 입력 초기화 함수
+    function resetInput(input) {
+        input.value = '';
+        document.getElementById('preview').src = '${contextPath}/images/default_profile.png';
     }
 
-    // 모든 검사를 통과하면 폼 제출
-    return true;
-}
+    // 폼 제출 유효성 검사 함수
+    function validateJoinForm() {
+        // 1. 아이디 중복 확인 여부 검사
+        if ($('#submitBtn').is(':disabled')) {
+            alert("아이디 중복 확인을 해주세요.");
+            return false;
+        }
+
+        // 2. reCAPTCHA 검사
+        const recaptchaResponse = grecaptcha.getResponse();
+        if (recaptchaResponse.length === 0) {
+            alert("reCAPTCHA를 확인해주세요.");
+            return false;
+        }
+
+        // 3. 전화번호 유효성 검사 추가
+        const countryCode = document.getElementById('countryCode').value;
+        const phone = document.getElementById('phone').value;
+        if (countryCode === '82') {
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            // 011, 016 등도 처리하기 위해 전체 길이만 검사합니다.
+            if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+                alert('올바른 휴대폰 번호 10자리 또는 11자리를 입력해주세요.');
+                document.getElementById('phone').focus();
+                return false;
+            }
+        }
+
+        // 모든 검사를 통과하면 폼 제출
+        return true;
+    }
 </script>
 
 <div class="container my-5" style="max-width: 600px;">
@@ -111,11 +124,10 @@ function validateJoinForm() {
         <input type="hidden" name="role" value="OWNER">
 
         <div class="text-center mb-4">
-            <%-- (수정) 기본 이미지 경로를 로컬 경로로 변경 --%>
             <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
             <div>
                 <label for="profileImageFile" class="form-label">대표자 프로필 이미지 (2MB / 500x500px 이하)</label>
-                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" accept="image/*">
+                <input class="form-control" type="file" id="profileImageFile" name="profileImageFile" onchange="validateImage(this);" accept="image/*">
             </div>
         </div>
         
@@ -138,7 +150,7 @@ function validateJoinForm() {
             <input type="text" class="form-control" id="memberName" name="memberName" required>
         </div>
         <div class="alert alert-secondary" role="alert">
-          사업자 등록 정보는 추후 별도 페이지에서 인증 및 입력하게 됩니다.
+         사업자 등록 정보는 추후 별도 페이지에서 인증 및 입력하게 됩니다.
         </div>
         <div class="mb-3">
             <label for="birth" class="form-label">생년월일</label>
@@ -161,7 +173,7 @@ function validateJoinForm() {
         <div class="mb-3">
             <label for="phone" class="form-label">연락처</label>
             <div class="input-group">
-                <select class="form-select" name="countryCode" style="max-width: 150px;">
+                <select class="form-select" id="countryCode" name="countryCode" style="max-width: 150px;">
                     <option value="82" selected>+82 (대한민국)</option>
                     <option value="1">+1 (United States)</option>
                     <option value="81">+81 (日本)</option>
@@ -195,7 +207,7 @@ function validateJoinForm() {
             <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
         </div>
 
-        <%-- (수정) 알림 수신 동의 UI 개선 --%>
+        <%-- 알림 수신 동의 UI 개선 --%>
         <div class="mb-3">
             <label class="form-label">알림 수신 동의 (선택)</label>
             <div>
@@ -215,12 +227,12 @@ function validateJoinForm() {
             <div class="form-text">빈자리 알림 등 유용한 정보를 위 채널로 받겠습니다.</div>
         </div>
         
-        <%-- (신규) reCAPTCHA 위젯 추가 --%>
+        <%-- reCAPTCHA 위젯 추가 --%>
         <div class="mb-3 d-flex justify-content-center">
             <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
         </div>
         
-        <%-- 가입하기 버튼 (수정) --%>
+        <%-- 가입하기 버튼 --%>
         <div class="d-grid">
             <button type="submit" id="submitBtn" class="btn btn-success" disabled>가입하기</button>
         </div>

@@ -16,7 +16,6 @@
 		<result property="cancelledReason" column="cancelled_reason"/>
 	</resultMap>
 
-	<!-- ⭐ StoreTableVO를 위한 ResultMap 추가 ⭐ -->
 	<resultMap id="storeTableResultMap" type="com.spring.teamProject.vo.StoreTableVO">
 		<id property="tableId" column="table_id"/>
 		<result property="storeId" column="store_id"/>
@@ -25,6 +24,17 @@
 		<result property="pos_x" column="pos_x"/>
 		<result property="pos_y" column="pos_y"/>
 	</resultMap>
+
+    <select id="selectReservationsByStoreIdAndDateAndStatuses" resultType="com.spring.teamProject.vo.ReservationVO">
+        SELECT *
+        FROM reservations
+        WHERE STORE_ID = #{storeId}
+        AND DATE(RESERVATION_TIME) = #{date}
+        AND STATUS IN
+        <foreach item="status" collection="statuses" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </select>
 
 	<insert id="insertReservation" parameterType="com.spring.teamProject.vo.ReservationVO"
             useGeneratedKeys="true" keyProperty="reservationId">
@@ -94,33 +104,12 @@
         LIMIT 1
     </select>
 
-    <!-- ⭐ 추가된 SQL 쿼리: tableId로 테이블 정보를 조회합니다. ⭐ -->
     <select id="selectStoreTableById" parameterType="long" resultMap="storeTableResultMap">
     	SELECT *
     	FROM store_tables
     	WHERE table_id = #{tableId}
     </select>
 
-    <!-- 👇 아래 두 쿼리가 새롭게 추가되었습니다. 👇 -->
-
-    <!-- 특정 매장, 날짜, 상태에 해당하는 예약 목록을 조회합니다. -->
-    <select id="selectReservationsByStoreIdAndDateAndStatus" resultMap="reservationResultMap">
-        SELECT
-            reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
-            status, cancelled_reason, created_at
-        FROM
-            reservations
-        WHERE
-            store_id = #{storeId}
-        AND
-            DATE(reservation_time) = #{date}
-        AND
-            status = #{status}
-        ORDER BY
-            reservation_time ASC
-    </select>
-
-    <!-- 예약 상태와 취소 사유를 함께 업데이트합니다. -->
     <update id="updateReservationStatusAndReason">
         UPDATE reservations
         SET
@@ -130,7 +119,6 @@
             reservation_id = #{reservationId}
     </update>
 
-    <!-- [신규] 사용자 ID로 예약 목록을 조회하는 쿼리 -->
     <select id="selectReservationsByMemberId" parameterType="long" resultMap="reservationResultMap">
         SELECT
             reservation_id, member_id, store_id, table_id, reservation_time, guest_count,
