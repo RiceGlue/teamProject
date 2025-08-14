@@ -69,8 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void updatePaymentStatus(PaymentVO payment) throws Exception {
-        // 결제 상태 업데이트 로직 구현
-    	paymentDAO.updatePaymentStatus(payment.getPaymentId(), payment.getStatus());
+        paymentDAO.updatePaymentStatus(payment.getPaymentId(), payment.getStatus());
     }
 
     @Override
@@ -108,17 +107,59 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    public void updatePaymentStatus(Long paymentId, String status) throws Exception {
-        paymentDAO.updatePaymentStatus(paymentId, status);
-    }
-
     @Override
-    public PaymentVO getPaymentByReservationId(Long reservationId) throws Exception {
+    public PaymentVO getPaymentByReservationId(Long reservationId) {
         try {
             return paymentDAO.selectByReservationId(reservationId);
         } catch (Exception e) {
             log.error("예약 ID로 결제 정보를 조회하는 중 오류가 발생했습니다: {}", e.getMessage());
             return null;
+        }
+    }
+
+    @Override
+    public boolean updatePaymentStatus(Long paymentId, String status) {
+        try {
+            paymentDAO.updatePaymentStatus(paymentId, status);
+            return true;
+        } catch (Exception e) {
+            log.error("결제 상태를 업데이트하는 중 오류가 발생했습니다. paymentId={}, status={}", paymentId, status, e);
+            return false;
+        }
+    }
+
+    /**
+     * 결제를 환불 처리하고, 데이터베이스 상태를 'refunded'로 업데이트합니다.
+     * @param paymentId 환불할 결제 건의 ID
+     */
+    @Transactional
+    @Override
+    public void refundPayment(Long paymentId) throws Exception {
+        // 1. paymentId로 결제 정보를 조회합니다.
+        PaymentVO payment = paymentDAO.selectById(paymentId);
+
+        if (payment == null) {
+            throw new Exception("결제 정보를 찾을 수 없습니다.");
+        }
+        if (!"paid".equals(payment.getStatus())) {
+            throw new Exception("이미 취소되었거나 환불 불가능한 결제입니다. (현재 상태: " + payment.getStatus() + ")");
+        }
+
+        System.out.println("결제 ID " + paymentId + " 환불을 시작합니다...");
+
+        // 2. 외부 결제 시스템(포트원 등)에 환불 요청을 보냅니다.
+        // 이 부분은 실제 결제 API를 연동하는 로직으로 대체해야 합니다.
+        // 현재는 성공했다고 가정합니다.
+        boolean refundSuccess = true;
+
+        if (refundSuccess) {
+            // 3. 환불 요청이 성공하면, 데이터베이스의 결제 상태를 'refunded'로 업데이트합니다.
+            paymentDAO.updatePaymentStatus(paymentId, "refunded");
+            System.out.println("결제 ID " + paymentId + "에 대한 환불 처리가 완료되었습니다. DB 상태: 'refunded'");
+        } else {
+            // API 호출이 실패한 경우
+            System.err.println("결제 ID " + paymentId + " 환불 처리에 실패했습니다. 결제 시스템 API를 확인해주세요.");
+            throw new Exception("환불 처리에 실패했습니다.");
         }
     }
 }

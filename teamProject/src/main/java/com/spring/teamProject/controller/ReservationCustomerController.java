@@ -294,4 +294,27 @@ public class ReservationCustomerController {
         store.setAddress("서울시 가짜구 더미동 123");
         return store;
     }
+
+    /**
+     * 고객이 예약 취소 요청을 처리하는 엔드포인트
+     * @param reservationId 취소할 예약의 ID
+     * @return 취소 성공 여부를 담은 JSON 응답
+     */
+    @PostMapping("/cancel-reservation")
+    @ResponseBody
+    public Map<String, Object> cancelReservation(@RequestParam("reservationId") Long reservationId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Service 계층의 예약 취소 및 환불 로직 호출
+            reservationService.cancelReservationByUser(reservationId);
+
+            response.put("success", true);
+            response.put("message", "예약이 성공적으로 취소되었습니다.");
+        } catch (Exception e) {
+            logger.error("예약 취소 중 오류 발생: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+        return response;
+    }
 }

@@ -15,6 +15,7 @@
 		<result property="createdAt" column="created_at"/>
 	</resultMap>
 
+    <!-- 새로운 결제 정보를 추가하는 쿼리 -->
     <insert id="insertPayment" parameterType="com.spring.teamProject.vo.PaymentVO"
             useGeneratedKeys="true" keyProperty="paymentId">
         INSERT INTO payments (
@@ -42,6 +43,7 @@
             payment_id = #{paymentId}
     </update>
 
+    <!-- reservationId로 결제 정보를 조회하는 쿼리 -->
     <select id="selectByReservationId" parameterType="Long" resultMap="paymentResultMap">
         SELECT
             payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
@@ -49,5 +51,14 @@
         WHERE reservation_id = #{reservationId}
         LIMIT 1
     </select>
+
+	<!-- paymentId로 결제 정보를 조회하는 쿼리 (새로 추가) -->
+    <select id="selectById" parameterType="Long" resultMap="paymentResultMap">
+        SELECT
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+        FROM payments
+        WHERE payment_id = #{paymentId}
+    </select>
+
 
 </mapper>
