@@ -20,6 +20,10 @@ public class SecurityConfig {
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
+    // ✨ --- [1. 수정] 로그인 성공 핸들러를 주입받습니다. --- ✨
+    @Autowired
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
     // 비밀번호 암호화를 위한 Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -29,44 +33,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-	     	// 1. CSRF 보호 설정 수정: 특정 URL만 CSRF 보호 예외 처리
-//        	.csrf(csrf -> csrf
-//	            .ignoringRequestMatchers(
-//	                "/payment/webhook",
-//	                "/reservation/customer/book-temp",
-//	                "/reservation/customer/complete-payment"
-//	            )
-//	        )
-	        .csrf(AbstractHttpConfigurer::disable) // <- 이 코드는 제거 또는 주석 처리
+            .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-                // 2. 접근 권한 설정: 가장 구체적인 규칙부터 순서대로
-                .requestMatchers("/admin/**").hasRole("ADMIN")	// /admin 경로는 ADMIN만
-                .requestMatchers("/mypage/**").authenticated()	// /mypage 경로는 로그인한 사용자만
-                .anyRequest().permitAll()						// (핵심) 그 외 모든 요청은 일단 모두 허용
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/member/mypage/**").authenticated() // ✨ /member/mypage 하위 경로도 인증 필요
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form
-                // 3. 커스텀 로그인 설정
-                .loginPage("/member/login")					// 로그인 페이지 경로
-                .loginProcessingUrl("/member/login")		// 로그인 form action 경로
-                .usernameParameter("username")				// 아이디 파라미터 이름
-                .passwordParameter("password")				// 비밀번호 파라미터 이름
-                .defaultSuccessUrl("/", true)				// 성공 시 이동 경로
-                .failureUrl("/member/login?error=true")		// 실패 시 이동 경로
+                .loginPage("/member/login")
+                .loginProcessingUrl("/member/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/member/login?error=true")
             )
             .oauth2Login(oauth2 -> oauth2
-                // 4. 소셜 로그인 설정
                 .loginPage("/member/login")
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )
-                // --- ? 여기가 핵심 수정 부분입니다 ? ---
-                // [수정] 역할에 따라 다른 페이지로 보내던 핸들러를 제거하고,
-                // 모든 소셜 로그인을 메인 페이지로 보내도록 통일합니다.
-                .defaultSuccessUrl("/", true)
+                // ✨ --- [2. 수정] defaultSuccessUrl을 지우고, 우리가 만든 successHandler를 등록합니다. --- ✨
+                .successHandler(oAuth2AuthenticationSuccessHandler)
             )
             .logout(logout -> logout
-                // 5. 로그아웃 설정
                 .logoutUrl("/member/logout")
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
