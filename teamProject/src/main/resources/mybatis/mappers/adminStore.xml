@@ -76,12 +76,6 @@
 		<result property="countScoreRating" column="countScoreRating" />
 	</resultMap>
 	
-	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
-		<![CDATA[
-			select * from stores where storeId = #{storeId}
-		]]>
-	</select>
-	
 	<insert id="insertStoreInfo" parameterType="java.util.Map" >
 			insert into stores
 			(
@@ -199,16 +193,16 @@
 		)
 	</insert>
 	
-	<select id="selectStoreInfo" parameterType="long" resultMap="menulist">
+	<select id="selectStoreInfo" parameterType="long" resultMap="storelist">
 		<![CDATA[
-			select * from menu where stores where store_id=#{storeId}
+			select * from stores where store_id=#{storeId}
 		]]>
 	</select>
 	
 	<select id="selectMenuList" parameterType="long" resultMap="menulist">
 		<![CDATA[
 			select menu_id, menu_name, price, description, display_no, file_name
-			from menu where menu where store_id=#{storeId}
+			from menu where store_id=#{storeId}
 		]]>
 	</select>
 </mapper>

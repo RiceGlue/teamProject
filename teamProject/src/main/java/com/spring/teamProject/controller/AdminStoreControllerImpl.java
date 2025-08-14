@@ -55,12 +55,11 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	@RequestMapping(value={"/modifyStoreInfoForm", "/modifyMenuForm"})
 	public ModelAndView modifyForm (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
-
-		ModelAndView mav = ViewUtil.layout(viewName);
 		
 		StoreVO storeInfo = adminStoreService.selectStoreInfo(storeId);
 		List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
 		
+		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeId", storeId);
 		mav.addObject("menuList", menuList);
 		mav.addObject("storeInfo", storeInfo);
@@ -224,5 +223,11 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	    
 	    return mav;
 	}
+	
+//	@Override
+//	@RequestMapping(value="/modifyMenu", method=RequestMethod.POST)
+//	public ModelAndView modifyMenu(MultipartHttpServletRequest multiReq) throws Exception {
+//		
+//	}
 
 }
