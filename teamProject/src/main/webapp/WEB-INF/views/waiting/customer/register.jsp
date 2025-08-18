@@ -67,19 +67,16 @@
         </div>
     </c:if>
 
-    <form action="/waiting/customer/register" method="post">
-        <label for="memberId">회원 ID:</label>
-        <input type="number" id="memberId" name="memberId" value="101" required /><br/>
-
-        <label for="storeId">매장 ID:</label>
-        <input type="number" id="storeId" name="storeId" value="1" required /><br/>
+    <form id="waitingForm" action="/waiting/customer/register" method="post">
+        <input type="hidden" id="memberId" name="memberId" value=""/><br/>
+        <input type="hidden" id="storeId" name="storeId" value="${storeId}" /><br/>
 
         <label for="guestCount">인원 수:</label>
-        <input type="number" id="guestCount" name="guestCount" value="2" required /><br/>
+        <input type="number" id="guestCount" name="guestCount" value="1" required /><br/>
 
         <input type="hidden" id="fcmToken" name="fcmToken" value="" />
 
-        <button type="submit">등록</button>
+        <button type="submit" id="submitButton" disabled>등록</button>
     </form>
 
     <div id="fcmStatus">FCM 초기화 중...</div>
@@ -101,7 +98,7 @@
         // Firebase 초기화
         const app = firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging(); // Firebase v9 호환 버전 사용
-
+        const submitButton = document.getElementById('submitButton');
         const fcmTokenInput = document.getElementById('fcmToken');
         const fcmStatusDiv = document.getElementById('fcmStatus');
         const fcmErrorDiv = document.getElementById('fcmError');
@@ -112,10 +109,12 @@
                 fcmErrorDiv.innerText = message;
                 fcmErrorDiv.style.display = 'block'; // 에러 메시지 표시
                 fcmStatusDiv.style.display = 'none'; // 상태 메시지 숨김
+                submitButton.disabled = true; // 에러 시 버튼 비활성화
             } else {
                 fcmStatusDiv.innerText = message;
                 fcmStatusDiv.style.display = 'block'; // 상태 메시지 표시
                 fcmErrorDiv.style.display = 'none'; // 에러 메시지 숨김
+                submitButton.disabled = false; // 성공 시 버튼 활성화
             }
         }
 
@@ -135,6 +134,7 @@
                         if (currentToken) {
                             updateStatus('FCM 토큰 발급 완료: ' + currentToken);
                             fcmTokenInput.value = currentToken; // 숨겨진 input에 토큰 설정
+                            submitButton.disabled = false; // 👈 여기에서 버튼 활성화
                         } else {
                             // 토큰이 없다는 것은 보통 알림 권한이 없거나, 서비스 워커 문제일 수 있습니다.
                             updateStatus('FCM 토큰을 가져올 수 없습니다. 알림 권한이 필요합니다.', true);
