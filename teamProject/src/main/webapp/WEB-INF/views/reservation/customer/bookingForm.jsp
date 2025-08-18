@@ -236,7 +236,6 @@
 
             if (tables && tables.length > 0) {
                  $.each(tables, function(index, table) {
-                    // ⭐⭐⭐ 여기를 수정합니다. table.tableName 대신 table.tableInfo를 사용합니다. ⭐⭐⭐
                     var buttonText = '테이블 ' + table.tableId + ' (최대 ' + table.capacity + '인)';
                     if (table.tableInfo) {
                         buttonText = table.tableInfo + ' (최대 ' + table.capacity + '인)';
@@ -325,6 +324,42 @@
             saveTempReservationAndRequestPay();
         });
 
+        function saveFinalReservation(paymentId) {
+            const storeId = $('[name="storeId"]').val();
+            const tableIdsArray = $('#selectedTableIds').val().split(',');
+
+            const formData = {
+                storeId: storeId,
+                reservationTimeStr: $('#selectedReservationTime').val(),
+                tableIds: tableIdsArray,
+                guestCount: $('#guestCount').val(),
+                request: $('#request').val(),
+                amount: 1000,
+                paymentId: paymentId
+            };
+
+            $.ajax({
+                url: '${pageContext.request.contextPath}/reservation/customer/book-final',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response === "success") {
+                        console.log("최종 예약 정보 저장 성공.");
+                        alert("예약이 최종 확정되었습니다.");
+                        const storeId = $('[name="storeId"]').val();
+                        window.location.href = `${contextPath}/reservation/customer/bookingConfirm?storeId=${storeId}`;
+                    } else {
+                        alert("예약 정보를 저장하는 데 실패했습니다. 관리자에게 문의해주세요.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("최종 예약 정보 저장 오류: ", error);
+                    alert("결제는 성공했으나, 예약 처리 중 오류가 발생했습니다. 관리자에게 문의해주세요.");
+                }
+            });
+        }
+
+
         function saveTempReservationAndRequestPay() {
             const storeId = $('[name="storeId"]').val();
             const transactionId = 'reservation_' + storeId + '_' + Date.now();
@@ -362,6 +397,31 @@
                 }
             });
         }
+
+        // ⭐⭐⭐ 추가된 부분: 결제 취소 시 임시 예약을 삭제하는 로직 ⭐⭐⭐
+        function deleteTempReservation(transactionId) {
+            if (!transactionId) {
+                console.warn("transactionId가 없어 임시 예약을 삭제할 수 없습니다.");
+                return;
+            }
+
+            $.ajax({
+                url: `${contextPath}/reservation/customer/cancel-temp`, // 서버의 임시 예약 삭제 엔드포인트
+                type: 'POST',
+                data: { transactionId: transactionId },
+                success: function(response) {
+                    if (response.result === "success") {
+                        console.log("임시 예약 정보 삭제 성공.");
+                    } else {
+                        console.error("임시 예약 삭제 실패: " + (response.message || "알 수 없는 오류"));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("임시 예약 삭제 중 오류 발생:", error);
+                }
+            });
+        }
+
 
         async function requestPay(transactionId, totalAmount) {
             const storeName = $('#storeNameHidden').val();
@@ -428,11 +488,14 @@
                 }
 
             } catch (error) {
+                // ⭐⭐⭐ 이 부분이 새롭게 추가되었습니다. ⭐⭐⭐
                 console.error("PortOne 결제 요청 중 오류 발생 또는 취소:", error);
                 alert(`결제가 취소되었거나 실패했습니다. ${error.message || ''}`);
+                deleteTempReservation(transactionId); // 결제 취소 시 임시 예약 삭제 요청
             }
         }
     });
 </script>
+
 </body>
 </html>

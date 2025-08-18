@@ -1,12 +1,14 @@
 package com.spring.teamProject.dao;
 
-import com.spring.teamProject.vo.ReservationVO;
-import com.spring.teamProject.vo.StoreTableVO;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.StoreTableVO;
 
 @Mapper
 @Repository
@@ -42,4 +44,13 @@ public interface ReservationDAO {
 
     // 회원 ID로 예약 목록 조회
     List<ReservationVO> selectReservationsByMemberId(long memberId);
+
+    // 결제 ID로 PENDING 상태의 예약을 조회
+    Optional<ReservationVO> selectPendingReservationByPaymentId(@Param("paymentId") String paymentId);
+
+    // 임시 예약에 연결된 테이블 정보 삭제
+    int deleteReservationTables(@Param("reservationId") long reservationId);
+
+    // 임시 예약 정보 삭제
+    int deleteReservation(@Param("reservationId") long reservationId);
 }
