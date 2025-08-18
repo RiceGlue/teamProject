@@ -130,7 +130,7 @@
                 <i class="bi bi-person-circle me-2"></i> 내 정보
             </a>
             <div id="collapseMyInfo" class="collapse">
-                <a class="nav-link" href="#">- 회원정보 수정</a>
+                <a class="nav-link" href="${contextPath}/owner/edit-profile">- 회원정보 수정</a>
                 <a class="nav-link" href="#">- 회원탈퇴</a>
             </div>
         </div>
