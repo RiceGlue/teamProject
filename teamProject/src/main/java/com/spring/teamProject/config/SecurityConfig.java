@@ -36,9 +36,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN")      // /admin/** 경로는 ADMIN 역할만 접근 가능
-                .requestMatchers("/owner/**").hasRole("OWNER")      // /owner/** 경로는 OWNER 역할만 접근 가능
-                .requestMatchers("/member/mypage/**").authenticated() // ✨ /member/mypage 하위 경로도 인증 필요
+                .requestMatchers("/admin/**").hasRole("ADMIN")                       // /admin/** 경로는 ADMIN 역할만 접근 가능
+                .requestMatchers("/owner/**").hasRole("OWNER")                       // /owner/** 경로는 OWNER 역할만 접근 가능
+                .requestMatchers("/member/mypage/**").authenticated()                // ✨ /member/mypage 하위 경로도 인증 필요
+                .requestMatchers("/reservation/**", "/waiting/**").authenticated()   // reservation 페이지나 waiting 페이지로 이동할때 로그인을 유도함
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
