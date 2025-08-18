@@ -279,46 +279,57 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 
 		//fileType, displayNo 가져오기
 		String[] fileTypes = multiReq.getParameterValues("fileType");
+		
+		for(int i=0;i<fileTypes.length;i++) {
+			System.out.println("파일 타입 : " + fileTypes[i]);
+		}
 		String[] displayNos = multiReq.getParameterValues("displayNo");
 		
 		String[] originalFileNames = multiReq.getParameterValues("originalFileName");
+			
 		List<MultipartFile> files = multiReq.getFiles("fileName");
+		
+		for(int i=0;i<files.size();i++) {
+			if(files.get(i).getOriginalFilename().isEmpty()) {
+				System.out.println("null");
+			} else { System.out.println(files.get(i).getOriginalFilename()); }
+		}
 
 		List<ImageFileVO> imgFileList = new ArrayList<>();
 
-		// index 기준으로 순회
+		// 1. 파일 업로드는 딱 한 번만!
+		List<ImageFileVO> uploadedFiles = upload(multiReq, directoryName);
+
 		for (int i = 0; i < files.size(); i++) {
 		    MultipartFile file = files.get(i);
 
-		    // 새로 업로드된 파일이 존재할 경우
 		    if (!file.isEmpty()) {
-		        // ✅ 기존 파일 삭제
+		        // 기존 파일 삭제
 		        String originalFileName = originalFileNames[i];
 		        if (originalFileName != null && !originalFileName.isEmpty()) {
-		        	deleteFile(originalFileName, directoryName); // 삭제
+		            deleteFile(originalFileName, directoryName);
 		        }
 
-		        // ✅ 새로운 파일 업로드
-		        List<ImageFileVO> uploadedFiles = upload(multiReq, directoryName);  // uploadFile: MultipartFile 단건 업로드 처리 메서드
-		        if (!uploadedFiles.isEmpty()) {
-		            // ✅ displayNo 등 필요한 값 세팅
-		            ImageFileVO imageVO = uploadedFiles.get(0);
-		            imageVO.setDisplayNo(Integer.parseInt(displayNos[i])); // 순서대로 유지
-		            imageVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
-		            imageVO.setStoreId(storeId);
-		            imageVO.setRegId(regId);
-		            
-		            if(Boolean.parseBoolean(fileTypes[i])) {
-		            	storeInfo.remove(originalFileName);
-		            	storeInfo.put("fileName", uploadedFiles.get(0).getFileName());
-		            }
-		            
-		            System.out.println("메인 이미지 : " + uploadedFiles.get(0).getFileName());
+		        // 인덱스 맞게 업로드된 파일 사용
+		        ImageFileVO uploadedFile = uploadedFiles.get(i);
 
-		            imgFileList.add(imageVO);
+		        ImageFileVO imageVO = new ImageFileVO();
+		        imageVO.setFileName(uploadedFile.getFileName());
+		        imageVO.setDisplayNo(Integer.parseInt(displayNos[i]));
+		        imageVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
+		        imageVO.setStoreId(storeId);
+		        imageVO.setRegId(regId);
+
+		        // 메인 이미지인 경우 storeInfo 업데이트
+		        if (Boolean.parseBoolean(fileTypes[i])) {
+		            storeInfo.remove(originalFileName);
+		            storeInfo.put("fileName", uploadedFile.getFileName());
 		        }
+
+		        imgFileList.add(imageVO);
 		    }
 		}
+
 		
 		try {
 			adminStoreService.modifyStoreInfo(storeInfo);

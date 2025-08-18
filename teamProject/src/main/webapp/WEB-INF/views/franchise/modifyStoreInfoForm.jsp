@@ -61,39 +61,32 @@
         }).open();
     }
     
-    let imageIndex = ${storeMap.imageList.size()}; // 기존 이미지 개수
-	let nextDisplayNo = Math.max(...[<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">${image.displayNo},</c:forEach> 0]) + 1;
+    let imageIndex = ${storeMap.imageList.size()};
+    console.log(imageIndex);
 
-	function addNewImageField() {
-		const container = document.getElementById("ImagesContainer");
+    function addImage() {
+	    const fileNameIdx = "fileName" + imageIndex;
+	    const previewIdx = "preview" + imageIndex;
+	
+	    const html =
+		    '<div style="margin-bottom: 10px;">' +
+		    '<div style="margin-bottom: 10px;">' +
+		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)"> 메인</label>' +
+		    '</div>' +
+		    '<div style="display: flex; width: 100%;">' +
+		    '<div class="form-input" style="flex: 1;">' +
+		    '<span style="font-weight: bold;">신규 이미지</span><br>' +
+		    '<input type="file" name="fileName" id="' + fileNameIdx + '" accept="image/*" onchange="validateImages(this, ' + imageIndex + ')" />' +
+		    '<div class="image-preview" id="' + previewIdx + '" style="margin-top: 10px;"></div>' +
+		    '<input type="hidden" name="displayNo" value="' + imageIndex + '">' +
+		    '</div>' +
+		    '</div>' +
+		    '</div>';
+	
+	    $("#addImage").append(html);
+	    imageIndex++;
+    }
 
-		const div = document.createElement("div");
-		div.className = "form-row";
-		div.style.cssText = "display: flex; margin-bottom: 10px; align-items: flex-start;";
-
-		const html = `
-			<div class="form-label" style="width: 200px;">
-				<label>
-					<input type="radio" name="mainImageRadio" onchange="setMainImage(this)"> 메인 이미지
-				</label>
-			</div>
-			<div class="form-input" style="flex: 1;">
-				<span style="font-weight: bold;">신규 이미지</span><br>
-				<input type="file" name="fileName" id="fileName${imageIndex}" accept="image/*" onchange="validateImages(this, ${imageIndex})" />
-				<div class="image-preview" id="preview${imageIndex}" style="margin-top: 10px;"></div>
-
-				<!-- hidden inputs -->
-				<input type="hidden" name="originalFileName" value="">
-				<input type="hidden" name="displayNo" value="${nextDisplayNo}">
-			</div>
-		`;
-
-		div.innerHTML = html;
-		container.appendChild(div);
-
-		imageIndex++;
-		nextDisplayNo++;
-	}
 	
 	function setMainImage(radio) {
     	const allRows = document.querySelectorAll('#ImagesContainer .form-row');
@@ -530,41 +523,39 @@
 				</label>
 			</div>
 		</div>
-		
 		<div id="ImagesContainer">
-			<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
-				<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
-					<div class="form-label" style="width: 200px;">
-						<label>
-							<input type="radio" name="fileType" onchange="setMainImage(this)" 
-							<c:if test="${image.fileType eq true}">checked</c:if>> 메인 이미지
-						</label>
-					</div>
-					<div class="form-input" style="flex: 1;">
-						<div style="margin-bottom: 15px;">
-							<span style="font-weight: bold;">현재 이미지</span><br>
-							<img src="${contextPath}/download?directoryName=store&fileName=${image.fileName}" alt="가게 이미지" style="max-width: 200px; margin-top: 5px;" />
+			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
+				<div class="form-label" style="width: 200px; float:left;">이미지</div>
+				<div id="addImage" style="float:right; width:calc(100%-210px);">
+					<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
+						<div style="margin-bottom: 10px;">
+							<input type="hidden" name="fileType" value="${image.fileType}" />
+							<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" <c:if test="${image.fileType}">checked</c:if>> 메인</label>
 						</div>
-					</div>
-					<div class="form-input" style="flex: 1;">
-						<span style="font-weight: bold;">변경 이미지</span><br>
-						<input type="file" name="fileName" id="fileName${status.index}" accept="image/*" onchange="validateImages(this, ${status.index})" />
-						<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
-			
-						<!-- ✅ 기존 파일명을 hidden으로 전달 -->
-						<input type="hidden" name="originalFileName" id="originalFileName${status.index}" value="${image.fileName}">
-			
-						<!-- 기존 display 번호도 함께 전달 -->
-						<input type="hidden" name="displayNo" id="displayNo${status.index}" value="${image.displayNo}">
-					</div>
+						
+						<div style="display: flex; width: 100%;">
+							<div class="form-input" style="flex: 1;">
+								<input type="hidden" name="originalFileName" id="originalFileName${status.index}" value="${image.fileName}">
+								
+								<span style="font-weight: bold;">현재 이미지</span><br>
+								<div style="margin:35px;"></div>
+								<img src="${contextPath}/download?directoryName=store&fileName=${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
+							</div>
+							
+							<div class="form-input" style="flex: 1;">
+								<span style="font-weight: bold;">변경 이미지</span><br>
+								<input type="file" name="fileName" id="fileName${status.index}" accept="image/*" onchange="validateImages(this, ${status.index})" />
+								<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
+								<input type="hidden" name="displayNo" id="displayNo${status.index}" value="${image.displayNo}">
+							</div>
+						</div>
+					</c:forEach>
 				</div>
-			</c:forEach>
+			</div>
 		</div>
-
-		
 		<div style="margin-top: 15px;">
+			<input type="button" onclick="addImage()" value="신규 이미지 추가 ">
 			<input type="submit" value="정보 수정">
-			<button type="button" onclick="addNewImageField()">+ 이미지 추가</button>
 		</div>
 	</div>
 </form>
