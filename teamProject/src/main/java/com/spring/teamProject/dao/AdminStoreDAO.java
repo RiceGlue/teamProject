@@ -20,4 +20,5 @@ public interface AdminStoreDAO {
 	public StoreVO selectStoreInfo(long storeId) throws DataAccessException;
 	public List<MenuVO> selectMenuList(long storeId) throws DataAccessException;
 	public List<ImageFileVO> selectStoreImage(StoreVO storeVO) throws DataAccessException;
+	public void updateStoreInfo (Map storeInfo) throws DataAccessException;
 }

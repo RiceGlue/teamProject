@@ -4,10 +4,10 @@
 <c:set var="store" value="${storeMap.storeInfo }" />
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("수정 등록 완료!");</script>
+    <script>alert("수정 완료!");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("수정 등록 실패!");</script>
+    <script>alert("수정 실패!");</script>
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -60,6 +60,51 @@
             }
         }).open();
     }
+    
+    let imageIndex = ${storeMap.imageList.size()};
+    console.log(imageIndex);
+
+    function addImage() {
+	    const fileNameIdx = "fileName" + imageIndex;
+	    const previewIdx = "preview" + imageIndex;
+	
+	    const html =
+		    '<div style="margin-bottom: 10px;">' +
+		    '<div style="margin-bottom: 10px;">' +
+		    '<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)"> 메인</label>' +
+		    '</div>' +
+		    '<div style="display: flex; width: 100%;">' +
+		    '<div class="form-input" style="flex: 1;">' +
+		    '<span style="font-weight: bold;">신규 이미지</span><br>' +
+		    '<input type="file" name="fileName" id="' + fileNameIdx + '" accept="image/*" onchange="validateImages(this, ' + imageIndex + ')" />' +
+		    '<div class="image-preview" id="' + previewIdx + '" style="margin-top: 10px;"></div>' +
+		    '<input type="hidden" name="displayNo" value="' + imageIndex + '">' +
+		    '</div>' +
+		    '</div>' +
+		    '</div>';
+	
+	    $("#addImage").append(html);
+	    imageIndex++;
+    }
+
+	
+	function setMainImage(radio) {
+    	const allRows = document.querySelectorAll('#ImagesContainer .form-row');
+    	allRows.forEach(row => {
+    		const fileTypeInput = row.querySelector('input[type="hidden"][name="fileType"]');
+    		if (fileTypeInput) {
+    			fileTypeInput.value = 'false'; // 일단 모두 false
+    		}
+    	});
+
+    	// 선택된 라디오 버튼이 있는 row의 fileType만 true로
+    	const selectedRow = radio.closest('.form-row');
+    	const selectedFileTypeInput = selectedRow.querySelector('input[type="hidden"][name="fileType"]');
+    	if (selectedFileTypeInput) {
+    		selectedFileTypeInput.value = 'true';
+    	}
+    }
+
     function previewImage(file, index) {
     	const previewDiv = document.getElementById("preview" + index);
     	const reader = new FileReader();
@@ -123,10 +168,106 @@
     	const previewId = input.getAttribute("onchange").match(/\d+/)[0];
     	document.getElementById("preview" + previewId).innerHTML = "";
     }
+    
+	function checkStoreInfo(){
+		
+		//매장 전화번호 유효성
+		const localNumber=document.getElementById('localNumber').value.trim(); 
+		const number1=document.getElementById('number1').value.trim();
+		const number2=document.getElementById('number2').value.trim();
+		
+		if(!localNumber){
+			alert('지역번호를 선택해주세요.');
+			return false;
+		}
+		if(!number1||!/^\d+$/.test(number1)){
+			alert('전화번호 가운데 번호를 숫자로 입력해주세요.');
+			return false;
+		}
+		if(!number2||!/^\d+$/.test(number2)){
+			alert('전화번호 마지막 번호를 숫자로 입력해주세요.');
+			return false;
+		}
+		
+		//정기휴무 유효썽
+		const closedOptions=[...document.querySelectorAll('input[name="closedOption"]:checked')].map(el=>el.value);
+		const closed=closedOptions.join(', ');
+		console.log('정기 휴무:',closed);
+		
+		//영업시간 유효성
+		const startHour=document.getElementById('startHour').value;
+		const startMin=document.getElementById('startMin').value;
+		const endHour=document.getElementById('endHour').value;
+		const endMin=document.getElementById('endMin').value;
+		
+		if(!startHour||!startMin||!endHour||!endMin){
+			alert('영업시간을 모두 선택해주세요.');
+			return false;
+		}
+		const operatingTime = startHour.padStart(2, '0') + " : " + startMin.padStart(2, '0') + " ~ " + endHour.padStart(2, '0') + " : " + endMin.padStart(2, '0');
+		console.log('영업시간:',operatingTime);
+		
+		//브레이크 타임 유효성
+		const breakStartHour=document.getElementById('breakStartHour').value;
+		const breakStartMin=document.getElementById('breakStartMin').value;
+		const breakEndHour=document.getElementById('breakEndHour').value;
+		const breakEndMin=document.getElementById('breakEndMin').value;
+		
+		let breakTime='';
+		if(breakStartHour&&breakStartMin&&breakEndHour&&breakEndMin){
+			breakTime= breakStartHour.padStart(2,'0')+" : "+breakStartMin.padStart(2,'0')+" ~ "+breakEndHour.padStart(2,'0')+" : "+breakEndMin.padStart(2,'0');
+		}
+		console.log('브레이크 타임:',breakTime);
+		
+		//라스트 오더 유효성
+		const lastOrderHour=document.getElementById('lastOrderHour').value;
+		const lastOrderMin=document.getElementById('lastOrderMin').value;
+		
+		let lastOrder='';
+		if(lastOrderHour&&lastOrderMin){
+			lastOrder = lastOrderHour.padStart(2, '0') + " : " + lastOrderMin.padStart(2, '0');
+		}
+		console.log('라스트 오더:',lastOrder);
+		
+		//편의시설 유효성
+		const amenOptions=[...document.querySelectorAll('input[name="amenOption"]:checked')].map(el=>el.value);
+		const amenities=amenOptions.join(', ');
+		console.log('편의시설:',amenities);
+		
+		//이미지 파일 유효성
+		const files=document.querySelectorAll('input[name="fileName"]');
+		let hasFile=false;
+		files.forEach(input=>{
+			if(input.files.length>0)hasFile=true;
+		});
+		if(!hasFile){
+			alert('최소 한 개 이상의 이미지를 선택해주세요.');
+			return false;
+		}
+		
+		setHiddenInput('closed',closed);
+		setHiddenInput('operatingTime',operatingTime);
+		setHiddenInput('breakTime',breakTime);
+		setHiddenInput('lastOrder',lastOrder);
+		setHiddenInput('amenities',amenities);
+		
+		return true;
+	}
+	
+	function setHiddenInput(name,value){
+		let input=document.querySelector(`input[name="${name}"]`);
+		if(!input){
+			input=document.createElement('input');
+			input.type='hidden';
+			input.name=name;
+			document.forms['storeInfo'].appendChild(input);
+		}		
+		input.value=value;
+	}
 
 </script>
 
-
+<form action="${contextPath}/franchise/modifyStoreInfo" method="post" name="storeInfo" enctype="multipart/form-data" onsubmit="return checkStoreInfo()">
 <h1>매장 정보 수정</h1>
 	<input type="hidden" id="storeId" name="storeId" value="${store.storeId}" />
 	<input type="hidden" id="ownerId" name="ownerId" value="${store.ownerId}" />
@@ -227,13 +368,34 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">  <!-- 정기 휴무 설정 -->
 			<div class="form-label" style="width: 200px;">정기 휴무<small>(복수 선택 가능)</small></div>
 			<div class="form-input" style="flex: 1;">
-				<label><input type="checkbox" name="closedOption" value="월요일" /> 월요일</label>
-				<label><input type="checkbox" name="closedOption" value="화요일" /> 화요일</label>
-				<label><input type="checkbox" name="closedOption" value="수요일" /> 수요일</label>
-				<label><input type="checkbox" name="closedOption" value="목요일" /> 목요일</label>
-				<label><input type="checkbox" name="closedOption" value="금요일" /> 금요일</label>
-				<label><input type="checkbox" name="closedOption" value="토요일" /> 토요일</label>
-				<label><input type="checkbox" name="closedOption" value="일요일" /> 일요일</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="월요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('월요일')}">checked</c:if> />월요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="화요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('화요일')}">checked</c:if> />화요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="수요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('수요일')}">checked</c:if> />수요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="목요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('목요일')}">checked</c:if> />목요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="금요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('금요일')}">checked</c:if> />금요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="토요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('토요일')}">checked</c:if> />토요일
+				</label>
+				<label>
+					<input type="checkbox" name="closedOption" value="일요일"
+				    <c:if test="${storeMap.closedList != null && storeMap.closedList.contains('일요일')}">checked</c:if> />일요일
+				</label>
 			</div>
 		</div>
 		
@@ -242,33 +404,37 @@
 			<div class="form-input" style="flex: 1;">
 				<select id="startHour" name="startHour">
 					<option value="">시</option>
-					<script>
-					for(let i=0; i<=23; i++) { document.write('<option value="' + i + '">' + i.toString().padStart(2,'0') + '</option>'); }
-					</script>
+						<c:forEach var="i" begin="0" end="23">
+							<option value="${i}"
+								<c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[0] != null && storeMap.operatingTimeList[0]== i.toString()}">selected</c:if>>${i}
+							</option>
+						</c:forEach>
 				</select> :
 				<select id="startMin" name="startMin">
 					<option value="">분</option>
-					<option value="0">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="00" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]=='00'}">selected</c:if>>00</option>
+					<option value="10" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]== '10'}">selected</c:if>>10</option>
+					<option value="20" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]== '20'}">selected</c:if>>20</option>
+					<option value="30" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]== '30'}">selected</c:if>>30</option>
+					<option value="40" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]== '40'}">selected</c:if>>40</option>
+					<option value="50" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[1]== '50'}">selected</c:if>>50</option>
 				</select> ~
 				<select id="endHour" name="endHour">
 					<option value="">시</option>
-					<script>
-					for(let i=0; i<=23; i++) { document.write('<option value="' + i + '">' + i.toString().padStart(2,'0') + '</option>'); }
-					</script>
+						<c:forEach var="i" begin="0" end="23">
+							<option value="${i}"
+								<c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[2] != null && storeMap.operatingTimeList[2]== i.toString()}">selected</c:if>>${i}
+							</option>
+						</c:forEach>
 				</select> :
 				<select id="endMin" name="endMin">
 					<option value="">분</option>
-					<option value="0">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="00" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]=='00'}">selected</c:if>>00</option>
+					<option value="10" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]== '10'}">selected</c:if>>10</option>
+					<option value="20" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]== '20'}">selected</c:if>>20</option>
+					<option value="30" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]== '30'}">selected</c:if>>30</option>
+					<option value="40" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]== '40'}">selected</c:if>>40</option>
+					<option value="50" <c:if test="${storeMap.operatingTimeList != null && storeMap.operatingTimeList[3]== '50'}">selected</c:if>>50</option>
 				</select>
 			</div>
 		</div>
@@ -278,33 +444,37 @@
 			<div class="form-input" style="flex: 1;">
 				<select id="breakStartHour" name="breakStartHour">
 					<option value="">시</option>
-					<script>
-					for(let i=0; i<=23; i++) { document.write('<option value="' + i + '">' + i.toString().padStart(2,'0') + '</option>'); }
-					</script>
+						<c:forEach var="i" begin="0" end="23">
+							<option value="${i}"
+								<c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[0] != null && storeMap.breakTimeList[0]== i.toString()}">selected</c:if>>${i}
+							</option>
+						</c:forEach>
 				</select> :
 				<select id="breakStartMin" name="breakStartMin">
 					<option value="">분</option>
-					<option value="0">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="00" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]=='00'}">selected</c:if>>00</option>
+					<option value="10" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]== '10'}">selected</c:if>>10</option>
+					<option value="20" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]== '20'}">selected</c:if>>20</option>
+					<option value="30" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]== '30'}">selected</c:if>>30</option>
+					<option value="40" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]== '40'}">selected</c:if>>40</option>
+					<option value="50" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[1]== '50'}">selected</c:if>>50</option>
 				</select> ~
 				<select id="breakEndHour" name="breakEndHour">
 					<option value="">시</option>
-					<script>
-					for(let i=0; i<=23; i++) { document.write('<option value="' + i + '">' + i.toString().padStart(2,'0') + '</option>'); }
-					</script>
+						<c:forEach var="i" begin="0" end="23">
+							<option value="${i}"
+								<c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[2] != null && storeMap.breakTimeList[2]== i.toString()}">selected</c:if>>${i}
+							</option>
+						</c:forEach>
 				</select> :
 				<select id="breakEndMin" name="breakEndMin">
 					<option value="">분</option>
-					<option value="0">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="00" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]=='00'}">selected</c:if>>00</option>
+					<option value="10" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]== '10'}">selected</c:if>>10</option>
+					<option value="20" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]== '20'}">selected</c:if>>20</option>
+					<option value="30" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]== '30'}">selected</c:if>>30</option>
+					<option value="40" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]== '40'}">selected</c:if>>40</option>
+					<option value="50" <c:if test="${storeMap.breakTimeList != null && storeMap.breakTimeList[3]== '50'}">selected</c:if>>50</option>
 				</select>
 			</div>
 		</div>
@@ -314,18 +484,20 @@
 			<div class="form-input" style="flex: 1;">
 				<select id="lastOrderHour" name="lastOrderHour">
 					<option value="">시</option>
-					<script>
-					for(let i=0; i<=23; i++) { document.write('<option value="' + i + '">' + i.toString().padStart(2,'0') + '</option>'); }
-					</script>
+						<c:forEach var="i" begin="0" end="23">
+							<option value="${i}"
+								<c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[0] != null && storeMap.lastOrderList[0]== i.toString()}">selected</c:if>>${i}
+							</option>
+						</c:forEach>
 				</select> :
 				<select id="lastOrderMin" name="lastOrderMin">
 					<option value="">분</option>
-					<option value="00">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="00" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]=='00'}">selected</c:if>>00</option>
+					<option value="10" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]== '10'}">selected</c:if>>10</option>
+					<option value="20" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]== '20'}">selected</c:if>>20</option>
+					<option value="30" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]== '30'}">selected</c:if>>30</option>
+					<option value="40" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]== '40'}">selected</c:if>>40</option>
+					<option value="50" <c:if test="${storeMap.lastOrderList != null && storeMap.lastOrderList[1]== '50'}">selected</c:if>>50</option>
 				</select>
 			</div>
 		</div>
@@ -333,40 +505,57 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">  <!-- 편의 시설 -->
 			<div class="form-label" style="width: 200px;">편의 시설</div>
 			<div class="form-input" style="flex: 1;">
-				<label><input type="checkbox" name="amenOption" value="주차장" />주차장 있음</label>
-				<label><input type="checkbox" name="amenOption" value="키즈존" />키즈존</label>
-				<label><input type="checkbox" name="amenOption" value="노키즈존" />노키즈존</label>
-				<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>
+				<label>
+					<input type="checkbox" name="amenOption" value="주차장"
+				    <c:if test="${storeMap.amenitiesList != null && storeMap.amenitiesList.contains('주차장')}">checked</c:if> />주차장
+				</label>
+				<label>
+					<input type="checkbox" name="amenOption" value="키즈존"
+				    <c:if test="${storeMap.amenitiesList != null && storeMap.amenitiesList.contains('키즈존')}">checked</c:if> />키즈존
+				</label>
+				<label>
+					<input type="checkbox" name="amenOption" value="노키즈존"
+				    <c:if test="${storeMap.amenitiesList != null && storeMap.amenitiesList.contains('노키즈존')}">checked</c:if> />노키즈존
+				</label>
+				<label>
+					<input type="checkbox" name="amenOption" value="와이파이"
+				    <c:if test="${storeMap.amenitiesList != null && storeMap.amenitiesList.contains('와이파이')}">checked</c:if> />와이파이
+				</label>
 			</div>
 		</div>
-		
 		<div id="ImagesContainer">
-			<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
-				<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
-					<div class="form-label" style="width: 200px;">
-						<label>
-						<input type="radio" name="mainImageRadio" onchange="setMainImage(this)" 
-						<c:if test="${image.fileType eq true}">checked</c:if>> 메인 이미지
-						</label>
-					</div>
-					<div class="form-input" style="flex: 1;">
-						<div style="margin-bottom: 15px;">
-							<span style="font-weight: bold;">현재 이미지</span><br>
-							<img src="${contextPath}/download?directoryName=store&fileName=${image.fileName}" alt="가게 이미지" style="max-width: 200px; margin-top: 5px;" />
+			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
+				<div class="form-label" style="width: 200px; float:left;">이미지</div>
+				<div id="addImage" style="float:right; width:calc(100%-210px);">
+					<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
+						<div style="margin-bottom: 10px;">
+							<input type="hidden" name="fileType" value="${image.fileType}" />
+							<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" <c:if test="${image.fileType}">checked</c:if>> 메인</label>
 						</div>
-					</div>
-					<div class="form-input" style="flex: 1;">
-						<span style="font-weight: bold;">변경 이미지</span><br>
-						<input type="file" name="imageFile" accept="image/*" onchange="validateImages(this, ${status.index})" />
-						<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
-						<input type="hidden" name="displayNo" value="${image.displayNo}">
-					</div>
+						
+						<div style="display: flex; width: 100%;">
+							<div class="form-input" style="flex: 1;">
+								<input type="hidden" name="originalFileName" id="originalFileName${status.index}" value="${image.fileName}">
+								
+								<span style="font-weight: bold;">현재 이미지</span><br>
+								<div style="margin:35px;"></div>
+								<img src="${contextPath}/download?directoryName=store&fileName=${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
+							</div>
+							
+							<div class="form-input" style="flex: 1;">
+								<span style="font-weight: bold;">변경 이미지</span><br>
+								<input type="file" name="fileName" id="fileName${status.index}" accept="image/*" onchange="validateImages(this, ${status.index})" />
+								<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
+								<input type="hidden" name="displayNo" id="displayNo${status.index}" value="${image.displayNo}">
+							</div>
+						</div>
+					</c:forEach>
 				</div>
-			</c:forEach>
+			</div>
 		</div>
-
-		
 		<div style="margin-top: 15px;">
+			<input type="button" onclick="addImage()" value="신규 이미지 추가 ">
 			<input type="submit" value="정보 수정">
 		</div>
 	</div>
+</form>

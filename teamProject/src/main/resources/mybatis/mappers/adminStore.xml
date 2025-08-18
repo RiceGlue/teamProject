@@ -210,7 +210,32 @@
 		<![CDATA[
 			select image_id, file_name, file_type, display_no
 			from image_file
-			where store_id=#{storeId} and reg_id=#{ownerId}
+			where store_id=#{storeId} and menu_id is null and review_id is null
 		]]>
 	</select>
+	
+	<update id="updateStoreInfo" parameterType="java.util.Map" >
+		<![CDATA[
+			UPDATE stores
+			SET 
+				store_type = #{storeType},
+				zipcode = #{zipcode},
+				address = #{address},
+				detail_address = #{detailAddress},
+				extra_address = #{extraAddress},
+				operation_type = #{operationType},
+				local_number = #{localNumber},
+				number1 = #{number1},
+				number2 = #{number2},
+				description = #{description},
+				closed = #{closed},
+				operating_time = #{operatingTime},
+				break_time = #{breakTime},
+				last_order = #{lastOrder},
+				amenities = #{amenities},
+				file_name = #{fileName},
+				updated_at = now()
+		 	WHERE store_id = #{storeId}
+		]]>
+	</update>
 </mapper>

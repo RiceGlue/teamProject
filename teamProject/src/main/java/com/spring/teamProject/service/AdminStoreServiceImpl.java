@@ -43,7 +43,7 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	}
 	
 	@Override
-	public StoreVO selectStoreInfo(long storeId) throws Exception {
+	public StoreVO selectStoreInfo(long storeId) throws Exception {	
 		StoreVO storeInfo = adminStoreDAO.selectStoreInfo(storeId);
 		return storeInfo;
 	}
@@ -59,4 +59,10 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 		List<ImageFileVO> imageList = adminStoreDAO.selectStoreImage(storeVO);
 		return imageList;
 	}
+	
+	@Override
+	public void modifyStoreInfo(Map storeInfo) throws Exception {
+		adminStoreDAO.updateStoreInfo(storeInfo);
+	}
+
 }

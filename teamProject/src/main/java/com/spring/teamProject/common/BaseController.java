@@ -52,8 +52,8 @@ public abstract class BaseController {
         return fileList;
     }
 
-    protected void deleteFile(String fileName) {
-        File file = new File(CURR_IMAGE_REPO_PATH + File.separator + fileName);
+    protected void deleteFile(String fileName, String directoryName) {
+        File file = new File(CURR_IMAGE_REPO_PATH + File.separator + directoryName + File.separator + fileName);
         try {
             file.delete();
         } catch (Exception e) {

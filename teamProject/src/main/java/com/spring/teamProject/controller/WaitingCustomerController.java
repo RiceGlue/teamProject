@@ -42,14 +42,17 @@ public class WaitingCustomerController {
     private MemberService memberService;
 
     // GET 요청: 웨이팅 등록 폼을 보여줍니다.
-    @GetMapping("/register")
-    public String showForm() {
+    @GetMapping("/form")
+    public String showForm(@RequestParam("storeId") Long storeId, Model model) {
+    	logger.info("GET /register 요청이 들어왔습니다.");
+    	model.addAttribute("storeId", storeId);
         return "waiting/customer/register";
     }
 
     // POST 요청: 웨이팅 등록 폼 데이터를 처리합니다.
     @PostMapping("/register")
     public String submitForm(@ModelAttribute WaitingVO waitingVO, Authentication authentication, RedirectAttributes redirectAttributes) {
+    	logger.info("POST /register 요청이 들어왔습니다.");
         try {
         	if (authentication != null && authentication.getPrincipal() instanceof UserDetailsVO) {
                 // principal 객체를 UserDetailsVO 타입으로 형 변환
