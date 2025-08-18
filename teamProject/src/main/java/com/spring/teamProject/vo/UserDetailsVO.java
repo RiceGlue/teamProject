@@ -26,12 +26,12 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("name", memberVO.getMemberName());
         attributes.put("email", memberVO.getEmail());
-        
+
         List<SocialAccountVO> socialAccounts = memberVO.getSocialAccounts();
         if (socialAccounts != null && !socialAccounts.isEmpty()) {
             attributes.put("socialProvider", socialAccounts.get(0).getProvider());
         }
-        
+
         return attributes;
     }
 
@@ -67,6 +67,10 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
         return memberVO.getLoginPw();
     }
 
+    public Long getMemberId() {
+        return memberVO.getMemberId();
+    }
+
     /**
      * [수정] UserDetails의 username은 null이 아니어야 합니다.
      * login_id가 없는 소셜 전용 회원의 경우, 고유값인 email을 대신 반환합니다.
@@ -92,7 +96,7 @@ public class UserDetailsVO implements UserDetails, OAuth2User {
     public boolean isEnabled() {
         return "ACTIVE".equals(memberVO.getStatus());
     }
-    
+
     public MemberVO getMemberVO() {
         return memberVO;
     }
