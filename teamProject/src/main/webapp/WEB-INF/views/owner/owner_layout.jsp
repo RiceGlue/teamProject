@@ -30,6 +30,7 @@
             background-color: #2c3e50;
             padding-top: 1rem;
             z-index: 1000;
+            overflow-y: auto;
         }
         .sidebar-brand {
             padding: 1rem 1.5rem;
@@ -55,7 +56,7 @@
         }
         .sidebar .nav-item .nav-link[data-bs-toggle="collapse"] { position: relative; }
         .sidebar .nav-item .nav-link[data-bs-toggle="collapse"]::after {
-            content: '›';
+            content: '\203A'; /* 깨지지 않는 CSS 코드로 변경 */
             position: absolute;
             right: 1.5rem;
             font-size: 1.5rem;
@@ -93,14 +94,14 @@
             <a class="nav-link active" href="${contextPath}/owner/dashboard"> <i class="bi bi-house-door-fill me-2"></i> 대시보드 홈 </a>
         </div>
 
+        <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
         <div class="nav-item">
             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseStore">
                 <i class="bi bi-shop me-2"></i> 매장
             </a>
             <div id="collapseStore" class="collapse">
-                <a class="nav-link" href="#">- 매장 관리</a>
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseStoreSubMenu">
-                    &nbsp;&nbsp;&nbsp;↳ 상세 관리
+                    - 매장 관리
                 </a>
                 <div id="collapseStoreSubMenu" class="collapse">
                     <a class="nav-link" href="#">> 메뉴 관리</a>
@@ -133,6 +134,17 @@
                 <a class="nav-link" href="#">- 회원탈퇴</a>
             </div>
         </div>
+        
+        <hr class="sidebar-divider">
+        
+        <div class="nav-item">
+            <a class="nav-link" href="${contextPath}/" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>메인 페이지로</a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link" href="javascript:document.getElementById('logout-form').submit();"><i class="bi bi-box-arrow-right me-2"></i>로그아웃</a>
+            <form id="logout-form" action="${contextPath}/member/logout" method="post" style="display: none;"></form>
+        </div>
+
     </div>
 
     <!-- === 우측 메인 콘텐츠 === -->

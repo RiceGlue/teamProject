@@ -36,7 +36,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")      // /admin/** 경로는 ADMIN 역할만 접근 가능
+                .requestMatchers("/owner/**").hasRole("OWNER")      // /owner/** 경로는 OWNER 역할만 접근 가능
                 .requestMatchers("/member/mypage/**").authenticated() // ✨ /member/mypage 하위 경로도 인증 필요
                 .anyRequest().permitAll()
             )

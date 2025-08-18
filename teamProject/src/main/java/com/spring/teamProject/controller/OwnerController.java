@@ -21,7 +21,7 @@ public class OwnerController {
         // owner_layout.jsp를 메인 레이아웃으로 사용하고,
         // 본문(body)에는 owner_dashboard.jsp를 포함시킵니다.
         model.addAttribute("body", "owner/owner_dashboard.jsp");
-        return "layout/owner_layout";
+        return "owner/owner_layout";
     }
 
     // TODO: 앞으로 '매장 관리', '정산 내역' 등 다른 점주용 페이지 요청을 처리할 메소드를 여기에 추가합니다.
