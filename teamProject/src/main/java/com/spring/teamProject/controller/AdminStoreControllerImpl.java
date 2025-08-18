@@ -252,7 +252,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@Override
-	@RequestMapping(value="/mdifyStoreInfo", method=RequestMethod.POST)
+	@RequestMapping(value="/modifyStoreInfo", method=RequestMethod.POST)
 	public ModelAndView modifyStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
 		String directoryName = "store";
 		ModelAndView mav = new ModelAndView();
@@ -295,7 +295,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		        // ✅ 기존 파일 삭제
 		        String originalFileName = originalFileNames[i];
 		        if (originalFileName != null && !originalFileName.isEmpty()) {
-		        	deleteFile(originalFileName); // 삭제
+		        	deleteFile(originalFileName, directoryName); // 삭제
 		        }
 
 		        // ✅ 새로운 파일 업로드
@@ -307,6 +307,13 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		            imageVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
 		            imageVO.setStoreId(storeId);
 		            imageVO.setRegId(regId);
+		            
+		            if(Boolean.parseBoolean(fileTypes[i])) {
+		            	storeInfo.remove(originalFileName);
+		            	storeInfo.put("fileName", uploadedFiles.get(0).getFileName());
+		            }
+		            
+		            System.out.println("메인 이미지 : " + uploadedFiles.get(0).getFileName());
 
 		            imgFileList.add(imageVO);
 		        }

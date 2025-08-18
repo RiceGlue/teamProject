@@ -94,6 +94,23 @@
 		imageIndex++;
 		nextDisplayNo++;
 	}
+	
+	function setMainImage(radio) {
+    	const allRows = document.querySelectorAll('#ImagesContainer .form-row');
+    	allRows.forEach(row => {
+    		const fileTypeInput = row.querySelector('input[type="hidden"][name="fileType"]');
+    		if (fileTypeInput) {
+    			fileTypeInput.value = 'false'; // 일단 모두 false
+    		}
+    	});
+
+    	// 선택된 라디오 버튼이 있는 row의 fileType만 true로
+    	const selectedRow = radio.closest('.form-row');
+    	const selectedFileTypeInput = selectedRow.querySelector('input[type="hidden"][name="fileType"]');
+    	if (selectedFileTypeInput) {
+    		selectedFileTypeInput.value = 'true';
+    	}
+    }
 
     function previewImage(file, index) {
     	const previewDiv = document.getElementById("preview" + index);
@@ -519,7 +536,7 @@
 				<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
 					<div class="form-label" style="width: 200px;">
 						<label>
-							<input type="radio" name="mainImageRadio" onchange="setMainImage(this)" 
+							<input type="radio" name="fileType" onchange="setMainImage(this)" 
 							<c:if test="${image.fileType eq true}">checked</c:if>> 메인 이미지
 						</label>
 					</div>
