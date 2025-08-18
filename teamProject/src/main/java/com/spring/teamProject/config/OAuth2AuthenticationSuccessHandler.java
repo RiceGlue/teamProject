@@ -7,6 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.ServletException;
@@ -17,6 +20,8 @@ import jakarta.servlet.http.HttpSession;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private RequestCache requestCache = new HttpSessionRequestCache();
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                           Authentication authentication) throws IOException, ServletException {
@@ -24,7 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         HttpSession session = request.getSession();
         Boolean isLinking = (Boolean) session.getAttribute("socialLinkRequest");
 
-        // --- ✨ 1. '계정 연동' 시나리오 처리 ---
+        // --- ? 1. '계정 연동' 시나리오 처리 ---
         // 세션에 '계정 연동' 표식이 있는지 먼저 확인합니다.
         if (Boolean.TRUE.equals(isLinking)) {
             // 표식을 사용했으니 즉시 제거하여 다음 로그인에 영향을 주지 않도록 합니다.
@@ -37,7 +42,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return; // 여기서 로직을 종료합니다.
         }
 
-        // --- ✨ 2. '신규 가입' 또는 '기존 회원 로그인' 시나리오 처리 ---
+        // --- ? 2. '신규 가입' 또는 '기존 회원 로그인' 시나리오 처리 ---
         // '계정 연동' 표식이 없는 경우에만 이 로직이 실행됩니다.
         
         // GUEST 권한이 있다면 신규 사용자이므로 추가 정보 입력 페이지로 이동시킵니다.
@@ -51,9 +56,21 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } else {
-            // GUEST가 아니라면 기존 회원이므로 메인 페이지로 리다이렉트합니다.
-            String targetUrl = "/";
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            // ? --- 여기가 핵심 수정 부분입니다 --- ?
+            // 3. '기존 회원 로그인' 시나리오 처리
+            
+            // Spring Security가 저장해 둔 '원래 가려던 페이지' 정보를 가져옵니다.
+            SavedRequest savedRequest = requestCache.getRequest(request, response);
+
+            if (savedRequest != null) {
+                // '원래 가려던 페이지'가 있으면, 그곳으로 리다이렉트합니다.
+                String targetUrl = savedRequest.getRedirectUrl();
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            } else {
+                // '원래 가려던 페이지'가 없으면, 기본 URL(메인 페이지)로 리다이렉트합니다.
+                String targetUrl = "/";
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            }
         }
     }
 }

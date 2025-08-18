@@ -19,6 +19,17 @@
     <script src="${contextPath}/js/common.js" defer></script>
 </head>
 <body>
+    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+    <%-- 세션에 에러 메시지가 있으면 alert로 표시하고, 바로 세션에서 제거합니다. --%>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <script>
+            window.onload = function() {
+                alert("${sessionScope.errorMessage}");
+            };
+        </script>
+        <c:remove var="errorMessage" scope="session" />
+    </c:if>
+
     <div><a href="#">언어선택</a></div>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
