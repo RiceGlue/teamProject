@@ -1,5 +1,6 @@
 package com.spring.teamProject.controller;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.BaseController;
+import com.spring.teamProject.common.StringUtil;
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.vo.ImageFileVO;
@@ -53,25 +56,42 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@RequestMapping(value={"/modifyStoreInfoForm", "/modifyMenuForm"})
-	public ModelAndView modifyForm (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
-		String viewName = (String)req.getAttribute("viewName");
-		//매장 정보 수정 원래 데이터 가져오기
-		Map<String, Object> storeMap = new HashMap<>();
-		
-		StoreVO storeVO = adminStoreService.selectStoreInfo(storeId);
-		List<ImageFileVO> imageList = adminStoreService.selectStoreImage(storeVO);
-		
-		storeMap.put("storeInfo", storeVO);
-		storeMap.put("imageList", imageList);
-		
-		//메뉴 수정 원래 데이터 가져오기
-		List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
-		
-		ModelAndView mav = ViewUtil.layout(viewName);
-		mav.addObject("menuList", menuList);
-		mav.addObject("storeMap",storeMap);
-		return mav;
+	public ModelAndView modifyForm (@RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	    String viewName = (String) req.getAttribute("viewName");
+
+	    // 매장 정보 및 이미지 가져오기
+	    StoreVO storeVO = adminStoreService.selectStoreInfo(storeId);
+	    List<ImageFileVO> imageList = adminStoreService.selectStoreImage(storeVO);
+
+	    // storeVO 안의 문자열 필드들을 List<String>으로 변환
+	    List<String> closedList = StringUtil.StringSeparated(storeVO.getClosed());
+	    List<String> operatingTimeList = StringUtil.StringSeparated(storeVO.getOperatingTime());
+	    List<String> breakTimeList = StringUtil.StringSeparated(storeVO.getBreakTime());
+	    List<String> lastOrderList = StringUtil.StringSeparated(storeVO.getLastOrder());
+	    List<String> amenitiesList = StringUtil.StringSeparated(storeVO.getAmenities());
+
+	    // storeMap에 정보 저장
+	    Map<String, Object> storeMap = new HashMap<>();
+	    storeMap.put("storeInfo", storeVO);
+	    storeMap.put("imageList", imageList);
+	    
+	    storeMap.put("closedList", closedList);
+	    storeMap.put("operatingTimeList", operatingTimeList);
+	    storeMap.put("breakTimeList", breakTimeList);
+	    storeMap.put("lastOrderList", lastOrderList);
+	    storeMap.put("amenitiesList", amenitiesList);
+
+	    // 메뉴 정보 가져오기
+	    List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
+
+	    // 모델과 뷰 반환
+	    ModelAndView mav = ViewUtil.layout(viewName);
+	    mav.addObject("menuList", menuList);
+	    mav.addObject("storeMap", storeMap);
+
+	    return mav;
 	}
+
 
 	@Override
 	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)
@@ -229,6 +249,85 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	    }
 	    
 	    return mav;
+	}
+	
+	@Override
+	@RequestMapping(value="/mdifyStoreInfo", method=RequestMethod.POST)
+	public ModelAndView modifyStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
+		String directoryName = "store";
+		ModelAndView mav = new ModelAndView();
+		
+		multiReq.setCharacterEncoding("UTF-8");
+
+		//수정된 storeInfo map에 넣기
+		Map<String, Object> storeInfo = new HashMap<>();
+		Enumeration<?> enu = multiReq.getParameterNames();
+		while (enu.hasMoreElements()) {
+			String name = (String) enu.nextElement();
+			String value = multiReq.getParameter(name);
+			System.out.println(name + ": " + value);
+			storeInfo.put(name, value);
+		}
+
+		//이미지 파일 등록자 아이디
+		String regIdstr = (String) storeInfo.get("ownerId"); 
+		long regId = Long.parseLong(regIdstr); 
+		
+		//storeId
+		String storeIdstr = (String) storeInfo.get("storeId"); 
+		long storeId = Long.parseLong(storeIdstr);
+
+		//fileType, displayNo 가져오기
+		String[] fileTypes = multiReq.getParameterValues("fileType");
+		String[] displayNos = multiReq.getParameterValues("displayNo");
+		
+		String[] originalFileNames = multiReq.getParameterValues("originalFileName");
+		List<MultipartFile> files = multiReq.getFiles("fileName");
+
+		List<ImageFileVO> imgFileList = new ArrayList<>();
+
+		// index 기준으로 순회
+		for (int i = 0; i < files.size(); i++) {
+		    MultipartFile file = files.get(i);
+
+		    // 새로 업로드된 파일이 존재할 경우
+		    if (!file.isEmpty()) {
+		        // ✅ 기존 파일 삭제
+		        String originalFileName = originalFileNames[i];
+		        if (originalFileName != null && !originalFileName.isEmpty()) {
+		        	deleteFile(originalFileName); // 삭제
+		        }
+
+		        // ✅ 새로운 파일 업로드
+		        List<ImageFileVO> uploadedFiles = upload(multiReq, directoryName);  // uploadFile: MultipartFile 단건 업로드 처리 메서드
+		        if (!uploadedFiles.isEmpty()) {
+		            // ✅ displayNo 등 필요한 값 세팅
+		            ImageFileVO imageVO = uploadedFiles.get(0);
+		            imageVO.setDisplayNo(Integer.parseInt(displayNos[i])); // 순서대로 유지
+		            imageVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
+		            imageVO.setStoreId(storeId);
+		            imageVO.setRegId(regId);
+
+		            imgFileList.add(imageVO);
+		        }
+		    }
+		}
+		
+		try {
+			adminStoreService.modifyStoreInfo(storeInfo);
+			adminStoreService.addStoreInfoImage(imgFileList);
+			
+			mav.addObject("success",true);
+		    mav.setViewName("redirect:/franchise/modifyStoreInfo?ownerId=" + regId);	
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			mav.addObject("error",true);
+	        mav.setViewName("redirect:/franchise/modifyStoreInfo?ownerId=" + regId);
+		}
+
+		return mav;
+
 	}
 //	
 //	@Override

@@ -3,10 +3,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("정보 등록 완료!");</script>
+    <script>alert("등록 완료!");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("정보 등록 실패!");</script>
+    <script>alert("등록 실패!");</script>
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -519,7 +519,7 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">  <!-- 편의 시설 -->
 			<div class="form-label" style="width: 200px;">편의 시설</div>
 			<div class="form-input" style="flex: 1;">
-				<label><input type="checkbox" name="amenOption" value="주차장" />주차장 있음</label>
+				<label><input type="checkbox" name="amenOption" value="주차장" />주차장</label>
 				<label><input type="checkbox" name="amenOption" value="키즈존" />키즈존</label>
 				<label><input type="checkbox" name="amenOption" value="노키즈존" />노키즈존</label>
 				<label><input type="checkbox" name="amenOption" value="와이파이" />와이파이</label>
@@ -542,8 +542,6 @@
 				<div class="image-preview" style="max-width:200px;"></div>
 			</div>
 		</div>
-
-
 
 		<div style="margin-top: 15px;">
 			<input type="button" value="이미지추가" onClick="addImage()">
