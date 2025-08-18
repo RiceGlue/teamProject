@@ -35,7 +35,6 @@
             <sec:authorize access="isAuthenticated()">
                 <sec:authentication property="principal" var="principal" />
 
-                <%-- ✨ --- 여기가 핵심 수정 부분입니다 --- ✨ --%>
                 <%-- principal 객체의 타입을 확인해서 UserDetailsVO(정식 회원)일 때만 상세 정보를 표시합니다. --%>
                 <c:set var="isCustomUser" value="${principal['class'].name == 'com.spring.teamProject.vo.UserDetailsVO'}" />
 
@@ -55,6 +54,20 @@
                                     </c:if>
                                 </c:forEach>
                             </c:if>
+                            
+                            <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+                            <c:choose>
+                                <c:when test="${principal.memberVO.role == 'ADMIN'}">
+                                    <span class="badge bg-danger ms-2">관리자</span>
+                                </c:when>
+                                <c:when test="${principal.memberVO.role == 'OWNER'}">
+                                    <span class="badge bg-success ms-2">가맹점</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge bg-primary ms-2">일반회원</span>
+                                </c:otherwise>
+                            </c:choose>
+
                             &nbsp;${principal.memberVO.memberName}님 환영합니다.
                         </span>
                     </li>
