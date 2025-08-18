@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -250,7 +251,7 @@ public class MemberController {
     }
 
     // =================================================================
-    // == 소셜 계정 연동 관련 (Social Link)
+    // == 소셜 계정 연동 및 전환 (Social Link & Conversion)
     // =================================================================
 
     @GetMapping("/prepare-link/{provider}")
@@ -285,6 +286,88 @@ public class MemberController {
         }
 
         return "redirect:/member/edit-profile";
+    }
+    
+    @PostMapping("/set-password")
+    public String setPasswordForSocialUser(@RequestParam("loginId") String loginId,
+                                           @RequestParam("newLoginPw") String newPassword,
+                                           @AuthenticationPrincipal Object principal,
+                                           RedirectAttributes redirectAttributes) {
+        MemberVO currentMember = getMemberInfoFromPrincipal(principal);
+        if (currentMember == null) {
+            return "redirect:/member/login";
+        }
+
+        try {
+            boolean isSuccess = memberService.setPasswordForSocialUser(currentMember.getMemberId(), loginId, newPassword);
+
+            if (isSuccess) {
+                redirectAttributes.addFlashAttribute("msg", "일반 계정으로 전환되었습니다. 이제 아이디와 비밀번호로 로그인할 수 있습니다.");
+
+                // 세션 갱신
+                MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
+                Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+                return "redirect:/member/edit-profile";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "계정 전환에 실패했습니다. 다시 시도해주세요.");
+                return "redirect:/member/edit-profile";
+            }
+        } catch (DuplicateKeyException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/edit-profile";
+        }
+    }
+    // ? --- [신규] 계정 연동 확인 페이지를 보여주는 메소드 --- ?
+    @GetMapping("/link-account")
+    public String linkAccountForm(Model model, HttpSession session) {
+        Object socialLinkInfo = session.getAttribute("socialLinkInfo");
+        if (socialLinkInfo == null) {
+            return "redirect:/";
+        }
+        model.addAttribute("socialLinkInfo", socialLinkInfo);
+        model.addAttribute("body", "member/link_account.jsp");
+        return "layout/layout";
+    }
+
+    // ? --- [신규] 아이디와 비밀번호 확인 후 계정을 연동하는 메소드 --- ?
+    @PostMapping("/link-account/confirm")
+    public String linkAccountConfirm(@RequestParam("loginId") String loginId, // 아이디 파라미터 추가
+                                     @RequestParam("password") String password,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+        
+        Map<String, Object> socialLinkInfo = (Map<String, Object>) session.getAttribute("socialLinkInfo");
+        if (socialLinkInfo == null) {
+            return "redirect:/";
+        }
+
+        String email = (String) socialLinkInfo.get("email");
+        String provider = (String) socialLinkInfo.get("provider");
+        String socialId = (String) socialLinkInfo.get("socialId");
+
+        try {
+            // 수정된 서비스 메소드 호출
+            MemberVO linkedMember = memberService.verifyIdAndPasswordAndLinkAccount(email, loginId, password, provider, socialId);
+
+            // 연동 성공 시, 수동으로 로그인 처리
+            UserDetailsVO userDetails = new UserDetailsVO(linkedMember);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            session.removeAttribute("socialLinkInfo");
+            // 세션에 성공 메시지를 담아 메인 페이지로 리다이렉트
+            session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
+
+            return "redirect:/";
+
+        } catch (BadCredentialsException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/link-account";
+        }
     }
 
     // =================================================================

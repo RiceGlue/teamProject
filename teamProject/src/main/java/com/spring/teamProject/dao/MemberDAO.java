@@ -34,14 +34,17 @@ public interface MemberDAO {
     // 회원정보 수정
     int updateMember(MemberVO memberVO);
     
-    // [수정] 회원 탈퇴 (논리적 삭제로 변경)
+    // 회원 탈퇴 (논리적 삭제로 변경)
     int deactivateMember(long memberId);
 
     /**
-     * [신규] 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
+     * 역할(role)이 'OWNER'인 모든 회원 목록을 조회합니다.
      * @return List<MemberVO>
      */
     List<MemberVO> findOwners();
 
     List<MemberVO> findUsers();
+
+    // ✨ --- [신규] 소셜 전용 회원의 아이디/비밀번호 설정을 위한 메소드 --- ✨
+    int updateLoginCredentials(MemberVO memberVO);
 }

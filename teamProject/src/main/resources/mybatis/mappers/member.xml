@@ -116,5 +116,12 @@
         WHERE member_id = #{memberId}
     </update>
     
+    <!-- ✨ [신규] 소셜 전용 회원이 일반 계정으로 전환 시 아이디/비밀번호 업데이트 ✨ -->
+    <update id="updateLoginCredentials" parameterType="com.spring.teamProject.vo.MemberVO">
+        UPDATE members
+        SET login_id = #{loginId},
+            login_pw = #{loginPw}
+        WHERE member_id = #{memberId}
+    </update>
 
 </mapper>

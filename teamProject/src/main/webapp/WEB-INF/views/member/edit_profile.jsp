@@ -85,6 +85,57 @@
         }
         return true;
     }
+
+    // ? --- [신규] 계정 전환 폼 유효성 검사 및 아이디 중복 확인 --- ?
+    function validateConversionForm() {
+        if ($('#conversionSubmitBtn').is(':disabled')) {
+            alert("새 아이디 중복 확인을 해주세요.");
+            return false;
+        }
+        const newPassword = $('#conversionNewLoginPw').val();
+        const confirmPassword = $('#conversionNewLoginPwConfirm').val();
+        if (newPassword !== confirmPassword) {
+            alert("새 비밀번호가 일치하지 않습니다.");
+            return false;
+        }
+        return true;
+    }
+
+    $(function() {
+        $('#conversionIdCheckBtn').on('click', function() {
+            const loginId = $('#conversionLoginId').val();
+            const idCheckMessage = $('#conversionIdCheckMessage');
+
+            if (!loginId) {
+                idCheckMessage.html('<span style="color: red;">아이디를 입력해주세요.</span>');
+                return;
+            }
+
+            $.ajax({
+                url: '${contextPath}/member/check-id', // MemberController의 중복 확인 API 사용
+                type: 'POST',
+                data: { loginId: loginId },
+                success: function(response) {
+                    if (!response.isDuplicate) {
+                        idCheckMessage.html('<span style="color: green;">사용 가능한 아이디입니다.</span>');
+                        $('#conversionSubmitBtn').prop('disabled', false);
+                    } else {
+                        idCheckMessage.html('<span style="color: red;">이미 사용 중인 아이디입니다.</span>');
+                        $('#conversionSubmitBtn').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    idCheckMessage.html('<span style="color: red;">오류가 발생했습니다.</span>');
+                    $('#conversionSubmitBtn').prop('disabled', true);
+                }
+            });
+        });
+
+        $('#conversionLoginId').on('input', function() {
+            $('#conversionSubmitBtn').prop('disabled', true);
+            $('#conversionIdCheckMessage').html('');
+        });
+    });
 </script>
 
 <div class="container my-5" style="max-width: 600px;">
@@ -98,6 +149,7 @@
         <div class="alert alert-success" role="alert">${msg}</div>
     </c:if>
 
+    <!-- === 프로필 정보 수정 폼 시작 === -->
     <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
         
         <div class="text-center mb-4">
@@ -159,10 +211,10 @@
         </div>
         
         
-        <!-- --- 1. 비밀번호 섹션 분기 처리 --- -->
+        <!-- --- 비밀번호 섹션 분기 처리 --- -->
         <hr class="my-4">
         
-        <%-- 비밀번호 변경 또는 설정 섹션 --%>
+        <%-- 비밀번호 변경 섹션 (일반 계정 사용자에게만 보임) --%>
         <c:if test="${not empty memberInfo.loginPw}">
             <h5 class="mb-3">비밀번호 변경</h5>
             <p class="text-muted small mb-3">비밀번호를 변경하지 않으려면 아래 항목을 비워두세요.</p>
@@ -177,16 +229,6 @@
             <div class="mb-3">
                 <label for="newLoginPwConfirm" class="form-label">새 비밀번호 확인</label>
                 <input type="password" class="form-control" id="newLoginPwConfirm" name="newLoginPwConfirm">
-            </div>
-        </c:if>
-
-			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
-        <c:if test="${empty memberInfo.loginPw}">
-            <h5 class="mb-3">비밀번호 설정</h5>
-            <p class="text-muted small mb-3">비밀번호를 설정하면 이메일과 비밀번호로도 로그인할 수 있습니다.</p>
-			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
-            <div class="d-grid">
-                <button type="button" class="btn btn-outline-primary" onclick="alert('비밀번호 설정 기능은 개발 예정입니다.');">비밀번호 설정하기</button>
             </div>
         </c:if>
         
@@ -220,12 +262,41 @@
     <!-- === 프로필 정보 수정 폼 종료 === -->
     
 
+    <%-- ? --- [신규] 소셜 전용 회원을 위한 일반 계정 전환 폼 --- ? --%>
+    <c:if test="${empty memberInfo.loginPw}">
+        <hr class="my-4">
+        <h5 class="mb-3">일반 계정으로 전환</h5>
+        <p class="text-muted small mb-3">아이디와 비밀번호를 설정하면 일반 계정으로 전환되어, 소셜 로그인과 함께 아이디/비밀번호로도 로그인할 수 있습니다.</p>
+        
+        <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+        <form action="${contextPath}/member/set-password" method="post" onsubmit="return validateConversionForm();">
+            <div class="mb-3">
+                <label for="conversionLoginId" class="form-label">새 아이디</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="conversionLoginId" name="loginId" required>
+                    <button class="btn btn-outline-secondary" type="button" id="conversionIdCheckBtn">중복 확인</button>
+                </div>
+                <div id="conversionIdCheckMessage" class="form-text mt-1"></div>
+            </div>
+            <div class="mb-3">
+                <label for="conversionNewLoginPw" class="form-label">새 비밀번호</label>
+                <input type="password" class="form-control" id="conversionNewLoginPw" name="newLoginPw" required>
+            </div>
+            <div class="mb-3">
+                <label for="conversionNewLoginPwConfirm" class="form-label">새 비밀번호 확인</label>
+                <input type="password" class="form-control" id="conversionNewLoginPwConfirm" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" id="conversionSubmitBtn" class="btn btn-success" disabled>계정 전환하기</button>
+            </div>
+        </form>
+    </c:if>
+
     <!-- --- 소셜 계정 연동 섹션 --- -->
     <hr class="my-4">
     <h5 class="mb-3">소셜 계정 연동</h5>
     
     <c:set var="googleLinked" value="${false}" />
-    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
     <c:forEach var="account" items="${memberInfo.socialAccounts}">
         <c:if test="${account.provider == 'GOOGLE'}">
             <c:set var="googleLinked" value="${true}" />

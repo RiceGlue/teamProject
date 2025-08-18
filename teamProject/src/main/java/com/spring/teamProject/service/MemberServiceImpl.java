@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,10 +97,9 @@ public class MemberServiceImpl implements MemberService {
                 String encodedNewPassword = passwordEncoder.encode(newPassword);
                 currentUser.setLoginPw(encodedNewPassword);
             } else if (currentUser.getLoginPw() == null) {
-                // 소셜 로그인 사용자가 비밀번호를 설정하려는 경우 (향후 기능)
-                // 현재는 아무 작업도 하지 않음
+                // 소셜 로그인 사용자가 비밀번호를 설정하려는 경우 (현재는 setPasswordForSocialUser에서 처리)
             } else {
-                return false; // 현재 비밀번호가 일치하지 않으면 실패
+                return false; // 현재 비밀번호 불일치
             }
         }
         
@@ -192,6 +193,59 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.findUsers();
     }
 
+    // 소셜 전용 회원의 아이디/비밀번호 설정 (일반 계정 전환) 로직 구현
+    @Override
+    @Transactional
+    public boolean setPasswordForSocialUser(long memberId, String loginId, String newPassword) {
+        // 1. 아이디 중복 확인
+        if (memberDAO.checkIdDuplicate(loginId) > 0) {
+            throw new DuplicateKeyException("이미 사용 중인 아이디입니다.");
+        }
+
+        // 2. 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(newPassword);
+
+        // 3. MemberVO 객체 생성 및 DB 업데이트
+        MemberVO memberVO = new MemberVO();
+        memberVO.setMemberId(memberId);
+        memberVO.setLoginId(loginId);
+        memberVO.setLoginPw(encodedPassword);
+        
+        return memberDAO.updateLoginCredentials(memberVO) == 1;
+    }
+    
+    // ? --- [신규] 아이디와 비밀번호 확인 후 소셜 계정 연동 로직 구현 --- ?
+    @Override
+    @Transactional
+    public MemberVO verifyIdAndPasswordAndLinkAccount(String email, String loginId, String rawPassword, String provider, String socialId) {
+        // 1. 이메일로 기존 회원 정보를 가져옵니다.
+        MemberVO member = memberDAO.findByEmail(email);
+        if (member == null) {
+            throw new BadCredentialsException("사용자 정보를 찾을 수 없습니다.");
+        }
+
+        // 2. 입력된 아이디가 DB의 아이디와 일치하는지 확인합니다.
+        if (!loginId.equals(member.getLoginId())) {
+            throw new BadCredentialsException("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 3. 입력된 비밀번호와 DB의 암호화된 비밀번호를 비교합니다.
+        if (passwordEncoder.matches(rawPassword, member.getLoginPw())) {
+            // 4. 비밀번호가 일치하면, 새로운 소셜 계정 정보를 생성하고 DB에 저장합니다.
+            SocialAccountVO newSocialAccount = new SocialAccountVO();
+            newSocialAccount.setMemberId(member.getMemberId());
+            newSocialAccount.setProvider(provider);
+            newSocialAccount.setSocialId(socialId);
+            socialAccountDAO.insertSocialAccount(newSocialAccount);
+            
+            // 5. 연동이 완료된 최신 회원 정보를 반환합니다.
+            return memberDAO.findById(member.getMemberId());
+        } else {
+            // 6. 비밀번호가 일치하지 않으면 예외를 발생시킵니다.
+            throw new BadCredentialsException("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
+    }
+    
     /**
      * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.
      * @param memberVO 이미지 파일이 포함된 MemberVO 객체
