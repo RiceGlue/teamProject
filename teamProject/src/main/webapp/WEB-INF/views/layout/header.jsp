@@ -19,6 +19,17 @@
     <script src="${contextPath}/js/common.js" defer></script>
 </head>
 <body>
+    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+    <%-- 세션에 에러 메시지가 있으면 alert로 표시하고, 바로 세션에서 제거합니다. --%>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <script>
+            window.onload = function() {
+                alert("${sessionScope.errorMessage}");
+            };
+        </script>
+        <c:remove var="errorMessage" scope="session" />
+    </c:if>
+
     <div><a href="#">언어선택</a></div>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -33,54 +44,57 @@
 
             <%-- 로그인 상태일 때 --%>
             <sec:authorize access="isAuthenticated()">
-                <%-- 1. 현재 인증(Authentication) 객체 자체를 'authentication'이라는 이름으로 사용합니다.
-                       이것이 JSP에서 Security Taglib이 Principal 객체를 노출하는 기본 방식입니다. --%>
                 <sec:authentication property="principal" var="principal" />
 
-                <li class="nav-item">
-                    <span class="navbar-text me-3 d-flex align-items-center">
+                <%-- principal 객체의 타입을 확인해서 UserDetailsVO(정식 회원)일 때만 상세 정보를 표시합니다. --%>
+                <c:set var="isCustomUser" value="${principal['class'].name == 'com.spring.teamProject.vo.UserDetailsVO'}" />
 
-                        <%-- ? 여기가 핵심 수정 부분입니다 ? --%>
-                        <%-- [수정] 비밀번호가 없고(소셜 전용 계정), 연동된 소셜 계정이 있을 때만 아이콘을 표시합니다. --%>
-                        <c:if test="${empty principal.memberVO.loginPw and not empty principal.memberVO.socialAccounts}">
-                            <%-- 현재는 구글만 있지만, 나중을 위해 provider를 확인하는 로직을 유지합니다. --%>
-                            <c:forEach var="account" items="${principal.memberVO.socialAccounts}">
-                                <c:if test="${account.provider == 'GOOGLE'}">
-                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                        <path fill="none" d="M0 0h48v48H0z"></path>
-                                    </svg>
-                                </c:if>
-                            </c:forEach>
-                        </c:if>
+                <c:if test="${isCustomUser}">
+                    <li class="nav-item">
+                        <span class="navbar-text me-3 d-flex align-items-center">
+                            <c:if test="${empty principal.memberVO.loginPw and not empty principal.memberVO.socialAccounts}">
+                                <c:forEach var="account" items="${principal.memberVO.socialAccounts}">
+                                    <c:if test="${account.provider == 'GOOGLE'}">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 48 48" style="display: block;">
+                                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                                            <path fill="none" d="M0 0h48v48H0z"></path>
+                                        </svg>
+                                    </c:if>
+                                </c:forEach>
+                            </c:if>
+                            
+                            <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+                            <c:choose>
+                                <c:when test="${principal.memberVO.role == 'ADMIN'}">
+                                    <span class="badge bg-danger ms-2">관리자</span>
+                                </c:when>
+                                <c:when test="${principal.memberVO.role == 'OWNER'}">
+                                    <span class="badge bg-success ms-2">가맹점</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge bg-primary ms-2">일반회원</span>
+                                </c:otherwise>
+                            </c:choose>
 
-                        &nbsp;${principal.memberVO.memberName}님 환영합니다.
-                    </span>
-                </li>
+                            &nbsp;${principal.memberVO.memberName}님 환영합니다.
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="${contextPath}/member/mypage">마이페이지</a>
+                    </li>
+                </c:if>
 
-                <!-- ? --- 여기가 핵심 수정 부분입니다 --- ? -->
-                <%-- 사용자의 역할(Role)을 가져와 변수에 저장합니다. --%>
-                <sec:authentication property="principal.memberVO.role" var="userRole" />
-
-                <li class="nav-item">
-                    <c:choose>
-                        <%-- Case 1: 관리자(ADMIN)일 경우 --%>
-                        <c:when test="${userRole == 'ADMIN'}">
-                            <a class="nav-link" href="${contextPath}/admin/dashboard">마이페이지</a>
-                        </c:when>
-                        <%-- Case 2: 가맹점주(OWNER)일 경우 (향후 개발) --%>
-                        <c:when test="${userRole == 'OWNER'}">
-                            <a class="nav-link" href="#">마이페이지</a>
-                        </c:when>
-                        <%-- Case 3: 그 외(USER)일 경우 --%>
-                        <c:otherwise>
-                            <a class="nav-link" href="${contextPath}/member/mypage">마이페이지</a>
-                        </c:otherwise>
-                    </c:choose>
-                </li>
+                <%-- GUEST 회원일 경우 안내 메시지를 표시합니다. --%>
+                <c:if test="${!isCustomUser}">
+                    <li class="nav-item">
+                         <span class="navbar-text me-3">
+                            추가 정보 입력 후 가입이 완료됩니다.
+                         </span>
+                    </li>
+                </c:if>
 
                 <li class="nav-item">
                     <form action="${contextPath}/member/logout" method="post" class="d-inline">

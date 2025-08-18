@@ -37,7 +37,14 @@ public interface PaymentService {
      */
     boolean completePayment(String paymentId) throws Exception;
 
-    // 	새로운 환불 메서드 추가
+    /**
+     * 새로운 환불 메서드 추가
+     */
     void refundPayment(Long paymentId) throws Exception;
 
+    /**
+     * paymentId로 결제 정보를 삭제합니다.
+     * @param paymentId 삭제할 결제 ID
+     */
+    void deletePayment(Long paymentId);
 }

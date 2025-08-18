@@ -2,6 +2,7 @@ package com.spring.teamProject.service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public boolean completePayment(String paymentId) throws Exception {
         try {
-            // 여기서는 paymentId 대신 transactionId를 사용
+            // transactionId로 결제 정보 조회
             PaymentVO paymentVO = paymentDAO.selectByTransactionId(paymentId);
             if (paymentVO == null) {
                 log.error("DB에 존재하지 않는 결제 정보입니다: transactionId={}", paymentId);
@@ -141,25 +142,43 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment == null) {
             throw new Exception("결제 정보를 찾을 수 없습니다.");
         }
-        if (!"paid".equals(payment.getStatus())) {
+        if (!"paid".equals(payment.getStatus()) && !"COMPLETED".equals(payment.getStatus())) {
             throw new Exception("이미 취소되었거나 환불 불가능한 결제입니다. (현재 상태: " + payment.getStatus() + ")");
         }
 
-        System.out.println("결제 ID " + paymentId + " 환불을 시작합니다...");
+        log.info("결제 ID {} 환불을 시작합니다...", paymentId);
 
         // 2. 외부 결제 시스템(포트원 등)에 환불 요청을 보냅니다.
         // 이 부분은 실제 결제 API를 연동하는 로직으로 대체해야 합니다.
         // 현재는 성공했다고 가정합니다.
-        boolean refundSuccess = true;
+        // Portone의 refund API는 transactionId가 필요할 수 있습니다.
+        boolean refundSuccess = true; // 실제 API 호출 결과로 대체해야 함
 
         if (refundSuccess) {
             // 3. 환불 요청이 성공하면, 데이터베이스의 결제 상태를 'refunded'로 업데이트합니다.
             paymentDAO.updatePaymentStatus(paymentId, "refunded");
-            System.out.println("결제 ID " + paymentId + "에 대한 환불 처리가 완료되었습니다. DB 상태: 'refunded'");
+            log.info("결제 ID {}에 대한 환불 처리가 완료되었습니다. DB 상태: 'refunded'", paymentId);
         } else {
             // API 호출이 실패한 경우
-            System.err.println("결제 ID " + paymentId + " 환불 처리에 실패했습니다. 결제 시스템 API를 확인해주세요.");
+            log.error("결제 ID {} 환불 처리에 실패했습니다. 결제 시스템 API를 확인해주세요.", paymentId);
             throw new Exception("환불 처리에 실패했습니다.");
+        }
+    }
+
+    /**
+     * paymentId로 결제 정보를 삭제합니다.
+     * ReservationService에서 임시 예약 삭제 시 호출됩니다.
+     * @param paymentId 삭제할 결제 ID
+     */
+    @Override
+    public void deletePayment(Long paymentId) {
+        try {
+            paymentDAO.deletePayment(paymentId);
+            log.info("Successfully deleted payment with ID: {}", paymentId);
+        } catch (Exception e) {
+            // 결제 정보가 이미 삭제되었을 경우를 고려하여 예외를 로깅만 하고 던지지 않습니다.
+            // ReservationServiceImpl에서 이 메서드를 호출할 때 예외 처리를 하지 않아도 되도록 합니다.
+            log.warn("Failed to delete payment with ID: {}. It might have been deleted already. Error: {}", paymentId, e.getMessage());
         }
     }
 }

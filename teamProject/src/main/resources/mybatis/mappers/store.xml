@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-	
+
 <mapper namespace="com.spring.teamProject.dao.StoreDAO">
 	<resultMap id="storelist" type="StoreVO">
 		<result property="storeId" column="store_id"/>
@@ -28,7 +28,7 @@
 		<result property="avgRating" column="avgRating"/>
 		<result property="countRating" column="countRating"/>
 	</resultMap>
-	
+
 	<resultMap id="imagelist" type="ImageFileVO">
 		<result property="imageId" column="image_id"/>
 		<result property="storeId" column="store_id"/>
@@ -39,7 +39,7 @@
 		<result property="createdAt" column="created_at"/>
 		<result property="regId" column="reg_id"/>
 	</resultMap>
-	
+
 	<resultMap type="MenuVO" id="menulist">
 		<result property="menuId" column="menu_id" />
 		<result property="storeId" column="store_id" />
@@ -51,7 +51,7 @@
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
-	
+
 	<resultMap id="reservationlist" type="ReservationSettingVO">
 		<result property="settingId" column="setting_id" />
 		<result property="storeId" column="store_id"/>
@@ -59,7 +59,7 @@
 		<result property="timeSlot" column="time_slot"/>
 		<result property="isActive" column="is_active"/>
 	</resultMap>
-	
+
 	<resultMap id="reviewlist" type="ReviewVO">
 		<result property="reviewId" column="review_id" />
 		<result property="memberId" column="member_id" />
@@ -75,13 +75,13 @@
 		<result property="countRating" column="countRating" />
 		<result property="countScoreRating" column="countScoreRating" />
 	</resultMap>
-	
+
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
 		]]>
 	</select>
-	
+
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
@@ -93,7 +93,7 @@
 			ORDER BY s.store_id
 		]]>
 	</select>
-	
+
 	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
 		<![CDATA[
 		    SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
@@ -118,7 +118,7 @@
 			ORDER BY s.store_id
 		]]>
 	</select>
-	
+
 	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
@@ -130,7 +130,7 @@
 			ORDER BY s.store_id
 		]]>
 	</select>
-	
+
 	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
 		<![CDATA[
 			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
@@ -142,7 +142,7 @@
 			ORDER BY s.store_id
 		]]>
 	</select>
-	
+
 	<select id="selectStoreDetail" parameterType="long" resultMap="storelist" >
 		<![CDATA[
 			SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
@@ -159,7 +159,7 @@
 			where store_id=#{storeId} order by display_no asc
 		]]>
 	</select>
-	
+
 	<select id="selectStoreReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
 			select r.review_id, m.login_id as writerId, r.reservation_id, r.waiting_id, r.rating, r.content, r.created_at, r.updated_at
@@ -168,20 +168,20 @@
 			order by r.created_at desc
 		]]>
 	</select>
-	
+
 	<select id="selectDetailReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
 			select rating, count(rating) as countScoreRating from reviews where store_id=#{storeId} group by rating order by rating desc
 		]]>
 	</select>
-	
+
 	<select id="selectStoreReservatioin" parameterType="long" resultMap="reservationlist" >
 		<![CDATA[
  			select * from reservation_settings
  			where store_id=#{storeId}
 		]]>
 	</select>
-	
+
 	<select id="selectStoreImage" parameterType="long" resultMap="imagelist">
 		<![CDATA[
 			select image_id, file_name, file_type, display_no, created_at, updated_at
@@ -189,7 +189,7 @@
 			where store_id = #{storeId} and reg_id = #{ownerId}
 		]]>
 	</select>
-	
+
 	<select id="selectReviewImage" parameterType="long" resultMap="imagelist">
 		<![CDATA[
 			select image_id, file_name, file_type, display_no, review_id, created_at, updated_at
@@ -197,5 +197,12 @@
 			where store_id = #{storeId} and review_id is not null
 		]]>
 	</select>
-	
+
+	<!-- 매장 ID로 매장 정보를 가져오는 새로운 쿼리 추가 -->
+	<select id="selectStoreById" parameterType="long" resultMap="storelist">
+		<![CDATA[
+			select * from stores where store_id = #{storeId}
+		]]>
+	</select>
+
 </mapper>

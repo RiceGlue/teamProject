@@ -13,6 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +33,7 @@ import com.spring.teamProject.vo.SocialAccountVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -45,7 +49,10 @@ public class MemberController {
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
 
-    // --- (신규) 아이디 중복 확인 API ---
+    // =================================================================
+    // == 회원가입 / 로그인 / 로그아웃 (Join / Login / Logout)
+    // =================================================================
+
     @PostMapping("/check-id")
     @ResponseBody
     public Map<String, Boolean> checkIdDuplicate(@RequestParam("loginId") String loginId) {
@@ -55,8 +62,6 @@ public class MemberController {
         return response;
     }
 
-    // --- 회원가입 및 로그인/로그아웃 관련 메소드 ---
-
     @GetMapping("/join-select")
     public String joinSelectForm(Model model) {
         model.addAttribute("body", "member/join_select.jsp");
@@ -64,7 +69,16 @@ public class MemberController {
     }
 
     @GetMapping("/login")
-    public String loginForm(Model model) {
+    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
+        // Spring Security가 저장한 '원래 가려던 페이지' 정보를 가져옵니다.
+        RequestCache requestCache = new HttpSessionRequestCache();
+        SavedRequest savedRequest = requestCache.getRequest(request, response);
+
+        // '원래 가려던 페이지' 정보가 있다면, 로그인 유도 메시지를 모델에 추가합니다.
+        if (savedRequest != null) {
+            model.addAttribute("loginRedirectMessage", "로그인이 필요한 서비스입니다. 로그인 후 이전 페이지로 이동합니다.");
+        }
+        
         model.addAttribute("body", "member/login.jsp");
         return "layout/layout";
     }
@@ -78,7 +92,6 @@ public class MemberController {
         return "redirect:/";
     }
 
-    // 회원가입 폼을 보여줄 때, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join")
     public String joinForm(@RequestParam("role") String role, Model model) {
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey);
@@ -90,7 +103,6 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // 일반 회원가입 처리
     @PostMapping("/join")
     public String join(MemberVO memberVO,
                        @RequestParam("g-recaptcha-response") String recaptchaResponse,
@@ -114,7 +126,6 @@ public class MemberController {
         }
     }
 
-    // 소셜 회원가입 폼을 보여줄 때도, reCAPTCHA 사이트 키를 모델에 담아 전달합니다.
     @GetMapping("/join_social")
     public String joinSocialForm(Model model, HttpSession session) {
         Object socialUserInfo = session.getAttribute("socialUserInfo");
@@ -127,7 +138,6 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // [수정] 소셜 회원가입 최종 처리 로직 변경
     @PostMapping("/join_social")
     public String joinSocial(MemberVO memberVO,
                              @RequestParam("g-recaptcha-response") String recaptchaResponse,
@@ -144,22 +154,18 @@ public class MemberController {
         Map<String, Object> socialUserInfo = (Map<String, Object>) session.getAttribute("socialUserInfo");
 
         if (socialUserInfo != null) {
-        	// 1. memberVO에 기본 정보 설정 (비밀번호, 아이디는 없음)
             memberVO.setEmail((String) socialUserInfo.get("email"));
             memberVO.setRole("USER");
 
-            // 2. SocialAccountVO 생성 및 정보 설정
             SocialAccountVO socialAccount = new SocialAccountVO();
             socialAccount.setProvider("GOOGLE");
             socialAccount.setSocialId((String) socialUserInfo.get("sub"));
 
-            // 3. MemberVO에 소셜 계정 리스트를 담아 전달
             List<SocialAccountVO> socialAccounts = new ArrayList<>();
             socialAccounts.add(socialAccount);
             memberVO.setSocialAccounts(socialAccounts);
 
             try {
-                // 4. 통합된 join 서비스 호출
                 memberService.join(memberVO);
                 session.removeAttribute("socialUserInfo");
                 redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 다시 로그인해주세요.");
@@ -173,8 +179,36 @@ public class MemberController {
         return "redirect:/member/login";
     }
 
-    // --- 마이페이지, 프로필 수정, 회원 탈퇴 ---
-    // [기존] 마이페이지 메소드 제거됨.
+    // =================================================================
+    // == 마이페이지 (MyPage) - USER, OWNER, ADMIN 공통 진입점
+    // =================================================================
+    
+    @GetMapping("/mypage")
+    public String mypage(@AuthenticationPrincipal Object principal, Model model) {
+        MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
+        if (memberInfo == null) {
+            return "redirect:/member/login";
+        }
+
+        String role = memberInfo.getRole();
+
+        if ("ADMIN".equals(role)) {
+            return "redirect:/admin/dashboard";
+        } else if ("OWNER".equals(role)) {
+            return "redirect:/owner/dashboard";
+        } else { // USER
+            model.addAttribute("memberInfo", memberInfo);
+            // TODO: ReservationService에 실제 메서드를 구현해야 합니다.
+            // List<ReservationVO> myReservations = reservationService.getReservationsByMemberId(memberInfo.getMemberId());
+            // model.addAttribute("myReservations", myReservations);
+            model.addAttribute("body", "member/mypage.jsp");
+            return "layout/layout";
+        }
+    }
+
+    // =================================================================
+    // == 프로필 수정 관련 (Edit Profile)
+    // =================================================================
 
     @GetMapping("/edit-profile")
     public String editProfileForm(@AuthenticationPrincipal Object principal, Model model) {
@@ -215,19 +249,16 @@ public class MemberController {
         }
     }
 
-    /**
-     * [신규] 소셜 계정 연동을 시작하기 전, 세션에 '연동 요청' 표식을 남기는 준비 단계
-     * @param provider 소셜 서비스 제공자 (예: google)
-     * @param session 현재 HttpSession
-     * @return 소셜 서비스의 인증 페이지로 리다이렉트
-     */
+    // =================================================================
+    // == 소셜 계정 연동 관련 (Social Link)
+    // =================================================================
+
     @GetMapping("/prepare-link/{provider}")
     public String prepareLinkSocial(@PathVariable String provider, HttpSession session) {
         session.setAttribute("socialLinkRequest", true);
         return "redirect:/oauth2/authorization/" + provider;
     }
 
-    // [신규] 소셜 계정 연동 해제 요청 처리
     @PostMapping("/unlink-social")
     public String unlinkSocial(@RequestParam("provider") String provider,
                                @AuthenticationPrincipal Object principal,
@@ -256,7 +287,10 @@ public class MemberController {
         return "redirect:/member/edit-profile";
     }
 
-    // [수정] 회원 탈퇴 (논리적 삭제)
+    // =================================================================
+    // == 회원 탈퇴 (Withdraw)
+    // =================================================================
+
     @PostMapping("/withdraw")
     public String withdraw(@AuthenticationPrincipal Object principal, HttpServletRequest request) {
         MemberVO currentMember = getMemberInfoFromPrincipal(principal);
@@ -273,7 +307,10 @@ public class MemberController {
         return "redirect:/";
     }
 
-    // [신규] Principal 객체에서 MemberVO를 안전하게 가져오는 헬퍼 메소드
+    // =================================================================
+    // == 헬퍼 메소드 (Helper Method)
+    // =================================================================
+
     private MemberVO getMemberInfoFromPrincipal(Object principal) {
         if (principal instanceof UserDetailsVO) {
             return ((UserDetailsVO) principal).getMemberVO();

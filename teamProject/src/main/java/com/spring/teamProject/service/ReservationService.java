@@ -86,4 +86,18 @@ public interface ReservationService {
 	 * @return 매장의 모든 테이블 목록
 	 */
 	List<StoreTableVO> getAllTables(int storeId);
+
+    /**
+     * 결제 ID를 사용하여 PENDING 상태의 예약을 CONFIRMED로 업데이트합니다.
+     * @param paymentId 결제 ID
+     * @return 성공 여부 (true: 성공, false: 실패)
+     */
+    boolean updateReservationToConfirmed(String paymentId);
+
+    /**
+     * transactionId를 사용하여 임시 예약 및 관련 결제 정보를 삭제합니다.
+     * @param transactionId 임시 예약의 transactionId
+     * @return 삭제 성공 여부
+     */
+    boolean deleteTempReservationByTransactionId(String transactionId);
 }

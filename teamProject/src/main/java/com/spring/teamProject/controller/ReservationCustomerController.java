@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spring.teamProject.service.PaymentService;
 import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.PaymentVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreTableVO;
@@ -47,13 +48,16 @@ public class ReservationCustomerController {
     @Autowired
     private PaymentService paymentService;
 
+    @Autowired
+    private StoreService storeService;
+
     @GetMapping("/bookForm")
     public String showBookingForm(@RequestParam("storeId") Long storeId,
                                   @RequestParam(value = "reservationTime", required = false) String reservationTime,
                                   @RequestParam(value = "tableIds", required = false) List<Long> tableIds,
                                   @RequestParam(value = "guestCount", required = false, defaultValue = "1") Integer guestCount,
                                   Model model,
-                                  HttpSession session) {
+                                  HttpSession session) throws Exception {
         logger.info("고객 예약 폼 요청 - storeId: {}, reservationTime: {}, tableIds: {}, guestCount: {}",
                 storeId, reservationTime, tableIds, guestCount);
 
@@ -67,7 +71,8 @@ public class ReservationCustomerController {
                 : LocalDate.now().toString();
         model.addAttribute("currentDate", currentDate);
 
-        StoreVO store = getDummyStoreInfo(storeId);
+        //StoreVO store = getDummyStoreInfo(storeId);
+        StoreVO store = storeService.getStoreById(storeId);
         model.addAttribute("store", store);
 
         session.removeAttribute("pendingReservation");
@@ -90,6 +95,31 @@ public class ReservationCustomerController {
         }
     }
 
+
+    // 결제 성공 후 최종 예약을 처리하는 새로운 엔드포인트
+    @PostMapping("/book-final")
+    @ResponseBody
+    public String saveFinalReservation(@RequestParam("paymentId") String paymentId) {
+        logger.info("최종 예약 정보 저장 요청 (결제 ID): {}", paymentId);
+
+        try {
+            // 1. 임시 예약 상태를 '확정'으로 업데이트합니다.
+            boolean success = reservationService.updateReservationToConfirmed(paymentId);
+
+            if (success) {
+                // 2. 예약 확정 성공 시 'success' 반환
+                return "success";
+            } else {
+                // 3. 예약 확정 실패 시 (e.g., 이미 예약되었거나 존재하지 않는 경우) 'failure' 반환
+                return "failure";
+            }
+        } catch (Exception e) {
+            logger.error("최종 예약 정보 저장 중 오류 발생", e);
+            return "error";
+        }
+    }
+
+    // ⭐⭐⭐ 복구된 임시 예약 생성 엔드포인트 ⭐⭐⭐
     @PostMapping("/book-temp")
     @ResponseBody
     public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
@@ -142,7 +172,32 @@ public class ReservationCustomerController {
         }
     }
 
-    @PostMapping("/complete-payment")
+    // ⭐⭐⭐ 새로 추가된 임시 예약 취소 엔드포인트 ⭐⭐⭐
+    /**
+     * 결제창 취소/실패 시 임시 예약 정보를 삭제하는 엔드포인트
+     * @param transactionId 결제 요청 시 생성된 고유 ID
+     * @return 성공 여부 문자열
+     */
+    @PostMapping("/cancel-temp")
+    @ResponseBody
+    public String cancelTempReservation(@RequestParam("transactionId") String transactionId) {
+        logger.info("결제 취소로 인한 임시 예약 삭제 요청 - transactionId: {}", transactionId);
+        try {
+            boolean success = reservationService.deleteTempReservationByTransactionId(transactionId);
+            if (success) {
+                logger.info("임시 예약 및 결제 정보 삭제 성공. transactionId: {}", transactionId);
+                return "success";
+            } else {
+                logger.warn("해당 transactionId로 임시 예약 정보를 찾을 수 없거나 삭제 실패. transactionId: {}", transactionId);
+                return "failure";
+            }
+        } catch (Exception e) {
+            logger.error("임시 예약 삭제 중 오류 발생: {}", e.getMessage(), e);
+            return "error";
+        }
+    }
+
+    @GetMapping("/complete-payment")
     @ResponseBody
     public Map<String, Object> completePayment(@RequestParam String paymentId) throws Exception {
         Map<String, Object> response = new HashMap<>();
@@ -186,8 +241,15 @@ public class ReservationCustomerController {
         }
 
         if (storeId != null) {
-            StoreVO store = getDummyStoreInfo(storeId);
-            model.addAttribute("store", store);
+            try {
+                // 더미 데이터 대신 실제 DB에서 가게 정보를 가져옵니다.
+                StoreVO store = storeService.getStoreById(storeId);
+                model.addAttribute("store", store);
+                logger.info("DB에서 가게 정보 조회 완료: {}", store);
+            } catch (Exception e) {
+                logger.error("가게 정보 조회 오류: {}", e.getMessage(), e);
+                model.addAttribute("errorMessage", "가게 정보를 불러오는 데 실패했습니다.");
+            }
         }
 
         if (reservationId != null) {

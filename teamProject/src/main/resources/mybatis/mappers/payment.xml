@@ -60,5 +60,9 @@
         WHERE payment_id = #{paymentId}
     </select>
 
+    <!-- paymentId로 결제 정보를 삭제하는 쿼리 -->
+    <delete id="deletePayment" parameterType="Long">
+        DELETE FROM payments WHERE payment_id = #{paymentId}
+    </delete>
 
 </mapper>

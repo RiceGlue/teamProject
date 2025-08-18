@@ -33,4 +33,10 @@ public interface PaymentDAO {
 
     // 	paymentId로 결제 정보 조회 (새로 추가)
     PaymentVO selectById(Long paymentId);
+
+    /**
+     * paymentId로 결제 정보를 삭제합니다.
+     * @param paymentId 삭제할 결제 ID
+     */
+    void deletePayment(Long paymentId);
 }

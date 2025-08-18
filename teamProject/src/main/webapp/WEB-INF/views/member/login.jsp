@@ -18,6 +18,14 @@
         
         <%-- 일반 로그인 탭 --%>
         <div class="tab-pane fade show active" id="normal-login" role="tabpanel" aria-labelledby="normal-login-tab">
+            
+            <%-- 컨트롤러에서 보낸 로그인 유도 메시지가 있으면 표시합니다. --%>
+            <c:if test="${not empty loginRedirectMessage}">
+                <div class="alert alert-info" role="alert">
+                    ${loginRedirectMessage}
+                </div>
+            </c:if>
+
             <c:if test="${param.error}">
                 <div class="alert alert-danger" role="alert">
                     아이디 또는 비밀번호가 일치하지 않습니다.
@@ -45,7 +53,7 @@
             </form>
         </div>
 
-        <%-- 소셜 로그인 탭 (수정됨) --%>
+        <%-- 소셜 로그인 탭 --%>
         <div class="tab-pane fade" id="social-login" role="tabpanel" aria-labelledby="social-login-tab">
             <div class="d-grid mt-4">
                 <a href="${contextPath}/oauth2/authorization/google" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center py-2">
@@ -64,6 +72,6 @@
     </div>
 
     <div class="text-center mt-4">
-        <a href="${contextPath}/member/join-select">회원가입</a> | <a href="#">아이디/비밀번호 찾기</a>
+        <a href="${contextPath}/member/join?role=USER">회원가입</a> | <a href="#">아이디/비밀번호 찾기</a>
     </div>
 </div>

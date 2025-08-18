@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.StoreServiceImpl;
+import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,17 +26,20 @@ public class StoreControllerImpl implements StoreController {
 	@Autowired
 	private StoreServiceImpl storeService;
 
+	@Autowired
+    private WaitingService waitingService;
+
 	@Override
 	@RequestMapping(value="/storeList", method=RequestMethod.GET)
 	public ModelAndView storeList (@RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
-		
+
 		List<StoreVO> regionlist = null ;
 		List<StoreVO> menulist = null ;
 		List<StoreVO> addrlist = null ;
 		List<StoreVO> namelist = null ;
 		List<StoreVO> typelist = null ;
-		
+
 		if(option.equals("region")) {
 			regionlist = storeService.selectStoreByRegion(keyword);
 		} else if(option.equals("search")) {
@@ -63,8 +67,12 @@ public class StoreControllerImpl implements StoreController {
 
 		Map storeMap = storeService.storeDetail(storeVO);
 
+		Long storeId = storeVO.getStoreId();
+		int currentWaitingCount = waitingService.getCurrentWaitingCount(storeId);
+
 		ModelAndView mav = ViewUtil.layout(viewName);
 		mav.addObject("storeMap", storeMap);
+		mav.addObject("currentWaitingCount", currentWaitingCount);
 		return mav;
 	}
 

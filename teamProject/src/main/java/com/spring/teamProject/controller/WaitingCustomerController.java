@@ -1,7 +1,7 @@
 package com.spring.teamProject.controller;
 
-import java.util.List;
 import java.util.HashMap; // Map을 사용하기 위해 임포트 추가
+import java.util.List;
 import java.util.Map;     // Map을 사용하기 위해 임포트 추가
 
 import org.slf4j.Logger;
@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication; // Authentication 클래스 임포트
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.WaitingService;
+import com.spring.teamProject.vo.UserDetailsVO;
 import com.spring.teamProject.vo.WaitingVO;
 
 @Controller
@@ -35,6 +38,9 @@ public class WaitingCustomerController {
     @Autowired
     private WaitingService waitingService;
 
+    @Autowired
+    private MemberService memberService;
+
     // GET 요청: 웨이팅 등록 폼을 보여줍니다.
     @GetMapping("/register")
     public String showForm() {
@@ -43,8 +49,30 @@ public class WaitingCustomerController {
 
     // POST 요청: 웨이팅 등록 폼 데이터를 처리합니다.
     @PostMapping("/register")
-    public String submitForm(@ModelAttribute WaitingVO waitingVO, RedirectAttributes redirectAttributes) {
+    public String submitForm(@ModelAttribute WaitingVO waitingVO, Authentication authentication, RedirectAttributes redirectAttributes) {
         try {
+        	if (authentication != null && authentication.getPrincipal() instanceof UserDetailsVO) {
+                // principal 객체를 UserDetailsVO 타입으로 형 변환
+                UserDetailsVO userDetailsVO = (UserDetailsVO) authentication.getPrincipal();
+                // UserDetailsVO에 추가한 getMemberId() 메서드를 사용하여 바로 값을 가져옴
+                Long memberId = userDetailsVO.getMemberId();
+
+                waitingVO.setMemberId(memberId);
+
+            } else {
+                redirectAttributes.addFlashAttribute("error", "로그인이 필요합니다.");
+                return "redirect:/member/login";
+            }
+
+            //waitingVO.setLoginId(loginId); // WaitingVO에 로그인한 사용자 ID 설정
+
+            //만약 WaitingVO에 memberId 필드를 꼭 채워야 한다면,
+            //memberId를 가져오는 서비스 로직을 추가해야 합니다.
+//	        MemberVO member = memberService.findByLoginId(loginId);
+//	        if(member != null) {
+//	        	waitingVO.setMemberId(member.getMemberId());
+//	        }
+
             waitingVO.setStatus("WAITING"); // 초기 웨이팅 상태 설정
 
             logger.info("Received WaitingVO: memberId={}, storeId={}, guestCount={}, fcmToken={}",

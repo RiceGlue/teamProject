@@ -170,4 +170,20 @@
         ORDER BY
             reservation_time DESC
     </select>
+
+    <select id="selectPendingReservationByPaymentId" resultType="com.spring.teamProject.vo.ReservationVO">
+        SELECT *
+        FROM reservation
+        WHERE payment_id = #{paymentId} AND status = 'PENDING'
+    </select>
+
+    <!-- 임시 예약에 연결된 테이블 정보 삭제 -->
+    <delete id="deleteReservationTables" parameterType="long">
+        DELETE FROM reservation_table WHERE reservation_id = #{reservationId}
+    </delete>
+
+    <!-- 임시 예약 정보 삭제 -->
+    <delete id="deleteReservation" parameterType="long">
+        DELETE FROM reservations WHERE reservation_id = #{reservationId}
+    </delete>
 </mapper>

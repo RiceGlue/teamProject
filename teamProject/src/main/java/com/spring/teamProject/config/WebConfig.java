@@ -23,4 +23,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**");
     }
 
+    // /profile-images/** URL로 들어오는 요청을
+    // file:///C:/project/file_repo/profile/ 경로의 파일과 매핑합니다.
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/profile-images/**")
+                .addResourceLocations("file:///" + uploadDir);
+    }
+
 }
