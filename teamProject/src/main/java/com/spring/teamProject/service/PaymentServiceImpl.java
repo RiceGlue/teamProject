@@ -63,49 +63,19 @@ public class PaymentServiceImpl implements PaymentService {
         paymentDAO.insertPayment(payment);
     }
 
-    @Override
-    public PaymentVO getPaymentByTransactionId(String transactionId) throws Exception {
-        return paymentDAO.selectByTransactionId(transactionId);
-    }
-
+    /**
+     * PaymentVO 객체로 결제 상태를 업데이트합니다.
+     */
     @Override
     public void updatePaymentStatus(PaymentVO payment) throws Exception {
+        // paymentVO의 paymentId와 status를 사용하여 DAO를 호출합니다.
+        // DAO에 이 두 필드를 매개변수로 받는 메서드가 있다고 가정합니다.
         paymentDAO.updatePaymentStatus(payment.getPaymentId(), payment.getStatus());
     }
 
     @Override
-    @Transactional
-    public boolean completePayment(String paymentId) throws Exception {
-        try {
-            // transactionId로 결제 정보 조회
-            PaymentVO paymentVO = paymentDAO.selectByTransactionId(paymentId);
-            if (paymentVO == null) {
-                log.error("DB에 존재하지 않는 결제 정보입니다: transactionId={}", paymentId);
-                return false;
-            }
-            String accessToken = getAccessToken().block();
-            Map portonePayment = webClient.get()
-                    .uri("/v2/payment/{transactionId}", paymentId)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block();
-            Integer portoneAmount = (Integer) ((Map) portonePayment.get("payment")).get("amount");
-            if (portoneAmount.longValue() != paymentVO.getAmount()) {
-                log.error("결제 금액 불일치: DB 금액={}, 포트원 금액={}", paymentVO.getAmount(), portoneAmount);
-                paymentDAO.updatePaymentStatus(paymentVO.getPaymentId(), "FAILED");
-                return false;
-            }
-            paymentVO.setStatus("COMPLETED");
-            paymentVO.setPaidAt(LocalDateTime.now());
-            updatePaymentStatus(paymentVO.getPaymentId(), paymentVO.getStatus());
-            reservationDAO.updateReservationStatus(paymentVO.getReservationId(), "CONFIRMED");
-            log.info("결제 및 예약 확정 성공: reservationId={}", paymentVO.getReservationId());
-            return true;
-        } catch (Exception e) {
-            log.error("결제 완료 처리 중 오류 발생: {}", e.getMessage());
-            return false;
-        }
+    public PaymentVO getPaymentByTransactionId(String transactionId) throws Exception {
+        return paymentDAO.selectByTransactionId(transactionId);
     }
 
     @Override
@@ -130,8 +100,45 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * 결제를 환불 처리하고, 데이터베이스 상태를 'refunded'로 업데이트합니다.
-     * @param paymentId 환불할 결제 건의 ID
+     * 결제 완료 후 최종 처리를 수행합니다.
+     */
+    @Override
+    @Transactional
+    public boolean completePayment(String transactionId) throws Exception {
+        try {
+            // transactionId로 결제 정보 조회
+            PaymentVO paymentVO = paymentDAO.selectByTransactionId(transactionId);
+            if (paymentVO == null) {
+                log.error("DB에 존재하지 않는 결제 정보입니다: transactionId={}", transactionId);
+                return false;
+            }
+            String accessToken = getAccessToken().block();
+            Map portonePayment = webClient.get()
+                    .uri("/v2/payment/{transactionId}", transactionId)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            Integer portoneAmount = (Integer) ((Map) portonePayment.get("payment")).get("amount");
+            if (portoneAmount.longValue() != paymentVO.getAmount()) {
+                log.error("결제 금액 불일치: DB 금액={}, 포트원 금액={}", paymentVO.getAmount(), portoneAmount);
+                paymentDAO.updatePaymentStatus(paymentVO.getPaymentId(), "FAILED");
+                return false;
+            }
+            paymentVO.setStatus("COMPLETED");
+            paymentVO.setPaidAt(LocalDateTime.now());
+            updatePaymentStatus(paymentVO.getPaymentId(), paymentVO.getStatus());
+            reservationDAO.updateReservationStatus(paymentVO.getReservationId(), "CONFIRMED");
+            log.info("결제 및 예약 확정 성공: reservationId={}", paymentVO.getReservationId());
+            return true;
+        } catch (Exception e) {
+            log.error("결제 완료 처리 중 오류 발생: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 새로운 환불 메서드 추가
      */
     @Transactional
     @Override
@@ -179,6 +186,46 @@ public class PaymentServiceImpl implements PaymentService {
             // 결제 정보가 이미 삭제되었을 경우를 고려하여 예외를 로깅만 하고 던지지 않습니다.
             // ReservationServiceImpl에서 이 메서드를 호출할 때 예외 처리를 하지 않아도 되도록 합니다.
             log.warn("Failed to delete payment with ID: {}. It might have been deleted already. Error: {}", paymentId, e.getMessage());
+        }
+    }
+
+    /**
+     * paymentId로 결제 정보를 조회합니다.
+     */
+    @Override
+    public PaymentVO getPaymentById(String paymentId) {
+        try {
+            // String을 Long으로 변환하여 DAO를 호출
+            Long id = Long.parseLong(paymentId);
+            return paymentDAO.selectById(id);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 결제 ID 형식입니다: {}", paymentId);
+            return null;
+        } catch (Exception e) {
+            log.error("결제 ID로 결제 정보를 조회하는 중 오류가 발생했습니다: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 결제 ID(문자열)와 상태(문자열)로 결제 상태를 업데이트합니다.
+     * @param paymentId 결제 ID
+     * @param status 새로운 상태 ("REFUNDED" 등)
+     */
+    @Override
+    public void updatePaymentStatus(String paymentId, String status) {
+        try {
+            // String을 Long으로 변환하여 DAO를 호출
+            Long id = Long.parseLong(paymentId);
+            paymentDAO.updatePaymentStatus(id, status);
+            log.info("결제 상태 업데이트 완료. paymentId: {}, status: {}", id, status);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 결제 ID 형식입니다: {}", paymentId);
+            throw new RuntimeException("결제 상태 업데이트 실패: 유효하지 않은 ID 형식", e);
+        } catch (Exception e) {
+            log.error("결제 상태를 업데이트하는 중 오류가 발생했습니다. paymentId={}, status={}", paymentId, status, e);
+            // 예외가 발생하면 호출한 쪽에서 처리할 수 있도록 RuntimeException을 던집니다.
+            throw new RuntimeException("결제 상태 업데이트 실패", e);
         }
     }
 }

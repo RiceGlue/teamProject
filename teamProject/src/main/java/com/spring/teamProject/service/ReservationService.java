@@ -100,4 +100,6 @@ public interface ReservationService {
      * @return 삭제 성공 여부
      */
     boolean deleteTempReservationByTransactionId(String transactionId);
+
+    boolean cancelReservationByPaymentId(String paymentId);
 }

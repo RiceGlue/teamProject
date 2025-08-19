@@ -72,7 +72,11 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Map<String, List<StoreTableVO>> getAvailableTimeSlots(long storeId, String date) {
-        // 예약 가능한 시간대 (예시: 10:00부터 21:00까지 30분 간격)
+
+    	// 시간대별로 예약 가능 테이블 목록을 담을 맵
+        Map<String, List<StoreTableVO>> availableSlots = new LinkedHashMap<>();
+
+    	// 예약 가능한 시간대 (예시: 10:00부터 21:00까지 30분 간격)
         List<String> timeSlots = new ArrayList<>();
         for (int hour = 10; hour <= 21; hour++) {
             timeSlots.add(String.format("%02d:00", hour));
@@ -88,32 +92,57 @@ public class ReservationServiceImpl implements ReservationService {
         List<String> activeStatuses = Arrays.asList("PENDING", "CONFIRMED");
         List<ReservationVO> reservedReservations = reservationDAO.selectReservationsByStoreIdAndDateAndStatuses(storeId, date, activeStatuses);
 
-        // 시간대별로 예약 가능 테이블 목록을 담을 맵
-        Map<String, List<StoreTableVO>> availableSlots = new LinkedHashMap<>();
+
+//
+//        // 각 시간대별로 예약 가능한 테이블을 계산
+//        for (String time : timeSlots) {
+//            String reservationTimeStr = date + "T" + time;
+//            LocalDateTime currentSlotTime = LocalDateTime.parse(reservationTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+//
+//            List<StoreTableVO> availableTablesInSlot = new ArrayList<>(allTables);
+//
+//            // 해당 시간대에 예약된 테이블을 걸러냄
+//            for (ReservationVO reserved : reservedReservations) {
+//                // 예약 시간과 현재 슬롯 시간이 일치하는 경우
+//                if (reserved.getReservationTime().equals(currentSlotTime)) {
+//                    reserved.getTables().forEach(reservedTable ->
+//                        availableTablesInSlot.removeIf(table -> table.getTableId().equals(reservedTable.getTableId()))
+//                    );
+//                }
+//            }
+//
+//            // 예약 가능한 테이블이 1개 이상 있을 경우 맵에 추가
+//            if (!availableTablesInSlot.isEmpty()) {
+//                availableSlots.put(time, availableTablesInSlot);
+//            }
+//        }
+
+        // --- ⭐ 이 부분부터 로직을 수정합니다. ⭐ ---
+        // 모든 시간대를 미리 맵에 추가하고, 값으로 빈 리스트를 넣어둡니다.
+        for (String time : timeSlots) {
+            availableSlots.put(time, new ArrayList<>());
+        }
 
         // 각 시간대별로 예약 가능한 테이블을 계산
         for (String time : timeSlots) {
-            String reservationTimeStr = date + "T" + time;
-            LocalDateTime currentSlotTime = LocalDateTime.parse(reservationTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
+            // 모든 테이블로 시작하여, 예약된 테이블을 제외합니다.
             List<StoreTableVO> availableTablesInSlot = new ArrayList<>(allTables);
 
-            // 해당 시간대에 예약된 테이블을 걸러냄
+            // 해당 시간대에 이미 예약된 테이블을 찾아 제거합니다.
             for (ReservationVO reserved : reservedReservations) {
                 // 예약 시간과 현재 슬롯 시간이 일치하는 경우
-                if (reserved.getReservationTime().equals(currentSlotTime)) {
+                String reservedTimeStr = reserved.getReservationTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+                if (reservedTimeStr.equals(time)) {
                     reserved.getTables().forEach(reservedTable ->
                         availableTablesInSlot.removeIf(table -> table.getTableId().equals(reservedTable.getTableId()))
                     );
                 }
             }
 
-            // 예약 가능한 테이블이 1개 이상 있을 경우 맵에 추가
-            if (!availableTablesInSlot.isEmpty()) {
-                availableSlots.put(time, availableTablesInSlot);
-            }
+            // 계산된 예약 가능 테이블 목록을 해당 시간대 키에 다시 설정합니다.
+            availableSlots.put(time, availableTablesInSlot);
         }
-
+        // --- ⭐ 여기까지 로직을 수정합니다. ⭐ ---
         return availableSlots;
     }
 
@@ -218,4 +247,44 @@ public class ReservationServiceImpl implements ReservationService {
             throw new RuntimeException("Failed to delete temporary reservation due to a database error.", e);
         }
     }
+
+
+    /**
+     * 결제 웹훅(paymentId)에 의해 임시 예약을 취소(상태 업데이트)합니다.
+     * @param paymentId 취소할 결제 ID
+     * @return 성공 여부
+     */
+    @Override
+    @Transactional
+    public boolean cancelReservationByPaymentId(String paymentId) {
+        try {
+            // 1. paymentId로 결제 정보 조회 (reservationId를 얻기 위함)
+            PaymentVO payment = paymentService.getPaymentById(paymentId);
+            if (payment == null) {
+                logger.warn("Payment with ID {} not found. Cannot proceed with reservation cancellation.", paymentId);
+                return false;
+            }
+
+            Long reservationId = payment.getReservationId();
+            if (reservationId != null) {
+                // 2. reservationId로 예약 정보 상태를 'CANCELLED'로 업데이트
+                reservationDAO.updateReservationStatus(reservationId, ReservationStatus.CANCELLED.name());
+                logger.info("Updated reservation status to CANCELLED for reservationId: {}.", reservationId);
+
+                // 3. 결제 정보 상태도 'CANCELLED'로 업데이트
+                paymentService.updatePaymentStatus(payment.getPaymentId(), "CANCELLED");
+                logger.info("Updated payment status to CANCELLED for paymentId: {}.", payment.getPaymentId());
+
+                return true;
+            } else {
+                logger.warn("Reservation ID not found for paymentId: {}. Cannot cancel reservation.", paymentId);
+                return false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Error cancelling reservation with paymentId {}: {}", paymentId, e.getMessage());
+            throw new RuntimeException("Failed to cancel reservation due to a database error.", e);
+        }
+    }
+
 }
