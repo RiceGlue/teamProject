@@ -52,9 +52,19 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void join(MemberVO memberVO) {
-        // DB에 저장하기 전, 전화번호 유효성을 먼저 검사합니다.
+        // ? --- 여기가 핵심 수정 부분입니다 --- ?
+        // 1. DB에 저장하기 전, 이메일이 이미 존재하는지 먼저 확인합니다.
+        MemberVO existingMember = memberDAO.findByEmail(memberVO.getEmail());
+        if (existingMember != null) {
+            // 2. 이메일이 존재할 경우, 해당 계정이 비밀번호가 없는 '소셜 전용 계정'인지 확인합니다.
+            if (!StringUtils.hasText(existingMember.getLoginPw())) {
+                // 3. 소셜 전용 계정이라면, 더 명확한 오류 메시지를 담은 예외를 발생시킵니다.
+                throw new IllegalArgumentException("이미 소셜 계정으로 가입된 이메일입니다. 해당 소셜 로그인을 이용해주세요.");
+            }
+        }
+        
+        // (기존 로직)
         validatePhoneNumber(memberVO);
-
         saveProfileImage(memberVO);
         processPhoneNumber(memberVO);
         

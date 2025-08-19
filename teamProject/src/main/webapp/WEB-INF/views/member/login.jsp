@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <div class="container my-5" style="max-width: 500px;">
     
@@ -23,6 +23,14 @@
             <c:if test="${not empty loginRedirectMessage}">
                 <div class="alert alert-info" role="alert">
                     ${loginRedirectMessage}
+                </div>
+            </c:if>
+
+            <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+            <%-- 일반 에러 메시지(소셜 계정 중복 등)를 표시하는 영역을 추가합니다. --%>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger" role="alert">
+                    ${error}
                 </div>
             </c:if>
 
