@@ -10,6 +10,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.ReviewVO;
+import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.WaitingVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,9 +44,7 @@ public class ReviewControllerImpl {
 	    	mav.addObject("waiting", waiting);
 	    }
 
-	    mav.addObject("review", reviewVO);
-	    
-	    
+	    mav.addObject("review", reviewVO);	    
 
 	    return mav;
 	}
