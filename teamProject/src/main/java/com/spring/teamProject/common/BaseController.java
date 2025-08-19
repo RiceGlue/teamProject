@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.vo.ImageFileVO;
-import com.spring.teamProject.vo.MenuVO;
 
 @Controller
 public abstract class BaseController {

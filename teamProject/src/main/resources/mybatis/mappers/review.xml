@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.spring.teamProject.dao.ReviewDAO">
+	<resultMap id="reservationInfo" type="ReservationVO">
+		<result property="reservationId" column="reservation_id" />
+		<result property="memberId" column="store_id"/>
+		<result property="storeId" column="day_of_week"/>
+		<result property="reservationTime" column="time_slot"/>
+		<result property="guestCount" column="is_active"/>
+		<result property="guestCount" column="is_active"/>
+		<result property="guestCount" column="is_active"/>
+	</resultMap>
+	
+	<resultMap id="reviewlist" type="ReviewVO">
+		<result property="reviewId" column="review_id" />
+		<result property="memberId" column="member_id" />
+		<result property="writerId" column="writerId" />
+		<result property="storeId" column="store_id" />
+		<result property="reservationId" column="reservation_id" />
+		<result property="waitingId" column="waiting_id" />
+		<result property="rating" column="rating" />
+		<result property="content" column="content" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="avgRating" column="avgRating" />
+		<result property="countRating" column="countRating" />
+		<result property="countScoreRating" column="countScoreRating" />
+	</resultMap>
+	
+	<select id="selectReservationById" parameterType="long" resultMap="ReservationVO" >
+		<![CDATA[
+			select * from reservations where reservation_id=#{reservationId}
+		]]>
+	</select>
+	
+	<select id="selectWaitingById" parameterType="long" resultMap="WaitingVO" >
+		<![CDATA[
+			select * from waitings where store_id=#{storeId}
+		]]>
+	</select>
+	
+	<select id="selectStore" parameterType="long" resultMap="StoreVO" >
+		<![CDATA[
+			select * from stores where store_id=#{storeId}
+		]]>
+	</select>
+</mapper>

@@ -71,15 +71,22 @@
 	    <h2>지역 선택</h2>
 	    <div class="row row-cols-2 row-cols-md-4 g-3">
 	        <div class="col">
-	            <div class="card text-center">
+	        	<div class="card text-center">
 	                <div class="card-body">
 	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=서울">서울</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/addStoreInfoForm?ownerId=10">매장 정보 입력</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/modifyStoreInfoForm?storeId=1">매장 정보 수정</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/addMenuForm?storeId=1&ownerId=1">메뉴 입력</a></h5>
-						<h5 class="card-title"><a href="${contextPath}/franchise/modifyMenuForm?storeId=1">메뉴 수정</a></h5>
+						
 	                </div>
 	            </div>
+	        	<div class="card text-center">
+	        		<h5 class="card-title"><a href="${contextPath}/franchise/addStoreInfoForm?ownerId=10">매장 정보 입력</a></h5>
+					<h5 class="card-title"><a href="${contextPath}/franchise/modifyStoreInfoForm?storeId=1">매장 정보 수정</a></h5>
+					<h5 class="card-title"><a href="${contextPath}/franchise/addMenuForm?storeId=1&ownerId=1">메뉴 입력</a></h5>
+					<h5 class="card-title"><a href="${contextPath}/franchise/modifyMenuForm?storeId=1">메뉴 수정</a></h5>
+	        	</div>
+	        	<div class="card text-center">
+	        		<h5 class="card-title"><a href="${contextPath}/review/reviewForm?memberId=1&storeId=1&waitingId=1">리뷰 작성</a></h5>
+	        	</div>
+	            
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">
