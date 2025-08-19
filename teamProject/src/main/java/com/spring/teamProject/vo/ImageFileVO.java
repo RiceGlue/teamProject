@@ -80,5 +80,4 @@ public class ImageFileVO {
 		this.menuId = menuId;
 	}
 
-	
 }

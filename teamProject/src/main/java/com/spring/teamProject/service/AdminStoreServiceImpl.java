@@ -65,4 +65,34 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 		adminStoreDAO.updateStoreInfo(storeInfo);
 	}
 
+	@Override
+	public void modifyImage(ImageFileVO imgFileVO) throws Exception {
+		adminStoreDAO.updateImage(imgFileVO);
+	}
+	
+	@Override
+	public void modifyFileType(ImageFileVO imgFileVO) throws Exception {
+		adminStoreDAO.updateFileType(imgFileVO);
+	}
+	
+	@Override
+	public ImageFileVO selectImage(long imageId) throws Exception {
+		ImageFileVO imgFileVO = adminStoreDAO.selectImage(imageId);
+		return imgFileVO;
+	}
+	
+	@Override
+	public void modifyStoreInfoWithImage(Map storeInfo) throws Exception {
+		adminStoreDAO.updateStoreInfoWithImage(storeInfo);
+	}
+	
+	@Override
+	public void modifyMenu(MenuVO menuVO) throws Exception {
+		adminStoreDAO.updateMenu(menuVO);
+	}
+	
+	@Override
+	public void modifyMenuWithImage(MenuVO menuVO) throws Exception {
+		adminStoreDAO.updateMenuWithImage(menuVO);
+	}
 }

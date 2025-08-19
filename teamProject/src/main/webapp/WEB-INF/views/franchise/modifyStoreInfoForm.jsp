@@ -75,6 +75,7 @@
 		    '</div>' +
 		    '<div style="display: flex; width: 100%;">' +
 		    '<div class="form-input" style="flex: 1;">' +
+		    '<input type="hidden" name="originalFileName" value="">'+
 		    '<span style="font-weight: bold;">신규 이미지</span><br>' +
 		    '<input type="file" name="fileName" id="' + fileNameIdx + '" accept="image/*" onchange="validateImages(this, ' + imageIndex + ')" />' +
 		    '<div class="image-preview" id="' + previewIdx + '" style="margin-top: 10px;"></div>' +
@@ -240,10 +241,6 @@
 		files.forEach(input=>{
 			if(input.files.length>0)hasFile=true;
 		});
-		if(!hasFile){
-			alert('최소 한 개 이상의 이미지를 선택해주세요.');
-			return false;
-		}
 		
 		setHiddenInput('closed',closed);
 		setHiddenInput('operatingTime',operatingTime);
@@ -528,6 +525,7 @@
 				<div class="form-label" style="width: 200px; float:left;">이미지</div>
 				<div id="addImage" style="float:right; width:calc(100%-210px);">
 					<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
+						<input type="hidden" name="imageId" value="${image.imageId }" >
 						<div style="margin-bottom: 10px;">
 							<input type="hidden" name="fileType" value="${image.fileType}" />
 							<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" <c:if test="${image.fileType}">checked</c:if>> 메인</label>

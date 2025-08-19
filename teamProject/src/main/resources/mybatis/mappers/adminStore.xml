@@ -201,7 +201,7 @@
 	
 	<select id="selectMenuList" parameterType="long" resultMap="menulist">
 		<![CDATA[
-			select menu_id, menu_name, price, description, display_no, file_name
+			select *
 			from menu where store_id=#{storeId}
 		]]>
 	</select>
@@ -233,9 +233,85 @@
 				break_time = #{breakTime},
 				last_order = #{lastOrder},
 				amenities = #{amenities},
+				updated_at = now()
+		 	WHERE store_id = #{storeId}
+		]]>
+	</update>
+	
+	<update id="updateImage" parameterType="ImageFileVO" >
+		<![CDATA[
+			UPDATE image_file
+			SET
+				file_type=#{fileType},
+				file_name=#{fileName},
+				updated_at=now()
+			WHERE image_id=#{imageId}
+		]]>
+	</update>
+	
+	<update id="updateFileType" parameterType="ImageFileVO" >
+		<![CDATA[
+			UPDATE image_file
+			SET
+				file_type = #{fileType}
+			WHERE image_id = #{imageId}
+		]]>
+	</update>
+	
+	<select id="selectImage" parameterType="long" resultMap="imagelist">
+		<![CDATA[
+			select * from image_file where image_id=#{imageId}
+		]]>
+	</select>
+	
+	<update id="updateStoreInfoWithImage" parameterType="java.util.Map" >
+		<![CDATA[
+			UPDATE stores
+			SET 
+				store_type = #{storeType},
+				zipcode = #{zipcode},
+				address = #{address},
+				detail_address = #{detailAddress},
+				extra_address = #{extraAddress},
+				operation_type = #{operationType},
+				local_number = #{localNumber},
+				number1 = #{number1},
+				number2 = #{number2},
+				description = #{description},
+				closed = #{closed},
+				operating_time = #{operatingTime},
+				break_time = #{breakTime},
+				last_order = #{lastOrder},
+				amenities = #{amenities},
 				file_name = #{fileName},
 				updated_at = now()
 		 	WHERE store_id = #{storeId}
 		]]>
 	</update>
+	
+	<update id="updateMenu" parameterType="menuVO" >
+		<![CDATA[
+			UPDATE menu
+			SET 
+				menu_name=#{menuName},
+				price=#{price},
+				description=#{description},
+				updated_at = now()
+		 	WHERE menu_id = #{menuId}
+		]]>
+	</update>
+	
+	<update id="updateMenuWithImage" parameterType="menuVO" >
+		<![CDATA[
+			UPDATE menu
+			SET 
+				menu_name=#{menuName},
+				price=#{price},
+				description=#{description},
+				file_name=#{fileName},
+				updated_at = now()
+		 	WHERE menu_id = #{menuId}
+		]]>
+	</update>
+
 </mapper>
