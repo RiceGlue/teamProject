@@ -13,4 +13,7 @@ public interface WaitingService {
 
     // 새로 추가된 메소드
     int getCurrentWaitingCount(Long storeId);
+
+    boolean checkExistingWaiting(Long memberId);
+
 }

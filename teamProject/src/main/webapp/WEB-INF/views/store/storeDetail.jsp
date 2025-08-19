@@ -428,7 +428,7 @@
 		<div class="wating_container">
 			<h4>현재 대기</h4>
 			<h6><strong>${currentWaitingCount}</strong>팀</h6>
-			<button type="button" style="width:80%" class="btn btn-danger" onClick="location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
+			<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
 			<%-- <form id="waitingForm" action="${contextPath}/waiting/customer/form" method="post">
 		        <input type="hidden" name="storeId" value="${storeId}" />
 		        <button type="submit" style="width:80%" class="btn btn-danger">웨이팅하기</button>
