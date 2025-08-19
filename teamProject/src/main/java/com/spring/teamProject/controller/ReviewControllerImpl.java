@@ -31,11 +31,13 @@ public class ReviewControllerImpl {
 
 	    Long reservationId = reviewVO.getReservationId();
 	    Long waitingId = reviewVO.getWaitingId();
+	    
+	    System.out.println("가게 아이디 : "+reviewVO.getStoreId());
 
 	    ReservationVO reservation = new ReservationVO();
 	    WaitingVO waiting = new WaitingVO();
 	    StoreVO storeInfo = reviewService.selectStoreInfo(reviewVO.getStoreId());
-	    
+
 	    if(reservationId!=null) {
 	    	reservation = reviewService.getReservationById(reservationId);
 			mav.addObject("reservation", reservation);
@@ -44,7 +46,8 @@ public class ReviewControllerImpl {
 	    	mav.addObject("waiting", waiting);
 	    }
 
-	    mav.addObject("review", reviewVO);	    
+	    mav.addObject("review", reviewVO);
+	    mav.addObject("storeInfo", storeInfo);
 
 	    return mav;
 	}

@@ -3,8 +3,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
-
-
 <style>
 	.star-rating {direction: rtl; font-size: 2rem; unicode-bidi: bidi-override; display: inline-flex;}
 	.star-rating input[type="radio"] {display: none;}
@@ -12,6 +10,13 @@
 	.star-rating input[type="radio"]:checked ~ label,
 	.star-rating label:hover,
 	.star-rating label:hover ~ label {color: gold;}
+	.store-card { border: solid 1px #c7bfbf; border-radius:10px; display:flex; padding:12px; margin:20px; font-family:'Segoe UI', sans-serif; align-items:center; }
+	.store-image { position:relative; width:120px; height:120px; border-radius:6px; overflow:hidden; flex-shrink:0; }
+	.store-image img { width:100%; height:100%; object-fit:cover; }
+	.store-info { margin-left:16px; flex:1; }
+	.store-info h4 { margin:0 0 6px; font-size:18px; }
+	.store-info p { margin:4px 0; font-size:14px; color:#444; }
+	.rating { color:#ffa500; font-weight:bold; }
 </style>
 
 <script>
@@ -68,12 +73,25 @@ function previewReviewImage(input) {
 }
 </script>
 
-<h2>리뷰 작성</h2>
+<h2>${storeInfo.storeName }의 방문후기</h2>
 
-<!-- 방문 내역 출력 -->
-<div style="margin-bottom: 30px; text-align: center;">
-	<h3>방문 정보</h3>
-		
+<div>
+	<h3 style="text-align:center;">방문 정보</h3>
+	<div class="store-card">
+		<div class="store-image">
+			<a href="${contextPath}/store/storeDetail?storeId=${storeInfo.storeId}&ownerId=${storeInfo.ownerId}">
+			<img src="${contextPath }/download?directoryName=store&fileName=${storeInfo.fileName}" alt="${storeInfo.fileName }">
+			</a>
+		</div>
+		<div class="store-info">
+			<h4>${storeInfo.storeName}</h4>
+			<p><span class="rating">★ ${storeInfo.avgRating}</span>리뷰 ${storeInfo.countRating}개</p>
+			<p class="meta-info">${storeInfo.storeType} · ${storeInfo.address}</p>
+			<p class="meta-info">${storeInfo.description}</p>
+		</div>
+	</div>
+	
+	<!-- 방문 내역 출력 -->	
 	<c:if test="${not empty reservation}">
 		<p>방문 유형: 예약</p>
 		<p>방문 인원: ${reservation.guestCount } </p>
