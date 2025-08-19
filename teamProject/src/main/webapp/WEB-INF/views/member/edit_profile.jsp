@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <script>
     function validateImage(input) {
@@ -59,14 +59,10 @@
                 }
             }
         }
-
-        // 비밀번호 유효성 검사
-        return validatePassword();
+        return true;
     }
 
     function validatePassword() {
-        // 이 함수는 form 태그의 onsubmit 이벤트에 의해 호출되므로,
-        // DOM 요소들이 모두 로드된 이후에 실행되어 id로 요소를 찾는데 문제가 없습니다.
         const newPasswordInput = document.getElementById('newLoginPw');
         if (newPasswordInput) {
             const newPassword = newPasswordInput.value;
@@ -85,28 +81,76 @@
         }
         return true;
     }
+
+    // 계정 전환 폼 유효성 검사 및 아이디 중복 확인
+    function validateConversionForm() {
+        if ($('#conversionSubmitBtn').is(':disabled')) {
+            alert("새 아이디 중복 확인을 해주세요.");
+            return false;
+        }
+        const newPassword = $('#conversionNewLoginPw').val();
+        const confirmPassword = $('#conversionNewLoginPwConfirm').val();
+        if (newPassword !== confirmPassword) {
+            alert("새 비밀번호가 일치하지 않습니다.");
+            return false;
+        }
+        return true;
+    }
+
+    $(function() {
+        $('#conversionIdCheckBtn').on('click', function() {
+            const loginId = $('#conversionLoginId').val();
+            const idCheckMessage = $('#conversionIdCheckMessage');
+
+            if (!loginId) {
+                idCheckMessage.html('<span style="color: red;">아이디를 입력해주세요.</span>');
+                return;
+            }
+
+            $.ajax({
+                url: '${contextPath}/member/check-id', // MemberController의 중복 확인 API 사용
+                type: 'POST',
+                data: { loginId: loginId },
+                success: function(response) {
+                    if (!response.isDuplicate) {
+                        idCheckMessage.html('<span style="color: green;">사용 가능한 아이디입니다.</span>');
+                        $('#conversionSubmitBtn').prop('disabled', false);
+                    } else {
+                        idCheckMessage.html('<span style="color: red;">이미 사용 중인 아이디입니다.</span>');
+                        $('#conversionSubmitBtn').prop('disabled', true);
+                    }
+                },
+                error: function() {
+                    idCheckMessage.html('<span style="color: red;">오류가 발생했습니다.</span>');
+                    $('#conversionSubmitBtn').prop('disabled', true);
+                }
+            });
+        });
+
+        $('#conversionLoginId').on('input', function() {
+            $('#conversionSubmitBtn').prop('disabled', true);
+            $('#conversionIdCheckMessage').html('');
+        });
+    });
 </script>
 
 <div class="container my-5" style="max-width: 600px;">
     <h2 class="text-center mb-4">프로필 수정</h2>
 
     <%-- 성공 또는 에러 메시지를 표시하는 영역 --%>
-    <c:if test="${not empty error}">
-        <div class="alert alert-danger" role="alert">${error}</div>
-    </c:if>
-    <c:if test="${not empty msg}">
-        <div class="alert alert-success" role="alert">${msg}</div>
-    </c:if>
+    <c:if test="${not empty error}"><div class="alert alert-danger" role="alert">${error}</div></c:if>
+    <c:if test="${not empty msg}"><div class="alert alert-success" role="alert">${msg}</div></c:if>
 
+    <!-- === 기본 프로필 정보 수정 폼 시작 === -->
     <form action="${contextPath}/member/edit-profile" method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
         
         <div class="text-center mb-4">
             <c:choose>
                 <c:when test="${not empty memberInfo.profileImageUrl}">
-                	<img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+                    <img src="${contextPath}${memberInfo.profileImageUrl}" class="img-fluid rounded-circle mb-3" alt="프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
                 </c:when>
                 <c:otherwise>
-                	<img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="기본 프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
+                    <img src="${contextPath}/images/default_profile.png" class="img-fluid rounded-circle mb-3" alt="기본 프로필 이미지" id="preview" style="width: 150px; height: 150px; object-fit: cover;">
                 </c:otherwise>
             </c:choose>
             <div>
@@ -153,44 +197,19 @@
                 <input type="tel" class="form-control" id="phone" name="phone" value="${displayPhone}" placeholder="'-' 없이 숫자만 입력" required>
             </div>
         </div>
+        
         <div class="mb-3">
             <label for="email" class="form-label">이메일</label>
-            <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" placeholder="name@example.com" required>
+            <c:choose>
+                <c:when test="${empty memberInfo.loginPw}">
+                    <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" readonly>
+                    <div class="form-text">소셜 로그인 전용 계정은 이메일을 변경할 수 없습니다.</div>
+                </c:when>
+                <c:otherwise>
+                    <input type="email" class="form-control" id="email" name="email" value="${memberInfo.email}" required>
+                </c:otherwise>
+            </c:choose>
         </div>
-        
-        
-        <!-- --- 1. 비밀번호 섹션 분기 처리 --- -->
-        <hr class="my-4">
-        
-        <%-- 비밀번호 변경 또는 설정 섹션 --%>
-        <c:if test="${not empty memberInfo.loginPw}">
-            <h5 class="mb-3">비밀번호 변경</h5>
-            <p class="text-muted small mb-3">비밀번호를 변경하지 않으려면 아래 항목을 비워두세요.</p>
-            <div class="mb-3">
-                <label for="currentLoginPw" class="form-label">현재 비밀번호</label>
-                <input type="password" class="form-control" id="currentLoginPw" name="currentLoginPw">
-            </div>
-            <div class="mb-3">
-                <label for="newLoginPw" class="form-label">새 비밀번호</label>
-                <input type="password" class="form-control" id="newLoginPw" name="newLoginPw">
-            </div>
-            <div class="mb-3">
-                <label for="newLoginPwConfirm" class="form-label">새 비밀번호 확인</label>
-                <input type="password" class="form-control" id="newLoginPwConfirm" name="newLoginPwConfirm">
-            </div>
-        </c:if>
-
-			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
-        <c:if test="${empty memberInfo.loginPw}">
-            <h5 class="mb-3">비밀번호 설정</h5>
-            <p class="text-muted small mb-3">비밀번호를 설정하면 이메일과 비밀번호로도 로그인할 수 있습니다.</p>
-			<%-- TODO: 비밀번호 설정 폼 (새 비밀번호, 새 비밀번호 확인) 추가 위치 --%>
-            <div class="d-grid">
-                <button type="button" class="btn btn-outline-primary" onclick="alert('비밀번호 설정 기능은 개발 예정입니다.');">비밀번호 설정하기</button>
-            </div>
-        </c:if>
-        
-        <hr class="my-4">
         
         <%-- 알림 수신 설정 섹션 --%>
         <div class="mb-3">
@@ -217,55 +236,107 @@
             <a href="${contextPath}/member/mypage" class="btn btn-secondary">취소</a>
         </div>
     </form>
-    <!-- === 프로필 정보 수정 폼 종료 === -->
-    
+    <!-- === 기본 프로필 정보 수정 폼 종료 === -->
 
-    <!-- --- 소셜 계정 연동 섹션 --- -->
+    <%-- 비밀번호 변경 또는 계정 전환 폼을 하나의 <hr>로 묶습니다. --%>
     <hr class="my-4">
-    <h5 class="mb-3">소셜 계정 연동</h5>
-    
-    <c:set var="googleLinked" value="${false}" />
-    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
-    <c:forEach var="account" items="${memberInfo.socialAccounts}">
-        <c:if test="${account.provider == 'GOOGLE'}">
-            <c:set var="googleLinked" value="${true}" />
-        </c:if>
-    </c:forEach>
 
-    <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
-                <span class="ms-2 fw-bold">Google</span>
-            </div>
-            <div>
-                <c:choose>
-                    <c:when test="${googleLinked}">
-                        <span class="badge bg-success me-2">연동됨</span>
-                        <c:if test="${not empty memberInfo.loginPw}">
-                            <!-- === 연동 해제 폼 시작 (독립된 폼) === -->
-                            <form action="${contextPath}/member/unlink-social" method="post" style="display: inline;" onsubmit="return confirm('정말로 Google 계정 연동을 해제하시겠습니까?');">
-                                <input type="hidden" name="provider" value="GOOGLE">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">연동 해제</button>
-                            </form>
-                            <!-- === 연동 해제 폼 종료 === -->
-                        </c:if>
-                    </c:when>
-                    <c:otherwise>
-                        <c:if test="${not empty memberInfo.loginPw}">
-                            <a href="${contextPath}/member/prepare-link/google" class="btn btn-sm btn-outline-secondary">연동하기</a>
-                        </c:if>
-                    </c:otherwise>
-                </c:choose>
+    <c:choose>
+        <c:when test="${not empty memberInfo.loginPw}">
+            <%-- 일반 회원을 위한 비밀번호 변경 폼 --%>
+            <form action="${contextPath}/member/edit-profile" method="post" onsubmit="return validatePassword();">
+                 <h5 class="mb-3">비밀번호 변경</h5>
+                 <p class="text-muted small mb-3">비밀번호를 변경하지 않으려면 아래 항목을 비워두세요.</p>
+                 <div class="mb-3">
+                     <label for="currentLoginPw" class="form-label">현재 비밀번호</label>
+                     <input type="password" class="form-control" id="currentLoginPw" name="currentLoginPw">
+                 </div>
+                 <div class="mb-3">
+                     <label for="newLoginPw" class="form-label">새 비밀번호</label>
+                     <input type="password" class="form-control" id="newLoginPw" name="newLoginPw">
+                 </div>
+                 <div class="mb-3">
+                     <label for="newLoginPwConfirm" class="form-label">새 비밀번호 확인</label>
+                     <input type="password" class="form-control" id="newLoginPwConfirm" name="newLoginPwConfirm">
+                 </div>
+                 <div class="d-grid">
+                    <button type="submit" class="btn btn-info">비밀번호만 변경</button>
+                </div>
+            </form>
+        </c:when>
+        <c:otherwise>
+            <%-- 소셜 전용 회원을 위한 일반 계정 전환 폼 --%>
+            <h5 class="mb-3">일반 계정으로 전환</h5>
+            <p class="text-muted small mb-3">아이디와 비밀번호를 설정하면 일반 계정으로 전환되어, 소셜 로그인과 함께 아이디/비밀번호로도 로그인할 수 있습니다.</p>
+            
+            <form action="${contextPath}/member/set-password" method="post" onsubmit="return validateConversionForm();">
+                <div class="mb-3">
+                    <label for="conversionLoginId" class="form-label">새 아이디</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="conversionLoginId" name="loginId" required>
+                        <button class="btn btn-outline-secondary" type="button" id="conversionIdCheckBtn">중복 확인</button>
+                    </div>
+                    <div id="conversionIdCheckMessage" class="form-text mt-1"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="conversionNewLoginPw" class="form-label">새 비밀번호</label>
+                    <input type="password" class="form-control" id="conversionNewLoginPw" name="newLoginPw" required>
+                </div>
+                <div class="mb-3">
+                    <label for="conversionNewLoginPwConfirm" class="form-label">새 비밀번호 확인</label>
+                    <input type="password" class="form-control" id="conversionNewLoginPwConfirm" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" id="conversionSubmitBtn" class="btn btn-success" disabled>계정 전환하기</button>
+                </div>
+            </form>
+        </c:otherwise>
+    </c:choose>
+
+    <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
+    <%-- 일반 계정(비밀번호가 있는 회원)일 경우에만 소셜 계정 연동 섹션을 보여줍니다. --%>
+    <c:if test="${not empty memberInfo.loginPw}">
+        <hr class="my-4">
+        <h5 class="mb-3">소셜 계정 연동</h5>
+        
+        <c:set var="googleLinked" value="${false}" />
+        <c:forEach var="account" items="${memberInfo.socialAccounts}">
+            <c:if test="${account.provider == 'GOOGLE'}">
+                <c:set var="googleLinked" value="${true}" />
+            </c:if>
+        </c:forEach>
+
+        <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                    <span class="ms-2 fw-bold">Google</span>
+                </div>
+                <div>
+                    <c:choose>
+                        <c:when test="${googleLinked}">
+                            <span class="badge bg-success me-2">연동됨</span>
+                            <c:if test="${not empty memberInfo.loginPw}">
+                                <form action="${contextPath}/member/unlink-social" method="post" style="display: inline;" onsubmit="return confirm('정말로 Google 계정 연동을 해제하시겠습니까?');">
+                                    <input type="hidden" name="provider" value="GOOGLE">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">연동 해제</button>
+                                </form>
+                            </c:if>
+                        </c:when>
+                        <c:otherwise>
+                            <c:if test="${not empty memberInfo.loginPw}">
+                                <a href="${contextPath}/member/prepare-link/google" class="btn btn-sm btn-outline-secondary">연동하기</a>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
         </div>
-    </div>
+    </c:if>
     
     <div class="text-end mt-5">
-        <!-- === 회원 탈퇴 폼 시작 (독립된 폼) === -->
         <form action="${contextPath}/member/withdraw" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제되며 복구할 수 없습니다.');">
             <button type="submit" class="btn btn-link text-danger btn-sm">회원 탈퇴</button>
         </form>
-        <!-- === 회원 탈퇴 폼 종료 === -->
     </div>
 </div>

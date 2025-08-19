@@ -42,4 +42,11 @@
         AND (status = 'WAITING' OR status = 'CALLED')
     </select>
 
+    <select id="countActiveWaitingsByMemberId" parameterType="Long" resultType="int">
+        SELECT COUNT(*)
+        FROM waitings
+        WHERE member_Id = #{memberId}
+          AND status IN ('WAITING', 'CALLED');
+    </select>
+
 </mapper>

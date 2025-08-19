@@ -250,4 +250,11 @@ public class WaitingServiceImpl implements WaitingService {
     public int getCurrentWaitingCount(Long storeId) {
         return waitingDAO.countCurrentWaitings(storeId);
     }
+
+    @Override
+    public boolean checkExistingWaiting(Long memberId) {
+        // DAO를 호출하여 해당 회원의 웨이팅 수를 조회
+        int count = waitingDAO.countActiveWaitingsByMemberId(memberId);
+        return count > 0;
+    }
 }

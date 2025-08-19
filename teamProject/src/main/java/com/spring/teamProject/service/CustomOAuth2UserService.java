@@ -86,23 +86,29 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             // 2-2. 연동된 소셜 계정이 없는 경우 -> 이메일로 기존 회원이 있는지 확인
             member = memberDAO.findByEmail(email);
+            
+            // ? --- 여기가 핵심 수정 부분입니다 --- ?
             if (member != null) {
-                // 3-1. 이메일이 같은 회원이 있다면 -> 새로운 소셜 계정을 기존 계정에 연동
-                SocialAccountVO newSocialAccount = new SocialAccountVO();
-                newSocialAccount.setMemberId(member.getMemberId());
-                newSocialAccount.setProvider(provider);
-                newSocialAccount.setSocialId(socialId);
-                socialAccountDAO.insertSocialAccount(newSocialAccount);
+                // 이메일이 같은 회원이 있다면, 자동으로 연동하지 않고 "계정 연동 필요" 상태로 만듭니다.
+                Map<String, Object> attributes = new java.util.HashMap<>(oAuth2User.getAttributes());
+                attributes.put("link_required", true); // 연동 필요 플래그
+                attributes.put("provider", provider);
+                attributes.put("socialId", socialId);
+
+                return new DefaultOAuth2User(
+                        Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")), // 임시 역할 부여
+                        attributes,
+                        "sub"
+                );
             }
         }
 
         if (member != null) {
-            // DB에 정보가 있는 사용자 (기존 소셜 유저 또는 방금 연동된 유저)
+            // DB에 정보가 있는 사용자 (기존 소셜 유저)
             if ("OWNER".equals(member.getRole()) || "ADMIN".equals(member.getRole())) {
                 throw new OAuth2AuthenticationException("가맹점주 및 관리자 계정은 소셜 로그인을 이용할 수 없습니다.");
             }
             
-            // --- ? 여기가 핵심 수정 부분입니다 ? ---
             // MyBatis의 지연 로딩 문제를 피하기 위해, social_accounts 정보를 명시적으로 다시 조회하여 주입합니다.
             List<SocialAccountVO> socialAccounts = socialAccountDAO.findByMemberId(member.getMemberId());
             member.setSocialAccounts(socialAccounts);

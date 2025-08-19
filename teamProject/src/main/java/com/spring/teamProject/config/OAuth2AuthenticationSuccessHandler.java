@@ -29,7 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         HttpSession session = request.getSession();
         Boolean isLinking = (Boolean) session.getAttribute("socialLinkRequest");
 
-        // --- ? 1. '계정 연동' 시나리오 처리 ---
+        // --- ? 1. '계정 연동' 시나리오 처리 (사용자가 프로필 수정 페이지에서 직접 연동을 시작한 경우) ---
         // 세션에 '계정 연동' 표식이 있는지 먼저 확인합니다.
         if (Boolean.TRUE.equals(isLinking)) {
             // 표식을 사용했으니 즉시 제거하여 다음 로그인에 영향을 주지 않도록 합니다.
@@ -42,13 +42,19 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return; // 여기서 로직을 종료합니다.
         }
 
-        // --- ? 2. '신규 가입' 또는 '기존 회원 로그인' 시나리오 처리 ---
-        // '계정 연동' 표식이 없는 경우에만 이 로직이 실행됩니다.
-        
-        // GUEST 권한이 있다면 신규 사용자이므로 추가 정보 입력 페이지로 이동시킵니다.
+        // --- ? 2. '신규 가입' 또는 '기존 회원 로그인' 또는 '연동 확인' 시나리오 처리 ---
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+
+        // 2-1. "계정 연동 확인"이 필요한 경우 (소셜 로그인 이메일과 동일한 이메일의 일반 계정이 이미 존재)
+        if (Boolean.TRUE.equals(attributes.get("link_required"))) {
+            session.setAttribute("socialLinkInfo", attributes); // 소셜 정보를 세션에 저장
+            getRedirectStrategy().sendRedirect(request, response, "/member/link-account"); // 연동 확인 페이지로 이동
+            return;
+        }
+
+        // 2-2. GUEST 권한이 있다면 완전 신규 사용자이므로 추가 정보 입력 페이지로 이동
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))) {
-            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-            Map<String, Object> attributes = oAuth2User.getAttributes();
             session.setAttribute("socialUserInfo", attributes);
 
             // 회원가입 페이지로 리다이렉트합니다.
@@ -56,7 +62,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } else {
-            // ? --- 여기가 핵심 수정 부분입니다 --- ?
             // 3. '기존 회원 로그인' 시나리오 처리
             
             // Spring Security가 저장해 둔 '원래 가려던 페이지' 정보를 가져옵니다.
