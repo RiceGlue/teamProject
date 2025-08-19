@@ -252,14 +252,13 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 	}
 	
 	@Override
-	@RequestMapping(value="/modifyStoreInfo", method=RequestMethod.POST)
+	@RequestMapping(value="/modifyStoreInfo", method = RequestMethod.POST)
 	public ModelAndView modifyStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
 		String directoryName = "store";
 		ModelAndView mav = new ModelAndView();
-		
+	
 		multiReq.setCharacterEncoding("UTF-8");
-
-		//수정된 storeInfo map에 넣기
+	
 		Map<String, Object> storeInfo = new HashMap<>();
 		Enumeration<?> enu = multiReq.getParameterNames();
 		while (enu.hasMoreElements()) {
@@ -268,90 +267,176 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 			System.out.println(name + ": " + value);
 			storeInfo.put(name, value);
 		}
-
-		//이미지 파일 등록자 아이디
+	
 		String regIdstr = (String) storeInfo.get("ownerId"); 
 		long regId = Long.parseLong(regIdstr); 
-		
-		//storeId
+	
 		String storeIdstr = (String) storeInfo.get("storeId"); 
 		long storeId = Long.parseLong(storeIdstr);
-
-		//fileType, displayNo 가져오기
+	
+		String[] imageIds = multiReq.getParameterValues("imageId");
 		String[] fileTypes = multiReq.getParameterValues("fileType");
-		
-		for(int i=0;i<fileTypes.length;i++) {
-			System.out.println("파일 타입 : " + fileTypes[i]);
-		}
 		String[] displayNos = multiReq.getParameterValues("displayNo");
-		
 		String[] originalFileNames = multiReq.getParameterValues("originalFileName");
-			
 		List<MultipartFile> files = multiReq.getFiles("fileName");
-		
-		for(int i=0;i<files.size();i++) {
-			if(files.get(i).getOriginalFilename().isEmpty()) {
-				System.out.println("null");
-			} else { System.out.println(files.get(i).getOriginalFilename()); }
-		}
-
-		List<ImageFileVO> imgFileList = new ArrayList<>();
-
-		// 1. 파일 업로드는 딱 한 번만!
-		List<ImageFileVO> uploadedFiles = upload(multiReq, directoryName);
-
-		for (int i = 0; i < files.size(); i++) {
-		    MultipartFile file = files.get(i);
-
-		    if (!file.isEmpty()) {
-		        // 기존 파일 삭제
-		        String originalFileName = originalFileNames[i];
-		        if (originalFileName != null && !originalFileName.isEmpty()) {
-		            deleteFile(originalFileName, directoryName);
-		        }
-
-		        // 인덱스 맞게 업로드된 파일 사용
-		        ImageFileVO uploadedFile = uploadedFiles.get(i);
-
-		        ImageFileVO imageVO = new ImageFileVO();
-		        imageVO.setFileName(uploadedFile.getFileName());
-		        imageVO.setDisplayNo(Integer.parseInt(displayNos[i]));
-		        imageVO.setFileType(Boolean.parseBoolean(fileTypes[i]));
-		        imageVO.setStoreId(storeId);
-		        imageVO.setRegId(regId);
-
-		        // 메인 이미지인 경우 storeInfo 업데이트
-		        if (Boolean.parseBoolean(fileTypes[i])) {
-		            storeInfo.remove(originalFileName);
-		            storeInfo.put("fileName", uploadedFile.getFileName());
-		        }
-
-		        imgFileList.add(imageVO);
-		    }
-		}
-
-		
+	
+		List<ImageFileVO> addImgFileList = new ArrayList<>();
+	
 		try {
-			adminStoreService.modifyStoreInfo(storeInfo);
-			adminStoreService.addStoreInfoImage(imgFileList);
+			ImageFileVO orignFileVO = new ImageFileVO();
+		
+			for (int i = 0; i < files.size(); i++) {
+				MultipartFile file = files.get(i);
 			
+				String imageId = (imageIds != null && i < imageIds.length) ? imageIds[i] : null;
+				String fileType = (fileTypes != null && i < fileTypes.length) ? fileTypes[i] : null;
+				String displayNo = (displayNos != null && i < displayNos.length) ? displayNos[i] : "0";
+				String originalFileName = (originalFileNames != null && i < originalFileNames.length) ? originalFileNames[i] : null;
+			
+				if (imageId != null && !imageId.isEmpty()) {
+					orignFileVO = adminStoreService.selectImage(Long.parseLong(imageId));
+				}
+			
+				boolean hasFile = file != null && !file.getOriginalFilename().isEmpty();
+				boolean isFileTypeTrue = "true".equalsIgnoreCase(fileType);
+			
+				if (hasFile && imageId != null) {
+					ImageFileVO imageFileVO = new ImageFileVO();
+					
+					imageFileVO.setImageId(Integer.parseInt(imageId));
+					imageFileVO.setFileName(file.getOriginalFilename());
+					imageFileVO.setFileType(isFileTypeTrue);
+				
+					if (originalFileName != null && !originalFileName.isEmpty()) {
+						deleteFile(originalFileName, directoryName);
+					}
+				
+					if (isFileTypeTrue) {
+						storeInfo.put("fileName", file.getOriginalFilename());
+					}
+				
+					adminStoreService.modifyImage(imageFileVO);
+				}
+				
+				else if (hasFile && (originalFileName == null || originalFileName.isEmpty())) {
+					ImageFileVO imageFileVO = new ImageFileVO();
+					
+					imageFileVO.setFileName(file.getOriginalFilename());
+					imageFileVO.setDisplayNo(Integer.parseInt(displayNo));
+					imageFileVO.setFileType(isFileTypeTrue);
+					
+					addImgFileList.add(imageFileVO);
+				
+					if (isFileTypeTrue) {
+						storeInfo.put("fileName", file.getOriginalFilename());
+					}
+				}
+				else if (orignFileVO.isFileType() != isFileTypeTrue) {
+					ImageFileVO imageFileVO = new ImageFileVO();
+					
+					imageFileVO.setImageId(Integer.parseInt(imageId));
+					imageFileVO.setFileType(isFileTypeTrue);
+					
+					adminStoreService.modifyFileType(imageFileVO);
+				}
+			}
+		
+			if (addImgFileList != null && !addImgFileList.isEmpty()) {
+			adminStoreService.addStoreInfoImage(addImgFileList);
+			}
+		
+			modifyUpload(multiReq,directoryName);
+		
+			if (storeInfo.get("fileName") != null && !((String)storeInfo.get("fileName")).isEmpty()) {
+				adminStoreService.modifyStoreInfoWithImage(storeInfo);
+			} else {
+				adminStoreService.modifyStoreInfo(storeInfo);
+			}
+		
 			mav.addObject("success",true);
-		    mav.setViewName("redirect:/franchise/modifyStoreInfo?ownerId=" + regId);	
+			mav.setViewName("redirect:/franchise/modifyStoreInfoForm?storeId=" + storeId);
+		} catch (Exception e) {
+		e.printStackTrace();
+	
+		mav.addObject("error",true);
+		mav.setViewName("redirect:/franchise/modifyStoreInfoForm?storeId=" + storeId);
+		}
+	
+		return mav;
+	}
+
+	
+	@Override
+	@RequestMapping(value="/modifyMenu", method=RequestMethod.POST)
+	public ModelAndView modifyMenu(MultipartHttpServletRequest multiReq) throws Exception {
+		ModelAndView mav = new ModelAndView();
+	
+		multiReq.setCharacterEncoding("UTF-8");
+	
+		// 파라미터 받기
+		String storeIdStr = multiReq.getParameter("storeId");
+		long storeId = Long.parseLong(storeIdStr);
+	
+		String menuIdStr = multiReq.getParameter("menuId");
+		long menuId = Long.parseLong(menuIdStr);
+	
+		String menuName = multiReq.getParameter("menuName");
+		String price = multiReq.getParameter("price");
+		String description = multiReq.getParameter("description");
+		String originalFileName = multiReq.getParameter("originalFileName");
+	
+		try {
+	
+			// 이미지 파일 처리
+			MultipartFile imageFile = multiReq.getFile("imageFile");
+			String fileName = null;
+		
+			if (imageFile != null && !imageFile.isEmpty()) {
+		
+				// 저장할 디렉토리명, 필요에 따라 변경
+				String directoryName = "menu";
+				upload(multiReq, directoryName);
+			
+				MenuVO menuVO = new MenuVO();
+				menuVO.setMenuId(menuId);
+				menuVO.setMenuName(menuName);
+				menuVO.setPrice(price);
+				menuVO.setDescription(description);
+			
+				fileName = imageFile.getOriginalFilename();
+			
+				// originalFileName이 비어있지 않을 경우에만 삭제 시도
+				if (originalFileName != null && !originalFileName.trim().isEmpty()) {
+					deleteFile(originalFileName, directoryName);
+				}
+			
+				ImageFileVO imgFileVO = new ImageFileVO();
+				imgFileVO.setFileName(fileName);
+				imgFileVO.setFileType(false);
+			
+				adminStoreService.modifyMenuWithImage(menuVO);
+				adminStoreService.modifyImage(imgFileVO);
+			} else {
+				MenuVO menuVO = new MenuVO();
+				menuVO.setMenuId(menuId);
+				menuVO.setMenuName(menuName);
+				menuVO.setPrice(price);
+				menuVO.setDescription(description);
+			
+				adminStoreService.modifyMenu(menuVO);
+			}
+		
+			mav.addObject("success",true);
+			mav.setViewName("redirect:/franchise/modifyMenuForm?storeId=" + storeId);
+	
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+		
 			mav.addObject("error",true);
-	        mav.setViewName("redirect:/franchise/modifyStoreInfo?ownerId=" + regId);
+			mav.setViewName("redirect:/franchise/modifyMenuForm?storeId=" + storeId);
 		}
-
+	
 		return mav;
-
 	}
-//	
-//	@Override
-//	@RequestMapping(value="/modifyMenu", method=RequestMethod.POST)
-//	public ModelAndView modifyMenu(MultipartHttpServletRequest multiReq) throws Exception {
-//		
-//	}
 
 }
