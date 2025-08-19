@@ -360,14 +360,6 @@ public class ReservationCustomerController {
         }
     }
 
-    private StoreVO getDummyStoreInfo(Long storeId) {
-        StoreVO store = new StoreVO();
-        store.setStoreId(storeId);
-        store.setStoreName("더미 레스토랑 (ID:" + storeId + ")");
-        store.setAddress("서울시 가짜구 더미동 123");
-        return store;
-    }
-
     /**
      * 고객이 예약 취소 요청을 처리하는 엔드포인트
      * @param reservationId 취소할 예약의 ID
