@@ -15,4 +15,7 @@ public interface WaitingDAO {
 
     // 새로 추가된 메소드: 현재 대기 중인 팀 수 카운트
     int countCurrentWaitings(@Param("storeId") Long storeId);
+    int countActiveWaitingsByMemberId(Long memberId);
+
+
 }

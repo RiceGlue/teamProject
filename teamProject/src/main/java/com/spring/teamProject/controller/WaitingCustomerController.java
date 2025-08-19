@@ -44,7 +44,7 @@ public class WaitingCustomerController {
     // GET 요청: 웨이팅 등록 폼을 보여줍니다.
     @GetMapping("/form")
     public String showForm(@RequestParam("storeId") Long storeId, Model model) {
-    	logger.info("GET /register 요청이 들어왔습니다.");
+    	logger.info("GET /form 요청이 들어왔습니다.");
     	model.addAttribute("storeId", storeId);
         return "waiting/customer/register";
     }
@@ -59,6 +59,13 @@ public class WaitingCustomerController {
                 UserDetailsVO userDetailsVO = (UserDetailsVO) authentication.getPrincipal();
                 // UserDetailsVO에 추가한 getMemberId() 메서드를 사용하여 바로 값을 가져옴
                 Long memberId = userDetailsVO.getMemberId();
+
+                // ⭐️ 추가된 로직: 중복 웨이팅 확인
+                boolean hasExistingWaiting = waitingService.checkExistingWaiting(memberId);
+                if (hasExistingWaiting) {
+                    redirectAttributes.addFlashAttribute("error", "이미 웨이팅 중인 내역이 있습니다.");
+                    return "redirect:/waiting/customer/form?storeId=" + waitingVO.getStoreId() + "&error=true";
+                }
 
                 waitingVO.setMemberId(memberId);
 
@@ -91,7 +98,8 @@ public class WaitingCustomerController {
         } catch (IllegalStateException e) { // <-- 이 부분 추가: 서비스에서 던지는 IllegalStateException 처리
             logger.error("웨이팅 등록 불가: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage()); // 서비스에서 보낸 메시지를 그대로 사용자에게 전달
-            return "redirect:/waiting/customer/register?error=true"; // 등록 폼으로 다시 보내면서 에러 메시지 표시
+            //return "redirect:/waiting/customer/form?error=true"; // 등록 폼으로 다시 보내면서 에러 메시지 표시
+            return "redirect:/waiting/customer/form?storeId=" + waitingVO.getStoreId() + "&error=true";
         }
         catch (Exception e) {
             logger.error("Error submitting waiting form: ", e);
