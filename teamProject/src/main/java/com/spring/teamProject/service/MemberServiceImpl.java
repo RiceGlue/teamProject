@@ -105,7 +105,12 @@ public class MemberServiceImpl implements MemberService {
         
         // 3. 폼에서 넘어온 다른 정보들을 currentUser 객체에 덮어씁니다.
         currentUser.setMemberName(updatedInfoVO.getMemberName());
-        currentUser.setEmail(updatedInfoVO.getEmail());
+        
+        // 기존 회원의 비밀번호가 있는 경우(일반 회원 또는 전환된 회원)에만 이메일 변경을 허용합니다.
+        if (StringUtils.hasText(currentUser.getLoginPw())) {
+            currentUser.setEmail(updatedInfoVO.getEmail());
+        }
+        
         currentUser.setCountryCode(updatedInfoVO.getCountryCode());
         currentUser.setPhone(updatedInfoVO.getPhone());
         
@@ -214,7 +219,7 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.updateLoginCredentials(memberVO) == 1;
     }
     
-    // ? --- [신규] 아이디와 비밀번호 확인 후 소셜 계정 연동 로직 구현 --- ?
+    // 아이디와 비밀번호 확인 후 소셜 계정 연동 로직 구현
     @Override
     @Transactional
     public MemberVO verifyIdAndPasswordAndLinkAccount(String email, String loginId, String rawPassword, String provider, String socialId) {
@@ -314,7 +319,6 @@ public class MemberServiceImpl implements MemberService {
         if ("82".equals(memberVO.getCountryCode()) && memberVO.getPhone() != null) {
             String phone = memberVO.getPhone().replaceAll("[^0-9]", "");
             
-            // ? --- 여기가 핵심 수정 부분입니다 --- ?
             // [수정] 맨 앞의 '0'을 제거하지 않고, 전체 길이를 기준으로 검사합니다.
             // 이렇게 하면 011, 016 등도 포함하는 10자리, 11자리 번호를 모두 허용하게 됩니다.
             if (phone.length() < 10 || phone.length() > 11) {
