@@ -122,7 +122,6 @@ public class MemberController {
             redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
             return "redirect:/member/login";
         } catch (IllegalArgumentException e) {
-            // ? --- 여기가 핵심 수정 부분입니다 --- ?
             // Service에서 보낸 '소셜 계정 이메일 중복' 메시지를 로그인 페이지로 전달합니다.
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/member/login"; // 회원가입 페이지가 아닌 로그인 페이지로 이동
@@ -184,6 +183,48 @@ public class MemberController {
                 return "redirect:/member/join_social";
             }
         }
+        return "redirect:/member/login";
+    }
+
+    // =================================================================
+    // == 아이디 / 비밀번호 찾기 (Find Account)
+    // =================================================================
+
+    @GetMapping("/find-account")
+    public String findAccountForm(Model model) {
+        model.addAttribute("body", "member/find_account.jsp");
+        return "layout/layout";
+    }
+
+    @PostMapping("/find-id")
+    @ResponseBody
+    public Map<String, Object> findId(@RequestParam("memberName") String memberName,
+                                      @RequestParam("phone") String phone) {
+        Map<String, Object> response = new HashMap<>();
+        String loginId = memberService.findLoginId(memberName, phone);
+        
+        if (loginId != null) {
+            response.put("success", true);
+            response.put("loginId", loginId);
+        } else {
+            response.put("success", false);
+        }
+        return response;
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam("loginId") String loginId,
+                                @RequestParam("email") String email,
+                                RedirectAttributes redirectAttributes) {
+        
+        boolean isSuccess = memberService.resetPassword(loginId, email);
+
+        if (isSuccess) {
+            redirectAttributes.addFlashAttribute("msg", "가입하신 이메일로 임시 비밀번호가 발송되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "일치하는 회원 정보를 찾을 수 없습니다.");
+        }
+        
         return "redirect:/member/login";
     }
 
@@ -358,7 +399,6 @@ public class MemberController {
         String socialId = (String) socialLinkInfo.get("socialId");
 
         try {
-            // 수정된 서비스 메소드 호출
             MemberVO linkedMember = memberService.verifyIdAndPasswordAndLinkAccount(email, loginId, password, provider, socialId);
 
             // 연동 성공 시, 수동으로 로그인 처리
@@ -367,7 +407,6 @@ public class MemberController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
             session.removeAttribute("socialLinkInfo");
-            // 세션에 성공 메시지를 담아 메인 페이지로 리다이렉트
             session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
 
             return "redirect:/";

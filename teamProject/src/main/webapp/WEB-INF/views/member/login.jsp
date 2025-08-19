@@ -80,6 +80,6 @@
     </div>
 
     <div class="text-center mt-4">
-        <a href="${contextPath}/member/join?role=USER">회원가입</a> | <a href="#">아이디/비밀번호 찾기</a>
+        <a href="${contextPath}/member/join?role=USER">회원가입</a> | <a href="${contextPath}/member/find-account">아이디/비밀번호 찾기</a>
     </div>
 </div>
