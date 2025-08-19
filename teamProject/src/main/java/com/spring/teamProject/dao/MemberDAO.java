@@ -1,6 +1,8 @@
 package com.spring.teamProject.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import com.spring.teamProject.vo.MemberVO;
 import java.util.List;
 
@@ -45,6 +47,15 @@ public interface MemberDAO {
 
     List<MemberVO> findUsers();
 
-    // ✨ --- [신규] 소셜 전용 회원의 아이디/비밀번호 설정을 위한 메소드 --- ✨
+    // 소셜 전용 회원의 아이디/비밀번호 설정을 위한 메소드
     int updateLoginCredentials(MemberVO memberVO);
+
+    // ✨ --- [신규] 아이디 찾기를 위한 메소드 --- ✨
+    MemberVO findByNameAndPhone(@Param("memberName") String memberName, @Param("phone") String phone);
+
+    // ✨ --- [신규] 비밀번호 재설정을 위한 사용자 확인 메소드 --- ✨
+    MemberVO findByLoginIdAndEmail(@Param("loginId") String loginId, @Param("email") String email);
+
+    // ✨ --- [신규] 비밀번호를 업데이트하는 메소드 --- ✨
+    int updatePassword(@Param("memberId") long memberId, @Param("encodedPassword") String encodedPassword);
 }

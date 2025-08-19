@@ -65,4 +65,11 @@ public interface MemberService {
      * @return 연동이 완료된 회원 정보
      */
     MemberVO verifyIdAndPasswordAndLinkAccount(String email, String loginId, String rawPassword, String provider, String socialId);
+	
+    // ✨ --- [신규] 아이디 찾기 로직 --- ✨
+    String findLoginId(String memberName, String phone);
+
+    // ✨ --- [신규] 비밀번호 재설정 로직 --- ✨
+    boolean resetPassword(String loginId, String email);
+
 }

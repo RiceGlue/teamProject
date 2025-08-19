@@ -20,6 +20,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,7 +95,7 @@ public class MemberController {
     }
 
     @GetMapping("/join")
-    public String joinForm(@RequestParam("role") String role, Model model) {
+    public String joinForm(@RequestParam("role") String role, Model model, @ModelAttribute("memberVO") MemberVO memberVO) {
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey);
         if ("OWNER".equals(role)) {
             model.addAttribute("body", "member/join_owner.jsp");
@@ -120,7 +121,12 @@ public class MemberController {
             memberService.join(memberVO);
             redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인해주세요.");
             return "redirect:/member/login";
+        } catch (IllegalArgumentException e) {
+            // Service에서 보낸 '소셜 계정 이메일 중복' 메시지를 로그인 페이지로 전달합니다.
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/login"; // 회원가입 페이지가 아닌 로그인 페이지로 이동
         } catch (DuplicateKeyException e) {
+            // DB의 UNIQUE 제약 조건에 걸린 경우 (일반 계정 이메일, 아이디, 전화번호 중복)
             redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
             redirectAttributes.addFlashAttribute("memberVO", memberVO);
             return "redirect:/member/join?role=" + memberVO.getRole();
@@ -181,6 +187,48 @@ public class MemberController {
     }
 
     // =================================================================
+    // == 아이디 / 비밀번호 찾기 (Find Account)
+    // =================================================================
+
+    @GetMapping("/find-account")
+    public String findAccountForm(Model model) {
+        model.addAttribute("body", "member/find_account.jsp");
+        return "layout/layout";
+    }
+
+    @PostMapping("/find-id")
+    @ResponseBody
+    public Map<String, Object> findId(@RequestParam("memberName") String memberName,
+                                      @RequestParam("phone") String phone) {
+        Map<String, Object> response = new HashMap<>();
+        String loginId = memberService.findLoginId(memberName, phone);
+        
+        if (loginId != null) {
+            response.put("success", true);
+            response.put("loginId", loginId);
+        } else {
+            response.put("success", false);
+        }
+        return response;
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam("loginId") String loginId,
+                                @RequestParam("email") String email,
+                                RedirectAttributes redirectAttributes) {
+        
+        boolean isSuccess = memberService.resetPassword(loginId, email);
+
+        if (isSuccess) {
+            redirectAttributes.addFlashAttribute("msg", "가입하신 이메일로 임시 비밀번호가 발송되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "일치하는 회원 정보를 찾을 수 없습니다.");
+        }
+        
+        return "redirect:/member/login";
+    }
+
+    // =================================================================
     // == 마이페이지 (MyPage) - USER, OWNER, ADMIN 공통 진입점
     // =================================================================
     
@@ -199,9 +247,6 @@ public class MemberController {
             return "redirect:/owner/dashboard";
         } else { // USER
             model.addAttribute("memberInfo", memberInfo);
-            // TODO: ReservationService에 실제 메서드를 구현해야 합니다.
-            // List<ReservationVO> myReservations = reservationService.getReservationsByMemberId(memberInfo.getMemberId());
-            // model.addAttribute("myReservations", myReservations);
             model.addAttribute("body", "member/mypage.jsp");
             return "layout/layout";
         }
@@ -231,21 +276,26 @@ public class MemberController {
 
         memberVO.setMemberId(currentMember.getMemberId());
 
-        boolean isSuccess = memberService.updateMember(memberVO);
+        try {
+            boolean isSuccess = memberService.updateMember(memberVO);
 
-        if (isSuccess) {
-            redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
+            if (isSuccess) {
+                redirectAttributes.addFlashAttribute("msg", "프로필이 성공적으로 수정되었습니다.");
 
-            // 세션 갱신 로직
-            MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
-            Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(newAuth);
+                // 세션 갱신 로직
+                MemberVO updatedMember = memberService.findById(currentMember.getMemberId());
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                UserDetailsVO newPrincipal = new UserDetailsVO(updatedMember);
+                Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, authentication.getCredentials(), newPrincipal.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-            return "redirect:/member/mypage";
-        } else {
-            redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않거나, 정보 수정에 실패했습니다.");
+                return "redirect:/member/mypage";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "현재 비밀번호가 일치하지 않거나, 정보 수정에 실패했습니다.");
+                return "redirect:/member/edit-profile";
+            }
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/member/edit-profile";
         }
     }
@@ -321,7 +371,7 @@ public class MemberController {
             return "redirect:/member/edit-profile";
         }
     }
-    // ? --- [신규] 계정 연동 확인 페이지를 보여주는 메소드 --- ?
+    
     @GetMapping("/link-account")
     public String linkAccountForm(Model model, HttpSession session) {
         Object socialLinkInfo = session.getAttribute("socialLinkInfo");
@@ -333,9 +383,8 @@ public class MemberController {
         return "layout/layout";
     }
 
-    // ? --- [신규] 아이디와 비밀번호 확인 후 계정을 연동하는 메소드 --- ?
     @PostMapping("/link-account/confirm")
-    public String linkAccountConfirm(@RequestParam("loginId") String loginId, // 아이디 파라미터 추가
+    public String linkAccountConfirm(@RequestParam("loginId") String loginId,
                                      @RequestParam("password") String password,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
@@ -350,7 +399,6 @@ public class MemberController {
         String socialId = (String) socialLinkInfo.get("socialId");
 
         try {
-            // 수정된 서비스 메소드 호출
             MemberVO linkedMember = memberService.verifyIdAndPasswordAndLinkAccount(email, loginId, password, provider, socialId);
 
             // 연동 성공 시, 수동으로 로그인 처리
@@ -359,7 +407,6 @@ public class MemberController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
             session.removeAttribute("socialLinkInfo");
-            // 세션에 성공 메시지를 담아 메인 페이지로 리다이렉트
             session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
 
             return "redirect:/";

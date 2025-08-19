@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 
@@ -52,9 +53,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void join(MemberVO memberVO) {
-        // DB에 저장하기 전, 전화번호 유효성을 먼저 검사합니다.
+        // 1. DB에 저장하기 전, 이메일이 이미 존재하는지 먼저 확인합니다.
+        MemberVO existingMember = memberDAO.findByEmail(memberVO.getEmail());
+        if (existingMember != null) {
+            // 2. 이메일이 존재할 경우, 해당 계정이 비밀번호가 없는 '소셜 전용 계정'인지 확인합니다.
+            if (!StringUtils.hasText(existingMember.getLoginPw())) {
+                // 3. 소셜 전용 계정이라면, 더 명확한 오류 메시지를 담은 예외를 발생시킵니다.
+                throw new IllegalArgumentException("이미 소셜 계정으로 가입된 이메일입니다. 해당 소셜 로그인을 이용해주세요.");
+            }
+        }
+        
         validatePhoneNumber(memberVO);
-
         saveProfileImage(memberVO);
         processPhoneNumber(memberVO);
         
@@ -79,10 +88,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional // ? --- 여기가 핵심 수정 부분입니다 --- ?
     public boolean updateMember(MemberVO updatedInfoVO) {
-        // DB에 저장하기 전, 전화번호 유효성을 먼저 검사합니다.
-        validatePhoneNumber(updatedInfoVO);
-
         // 1. DB에서 현재 사용자의 온전한 정보를 가져옵니다.
         MemberVO currentUser = memberDAO.findById(updatedInfoVO.getMemberId());
         if (currentUser == null) {
@@ -92,38 +99,47 @@ public class MemberServiceImpl implements MemberService {
         // 2. 비밀번호 변경 로직: 새 비밀번호가 입력되었을 때만 실행
         String newPassword = updatedInfoVO.getNewLoginPw();
         if (StringUtils.hasText(newPassword)) {
-            // 소셜 로그인 사용자는 비밀번호가 없으므로 이 로직을 건너뜁니다.
             if (currentUser.getLoginPw() != null && passwordEncoder.matches(updatedInfoVO.getCurrentLoginPw(), currentUser.getLoginPw())) {
                 String encodedNewPassword = passwordEncoder.encode(newPassword);
                 currentUser.setLoginPw(encodedNewPassword);
-            } else if (currentUser.getLoginPw() == null) {
-                // 소셜 로그인 사용자가 비밀번호를 설정하려는 경우 (현재는 setPasswordForSocialUser에서 처리)
             } else {
-                return false; // 현재 비밀번호 불일치
+                // 비밀번호가 있는데 현재 비밀번호가 틀렸거나, 소셜 전용 회원이 비밀번호를 설정하려는 경우
+                // 현재 로직에서는 비밀번호 불일치로 처리
+                return false;
             }
         }
         
         // 3. 폼에서 넘어온 다른 정보들을 currentUser 객체에 덮어씁니다.
-        currentUser.setMemberName(updatedInfoVO.getMemberName());
+        //    값이 넘어온 경우에만 덮어쓰도록 변경합니다.
+        if (StringUtils.hasText(updatedInfoVO.getMemberName())) {
+            currentUser.setMemberName(updatedInfoVO.getMemberName());
+        }
         
-        // 기존 회원의 비밀번호가 있는 경우(일반 회원 또는 전환된 회원)에만 이메일 변경을 허용합니다.
-        if (StringUtils.hasText(currentUser.getLoginPw())) {
+        // 소셜 전용 회원이 아닐 경우에만 이메일 변경 허용
+        if (StringUtils.hasText(currentUser.getLoginPw()) && StringUtils.hasText(updatedInfoVO.getEmail())) {
             currentUser.setEmail(updatedInfoVO.getEmail());
         }
         
-        currentUser.setCountryCode(updatedInfoVO.getCountryCode());
-        currentUser.setPhone(updatedInfoVO.getPhone());
+        if (StringUtils.hasText(updatedInfoVO.getCountryCode())) {
+            currentUser.setCountryCode(updatedInfoVO.getCountryCode());
+        }
         
-        // 3-1. 전화번호 포맷팅 (하이픈 제거 등)
-        processPhoneNumber(currentUser);
+        if (StringUtils.hasText(updatedInfoVO.getPhone())) {
+            validatePhoneNumber(updatedInfoVO); // 유효성 검사는 새로운 값에 대해 수행
+            currentUser.setPhone(updatedInfoVO.getPhone());
+            processPhoneNumber(currentUser); // 포맷팅은 currentUser 객체에 대해 수행
+        }
 
+        // 체크박스는 값이 넘어오지 않으면 false로 처리되므로, 항상 값을 업데이트합니다.
         currentUser.setAgreeEmail(updatedInfoVO.isAgreeEmail());
         currentUser.setAgreeSms(updatedInfoVO.isAgreeSms());
         currentUser.setAgreeKakao(updatedInfoVO.isAgreeKakao());
         
         // 4. 프로필 이미지가 새로 업로드되었으면 저장하고 URL을 설정합니다.
-        currentUser.setProfileImageFile(updatedInfoVO.getProfileImageFile());
-        saveProfileImage(currentUser);
+        if (updatedInfoVO.getProfileImageFile() != null && !updatedInfoVO.getProfileImageFile().isEmpty()) {
+            currentUser.setProfileImageFile(updatedInfoVO.getProfileImageFile());
+            saveProfileImage(currentUser);
+        }
         
         // 5. 최종적으로 모든 정보가 업데이트된 currentUser 객체를 DB에 전달합니다.
         return memberDAO.updateMember(currentUser) == 1;
@@ -196,6 +212,63 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<MemberVO> findUsers() {
         return memberDAO.findUsers();
+    }
+
+    // 아이디 찾기 로직 구현
+    @Override
+    public String findLoginId(String memberName, String phone) {
+        // 전화번호에서 '-' 등 불필요한 문자 제거
+        String cleanPhone = phone.replaceAll("[^0-9]", "");
+        
+        // DB에 저장된 형식에 맞게 앞자리 '0' 제거 (한국 번호일 경우)
+        if (cleanPhone.startsWith("0")) {
+            cleanPhone = cleanPhone.substring(1);
+        }
+
+        MemberVO member = memberDAO.findByNameAndPhone(memberName, cleanPhone);
+        
+        // 일치하는 회원이 있고, 아이디가 존재할 경우 아이디 반환
+        if (member != null && StringUtils.hasText(member.getLoginId())) {
+            return member.getLoginId();
+        }
+        return null;
+    }
+
+    // 비밀번호 재설정 로직 구현
+    @Override
+    @Transactional
+    public boolean resetPassword(String loginId, String email) {
+        MemberVO member = memberDAO.findByLoginIdAndEmail(loginId, email);
+
+        // 일치하는 회원이 있고, 일반 계정(비밀번호가 있는)일 경우에만 실행
+        if (member != null && StringUtils.hasText(member.getLoginPw())) {
+            // 1. 8자리 임시 비밀번호 생성
+            String tempPassword = generateTempPassword();
+
+            // 2. 생성된 임시 비밀번호를 이메일로 발송
+            // TODO: EmailService 기능 활성화 후, 아래 주석을 해제하고 실제 이메일 발송 로직을 구현해야 합니다.
+            // emailService.sendSimpleMessage(member.getEmail(), "[밥풀] 임시 비밀번호 안내", "회원님의 임시 비밀번호는 " + tempPassword + " 입니다.");
+            System.out.println("임시 비밀번호 발급 (테스트용): " + tempPassword); // (임시) 콘솔에 출력
+
+            // 3. 임시 비밀번호를 암호화하여 DB에 저장
+            String encodedPassword = passwordEncoder.encode(tempPassword);
+            memberDAO.updatePassword(member.getMemberId(), encodedPassword);
+            
+            return true;
+        }
+        return false;
+    }
+
+    // 8자리 영문+숫자 임시 비밀번호 생성 헬퍼 메소드
+    private String generateTempPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder();
+        Random rnd = new Random();
+        while (sb.length() < 8) {
+            int index = (int) (rnd.nextFloat() * chars.length());
+            sb.append(chars.charAt(index));
+        }
+        return sb.toString();
     }
 
     // 소셜 전용 회원의 아이디/비밀번호 설정 (일반 계정 전환) 로직 구현
@@ -313,7 +386,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     /**
-     * [수정] 전화번호 유효성을 검사하는 헬퍼 메소드
+     * 전화번호 유효성을 검사하는 헬퍼 메소드
      */
     private void validatePhoneNumber(MemberVO memberVO) {
         if ("82".equals(memberVO.getCountryCode()) && memberVO.getPhone() != null) {
