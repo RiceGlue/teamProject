@@ -120,21 +120,21 @@
         WHERE member_id = #{memberId}
     </update>
 
-    <!-- ✨ [신규] 이름과 전화번호로 회원 정보 조회 (아이디 찾기용) ✨ -->
+    <!-- [신규] 이름과 전화번호로 회원 정보 조회 (아이디 찾기용) -->
     <select id="findByNameAndPhone" resultMap="memberResultMap">
         SELECT * FROM members 
         WHERE member_name = #{memberName} AND phone = #{phone} AND status = 'ACTIVE'
         LIMIT 1
     </select>
 
-    <!-- ✨ [신규] 아이디와 이메일로 회원 정보 조회 (비밀번호 재설정용) ✨ -->
+    <!-- [신규] 아이디와 이메일로 회원 정보 조회 (비밀번호 재설정용) -->
     <select id="findByLoginIdAndEmail" resultMap="memberResultMap">
         SELECT * FROM members 
         WHERE login_id = #{loginId} AND email = #{email} AND status = 'ACTIVE'
         LIMIT 1
     </select>
 
-    <!-- ✨ [신규] 비밀번호 업데이트 ✨ -->
+    <!-- [신규] 비밀번호 업데이트 -->
     <update id="updatePassword">
         UPDATE members
         SET login_pw = #{encodedPassword}
