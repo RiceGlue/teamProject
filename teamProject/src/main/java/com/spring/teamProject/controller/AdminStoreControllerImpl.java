@@ -385,25 +385,30 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		String description = multiReq.getParameter("description");
 		String originalFileName = multiReq.getParameter("originalFileName");
 	
+		long imageId = adminStoreService.selectImageId(menuId);
+		
 		try {
 	
 			// 이미지 파일 처리
-			MultipartFile imageFile = multiReq.getFile("imageFile");
+			MultipartFile imageFile = multiReq.getFile("fileName");
 			String fileName = null;
 		
 			if (imageFile != null && !imageFile.isEmpty()) {
 		
 				// 저장할 디렉토리명, 필요에 따라 변경
 				String directoryName = "menu";
-				upload(multiReq, directoryName);
-			
+				modifyUpload(multiReq, directoryName);
+				
+				fileName = imageFile.getOriginalFilename();
+				System.out.println("수정된 파일 이름 : " +fileName);
+				
 				MenuVO menuVO = new MenuVO();
 				menuVO.setMenuId(menuId);
 				menuVO.setMenuName(menuName);
 				menuVO.setPrice(price);
 				menuVO.setDescription(description);
-			
-				fileName = imageFile.getOriginalFilename();
+				menuVO.setFileName(fileName);
+				
 			
 				// originalFileName이 비어있지 않을 경우에만 삭제 시도
 				if (originalFileName != null && !originalFileName.trim().isEmpty()) {
@@ -413,6 +418,7 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 				ImageFileVO imgFileVO = new ImageFileVO();
 				imgFileVO.setFileName(fileName);
 				imgFileVO.setFileType(false);
+				imgFileVO.setImageId(imageId);
 			
 				adminStoreService.modifyMenuWithImage(menuVO);
 				adminStoreService.modifyImage(imgFileVO);
@@ -437,6 +443,32 @@ public class AdminStoreControllerImpl extends BaseController implements AdminSto
 		}
 	
 		return mav;
+	}
+	
+	@Override
+	@RequestMapping(value="/deleteMenu", method=RequestMethod.POST)
+	public ModelAndView deleteMenu(@RequestParam("menuId") long menuId, @RequestParam("storeId") long storeId, @RequestParam("fileName") String fileName) throws Exception {
+
+	    ModelAndView mav = new ModelAndView();
+	    String directoryName = "menu";
+
+	    try {
+	        // fileName 파라미터를 직접 받아서 삭제 처리
+	        deleteFile(fileName, directoryName);
+
+	        adminStoreService.deleteMenu(menuId);
+
+	        // 삭제 후 처리 (예: 목록 페이지로 리다이렉트)
+	        mav.addObject("success", true);
+	        mav.setViewName("redirect:/franchise/modifyMenuForm?storeId=" + storeId);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        mav.addObject("error", true);
+	        mav.setViewName("redirect:/franchise/modifyMenuForm?storeId=" + storeId);
+	    }
+
+	    return mav;
 	}
 
 }

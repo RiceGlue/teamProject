@@ -4,7 +4,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-
+<!-- 구글 맵 API -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
@@ -122,8 +123,9 @@
 	        const address = '<c:out value="${store.address}"/>';
 
 	        if (!address) {
-	        	console.log('address : ',address);
-	            alert("주소 정보가 없습니다.");
+                console.log('address : ',address);
+                alert("주소 정보가 없습니다.");
+	        	console.error('주소 정보가 없습니다.');
 	            return;
 	        }
 
@@ -139,30 +141,25 @@
 	                    position: location
 	                });
 	            } else {
-	                alert("지도를 불러올 수 없습니다: " + status);
+                    alert("지도를 불러올 수 없습니다: " + status);
+	                console.error("지도를 불러올 수 없습니다: " + status);
 	            }
 	        });
 	    }
 
-		// 인원수 변경 함수
 		function changeGuestCount(change) {
 			let guestCountInput = $('#guestCount');
-			let guestCountHiddenInput = $('#guestCountInput');
-			let currentCount = parseInt(guestCountInput.val());
-			let newCount = currentCount + change;
+			let newCount = parseInt(guestCountInput.val()) + change;
 
 			if (newCount >= 1 && newCount <= 10) {
 				guestCountInput.val(newCount);
-				guestCountHiddenInput.val(newCount);
 			}
 		}
 
-		document.addEventListener('DOMContentLoaded', function () {
-			// JSP 변수인 contextPath를 JavaScript 변수로 저장
-            var contextPath = '${contextPath}';
-            var storeId = '${storeId}';
+		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
+		function openTab3() { document.querySelector('ul.tabs li a[href="#tab3"]').click(); }
 
-		    // 탭 클릭 시 지도 resize
+		$(function () {
 		    $("ul.tabs li a").click(function () {
 		        const activeTab = $(this).attr("href");
 		        $(".tab_content").hide();
@@ -170,13 +167,14 @@
 		        $("ul.tabs li").removeClass("active");
 		        $(this).parent().addClass("active");
 
+	            // 탭 클릭 시 지도 resize
 		        if (activeTab === "#tab4" && map) {
 		            google.maps.event.trigger(map, "resize");
 		        }
 		        return false;
 		    });
 
-		    // 복사 기능 (주소)
+            // 복사 기능 (주소)
 		    document.getElementById('copyaddress').addEventListener('click', function () {
 		        navigator.clipboard.writeText('${store.address}').then(function () {
 		            alert("주소가 복사되었습니다.");
@@ -185,7 +183,7 @@
 		        });
 		    });
 
-		    // 공유 버튼 (URL)
+            // 공유 버튼 (URL)
 		    document.getElementById('copyUrlBtn').addEventListener('click', function () {
 		        navigator.clipboard.writeText(window.location.href).then(function () {
 		            alert("주소가 복사되었습니다.");
@@ -194,191 +192,29 @@
 		        });
 		    });
 
-		    // 탭 초기 설정
+            // 탭 초기 설정
 		    $(".tab_content").hide();
 		    $("ul.tabs li:first").addClass("active").show();
 		    $(".tab_content:first").show();
 
-
 			// jQuery UI Datepicker 초기화
 			$("#reservationDate").datepicker({
 				dateFormat: 'yy-mm-dd',
-				minDate: 0, // 오늘 날짜부터 선택 가능
-				onSelect: function(dateText, inst) {
-					fetchAvailableSlots(dateText);
-				}
-			});
-
-			// 페이지 로드 시 오늘 날짜의 예약 현황을 불러옴
-			var today = new Date();
-			// -- 수정된 부분: 날짜 형식을 올바르게 수정합니다.
-			var todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
-
-			// 날짜 선택 필드에 오늘 날짜를 설정하고 이벤트를 트리거하여 예약 슬롯을 불러옴
-			$("#reservationDate").val(todayFormatted);
-			fetchAvailableSlots(todayFormatted);
-
-			function fetchAvailableSlots(date) {
-				if (!storeId) {
-					console.error("storeId가 유효하지 않습니다.");
-					return;
-				}
-
-				$.ajax({
-					url: contextPath + '/reservation/customer/available-slots',
-					type: 'GET',
-					data: { storeId: storeId, date: date },
-					success: function(data) {
-						updateTimeSlots(data);
-					},
-					error: function(xhr, status, error) {
-						console.error("Failed to fetch available slots: ", error);
-						// -- 기존 알림을 수정하여 더 구체적인 안내를 제공합니다.
-						if (xhr.status === 404) {
-							alert("예약 정보를 불러오는 API를 찾을 수 없습니다.");
-						} else {
-							alert("예약 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.");
-						}
-					}
-				});
-			}
-
-			function updateTimeSlots(data) {
-				var timeSlotsContainer = $('#time-slots-container');
-				var tableSelectionContainer = $('#table-selection-container');
-				timeSlotsContainer.empty();
-				tableSelectionContainer.empty();
-
-				// 모든 선택 상태 초기화
-				$('#selectedReservationTime').val('');
-				$('#selectedTableId').val('');
-				$('#bookFormBtn').prop('disabled', true);
-
-				if (data && Object.keys(data).length > 0) {
-					$('#reservation-times-area').show();
-
-					const now = new Date();
-					const reservationDate = $('#reservationDate').val();
-					const isToday = reservationDate === now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
-					const currentTimestamp = now.getTime();
-
-					$.each(data, function(time, tables) {
-						const availableTablesCount = tables.length;
-						let isUnavailable = false;
-
-						if (availableTablesCount === 0) {
-							isUnavailable = true;
-						} else if (isToday) {
-							const slotDateTime = new Date(reservationDate + 'T' + time + ':00');
-							// -- 현재 시간의 분을 고려하여 마감 처리
-							if (slotDateTime.getTime() < currentTimestamp) {
-								isUnavailable = true;
-							}
-						}
-
-						var timeButton = $('<button>')
-							.attr('type', 'button')
-							.attr('data-time', time);
-
-						if (isUnavailable) {
-							timeButton.addClass('btn time-slot-btn unavailable');
-							timeButton.prop('disabled', true);
-							timeButton.text(time + ' (마감)');
-						} else {
-							timeButton.addClass('btn btn-outline-secondary time-slot-btn');
-							timeButton.text(time + ' (' + availableTablesCount + '석)');
-						}
-						timeSlotsContainer.append(timeButton);
-
-						var tableArea = $('<div>')
-							.addClass('table-select-area')
-							.attr('id', 'table-area-' + time.replace(':', ''));
-
-						if (tables && tables.length > 0) {
-							$.each(tables, function(index, table) {
-								var tableButton = $('<button>')
-									.addClass('btn btn-outline-success table-slot-btn')
-									.attr('type', 'button')
-									.attr('data-table-id', table.tableId)
-									.attr('data-time', time)
-									.text(table.tableName + ' (' + table.capacity + '인석)');
-								tableArea.append(tableButton);
-							});
-						} else {
-							tableArea.html('<p class="text-muted">예약 가능한 테이블이 없습니다.</p>');
-						}
-						tableSelectionContainer.append(tableArea);
-					});
-
-				} else {
-					$('#reservation-times-area').hide();
-					alert("선택하신 날짜에는 예약 가능한 시간이 없습니다.");
-				}
-			}
-
-			// 시간 슬롯 버튼 클릭 이벤트
-			$('#time-slots-container').on('click', '.time-slot-btn:not(.unavailable)', function() {
-				$('.time-slot-btn').removeClass('selected');
-				$(this).addClass('selected');
-
-				// 테이블 선택 영역 보이기
-				$('#table-selection-area').show();
-				$('.table-select-area').hide();
-				var selectedTime = $(this).data('time').replace(':', '');
-				$('#table-area-' + selectedTime).show();
-
-				// 시간 선택 시 테이블 선택 및 폼 필드 초기화
-				$('.table-slot-btn').removeClass('selected');
-				$('#selectedReservationTime').val('');
-				$('#selectedTableId').val('');
-				$('#bookFormBtn').prop('disabled', true);
-			});
-
-			// 테이블 슬롯 버튼 클릭 이벤트
-			$('#table-selection-container').on('click', '.table-slot-btn', function() {
-				var selectedTime = $('.time-slot-btn.selected').data('time');
-				if (!selectedTime) {
-					alert('먼저 시간을 선택해주세요.');
-					return;
-				}
-
-				$('.table-slot-btn').not(this).removeClass('selected');
-				$(this).toggleClass('selected');
-
-				var tableId = $(this).hasClass('selected') ? $(this).data('table-id') : '';
-
-				$('#selectedTableId').val(tableId);
-
-				var date = $('#reservationDate').val();
-				var reservationDateTime = date + 'T' + selectedTime;
-				$('#selectedReservationTime').val(reservationDateTime);
-
-				// 시간과 테이블이 모두 선택되면 버튼 활성화
-				if ($('#selectedReservationTime').val() && $('#selectedTableId').val()) {
+				minDate: 0,
+				onSelect: function() {
 					$('#bookFormBtn').prop('disabled', false);
-				} else {
-					$('#bookFormBtn').prop('disabled', true);
 				}
 			});
 
-			// 폼 제출 시 유효성 검사
-			$('#reservationForm').on('submit', function(e) {
-				if (!$('#selectedReservationTime').val() || !$('#selectedTableId').val()) {
-					e.preventDefault();
-					alert('예약 날짜, 시간, 테이블을 모두 선택해주세요.');
-				}
-			});
+			// 페이지 로드 시 오늘 날짜를 기본값으로 설정하고 버튼 활성화
+			const today = new Date();
+			const todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+			$("#reservationDate").val(todayFormatted);
+			$('#bookFormBtn').prop('disabled', false);
 		});
-
-		function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
-		function openTab3() { document.querySelector('ul.tabs li a[href="#tab3"]').click(); }
 	</script>
 
-<!-- 구글 맵 API -->
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
-
 </head>
-
 <body>
 
 	<div class="store-info">
@@ -414,14 +250,6 @@
 		</div>
 		<div>
 			<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간">
-<%-- 			<c:choose> --%>
-<%-- 				<c:when test="${res.isActive }"> --%>
-<!-- 					<strong>영업중</strong> -->
-<%-- 				</c:when> --%>
-<%-- 				<c:otherwise> --%>
-<!-- 					<strong>영업종료</strong> -->
-<%-- 				</c:otherwise> --%>
-<%-- 			</c:choose> --%>
 			<strong>영업중</strong>${store.operatingTime} </p>
 		</div>
 
@@ -429,10 +257,6 @@
 			<h4>현재 대기</h4>
 			<h6><strong>${currentWaitingCount}</strong>팀</h6>
 			<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
-			<%-- <form id="waitingForm" action="${contextPath}/waiting/customer/form" method="post">
-		        <input type="hidden" name="storeId" value="${storeId}" />
-		        <button type="submit" style="width:80%" class="btn btn-danger">웨이팅하기</button>
-		    </form> --%>
 		</div>
 		<div class="tab_container">
 			<div class="tab_container" id="container">
@@ -448,34 +272,18 @@
 							<hr>
 							<form action="${contextPath}/reservation/customer/bookForm" method="get" id="reservationForm">
 								<input type="hidden" name="storeId" value="${storeId}" />
-								<input type="hidden" name="reservationTime" id="selectedReservationTime" />
-								<input type="hidden" name="tableId" id="selectedTableId" />
-								<input type="hidden" name="guestCount" id="guestCountInput" value="1" />
-
 								<div class="mb-3">
 									<label for="reservationDate" class="form-label">예약 날짜:</label>
-									<input type="text" class="form-control" id="reservationDate" placeholder="날짜를 선택하세요" required>
+									<input type="text" class="form-control" id="reservationDate" name="reservationDate" placeholder="날짜를 선택하세요" required>
 								</div>
-
-								<div id="reservation-times-area" class="mb-3" style="display: none;">
-									<label class="form-label">예약 시간대:</label>
-									<div id="time-slots-container" class="d-flex flex-wrap"></div>
-								</div>
-
-								<div id="table-selection-area" class="mb-3" style="display: none;">
-									<label class="form-label">테이블 선택:</label>
-									<div id="table-selection-container" class="d-flex flex-wrap"></div>
-								</div>
-
 								<div class="mb-3 mt-4">
 									<label class="form-label">예약 인원:</label>
 									<div>
 										<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(-1)">-</button>
-										<input type="text" id="guestCount" value="1" readonly style="width: 50px; text-align: center;">
+										<input type="text" id="guestCount" name="guestCount" value="1" readonly style="width: 50px; text-align: center;">
 										<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(1)">+</button>
 									</div>
 								</div>
-
 								<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
 							</form>
 						<div class="button-group mt-5">
@@ -530,9 +338,7 @@
 								<c:forEach var="detailReview" items="${storeMap.detailReview}">
 									<div class="rating_bar_container">
 										<span class="rating_label">${detailReview.rating}점 ${detailReview.countScoreRating}</span>
-										<div class="rating_bar_bg">
-											<div class="rating_bar_fill" style="width:20px;"></div>
-										</div>
+										<div class="rating_bar_fill" style="width:20px;"></div>
 									</div>
 								</c:forEach>
 							</div>

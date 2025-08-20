@@ -50,15 +50,14 @@
              background-color: #f8f9fa;
              border-radius: 5px;
         }
-        /* ⭐⭐⭐ 시간 슬롯을 2열 그리드로 표시하도록 수정 ⭐⭐⭐ */
         #time-slots-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
         .time-slot-btn {
-            width: auto; /* 그리드에 맞춰 너비 자동 조절 */
-            margin: 0; /* 그리드 갭으로 여백 처리 */
+            width: auto;
+            margin: 0;
         }
     </style>
 </head>
@@ -95,7 +94,6 @@
             <label class="form-label">예약 시간대 및 테이블:</label>
             <div class="side-by-side-container">
                 <div class="time-slot-column">
-                    <!-- ⭐⭐⭐ flex-column 클래스 제거, CSS 그리드로 레이아웃 처리 ⭐⭐⭐ -->
                     <div id="time-slots-container"></div>
                 </div>
                 <div class="table-select-column">
@@ -177,6 +175,7 @@
                 }
             });
         }
+
         function updateTimeSlots(data) {
             var timeSlotsContainer = $('#time-slots-container');
             timeSlotsContainer.empty();
@@ -185,6 +184,9 @@
 
             const guestCount = parseInt($('#guestCount').val(), 10) || 1;
 
+            // ⭐⭐⭐ 디버깅용 로그 추가 ⭐⭐⭐
+            console.log("서버로부터 받은 전체 데이터:", data);
+
             if (data && Object.keys(data).length > 0) {
                 const now = new Date();
                 const reservationDate = $('#reservationDate').val();
@@ -192,10 +194,14 @@
                 const currentTimestamp = now.getTime();
 
                 $.each(data, function(time, tables) {
+                    // ⭐⭐⭐ 각 시간대별 데이터 로그 추가 ⭐⭐⭐
+                    console.log("시간:", time, "테이블 데이터:", tables);
+
                     const totalAvailableCapacity = tables.reduce((sum, table) => sum + table.capacity, 0);
 
                     let isUnavailable = false;
                     let unavailableReason = '';
+
                     if (isToday) {
                         const slotDateTime = new Date(reservationDate + 'T' + time + ':00');
                         if (slotDateTime.getTime() < currentTimestamp) {
@@ -204,14 +210,21 @@
                         }
                     }
 
-                    if (!isUnavailable && totalAvailableCapacity < guestCount) {
-                        isUnavailable = true;
-                        unavailableReason = '예약 불가';
+                    if (!isUnavailable) {
+                        // 예약 가능한 테이블 리스트가 비어있는 경우
+                        if (tables.length === 0) {
+                            isUnavailable = true;
+                            unavailableReason = '예약 매진';
+                        } else if (totalAvailableCapacity < guestCount) {
+                            isUnavailable = true;
+                            unavailableReason = '예약 불가';
+                        }
                     }
 
                     var timeButton = $('<button>')
                         .attr('type', 'button')
                         .attr('data-time', time);
+
                     if (isUnavailable) {
                         timeButton.removeClass('btn-outline-secondary').addClass('btn time-slot-btn unavailable');
                         timeButton.prop('disabled', true);
@@ -223,6 +236,7 @@
                     timeSlotsContainer.append(timeButton);
                 });
             } else {
+                // 예약 가능한 시간대가 아예 없을 때
                 alert("선택하신 날짜에는 예약 가능한 시간이 없습니다.");
             }
         }
@@ -398,7 +412,6 @@
             });
         }
 
-        // ⭐⭐⭐ 추가된 부분: 결제 취소 시 임시 예약을 삭제하는 로직 ⭐⭐⭐
         function deleteTempReservation(transactionId) {
             if (!transactionId) {
                 console.warn("transactionId가 없어 임시 예약을 삭제할 수 없습니다.");
@@ -406,7 +419,7 @@
             }
 
             $.ajax({
-                url: `${contextPath}/reservation/customer/cancel-temp`, // 서버의 임시 예약 삭제 엔드포인트
+                url: `${contextPath}/reservation/customer/cancel-temp`,
                 type: 'POST',
                 data: { transactionId: transactionId },
                 success: function(response) {
@@ -421,7 +434,6 @@
                 }
             });
         }
-
 
         async function requestPay(transactionId, totalAmount) {
             const storeName = $('#storeNameHidden').val();
@@ -488,10 +500,9 @@
                 }
 
             } catch (error) {
-                // ⭐⭐⭐ 이 부분이 새롭게 추가되었습니다. ⭐⭐⭐
                 console.error("PortOne 결제 요청 중 오류 발생 또는 취소:", error);
                 alert(`결제가 취소되었거나 실패했습니다. ${error.message || ''}`);
-                deleteTempReservation(transactionId); // 결제 취소 시 임시 예약 삭제 요청
+                deleteTempReservation(transactionId);
             }
         }
     });

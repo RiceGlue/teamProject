@@ -47,4 +47,6 @@ public interface PaymentService {
      * @param paymentId 삭제할 결제 ID
      */
     void deletePayment(Long paymentId);
+    public PaymentVO getPaymentById(String paymentId);
+    public void updatePaymentStatus(String paymentId, String status);
 }

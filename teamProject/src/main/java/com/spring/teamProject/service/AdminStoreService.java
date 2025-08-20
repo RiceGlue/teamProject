@@ -19,8 +19,10 @@ public interface AdminStoreService {
 	public void modifyStoreInfo(Map storeInfo) throws Exception;
 	public void modifyImage(ImageFileVO imgFileVO) throws Exception;
 	public ImageFileVO selectImage(long imageId) throws Exception;
+	public long selectImageId (long menuId) throws Exception;
 	public void modifyFileType(ImageFileVO imgFileVO) throws Exception;
 	public void modifyStoreInfoWithImage(Map storeInfo) throws Exception;
 	public void modifyMenu(MenuVO menuVO) throws Exception;
 	public void modifyMenuWithImage(MenuVO menuVO) throws Exception;
+	public void deleteMenu(long menuId) throws Exception;
 }

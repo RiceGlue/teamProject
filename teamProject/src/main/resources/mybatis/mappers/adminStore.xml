@@ -264,6 +264,12 @@
 		]]>
 	</select>
 	
+	<select id="selectImageId" parameterType="long" resultType="long">
+		<![CDATA[
+			select image_id from image_file where menu_id=#{menuId}
+		]]>
+	</select>
+	
 	<update id="updateStoreInfoWithImage" parameterType="java.util.Map" >
 		<![CDATA[
 			UPDATE stores
@@ -313,5 +319,17 @@
 		 	WHERE menu_id = #{menuId}
 		]]>
 	</update>
+	
+	<delete id="deleteMenuOnMenu" parameterType="long" >
+		<![CDATA[
+			delete from menu where menu_id = #{menuId}
+		]]>
+	</delete>
+	
+	<delete id="deleteMenuOnImageFile" parameterType="long" >
+		<![CDATA[
+			delete from image_file where menu_id = #{menuId}
+		]]>
+	</delete>
 
 </mapper>

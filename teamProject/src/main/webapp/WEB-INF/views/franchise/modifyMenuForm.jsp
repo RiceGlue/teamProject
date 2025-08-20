@@ -108,6 +108,39 @@
 
 		  return true; // 모두 통과하면 제출 허용
 	}
+	
+	function confirmDelete(menuId, storeId, fileName) {
+	    if (confirm('정말 이 메뉴를 삭제하시겠습니까?')) {
+	        const form = document.createElement('form');
+	        form.method = 'post';
+	        form.action = '${contextPath}/franchise/deleteMenu';  // 삭제 요청 URL
+
+	        // menuId hidden input
+	        const menuIdInput = document.createElement('input');
+	        menuIdInput.type = 'hidden';
+	        menuIdInput.name = 'menuId';
+	        menuIdInput.value = menuId;
+	        form.appendChild(menuIdInput);
+	        
+	     	// storeId hidden input
+	        const storeIdInput = document.createElement('input');
+	        storeIdInput.type = 'hidden';
+	        storeIdInput.name = 'storeId';
+	        storeIdInput.value = storeId;
+	        form.appendChild(storeIdInput);
+
+	        // fileName hidden input
+	        const fileNameInput = document.createElement('input');
+	        fileNameInput.type = 'hidden';
+	        fileNameInput.name = 'fileName';
+	        fileNameInput.value = fileName;
+	        form.appendChild(fileNameInput);
+
+	        document.body.appendChild(form);
+	        form.submit();
+	    }
+	}
+
 
 </script>
 
@@ -153,14 +186,16 @@
 			<div class="form-row" style="display: flex; margin-bottom: 15px; align-items: flex-start;">
 				<div class="form-label" style="width: 200px;">이미지 변경</div>
 				<div class="form-input" style="flex: 1;">
-					<input type="file" name="imageFile" accept="image/*" onchange="validateImages(this, ${status.index})" />
+					<input type="file" name="fileName" accept="image/*" onchange="validateImages(this, ${status.index})" />
 					<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
 				</div>
 			</div>
 			
-			<div class="form-row" style="text-align: right;">
-				<input type="submit" value="정보 수정">
+			<div class="form-row" style="display: flex; justify-content: space-between; align-items: center;">
+				<input type="button" onclick="confirmDelete(${menu.menuId}, ${menu.storeId}, '${menu.fileName}')" value="메뉴 삭제">
+				<input type="button" onclick="this.form.submit()" value="메뉴 수정">
 			</div>
+
 		</div>
 	</form>
 </c:forEach>

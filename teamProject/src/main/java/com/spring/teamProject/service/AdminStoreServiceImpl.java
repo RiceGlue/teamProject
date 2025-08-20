@@ -82,6 +82,11 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	}
 	
 	@Override
+	public long selectImageId (long menuId) throws Exception {
+		long imageId = adminStoreDAO.selectImageId(menuId);
+		return imageId;
+	}
+	@Override
 	public void modifyStoreInfoWithImage(Map storeInfo) throws Exception {
 		adminStoreDAO.updateStoreInfoWithImage(storeInfo);
 	}
@@ -94,5 +99,11 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	@Override
 	public void modifyMenuWithImage(MenuVO menuVO) throws Exception {
 		adminStoreDAO.updateMenuWithImage(menuVO);
+	}
+	
+	@Override
+	public void deleteMenu(long menuId) throws Exception {
+		adminStoreDAO.deleteMenuOnImageFile(menuId);
+		adminStoreDAO.deleteMenuOnMenu(menuId);
 	}
 }

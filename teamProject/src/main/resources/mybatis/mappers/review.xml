@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.spring.teamProject.dao.ReviewDAO">
+	<resultMap id="reservationInfo" type="com.spring.teamProject.vo.ReservationVO">
+	    <result property="reservationId" column="reservation_id" />
+	    <result property="memberId" column="member_id"/>
+	    <result property="storeId" column="store_id"/>
+	    <result property="reservationTime" column="reservation_time"/>
+	    <result property="guestCount" column="guest_count"/>
+	    <result property="status" column="status"/>
+	    <result property="createdAt" column="created_at"/>
+	    <result property="cancelledReason" column="cancelled_reason"/>
+	</resultMap>
+	
+	<resultMap id="waitingInfo" type="com.spring.teamProject.vo.WaitingVO">
+	    <result property="waitingId" column="waiting_id" />
+	    <result property="memberId" column="member_id"/>
+	    <result property="storeId" column="store_id"/>
+	    <result property="guestCount" column="guest_count"/>
+	    <result property="status" column="status"/>
+	    <result property="createdAt" column="created_at"/>
+	    <result property="updatedAt" column="updated_at" />
+	</resultMap>
+	
+	<resultMap id="reviewlist" type="com.spring.teamProject.vo.ReviewVO">
+		<result property="reviewId" column="review_id" />
+		<result property="memberId" column="member_id" />
+		<result property="writerId" column="writerId" />
+		<result property="storeId" column="store_id" />
+		<result property="reservationId" column="reservation_id" />
+		<result property="waitingId" column="waiting_id" />
+		<result property="rating" column="rating" />
+		<result property="content" column="content" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="avgRating" column="avgRating" />
+		<result property="countRating" column="countRating" />
+		<result property="countScoreRating" column="countScoreRating" />
+	</resultMap>
+	
+	<resultMap id="storeInfo" type="com.spring.teamProject.vo.StoreVO">
+		<result property="storeId" column="store_id"/>
+		<result property="ownerId" column="owner_id"/>
+		<result property="storeName" column="store_Name"/>
+		<result property="storeType" column="store_type" />
+		<result property="zipcode" column="zipcode" />
+		<result property="address" column="address"/>
+		<result property="detailAddress" column="detail_address"/>
+		<result property="extraAddress" column="extra_address"/>
+		<result property="operationType" column="operation_type" />
+		<result property="localNumber" column="local_number" />
+		<result property="number1" column="number1" />
+		<result property="number2" column="number2" />
+		<result property="description" column="description" />
+		<result property="closed" column="closed" />
+		<result property="operatingTime" column="operating_time" />
+		<result property="breakTime" column="break_time" />
+		<result property="lastOrder" column="last_order" />
+		<result property="amenities" column="amenities" />
+		<result property="fileName" column="file_name" />
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
+		<result property="avgRating" column="avgRating"/>
+		<result property="countRating" column="countRating"/>
+	</resultMap>
+	
+	<select id="selectReservationById" parameterType="long" resultMap="reservationInfo">
+	    <![CDATA[
+	        select * from reservations where reservation_id=#{reservationId}
+	    ]]>
+	</select>
+	
+	<select id="selectWaitingById" parameterType="long" resultMap="waitingInfo">
+	    <![CDATA[
+	        select * from waitings where waiting_id=#{waitingId}
+	    ]]>
+	</select>
+	
+	<select id="selectStore" parameterType="long" resultMap="storeInfo">
+		<![CDATA[
+			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.store_id=#{storeId}
+			GROUP BY s.store_id
+			ORDER BY s.store_id
+		]]>
+	</select>
+
+</mapper>
