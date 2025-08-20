@@ -56,7 +56,20 @@ public class ReviewControllerImpl extends BaseController implements ReviewContro
 
 	@RequestMapping(value="/modifyReviewForm")
 	public ModelAndView modifyReviewForm(@ModelAttribute ReviewVO reviewVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		ModelAndView mav = new ModelAndView();
+		String viewName = (String) req.getAttribute("viewName");
+	    ModelAndView mav = ViewUtil.layout(viewName);
+	    
+		long reviewId = reviewVO.getReviewId();
+		ReviewVO review = reviewService.getRivew(reviewId);
+		List<ImageFileVO> imglist = reviewService.getImageFile(reviewId);
+		
+		long storeId = review.getStoreId();
+	    StoreVO store = reviewService.selectStoreInfo(storeId);
+		
+		mav.addObject("storeInfo", store);
+		mav.addObject("review", review);
+		mav.addObject("imglist", imglist);
+		return mav;
 	}
 	
 	@Override
