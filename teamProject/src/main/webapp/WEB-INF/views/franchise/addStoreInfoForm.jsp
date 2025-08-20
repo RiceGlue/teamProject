@@ -248,7 +248,7 @@
 			return false;
 		}
 		
-		//정기휴무 유효썽
+		//정기휴무 유효성
 		const closedOptions=[...document.querySelectorAll('input[name="closedOption"]:checked')].map(el=>el.value);
 		const closed=closedOptions.join(', ');
 		console.log('정기 휴무:',closed);

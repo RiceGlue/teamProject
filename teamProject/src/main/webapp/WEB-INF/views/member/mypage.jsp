@@ -85,7 +85,7 @@
                         <p class="card-text">대기번호: <span class="fw-bold text-danger">12번</span></p>
                         <p class="card-text"><small class="text-muted">내 앞 대기: 6팀</small></p>
                         <a href="#" class="btn btn-sm btn-primary">상세보기</a>
-                        <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=11&waitingId=1" class="btn btn-sm btn-primary">리뷰쓰기</a>
+                        <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=1&waitingId=14" class="btn btn-sm btn-primary">리뷰쓰기</a>
                     </div>
                 </div>
             </c:forEach>
@@ -127,6 +127,7 @@
                         <p class="card-text">예약 시간: <strong>17:00</strong></p>
                         <p class="card-text">예약 인원: <strong>2명</strong></p>
                         <a href="#" class="btn btn-sm btn-primary">상세보기</a>
+                        <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=1&reservationId=22" class="btn btn-sm btn-primary">리뷰쓰기</a>
                     </div>
                 </div>
             </c:forEach>

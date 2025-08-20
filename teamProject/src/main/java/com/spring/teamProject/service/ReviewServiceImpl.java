@@ -1,12 +1,16 @@
 package com.spring.teamProject.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.spring.teamProject.dao.ReviewDAO;
+import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.WaitingVO;
 
@@ -33,5 +37,23 @@ public class ReviewServiceImpl implements ReviewService {
 	public StoreVO selectStoreInfo (long storeId) throws Exception {
 		StoreVO storeInfo = reviewDAO.selectStore(storeId);
 		return storeInfo;
+	}
+	
+	@Override
+	public long addReservationReview(ReviewVO review) throws Exception{
+		long reviewId = reviewDAO.insertReservationReview(review);
+		return reviewId;
+	}
+	
+	@Override
+	public long addWatingReview(ReviewVO review) throws Exception{
+		long reviewId = reviewDAO.insertWatingReview(review);
+		return reviewId;
+	}
+	
+	@Override
+	public void addReviewImageFiles(List<ImageFileVO> imgList) throws Exception{
+		reviewDAO.insertReviewImageFiles(imgList);
+
 	}
 }

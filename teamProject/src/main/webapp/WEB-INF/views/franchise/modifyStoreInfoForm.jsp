@@ -4,10 +4,10 @@
 <c:set var="store" value="${storeMap.storeInfo }" />
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("수정 완료!");</script>
+    <script>alert("수정 완료");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("수정 실패!");</script>
+    <script>alert("수정 실패");</script>
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>

@@ -1,13 +1,20 @@
 package com.spring.teamProject.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
+import com.spring.teamProject.common.BaseController;
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.ReviewServiceImpl;
+import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
@@ -18,7 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller("reviewController")
 @RequestMapping(value="/review")
-public class ReviewControllerImpl {
+public class ReviewControllerImpl extends BaseController implements ReviewController{
 	
 	@Autowired
 	private ReviewServiceImpl reviewService;
@@ -31,27 +38,101 @@ public class ReviewControllerImpl {
 
 	    Long reservationId = reviewVO.getReservationId();
 	    Long waitingId = reviewVO.getWaitingId();
+	    Long memberId = reviewVO.getMemberId();
 	    
 	    System.out.println("가게 아이디 : "+reviewVO.getStoreId());
 
-	    ReservationVO reservation = new ReservationVO();
-	    WaitingVO waiting = new WaitingVO();
 	    StoreVO storeInfo = reviewService.selectStoreInfo(reviewVO.getStoreId());
 
-	    if(reservationId!=null) {
-	    	reservation = reviewService.getReservationById(reservationId);
-			mav.addObject("reservation", reservation);
-	    } else if(waitingId!=null) {
-	    	waiting = reviewService.getWaitingById(waitingId);
-	    	mav.addObject("waiting", waiting);
+	    if(reservationId != null && reservationId != 0) {
+			mav.addObject("reservationId", reservationId);
+	    } else if(waitingId != null && waitingId != 0) {
+	    	mav.addObject("waitingId", waitingId);
 	    }
 
+	    mav.addObject("memberId", memberId);
 	    mav.addObject("review", reviewVO);
 	    mav.addObject("storeInfo", storeInfo);
 
 	    return mav;
 	}
 
-
+	@Override
+	@RequestMapping(value="/addReview" , method=RequestMethod.POST)
+	public ModelAndView addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
+		ModelAndView mav = new ModelAndView();
+	
+		Long regId = review.getMemberId();
+		Long storeId= review.getStoreId();
+	
+		Long reservationId = review.getReservationId();
+		Long waitingId = review.getWaitingId();
+	
+		if (reservationId != null && reservationId != 0) {
+	
+			try {
+			// 리뷰를 먼저 DB에 저장하고, 생성된 reviewId를 가져옵니다.
+			// 이 로직이 먼저 실행되어야 imageFile에 reviewId를 설정할 수 있습니다.
+				long reviewId = reviewService.addReservationReview(review);
+			
+				// 이미지를 업로드하고 ImageFileVO 리스트를 받아옵니다.
+				List<ImageFileVO> imgList = upload(multiReq, "review");
+			
+				// 각 이미지 객체에 필요한 정보를 설정합니다.
+				for (int i = 0; i < imgList.size(); i++) {
+					ImageFileVO imageFile = imgList.get(i);
+					imageFile.setRegId(regId);
+					imageFile.setStoreId(storeId);
+					imageFile.setReviewId(reviewId);
+					imageFile.setDisplayNo(i); // displayNo를 0부터 순차적으로 설정
+				}
+			
+				// 이미지 정보를 DB에 저장합니다.
+				reviewService.addReviewImageFiles(imgList);
+			
+				// 리뷰 작성 완료 후 마이페이지로 리다이렉트합니다.
+				mav.setView(new RedirectView("/member/myPage", true));
+		
+			} catch (Exception e) {
+			// 오류 처리
+				e.printStackTrace();
+				mav.addObject("error", true);
+				mav.setViewName("redirect:/review/reviewForm?memberId=" + regId + "&storeId=" + storeId + "&reservationId=" + reservationId);
+			}
+		
+		} else if (waitingId != null && waitingId != 0) {
+			try {
+				// 리뷰를 먼저 DB에 저장하고, 생성된 reviewId를 가져옵니다.
+				// 이 로직이 먼저 실행되어야 imageFile에 reviewId를 설정할 수 있습니다.
+				long reviewId = reviewService.addWatingReview(review);
+			
+				// 이미지를 업로드하고 ImageFileVO 리스트를 받아옵니다.
+				List<ImageFileVO> imgList = upload(multiReq, "review");
+			
+				// 각 이미지 객체에 필요한 정보를 설정합니다.
+				for (int i = 0; i < imgList.size(); i++) {
+					ImageFileVO imageFile = imgList.get(i);
+					imageFile.setRegId(regId);
+					imageFile.setStoreId(storeId);
+					imageFile.setReviewId(reviewId);
+					imageFile.setDisplayNo(i); // displayNo를 0부터 순차적으로 설정
+				}
+			
+				// 이미지 정보를 DB에 저장합니다.
+				reviewService.addReviewImageFiles(imgList);
+			
+				// 리뷰 작성 완료 후 마이페이지로 리다이렉트합니다.
+				mav.setView(new RedirectView("/member/myPage", true));
+	
+			} catch (Exception e) {
+				// 오류 처리
+				e.printStackTrace();
+				mav.addObject("error", true);
+				mav.setViewName("redirect:/review/reviewForm?memberId=" + regId + "&storeId=" + storeId + "&waitingId=" + waitingId);
+			}
+		}
+	
+		return mav;
+	}
 
 }

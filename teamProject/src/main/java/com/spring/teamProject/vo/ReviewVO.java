@@ -20,6 +20,11 @@ public class ReviewVO {
 	private int countRating;
 	private int countScoreRating;
 	
+	private int taste;
+	private int mood;
+	private int service;
+	private int clean;
+	
 	public long getReviewId() {
 		return reviewId;
 	}
@@ -97,6 +102,30 @@ public class ReviewVO {
 	}
 	public void setCountScoreRating(int countScoreRating) {
 		this.countScoreRating = countScoreRating;
+	}
+	public int getTaste() {
+		return taste;
+	}
+	public void setTaste(int taste) {
+		this.taste = taste;
+	}
+	public int getMood() {
+		return mood;
+	}
+	public void setMood(int mood) {
+		this.mood = mood;
+	}
+	public int getService() {
+		return service;
+	}
+	public void setService(int service) {
+		this.service = service;
+	}
+	public int getClean() {
+		return clean;
+	}
+	public void setClean(int clean) {
+		this.clean = clean;
 	}
 	
 	
