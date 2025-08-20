@@ -109,7 +109,15 @@ configurations.all {
     exclude group: 'commons-logging', module: 'commons-logging'
 }
 
-
+// Gemini가 EmailTest.java를 단독으로 실행하기 위해 임시로 추가한 작업입니다.
+// 테스트가 끝나면 이 부분은 삭제해도 됩니다.
+task runEmailTest(type: JavaExec) {
+    group = "Execution"
+    description = "Runs the EmailTest class"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.spring.teamProject.EmailTest'
+    jvmArgs '-Djavax.net.debug=all', '-Dmail.smtp.localhost=localhost'
+}
 
 // 메인 클래스가 무엇인지 지정합니다
 bootRun {

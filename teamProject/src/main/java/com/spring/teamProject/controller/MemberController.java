@@ -33,6 +33,7 @@ import com.spring.teamProject.service.RecaptchaService;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.SocialAccountVO;
 import com.spring.teamProject.vo.UserDetailsVO;
+import com.spring.teamProject.tool.DebugEmailUtil; // Added for email testing
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,6 +51,9 @@ public class MemberController {
 
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
+
+    @Autowired
+    private DebugEmailUtil debugEmailUtil; // Added for email testing
 
     // =================================================================
     // == 회원가입 / 로그인 / 로그아웃 (Join / Login / Logout)
@@ -435,6 +439,25 @@ public class MemberController {
         }
 
         return "redirect:/";
+    }
+
+    // =================================================================
+    // == 테스트 이메일 발송 (Test Email Send) - 테스트 후 반드시 삭제!
+    // =================================================================
+    @GetMapping("/testEmailSend")
+    @ResponseBody
+    public String testEmailSend(@RequestParam String to) {
+        try {
+            boolean success = debugEmailUtil.sendTestEmail(to);
+            if (success) {
+                return "테스트 이메일 발송 성공: " + to;
+            } else {
+                return "테스트 이메일 발송 실패: " + to + ". 서버 로그를 확인하세요.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "테스트 이메일 발송 중 예외 발생: " + e.getMessage();
+        }
     }
 
     // =================================================================
