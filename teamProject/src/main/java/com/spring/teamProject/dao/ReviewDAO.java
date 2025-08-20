@@ -18,6 +18,6 @@ public interface ReviewDAO {
 	public WaitingVO selectWaitingById(long waitingId) throws DataAccessException;
 	public StoreVO selectStore(long storeId) throws DataAccessException;
 	public long insertReservationReview(ReviewVO review) throws DataAccessException;
-	public long insertWatingReview(ReviewVO review) throws DataAccessException;
+	public long insertWaitingReview(ReviewVO review) throws DataAccessException;
 	public void insertReviewImageFiles(List<ImageFileVO> imgList) throws DataAccessException; 
 }
