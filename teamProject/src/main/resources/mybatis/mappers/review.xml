@@ -38,6 +38,10 @@
 		<result property="avgRating" column="avgRating" />
 		<result property="countRating" column="countRating" />
 		<result property="countScoreRating" column="countScoreRating" />
+		<result property="taste" column="taste" />
+		<result property="mood" column="mood" />
+		<result property="service" column="service" />
+		<result property="clean" column="clean" />
 	</resultMap>
 	
 	<resultMap id="storeInfo" type="com.spring.teamProject.vo.StoreVO">
@@ -66,6 +70,17 @@
 		<result property="countRating" column="countRating"/>
 	</resultMap>
 	
+	<resultMap id="imagelist" type="ImageFileVO">
+		<result property="imageId" column="image_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="reviewId" column="review_id"/>
+		<result property="fileName" column="file_name"/>
+		<result property="fileType" column="file_type"/>
+		<result property="displayNo" column="display_no"/>
+		<result property="createdAt" column="created_at"/>
+		<result property="regId" column="reg_id"/>
+	</resultMap>
+	
 	<select id="selectReservationById" parameterType="long" resultMap="reservationInfo">
 	    <![CDATA[
 	        select * from reservations where reservation_id=#{reservationId}
@@ -80,14 +95,89 @@
 	
 	<select id="selectStore" parameterType="long" resultMap="storeInfo">
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
-	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
-			FROM stores s
-			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.store_id=#{storeId}
-			GROUP BY s.store_id
-			ORDER BY s.store_id
+			SELECT store_id, store_name, file_name 
+			FROM stores
+			WHERE store_id=#{storeId}
 		]]>
 	</select>
+	
+	<insert id="insertReservationReview" parameterType="ReviewVO" useGeneratedKeys="true" keyProperty="reviewId">
+		<selectKey keyProperty="reviewId" resultType="int" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	    
+	    <![CDATA[
+	    INSERT INTO reviews (
+	        member_id,
+	        store_id,
+	        reservation_id,
+	        rating,
+	        content,
+	        taste,
+	        mood,
+	        service,
+	        clean,
+	        created_at
+	    ) VALUES (
+	        #{memberId},
+	        #{storeId},
+	        #{reservationId},
+	        #{rating},
+	        #{content},
+	        #{taste},
+	        #{mood},
+	        #{service},
+	        #{clean},
+	        NOW()
+	    )
+	    ]]>
+	</insert>
+	
+	<insert id="insertWatingReview" parameterType="ReviewVO" useGeneratedKeys="true" keyProperty="reviewId">
+		<selectKey keyProperty="reviewId" resultType="int" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	    
+	    <![CDATA[
+	    INSERT INTO reviews (
+	        member_id,
+	        store_id,
+	        waiting_id,
+	        rating,
+	        content,
+	        taste,
+	        mood,
+	        service,
+	        clean,
+	        created_at
+	    ) VALUES (
+	        #{memberId},
+	        #{storeId},
+	        #{waitingId},
+	        #{rating},
+	        #{content},
+	        #{taste},
+	        #{mood},
+	        #{service},
+	        #{clean},
+	        NOW()
+	    )
+	    ]]>
+	</insert>
+	
+	<insert id="insertReviewImageFiles" parameterType="list">
+	    insert into image_file (file_name, display_no, reg_id, store_id, review_id, created_at)
+	    values
+	    <foreach collection="list" item="item" separator=",">
+	        (
+	            #{item.fileName},
+	            #{item.displayNo},
+	            #{item.regId},
+	            #{item.storeId},
+	            #{item.reviewId},
+	            now()
+	        )
+	    </foreach>
+	</insert>
 
 </mapper>

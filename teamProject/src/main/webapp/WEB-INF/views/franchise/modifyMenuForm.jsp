@@ -4,10 +4,10 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath }" />
 
 <c:if test="${param.success eq 'true'}">
-    <script>alert("수정 완료!");</script>
+    <script>alert("수정 완료");</script>
 </c:if>
 <c:if test="${param.error eq 'true'}">
-    <script>alert("수정 실패!");</script>
+    <script>alert("수정 실패");</script>
 </c:if>
 
 <script>
