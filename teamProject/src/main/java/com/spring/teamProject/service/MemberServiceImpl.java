@@ -22,6 +22,7 @@ import com.spring.teamProject.dao.MemberDAO;
 import com.spring.teamProject.dao.SocialAccountDAO;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.SocialAccountVO;
+import com.spring.teamProject.service.EmailService;
 
 /**
  * MemberService 인터페이스를 구현한 클래스.
@@ -40,6 +41,9 @@ public class MemberServiceImpl implements MemberService {
     // SecurityConfig에 Bean으로 등록된 PasswordEncoder를 자동으로 주입받아 사용합니다.
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
     
     // application.properties에 설정된 파일 업로드 경로를 주입받습니다.
     @Value("${file.upload-dir}")
@@ -234,23 +238,21 @@ public class MemberServiceImpl implements MemberService {
         return null;
     }
 
-    // 비밀번호 재설정 로직 구현
+    // ✨ --- [신규] 비밀번호 재설정 로직 구현 --- ✨
     @Override
     @Transactional
     public boolean resetPassword(String loginId, String email) {
         MemberVO member = memberDAO.findByLoginIdAndEmail(loginId, email);
 
-        // 일치하는 회원이 있고, 일반 계정(비밀번호가 있는)일 경우에만 실행
         if (member != null && StringUtils.hasText(member.getLoginPw())) {
-            // 1. 8자리 임시 비밀번호 생성
             String tempPassword = generateTempPassword();
 
-            // 2. 생성된 임시 비밀번호를 이메일로 발송
-            // TODO: EmailService 기능 활성화 후, 아래 주석을 해제하고 실제 이메일 발송 로직을 구현해야 합니다.
-            // emailService.sendSimpleMessage(member.getEmail(), "[밥풀] 임시 비밀번호 안내", "회원님의 임시 비밀번호는 " + tempPassword + " 입니다.");
-            System.out.println("임시 비밀번호 발급 (테스트용): " + tempPassword); // (임시) 콘솔에 출력
-
-            // 3. 임시 비밀번호를 암호화하여 DB에 저장
+            emailService.sendSimpleMessage(
+                member.getEmail(), 
+                "[얌테이블] 임시 비밀번호 안내", 
+                "회원님의 임시 비밀번호는 " + tempPassword + " 입니다."
+            );
+            
             String encodedPassword = passwordEncoder.encode(tempPassword);
             memberDAO.updatePassword(member.getMemberId(), encodedPassword);
             

@@ -103,6 +103,8 @@ public class PaymentController {
                             payment.setStatus("COMPLETED");
                             payment.setPaidAt(LocalDateTime.now());
                             paymentService.updatePaymentStatus(payment);
+                            // 결제 성공 시 예약 상태도 'CONFIRMED'로 업데이트
+                            reservationService.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
                             logger.info("웹훅: 결제 및 예약 상태 업데이트 성공. reservationId: {}", payment.getReservationId());
                         } else {
                             logger.warn("웹훅 결제 검증 실패: transactionId: {}, PortOne status: {}", transactionId, portoneStatus);
@@ -120,13 +122,19 @@ public class PaymentController {
                 logger.error("웹훅 결제 처리 중 오류 발생: {}", e.getMessage(), e);
                 return new ResponseEntity<>("error during payment processing", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        } else if ("CANCELED".equals(status) || "FAILED".equals(status) || "REFUNDED".equals(status)) {
+        } else if ("CANCELED".equals(status.toUpperCase()) || "FAILED".equals(status.toUpperCase()) || "REFUNDED".equals(status.toUpperCase())) {
             try {
                 PaymentVO payment = paymentService.getPaymentByTransactionId(transactionId);
                 if (payment != null) {
-                    payment.setStatus(status);
+                    // 1. PaymentVO 상태 업데이트
+                    payment.setStatus(status.toUpperCase());
                     paymentService.updatePaymentStatus(payment);
                     logger.info("웹훅: 결제 상태 업데이트 완료 ({}). transactionId: {}", status, transactionId);
+
+                    // 2. ReservationVO 상태 업데이트
+                    // 결제 실패/취소/환불 시 예약 상태를 'FAILED'로 업데이트
+                    reservationService.updateReservationStatus(payment.getReservationId(), "FAILED");
+                    logger.info("웹훅: 예약 상태 업데이트 완료 ({}). reservationId: {}", "FAILED", payment.getReservationId());
                 } else {
                     logger.warn("웹훅: transactionId에 해당하는 결제 정보를 찾을 수 없습니다. transactionId: {}", transactionId);
                     return new ResponseEntity<>("payment not found for status update", HttpStatus.NOT_FOUND);

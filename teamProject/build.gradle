@@ -33,8 +33,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // (신규) Spring Boot Mail Starter 추가
+    // Spring Boot Mail Starter 추가
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // SMTPS 프로토콜 충돌을 일으킬 수 있는 라이브러리를 제거합니다.
+    // implementation 'org.eclipse.angus:angus-mail:2.0.3' // 이 라인을 삭제하거나 주석 처리합니다.
 
 	// DB
 	implementation 'mysql:mysql-connector-java:8.0.28'
@@ -104,4 +107,11 @@ tasks.named('test') {
 
 configurations.all {
     exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+
+
+// 메인 클래스가 무엇인지 지정합니다
+bootRun {
+    mainClass = 'com.spring.teamProject.TeamProjectApplication'
 }

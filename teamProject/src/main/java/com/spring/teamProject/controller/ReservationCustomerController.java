@@ -8,12 +8,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors; // ⭐ 추가된 import
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,7 +73,6 @@ public class ReservationCustomerController {
                 : LocalDate.now().toString();
         model.addAttribute("currentDate", currentDate);
 
-        //StoreVO store = getDummyStoreInfo(storeId);
         StoreVO store = storeService.getStoreById(storeId);
         model.addAttribute("store", store);
 
@@ -87,7 +88,6 @@ public class ReservationCustomerController {
                                                              @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         logger.info("예약 가능한 시간대 요청 - storeId: {}, date: {}", storeId, date);
         try {
-            // LocalDate 객체를 String으로 변환하여 서비스 메서드에 전달합니다.
             return reservationService.getAvailableTimeSlots(storeId, date.toString());
         } catch (Exception e) {
             logger.error("예약 가능 시간대 조회 중 오류 발생: {}", e.getMessage(), e);
@@ -119,7 +119,7 @@ public class ReservationCustomerController {
         }
     }
 
-    // ⭐⭐⭐ 복구된 임시 예약 생성 엔드포인트 ⭐⭐⭐
+    // 복구된 임시 예약 생성 엔드포인트
     @PostMapping("/book-temp")
     @ResponseBody
     public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
@@ -172,7 +172,7 @@ public class ReservationCustomerController {
         }
     }
 
-    // ⭐⭐⭐ 새로 추가된 임시 예약 취소 엔드포인트 ⭐⭐⭐
+    // 새로 추가된 임시 예약 취소 엔드포인트
     /**
      * 결제창 취소/실패 시 임시 예약 정보를 삭제하는 엔드포인트
      * @param transactionId 결제 요청 시 생성된 고유 ID
@@ -242,7 +242,6 @@ public class ReservationCustomerController {
 
         if (storeId != null) {
             try {
-                // 더미 데이터 대신 실제 DB에서 가게 정보를 가져옵니다.
                 StoreVO store = storeService.getStoreById(storeId);
                 model.addAttribute("store", store);
                 logger.info("DB에서 가게 정보 조회 완료: {}", store);
@@ -260,7 +259,7 @@ public class ReservationCustomerController {
 
                     if (reservationFromDb.getTables() != null && !reservationFromDb.getTables().isEmpty()) {
                         String tableNames = reservationFromDb.getTables().stream()
-                            .map(StoreTableVO::getTableName) // ⭐ getTableName()으로 변경
+                            .map(StoreTableVO::getTableName)
                             .collect(Collectors.joining(", "));
                         model.addAttribute("tableNames", tableNames);
                     } else {
@@ -316,6 +315,8 @@ public class ReservationCustomerController {
         logger.info("PortOne 결제 결과 리다이렉트 수신 - transactionId: {}, resultCode: {}", transactionId, resultCode);
 
         if (resultCode != null && !"0000".equals(resultCode)) {
+            // 결제 실패 또는 취소 시 임시 예약 삭제
+            reservationService.deleteTempReservationByTransactionId(transactionId);
             redirectAttributes.addFlashAttribute("errorMessage", "결제가 취소되었거나 실패했습니다. 다시 시도해주세요.");
             PaymentVO payment = paymentService.getPaymentByTransactionId(transactionId);
             if (payment != null && payment.getReservationId() != null) {
@@ -326,24 +327,20 @@ public class ReservationCustomerController {
 
         try {
             PaymentVO payment = null;
-            for (int i = 0; i < 10; i++) {
-                payment = paymentService.getPaymentByTransactionId(transactionId);
-                if (payment != null && "COMPLETED".equals(payment.getStatus())) {
-                    reservationService.updateReservationStatus(payment.getReservationId(), "CONFIRMED");
-                    break;
-                }
-                Thread.sleep(1000);
-            }
+            // 결제 상태를 확인하는 로직에 트랜잭션 ID로 결제 완료 처리를 추가
+            boolean success = paymentService.completePayment(transactionId);
 
-            if (payment != null && "COMPLETED".equals(payment.getStatus())) {
-                Long reservationId = payment.getReservationId();
-                if (reservationId != null) {
+            if (success) {
+                payment = paymentService.getPaymentByTransactionId(transactionId);
+                if (payment != null && payment.getReservationId() != null) {
+                    Long reservationId = payment.getReservationId();
                     ReservationVO reservation = reservationService.getReservationById(reservationId);
                     if (reservation != null) {
                         logger.info("결제 완료 후 URL 파라미터로 예약 ID 전달: {}", reservationId);
                         redirectAttributes.addAttribute("storeId", reservation.getStoreId());
                         redirectAttributes.addAttribute("reservationId", reservationId);
-
+                        session.removeAttribute("currentReservationId");
+                        session.removeAttribute("currentTransactionId");
                         return "redirect:/reservation/customer/bookingConfirm";
                     }
                 }
@@ -380,5 +377,40 @@ public class ReservationCustomerController {
             response.put("message", e.getMessage());
         }
         return response;
+    }
+
+    /**
+     * PortOne 결제 웹훅을 처리하는 새로운 엔드포인트
+     * 이 엔드포인트는 결제 성공/실패와 관계없이 PortOne이 결제 결과를 보낼 때마다 호출됩니다.
+     * @param body PortOne이 보낸 결제 정보(JSON)
+     * @return 200 OK 응답
+     */
+    @PostMapping("/payment-webhook")
+    @ResponseBody
+    public ResponseEntity<Void> handlePaymentWebhook(@RequestBody Map<String, Object> body) {
+        logger.info("PortOne 웹훅 수신: {}", body);
+
+        try {
+            String transactionId = (String) body.get("transaction_id");
+            String status = (String) body.get("status");
+
+            if ("success".equals(status)) {
+                // 결제 성공 웹훅인 경우, 결제 완료 처리를 진행합니다.
+                // 이미 payment-result에서 처리했더라도, 안전을 위해 중복 처리를 고려해야 합니다.
+                paymentService.completePayment(transactionId);
+                logger.info("웹훅을 통해 결제 성공 처리 완료. transactionId: {}", transactionId);
+            } else if ("failed".equals(status) || "cancelled".equals(status)) {
+                // 결제 실패 또는 취소 웹훅인 경우, 임시 예약을 삭제합니다.
+                // 이렇게 하면 사용자가 창을 닫아버려도 서버에서 안전하게 실패 처리가 가능합니다.
+                reservationService.deleteTempReservationByTransactionId(transactionId);
+                logger.info("웹훅을 통해 결제 실패/취소 처리 완료. transactionId: {}", transactionId);
+            }
+        } catch (Exception e) {
+            logger.error("웹훅 처리 중 오류 발생: {}", e.getMessage(), e);
+            // 오류가 발생하더라도 PortOne에 200 OK 응답을 보내야 재시도를 막을 수 있습니다.
+        }
+
+        // PortOne에 성공적으로 받았음을 알리기 위해 200 OK를 반환합니다.
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
