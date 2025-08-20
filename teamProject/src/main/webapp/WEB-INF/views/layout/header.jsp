@@ -9,7 +9,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>밥풀</title>
+    <title>얌테이블</title>
 
     <%-- CSS는 link 태그로 직접 로드하는 것이 성능에 유리합니다. --%>
     <link rel="stylesheet" href="${contextPath}/css/style.css">

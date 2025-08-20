@@ -83,7 +83,7 @@
 <body>
     <!-- === 좌측 사이드바 메뉴 === -->
     <div class="sidebar">
-        <a class="sidebar-brand" href="${contextPath}/admin/dashboard">밥풀 Admin</a>
+        <a class="sidebar-brand" href="${contextPath}/admin/dashboard">얌테이블 Admin</a>
         
         <hr class="sidebar-divider">
         
