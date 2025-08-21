@@ -21,10 +21,10 @@ public class ImageFileVO {
 	private long regId;
 	
 	//가게,리뷰 고유 아이디
-	private long storeId;
-	private long reviewId;
-	private long menuId;
-	public long getImageId() {
+	private Long storeId;
+	private Long reviewId;
+	private Long menuId;
+	public Long getImageId() {
 		return imageId;
 	}
 	public void setImageId(long imageId) {

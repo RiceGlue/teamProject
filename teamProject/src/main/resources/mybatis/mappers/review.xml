@@ -202,9 +202,9 @@
 		]]>
 	</update>
 
-	<select id="selectImageId" parameterType="String" resultType="String" >
+	<select id="selectImageId" parameterType="ImageFileVO" resultType="long" >
 		<![CDATA[
-			select image_id from image_file where file_name=#{fileNmae}
+			select image_id from image_file where file_name=#{fileName} and review_id =#{reviewId}
 		]]>
 	</select>
 	

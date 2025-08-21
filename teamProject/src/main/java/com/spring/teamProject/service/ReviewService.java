@@ -19,7 +19,7 @@ public interface ReviewService {
 	public ReviewVO getRivew(long reviewId) throws Exception;
 	public List<ImageFileVO> getImageFile (long reviewId) throws Exception;
 	public void modifyReview (ReviewVO review) throws Exception;
-	public long getImageId (String fileName) throws Exception;
+	public long getImageId (ImageFileVO imagefile) throws Exception;
 	public void modifyReviewImage(ImageFileVO imgFile) throws Exception;
 	public void deleteReviewImage(String fileName) throws Exception;
 	public void addReviewImage(ImageFileVO imgFile) throws Exception;
