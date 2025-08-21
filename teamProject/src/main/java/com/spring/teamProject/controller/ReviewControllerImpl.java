@@ -1,10 +1,14 @@
 package com.spring.teamProject.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -146,103 +150,95 @@ public class ReviewControllerImpl extends BaseController implements ReviewContro
 	}
 
 	@Override
-	@RequestMapping(value = "/modifyReview", method = RequestMethod.POST)
-	public ModelAndView modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
-	    ModelAndView mav = new ModelAndView();
+	@PostMapping("/modifyReview")
+	public ResponseEntity<?> modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
 	    String directoryName = "review";
-	    long reviewId = review.getReviewId();
-	    
-	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
-	    List<ImageFileVO> addedFiles = upload(multiReq, directoryName); // 새로 추가된 파일 목록
 
-	    
+	    long reviewId = review.getReviewId();
+	    long memberId = review.getMemberId();
+	    long storeId = review.getStoreId();
+
+	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
+	    List<ImageFileVO> addedFiles = upload(multiReq, directoryName);
+
+	    int deleteCount = deleteFileNames != null ? deleteFileNames.length : 0;
+	    int addCount = addedFiles != null ? addedFiles.size() : 0;
+
 	    try {
-	        // 1. 리뷰 본문 및 평점 수정
+	        // 리뷰 정보 수정
 	        reviewService.modifyReview(review);
 
-	        int deleteCount = (deleteFileNames != null) ? deleteFileNames.length : 0;
-	        int addCount = (addedFiles != null) ? addedFiles.size() : 0;
-	        
-	        System.out.println("deleteCount:"+deleteCount+"addCount"+addCount);
+	        int displayNo = 5 - deleteCount;
 
-	        // --- 1. 이미지 추가만 (삭제 없음, 추가만 있음) ---
-	        if (deleteCount == 0 && addCount > 0) {
-	        	reviewService.addReviewImageFiles(addedFiles);
-	        }
-	        // --- 2. 삭제 후 추가 (삭제 > 추가) ---
-	        else if (deleteCount > addCount && addCount > 0) {
-	            // 1. 교체 가능한 범위 내에서는 update
-	            for (int i = 0; i < addCount; i++) {
+	        if (deleteCount > 0 && addCount > 0) {
+	            int min = Math.min(deleteCount, addCount);
+
+	            for (int i = 0; i < min; i++) {
+	            	ImageFileVO oldFile = new ImageFileVO();
 	                String oldFileName = deleteFileNames[i];
+	                
+	                oldFile.setFileName(oldFileName);
+	                oldFile.setReviewId(reviewId);
+	                
+	                long imageId = reviewService.getImageId(oldFile);
+	                
 	                ImageFileVO newFile = addedFiles.get(i);
-
-	                long imageId = reviewService.getImageId(oldFileName);
 	                newFile.setImageId(imageId);
 	                newFile.setReviewId(reviewId);
 
-	                reviewService.modifyReviewImage(newFile); // 이미지 교체 (update)
-	                deleteFile(oldFileName, directoryName);   // 기존 파일 삭제
+	                reviewService.modifyReviewImage(newFile);
+	                deleteFile(oldFileName, directoryName);
 	            }
 
-	            // 2. 남은 삭제 대상은 실제 삭제 처리
-	            for (int i = addCount; i < deleteCount; i++) {
-	                String oldFileName = deleteFileNames[i];
-
-	                reviewService.deleteReviewImage(oldFileName); // DB 이미지 삭제
-	                deleteFile(oldFileName, directoryName);   // 파일 삭제
-	            }
-	        }
-
-	        // --- 3. 삭제 후 추가 (삭제 < 추가) ---
-	        else if (deleteCount < addCount && deleteCount > 0) {
-	        	int displayNo= 5-deleteCount;
-	        	
-	            // 삭제 이미지 만큼 기존 이미지 수정 (update)
-	            for (int i = 0; i < deleteCount; i++) {
-	                String oldFileName = deleteFileNames[i];
+	            for (int i = min; i < addCount; i++) {
 	                ImageFileVO newFile = addedFiles.get(i);
-
-	                long imageId = reviewService.getImageId(oldFileName);
-	                newFile.setImageId(imageId);
-	                newFile.setReviewId(reviewId);
-
-	                reviewService.modifyReviewImage(newFile); // update
-	                deleteFile(oldFileName, directoryName);  // 기존 파일 삭제
-	            }
-	            // 남은 추가 이미지들은 새로 insert
-	            for (int i = deleteCount; i < addCount; i++) {
-	                ImageFileVO newFile = new ImageFileVO();
-	                
-	                newFile.setFileName(addedFiles.get(i).getFileName());
-	                newFile.setDisplayNo(displayNo);
-	                newFile.setRegId(review.getMemberId());
-	                newFile.setStoreId(review.getStoreId());
-	                newFile.setReviewId(reviewId);
-	                
+	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
 	                reviewService.addReviewImage(newFile);
-	                displayNo++;
+	            }
+
+	            for (int i = min; i < deleteCount; i++) {
+	                String oldFileName = deleteFileNames[i];
+	                reviewService.deleteReviewImage(oldFileName);
+	                deleteFile(oldFileName, directoryName);
+	            }
+
+	        } else if (deleteCount > 0) {
+	            for (String fileName : deleteFileNames) {
+	                reviewService.deleteReviewImage(fileName);
+	                deleteFile(fileName, directoryName);
+	            }
+
+	        } else if (addCount > 0) {
+	            for (ImageFileVO newFile : addedFiles) {
+	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
+	                reviewService.addReviewImage(newFile);
 	            }
 	        }
-	        // --- 4. 이미지 삭제만 (삭제 있음, 추가 없음) ---
-	        else if (deleteCount > 0 && addCount == 0) {
-	            for (String oldFileName : deleteFileNames) {
-	                reviewService.deleteReviewImage(oldFileName); // DB 삭제
-	                deleteFile(oldFileName, directoryName);   // 파일 삭제
-	            }
-	        }
-	        // --- 5. 이미지 수정 안 함 (삭제 없음, 추가 없음) ---
-	        else {
-	            // 아무것도 안함
-	        }
+
+	        // 성공 응답 (선택: 필요한 데이터 포함 가능)
+	        return ResponseEntity.ok().body(Map.of(
+	            "status", "success",
+	            "reviewId", reviewId,
+	            "memberId", memberId
+	        ));
 
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        mav.setViewName("redirect:/review/reviewForm?error=true");
-	        return mav;
-	    }
+	        e.printStackTrace(); // 실제로는 로그 처리
 
-	    mav.setViewName("redirect:/member/myPage");
-	    return mav;
+	        // 실패 응답
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+	            "status", "error",
+	            "message", "리뷰 수정 중 오류 발생"
+	        ));
+	    }
+	}
+
+	// 공통 메타 설정 함수
+	private void populateFileMeta(ImageFileVO file, long storeId, long reviewId, long memberId, int displayNo) {
+	    file.setStoreId(storeId);
+	    file.setReviewId(reviewId);
+	    file.setRegId(memberId);
+	    file.setDisplayNo(displayNo);
 	}
 
 }

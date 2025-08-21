@@ -74,8 +74,8 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 	
 	@Override
-	public long getImageId (String fileName) throws Exception {
-		long imageId = reviewDAO.selectImageId(fileName);
+	public long getImageId (ImageFileVO imagefile) throws Exception {
+		long imageId = reviewDAO.selectImageId(imagefile);
 		return imageId;
 	}
 	
