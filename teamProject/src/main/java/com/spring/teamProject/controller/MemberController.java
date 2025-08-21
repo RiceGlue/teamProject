@@ -208,18 +208,53 @@ public class MemberController {
         return "layout/layout";
     }
 
-    @PostMapping("/find-id")
+    // ✨ --- [수정] 기존 find-id를 인증번호 발송 API로 변경 --- ✨
+    @PostMapping("/find-id/send-code")
     @ResponseBody
-    public Map<String, Object> findId(@RequestParam("memberName") String memberName,
-                                      @RequestParam("phone") String phone) {
+    public Map<String, Object> sendCodeForFindId(@RequestParam("memberName") String memberName,
+                                                 @RequestParam("email") String email,
+                                                 HttpSession session) {
         Map<String, Object> response = new HashMap<>();
-        String loginId = memberService.findLoginId(memberName, phone);
+        String result = memberService.sendVerificationCodeForId(memberName, email);
+        
+        if (result != null) {
+            String[] parts = result.split(":");
+            String code = parts[0];
+            String loginId = parts[1];
+            String maskedEmail = parts[2];
 
-        if (loginId != null) {
+            // 세션에 인증번호와 찾은 아이디를 저장 (3분 유효)
+            session.setAttribute("verificationCodeForId", code);
+            session.setAttribute("loginIdForVerification", loginId);
+            session.setMaxInactiveInterval(180);
+
             response.put("success", true);
-            response.put("loginId", loginId);
+            response.put("message", maskedEmail + "(으)로 인증번호를 발송했습니다.");
         } else {
             response.put("success", false);
+            response.put("message", "일치하는 회원 정보를 찾을 수 없습니다.");
+        }
+        return response;
+    }
+
+    // ✨ --- [신규] 인증번호 확인 API --- ✨
+    @PostMapping("/find-id/verify-code")
+    @ResponseBody
+    public Map<String, Object> verifyCodeForFindId(@RequestParam("code") String code,
+                                                 HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        String sessionCode = (String) session.getAttribute("verificationCodeForId");
+        String loginId = (String) session.getAttribute("loginIdForVerification");
+
+        if (sessionCode != null && sessionCode.equals(code)) {
+            response.put("success", true);
+            response.put("loginId", loginId);
+            // 성공 시 세션 정보 즉시 삭제
+            session.removeAttribute("verificationCodeForId");
+            session.removeAttribute("loginIdForVerification");
+        } else {
+            response.put("success", false);
+            response.put("message", "인증번호가 일치하지 않습니다.");
         }
         return response;
     }

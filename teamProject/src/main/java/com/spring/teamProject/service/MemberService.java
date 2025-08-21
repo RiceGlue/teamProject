@@ -66,10 +66,15 @@ public interface MemberService {
      */
     MemberVO verifyIdAndPasswordAndLinkAccount(String email, String loginId, String rawPassword, String provider, String socialId);
 	
-    // --- [신규] 아이디 찾기 로직 ---
-    String findLoginId(String memberName, String phone);
+    // --- 아이디 찾기 로직 ---
+    String findLoginId(String memberName, String email);
 
-    // --- [신규] 비밀번호 재설정 로직 ---
+    // --- 비밀번호 재설정 로직 ---
     boolean resetPassword(String loginId, String email);
 
+    // ✨ --- [신규] 아이디 찾기 시 테스트 이메일을 발송하는 메소드 --- ✨
+    //boolean sendFindIdTestEmail(String memberName, String email);
+
+    // ✨ --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ✨
+    String sendVerificationCodeForId(String memberName, String email);
 }
