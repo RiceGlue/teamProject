@@ -55,7 +55,8 @@ public class WaitingServiceImpl implements WaitingService {
             System.err.println("ERROR: 매장 ID " + storeId + "에 대한 웨이팅 설정이 존재하지 않습니다.");
             // 설정이 없으면 웨이팅 불가. 적절한 예외를 던지거나 특정 에러 코드 반환
             // 여기서는 0을 반환하여 실패를 알리고, 호출하는 컨트롤러에서 이 값을 확인하여 사용자에게 메시지 전달
-            throw new IllegalStateException("웨이팅 설정을 먼저 등록해야 합니다."); // RuntimeException 발생
+            //throw new IllegalStateException("웨이팅 설정을 먼저 등록해야 합니다."); // RuntimeException 발생
+            throw new IllegalStateException("해당 가게 점주가 대기열을 오픈해야합니다."); // RuntimeException 발생
         }
 
         if (!setting.isActive()) {

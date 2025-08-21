@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -31,6 +33,8 @@ import com.spring.teamProject.service.EmailService;
 @Service("memberService")
 public class MemberServiceImpl implements MemberService {
     
+    private static final Logger logger = LoggerFactory.getLogger(MemberServiceImpl.class);
+
     // MemberDAO Bean을 자동으로 주입받아 사용합니다.
     @Autowired
     private MemberDAO memberDAO;
@@ -242,23 +246,41 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public boolean resetPassword(String loginId, String email) {
+        logger.info("비밀번호 재설정 요청 시작: loginId={}, email={}", loginId, email); // 로그 추가
+
         MemberVO member = memberDAO.findByLoginIdAndEmail(loginId, email);
 
-        if (member != null && StringUtils.hasText(member.getLoginPw())) {
+        if (member == null) {
+            logger.warn("비밀번호 재설정 실패: 일치하는 회원 정보를 찾을 수 없음. loginId={}, email={}", loginId, email); // 로그 추가
+            return false;
+        }
+
+        if (!StringUtils.hasText(member.getLoginPw())) {
+            logger.warn("비밀번호 재설정 실패: 소셜 로그인 전용 계정은 비밀번호를 재설정할 수 없음. loginId={}", loginId); // 로그 추가
+            return false;
+        }
+
+        try {
             String tempPassword = generateTempPassword();
+            logger.info("임시 비밀번호 생성 완료: loginId={}", loginId); // 로그 추가
 
             emailService.sendSimpleMessage(
                 member.getEmail(), 
                 "[얌테이블] 임시 비밀번호 안내", 
                 "회원님의 임시 비밀번호는 " + tempPassword + " 입니다."
             );
+            logger.info("임시 비밀번호 이메일 발송 성공: loginId={}, to={}", loginId, member.getEmail()); // 로그 추가
             
             String encodedPassword = passwordEncoder.encode(tempPassword);
             memberDAO.updatePassword(member.getMemberId(), encodedPassword);
+            logger.info("DB에 임시 비밀번호 업데이트 성공: loginId={}", loginId); // 로그 추가
             
             return true;
+        } catch (Exception e) {
+            logger.error("비밀번호 재설정 중 예외 발생: loginId={}", loginId, e); // 예외 로그 추가
+            // 트랜잭션에 의해 롤백되므로, 여기서 false를 반환하여 실패를 알립니다.
+            return false;
         }
-        return false;
     }
 
     // 8자리 영문+숫자 임시 비밀번호 생성 헬퍼 메소드

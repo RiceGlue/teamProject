@@ -79,4 +79,17 @@ public class ReservationOwnerController {
         }
         return "redirect:/reservation/owner/manageList?storeId=" + storeId;
     }
+
+    /*
+     * 가맹점 회원이 매장 테이블을 생성합니다 (벽, 유리, 테이블)
+     */
+
+    @GetMapping("/layout_editor")
+    public String layoutEditor(@RequestParam("storeId") Long storeId, Model model) {
+        logger.info("레이아웃 에디터 요청 - storeId: {}", storeId);
+        StoreVO store = getDummyStoreInfo(storeId);
+        model.addAttribute("store", store);
+        model.addAttribute("storeId", storeId);
+        return "reservation/owner/layout_editor";
+    }
 }
