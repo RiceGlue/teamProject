@@ -46,14 +46,25 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 	
 	@Override
-	public long addWatingReview(ReviewVO review) throws Exception{
-		long reviewId = reviewDAO.insertWatingReview(review);
+	public long addWaitingReview(ReviewVO review) throws Exception{
+		long reviewId = reviewDAO.insertWaitingReview(review);
 		return reviewId;
 	}
 	
 	@Override
 	public void addReviewImageFiles(List<ImageFileVO> imgList) throws Exception{
 		reviewDAO.insertReviewImageFiles(imgList);
-
+	}
+	
+	@Override
+	public ReviewVO getRivew(long reviewId) throws Exception {
+		ReviewVO reviewVO = reviewDAO.selectReview(reviewId);
+		return reviewVO;
+	}
+	
+	@Override
+	public List<ImageFileVO> getImageFile (long reviewId) throws Exception {
+		List<ImageFileVO> imglist = reviewDAO.selectReviewImageFile(reviewId);
+		return imglist;
 	}
 }

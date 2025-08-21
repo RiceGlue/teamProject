@@ -196,52 +196,94 @@ function checkReview() {
 }
 </script>
 
+
 <div class="storeInfo">
 	<img src="${contextPath }/download?directoryName=store&fileName=${storeInfo.fileName}" alt="${storeInfo.fileName }">
 	<h4>${storeInfo.storeName }</h4>
-	<h2>방문 어떠셨나요?</h2>
+	<h2>리뷰를 수정해 주세요.</h2>
 </div>
 
 <div style="display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
-	<form action="${contextPath}/review/addReview" method="post" enctype="multipart/form-data" onsubmit="return checkReview()">
-		<input type="hidden" name="memberId" value="${memberId}" />
-		<input type="hidden" name="storeId" value="${storeInfo.storeId}" />
+	<%-- 폼의 action을 수정 또는 삭제 기능으로 변경해야 함 --%>
+	<form action="${contextPath}/review/modifyReview" method="post" enctype="multipart/form-data" onsubmit="return checkReview()">
+		<%-- review 객체에서 값을 가져와 hidden 필드에 넣습니다. --%>
+		<input type="hidden" name="reviewId" value="${review.reviewId}" />
+		<input type="hidden" name="memberId" value="${review.memberId}" />
+		<input type="hidden" name="storeId" value="${review.storeId}" />
+		
 		<c:choose>
-			<c:when test="${not empty reservationId}">
-				<input type="hidden" name="reservationId" value="${reservationId}" />
+			<c:when test="${not empty review.reservationId}">
+				<input type="hidden" name="reservationId" value="${review.reservationId}" />
 			</c:when>
 			<c:otherwise>
-				<input type="hidden" name="waitingId" value="${waitingId}" />
+				<input type="hidden" name="waitingId" value="${review.waitingId}" />
 			</c:otherwise>
 		</c:choose>
 		
 		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
 			<div class="form-input" style="flex: 1;">
 				<div class="star-rating">
-					<input type="radio" id="star5" name="rating" value="5" />
+					<input type="radio" id="star5" name="rating" value="5" ${review.rating eq 5 ? 'checked' : ''} />
 					<label for="star5" title="5점">★</label>
-					<input type="radio" id="star4" name="rating" value="4" />
+					<input type="radio" id="star4" name="rating" value="4" ${review.rating eq 4 ? 'checked' : ''} />
 					<label for="star4" title="4점">★</label>
-					<input type="radio" id="star3" name="rating" value="3" />
+					<input type="radio" id="star3" name="rating" value="3" ${review.rating eq 3 ? 'checked' : ''} />
 					<label for="star3" title="3점">★</label>
-					<input type="radio" id="star2" name="rating" value="2" />
+					<input type="radio" id="star2" name="rating" value="2" ${review.rating eq 2 ? 'checked' : ''} />
 					<label for="star2" title="2점">★</label>
-					<input type="radio" id="star1" name="rating" value="1" />
+					<input type="radio" id="star1" name="rating" value="1" ${review.rating eq 1 ? 'checked' : ''} />
 					<label for="star1" title="1점">★</label>
 				</div>
 			</div>
-	
 			<h4 id="rating-message">별점을 선택해주세요</h4>
 		</div>
 		
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
 			<div class="form-input" style="flex: 1;">
-				<textarea id="content" name="content" rows="5" cols="100" placeholder="리뷰를 작성해주세요." required></textarea>
+				<%-- 리뷰 내용 미리 채우기 --%>
+				<textarea id="content" name="content" rows="5" cols="100" >${review.content}</textarea>
 			</div>
 		</div>
+				<%-- 이미지 미리보기 로직 --%>
+		<c:if test="${not empty imglist}">
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const preview = document.getElementById('imagePreview');
+				const imageFiles = [
+					<c:forEach var="image" items="${imglist}" varStatus="loop">
+						'${contextPath}/download?fileName=${image.fileName}&directoryName=review'
+						<c:if test="${not loop.last}">,</c:if>
+					</c:forEach>
+				];
+				
+				imageFiles.forEach(src => {
+					const item = document.createElement('div');
+					item.className = 'image-preview-item';
+		
+					const img = document.createElement('img');
+					img.src = src;
+		
+					const removeBtn = document.createElement('span');
+					removeBtn.className = 'remove-image';
+					removeBtn.innerHTML = '&times;';
+		
+					// 삭제 버튼 로직 추가 필요
+					removeBtn.onclick = function() {
+						// 서버에서 이미지를 삭제하거나, 제출 시 삭제할 목록에 추가하는 로직
+						item.remove();
+					};
+		
+					item.appendChild(img);
+					item.appendChild(removeBtn);
+					preview.appendChild(item);
+				});
+			});
+		</script>
+		</c:if>
 		
 		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
 			<div class="form-input" style="flex: 1;">
+				<%-- 파일 업로드 부분은 그대로 유지 --%>
 				<input type="file" id="fileName" name="fileName" accept="image/*" multiple="multiple" onchange="previewReviewImage(this)" />
 				<div id="imagePreview"></div>
 				<div class="clear-button-container">
@@ -254,51 +296,50 @@ function checkReview() {
 			<div class="rating-group">
 				<div class="rating-label">음식 맛은 어떤가요?</div>
 				<div class="rating-options">
-					<input type="radio" id="taste-1" name="taste" value="1"><label for="taste-1">최악</label>
-					<input type="radio" id="taste-2" name="taste" value="2"><label for="taste-2">별로</label>
-					<input type="radio" id="taste-3" name="taste" value="3"><label for="taste-3">보통</label>
-					<input type="radio" id="taste-4" name="taste" value="4"><label for="taste-4">만족</label>
-					<input type="radio" id="taste-5" name="taste" value="5"><label for="taste-5">최고</label>
+					<input type="radio" id="taste-1" name="taste" value="1" ${review.taste eq 1 ? 'checked' : ''}><label for="taste-1">최악</label>
+					<input type="radio" id="taste-2" name="taste" value="2" ${review.taste eq 2 ? 'checked' : ''}><label for="taste-2">별로</label>
+					<input type="radio" id="taste-3" name="taste" value="3" ${review.taste eq 3 ? 'checked' : ''}><label for="taste-3">보통</label>
+					<input type="radio" id="taste-4" name="taste" value="4" ${review.taste eq 4 ? 'checked' : ''}><label for="taste-4">만족</label>
+					<input type="radio" id="taste-5" name="taste" value="5" ${review.taste eq 5 ? 'checked' : ''}><label for="taste-5">최고</label>
 				</div>
 			</div>
 			
 			<div class="rating-group">
 				<div class="rating-label">분위기는 어떤가요?</div>
 				<div class="rating-options">
-					<input type="radio" id="mood-1" name="mood" value="1"><label for="mood-1">최악</label>
-					<input type="radio" id="mood-2" name="mood" value="2"><label for="mood-2">별로</label>
-					<input type="radio" id="mood-3" name="mood" value="3"><label for="mood-3">보통</label>
-					<input type="radio" id="mood-4" name="mood" value="4"><label for="mood-4">만족</label>
-					<input type="radio" id="mood-5" name="mood" value="5"><label for="mood-5">최고</label>
+					<input type="radio" id="mood-1" name="mood" value="1" ${review.mood eq 1 ? 'checked' : ''}><label for="mood-1">최악</label>
+					<input type="radio" id="mood-2" name="mood" value="2" ${review.mood eq 2 ? 'checked' : ''}><label for="mood-2">별로</label>
+					<input type="radio" id="mood-3" name="mood" value="3" ${review.mood eq 3 ? 'checked' : ''}><label for="mood-3">보통</label>
+					<input type="radio" id="mood-4" name="mood" value="4" ${review.mood eq 4 ? 'checked' : ''}><label for="mood-4">만족</label>
+					<input type="radio" id="mood-5" name="mood" value="5" ${review.mood eq 5 ? 'checked' : ''}><label for="mood-5">최고</label>
 				</div>
 			</div>
 			
 			<div class="rating-group">
 				<div class="rating-label">서비스는 친절했나요?</div>
 				<div class="rating-options">
-					<input type="radio" id="service-1" name="service" value="1"><label for="service-1">최악</label>
-					<input type="radio" id="service-2" name="service" value="2"><label for="service-2">별로</label>
-					<input type="radio" id="service-3" name="service" value="3"><label for="service-3">보통</label>
-					<input type="radio" id="service-4" name="service" value="4"><label for="service-4">만족</label>
-					<input type="radio" id="service-5" name="service" value="5"><label for="service-5">최고</label>
+					<input type="radio" id="service-1" name="service" value="1" ${review.service eq 1 ? 'checked' : ''}><label for="service-1">최악</label>
+					<input type="radio" id="service-2" name="service" value="2" ${review.service eq 2 ? 'checked' : ''}><label for="service-2">별로</label>
+					<input type="radio" id="service-3" name="service" value="3" ${review.service eq 3 ? 'checked' : ''}><label for="service-3">보통</label>
+					<input type="radio" id="service-4" name="service" value="4" ${review.service eq 4 ? 'checked' : ''}><label for="service-4">만족</label>
+					<input type="radio" id="service-5" name="service" value="5" ${review.service eq 5 ? 'checked' : ''}><label for="service-5">최고</label>
 				</div>
 			</div>
 			
 			<div class="rating-group">
 				<div class="rating-label">매장 청결상태는 양호한가요?</div>
 				<div class="rating-options">
-					<input type="radio" id="clean-1" name="clean" value="1"><label for="clean-1">최악</label>
-					<input type="radio" id="clean-2" name="clean" value="2"><label for="clean-2">별로</label>
-					<input type="radio" id="clean-3" name="clean" value="3"><label for="clean-3">보통</label>
-					<input type="radio" id="clean-4" name="clean" value="4"><label for="clean-4">만족</label>
-					<input type="radio" id="clean-5" name="clean" value="5"><label for="clean-5">최고</label>
+					<input type="radio" id="clean-1" name="clean" value="1" ${review.clean eq 1 ? 'checked' : ''}><label for="clean-1">최악</label>
+					<input type="radio" id="clean-2" name="clean" value="2" ${review.clean eq 2 ? 'checked' : ''}><label for="clean-2">별로</label>
+					<input type="radio" id="clean-3" name="clean" value="3" ${review.clean eq 3 ? 'checked' : ''}><label for="clean-3">보통</label>
+					<input type="radio" id="clean-4" name="clean" value="4" ${review.clean eq 4 ? 'checked' : ''}><label for="clean-4">만족</label>
+					<input type="radio" id="clean-5" name="clean" value="5" ${review.clean eq 5 ? 'checked' : ''}><label for="clean-5">최고</label>
 				</div>
 			</div>
 		</div>
-
 		
 		<div class="form-row" style="display: flex; margin-top: 20px;">
-			<input type="submit" value="리뷰 작성" />
+			<input type="submit" value="리뷰 수정" />
 		</div>
 	</form>
 </div>

@@ -14,6 +14,8 @@ public interface ReviewService {
 	public WaitingVO getWaitingById(long waitingId) throws Exception;
 	public StoreVO selectStoreInfo (long storeId) throws Exception;
 	public long addReservationReview(ReviewVO review) throws Exception;
-	public long addWatingReview(ReviewVO review) throws Exception;
+	public long addWaitingReview(ReviewVO review) throws Exception;
 	public void addReviewImageFiles(List<ImageFileVO> imgList) throws Exception;
+	public ReviewVO getRivew(long reviewId) throws Exception;
+	public List<ImageFileVO> getImageFile (long reviewId) throws Exception;
 }
