@@ -1,9 +1,12 @@
 package com.spring.teamProject.controller;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,10 +33,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.RecaptchaService;
+import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.tool.DebugEmailUtil; // Added for email testing
 import com.spring.teamProject.vo.MemberVO;
+import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.SocialAccountVO;
 import com.spring.teamProject.vo.UserDetailsVO;
-import com.spring.teamProject.tool.DebugEmailUtil; // Added for email testing
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +53,9 @@ public class MemberController {
 
     @Autowired
     private RecaptchaService recaptchaService;
+
+    @Autowired
+    private ReservationService reservationService; // 이 부분을 추가하세요.
 
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
@@ -84,7 +92,7 @@ public class MemberController {
         if (savedRequest != null) {
             model.addAttribute("loginRedirectMessage", "로그인이 필요한 서비스입니다. 로그인 후 이전 페이지로 이동합니다.");
         }
-        
+
         model.addAttribute("body", "member/login.jsp");
         return "layout/layout";
     }
@@ -206,7 +214,7 @@ public class MemberController {
                                       @RequestParam("phone") String phone) {
         Map<String, Object> response = new HashMap<>();
         String loginId = memberService.findLoginId(memberName, phone);
-        
+
         if (loginId != null) {
             response.put("success", true);
             response.put("loginId", loginId);
@@ -220,7 +228,7 @@ public class MemberController {
     public String resetPassword(@RequestParam("loginId") String loginId,
                                 @RequestParam("email") String email,
                                 RedirectAttributes redirectAttributes) {
-        
+
         boolean isSuccess = memberService.resetPassword(loginId, email);
 
         if (isSuccess) {
@@ -228,14 +236,14 @@ public class MemberController {
         } else {
             redirectAttributes.addFlashAttribute("error", "일치하는 회원 정보를 찾을 수 없습니다.");
         }
-        
+
         return "redirect:/member/login";
     }
 
     // =================================================================
     // == 마이페이지 (MyPage) - USER, OWNER, ADMIN 공통 진입점
     // =================================================================
-    
+
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
         MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
@@ -251,6 +259,45 @@ public class MemberController {
             return "redirect:/owner/dashboard";
         } else { // USER
             model.addAttribute("memberInfo", memberInfo);
+
+            try {
+                // 1. 예약 정보 조회
+                List<ReservationVO> reservations = reservationService.getReservationsByMemberId((long) memberInfo.getMemberId());
+
+                // 2. 예약 정보 목록을 JSTL에서 사용할 수 있도록 변환
+                // 각 ReservationVO 객체를 순회하며 날짜 타입을 변환합니다.
+                // 여기서는 ReservationDisplayDTO와 같은 DTO를 사용하는 것이 더 깔끔하지만,
+                // ReservationVO에 직접 Date 필드를 추가하는 방법도 고려할 수 있습니다.
+                // 여기서는 임시로 Map을 사용해 필요한 정보를 담아 전달합니다.
+
+                List<Map<String, Object>> displayReservations = reservations.stream()
+                    .map(res -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("reservationId", res.getReservationId());
+                        map.put("storeId", res.getStoreId());
+                        map.put("guestCount", res.getGuestCount());
+                        map.put("status", res.getStatus());
+
+                        if (res.getReservationTime() != null) {
+                            // LocalDateTime을 Date로 변환
+                            Date reservationDate = Date.from(res.getReservationTime().atZone(ZoneId.systemDefault()).toInstant());
+                            map.put("reservationDate", reservationDate);
+                        }
+
+                        // TODO: ReservationVO에 가게 이름(storeName)이 있다면 추가
+                        // map.put("storeName", res.getStoreName());
+
+                        return map;
+                    })
+                    .collect(Collectors.toList());
+
+                model.addAttribute("reservations", displayReservations);
+
+            } catch (Exception e) {
+                //logger.error("예약 정보 조회 중 오류 발생: {}", e.getMessage(), e);
+                model.addAttribute("error", "예약 정보를 불러오는 데 실패했습니다.");
+            }
+
             model.addAttribute("body", "member/mypage.jsp");
             return "layout/layout";
         }
@@ -341,7 +388,7 @@ public class MemberController {
 
         return "redirect:/member/edit-profile";
     }
-    
+
     @PostMapping("/set-password")
     public String setPasswordForSocialUser(@RequestParam("loginId") String loginId,
                                            @RequestParam("newLoginPw") String newPassword,
@@ -375,7 +422,7 @@ public class MemberController {
             return "redirect:/member/edit-profile";
         }
     }
-    
+
     @GetMapping("/link-account")
     public String linkAccountForm(Model model, HttpSession session) {
         Object socialLinkInfo = session.getAttribute("socialLinkInfo");
@@ -392,7 +439,7 @@ public class MemberController {
                                      @RequestParam("password") String password,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
-        
+
         Map<String, Object> socialLinkInfo = (Map<String, Object>) session.getAttribute("socialLinkInfo");
         if (socialLinkInfo == null) {
             return "redirect:/";
@@ -409,7 +456,7 @@ public class MemberController {
             UserDetailsVO userDetails = new UserDetailsVO(linkedMember);
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            
+
             session.removeAttribute("socialLinkInfo");
             session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
 

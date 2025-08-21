@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 
 <!-- 컨트롤러에서 보낸 성공 메시지(msg)가 있을 경우, alert 창을 띄웁니다. -->
@@ -19,6 +20,7 @@
         overflow-x: auto;
         white-space: nowrap;
         padding-bottom: 15px;
+        position: relative;
     }
     .scroll-item {
         display: inline-block;
@@ -29,17 +31,29 @@
     }
     /* 스크롤바 숨기기 (선택 사항) */
     .scroll-container::-webkit-scrollbar {
-        display: none;
+/*         display: none; */
     }
     .profile-img {
         width: 150px;
         height: 150px;
         object-fit: cover; /* 이미지가 원 안에서 잘리지 않고 꽉 차도록 설정 */
     }
+/*     /* 오른쪽 끝에 어둡게 만드는 그라데이션 효과 추가 */ */
+/*     .scroll-container::after { */
+/*         content: ""; */
+/*         position: absolute; */
+/*         top: 0; */
+/*         right: 0; /* 이 속성은 컨테이너의 오른쪽 끝에 위치시킵니다. */ */
+/*         width: 50px; */
+/*         height: 100%; */
+/*         background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(0, 0, 0, 0.1)); */
+/*         pointer-events: none; */
+/*         z-index: 1; /* z-index를 추가하여 콘텐츠 위에 겹쳐지도록 합니다. */ */
+/*     } */
 </style>
 
 <div class="container my-5">
-    
+
     <%-- 프로필 섹션 --%>
     <div class="row mb-5 align-items-center">
         <div class="col-auto"> <%-- col-md-2 대신 col-auto로 변경하여 이미지 크기에 맞게 조절 --%>
@@ -119,19 +133,56 @@
             <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
         </div>
         <div class="scroll-container">
-            <%-- TODO: DB에서 실제 예약 목록을 가져와 c:forEach로 반복 --%>
-            <c:forEach var="i" begin="1" end="5">
-                <div class="card scroll-item">
-                    <div class="card-body">
-                        <h5 class="card-title">예약한 가게 ${i}</h5>
-                        <p class="card-text">예약 시간: <strong>17:00</strong></p>
-                        <p class="card-text">예약 인원: <strong>2명</strong></p>
-                        <a href="#" class="btn btn-sm btn-primary">상세보기</a>
-                        <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=1&reservationId=22" class="btn btn-sm btn-primary">리뷰쓰기</a>
-                    </div>
-                </div>
-            </c:forEach>
-        </div>
+	        <c:choose>
+	            <c:when test="${not empty reservations}">
+	                <c:forEach var="reservation" items="${reservations}">
+	                    <div class="card scroll-item">
+	                        <div class="card-body">
+	                            <%-- TODO: ReservationVO에 가게 이름이 없다면 storeId를 표시합니다. --%>
+	                            <h5 class="card-title">가게 ID: ${reservation.storeId}</h5>
+
+	                            <p class="card-text">
+	                                예약 시간:
+	                                <strong>
+	                                    <%-- Date 객체인 reservationDate를 사용하여 포맷팅 --%>
+	                                    <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy년 MM월 dd일 HH:mm"/>
+	                                </strong>
+	                            </p>
+	                            <p class="card-text">
+	                                예약 인원: <strong>${reservation.guestCount}명</strong>
+	                            </p>
+	                            <p class="card-text">
+	                                상태: <strong>${reservation.status}</strong>
+	                            </p>
+	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">상세보기</a>
+	                            <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">리뷰쓰기</a>
+	                        </div>
+	                    </div>
+	                </c:forEach>
+	            </c:when>
+	            <c:otherwise>
+	                <div class="card scroll-item">
+	                    <div class="card-body text-center">
+	                        <p class="card-text text-muted">예약 정보가 없습니다.</p>
+	                    </div>
+	                </div>
+	            </c:otherwise>
+	        </c:choose>
+	    </div>
+<!--         <div class="scroll-container"> -->
+<%--             TODO: DB에서 실제 예약 목록을 가져와 c:forEach로 반복 --%>
+<%--             <c:forEach var="i" begin="1" end="5"> --%>
+<!--                 <div class="card scroll-item"> -->
+<!--                     <div class="card-body"> -->
+<%--                         <h5 class="card-title">예약한 가게 ${i}</h5> --%>
+<!--                         <p class="card-text">예약 시간: <strong>17:00</strong></p> -->
+<!--                         <p class="card-text">예약 인원: <strong>2명</strong></p> -->
+<!--                         <a href="#" class="btn btn-sm btn-primary">상세보기</a> -->
+<%--                         <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=1&reservationId=22" class="btn btn-sm btn-primary">리뷰쓰기</a> --%>
+<!--                     </div> -->
+<!--                 </div> -->
+<%--             </c:forEach> --%>
+<!--         </div> -->
     </div>
 
 </div>
