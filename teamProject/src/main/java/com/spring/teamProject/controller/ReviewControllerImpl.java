@@ -145,4 +145,104 @@ public class ReviewControllerImpl extends BaseController implements ReviewContro
 		return mav;
 	}
 
+	@Override
+	@RequestMapping(value = "/modifyReview", method = RequestMethod.POST)
+	public ModelAndView modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
+	    ModelAndView mav = new ModelAndView();
+	    String directoryName = "review";
+	    long reviewId = review.getReviewId();
+	    
+	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
+	    List<ImageFileVO> addedFiles = upload(multiReq, directoryName); // 새로 추가된 파일 목록
+
+	    
+	    try {
+	        // 1. 리뷰 본문 및 평점 수정
+	        reviewService.modifyReview(review);
+
+	        int deleteCount = (deleteFileNames != null) ? deleteFileNames.length : 0;
+	        int addCount = (addedFiles != null) ? addedFiles.size() : 0;
+	        
+	        System.out.println("deleteCount:"+deleteCount+"addCount"+addCount);
+
+	        // --- 1. 이미지 추가만 (삭제 없음, 추가만 있음) ---
+	        if (deleteCount == 0 && addCount > 0) {
+	        	reviewService.addReviewImageFiles(addedFiles);
+	        }
+	        // --- 2. 삭제 후 추가 (삭제 > 추가) ---
+	        else if (deleteCount > addCount && addCount > 0) {
+	            // 1. 교체 가능한 범위 내에서는 update
+	            for (int i = 0; i < addCount; i++) {
+	                String oldFileName = deleteFileNames[i];
+	                ImageFileVO newFile = addedFiles.get(i);
+
+	                long imageId = reviewService.getImageId(oldFileName);
+	                newFile.setImageId(imageId);
+	                newFile.setReviewId(reviewId);
+
+	                reviewService.modifyReviewImage(newFile); // 이미지 교체 (update)
+	                deleteFile(oldFileName, directoryName);   // 기존 파일 삭제
+	            }
+
+	            // 2. 남은 삭제 대상은 실제 삭제 처리
+	            for (int i = addCount; i < deleteCount; i++) {
+	                String oldFileName = deleteFileNames[i];
+
+	                reviewService.deleteReviewImage(oldFileName); // DB 이미지 삭제
+	                deleteFile(oldFileName, directoryName);   // 파일 삭제
+	            }
+	        }
+
+	        // --- 3. 삭제 후 추가 (삭제 < 추가) ---
+	        else if (deleteCount < addCount && deleteCount > 0) {
+	        	int displayNo= 5-deleteCount;
+	        	
+	            // 삭제 이미지 만큼 기존 이미지 수정 (update)
+	            for (int i = 0; i < deleteCount; i++) {
+	                String oldFileName = deleteFileNames[i];
+	                ImageFileVO newFile = addedFiles.get(i);
+
+	                long imageId = reviewService.getImageId(oldFileName);
+	                newFile.setImageId(imageId);
+	                newFile.setReviewId(reviewId);
+
+	                reviewService.modifyReviewImage(newFile); // update
+	                deleteFile(oldFileName, directoryName);  // 기존 파일 삭제
+	            }
+	            // 남은 추가 이미지들은 새로 insert
+	            for (int i = deleteCount; i < addCount; i++) {
+	                ImageFileVO newFile = new ImageFileVO();
+	                
+	                newFile.setFileName(addedFiles.get(i).getFileName());
+	                newFile.setDisplayNo(displayNo);
+	                newFile.setRegId(review.getMemberId());
+	                newFile.setStoreId(review.getStoreId());
+	                newFile.setReviewId(reviewId);
+	                
+	                reviewService.addReviewImage(newFile);
+	                displayNo++;
+	            }
+	        }
+	        // --- 4. 이미지 삭제만 (삭제 있음, 추가 없음) ---
+	        else if (deleteCount > 0 && addCount == 0) {
+	            for (String oldFileName : deleteFileNames) {
+	                reviewService.deleteReviewImage(oldFileName); // DB 삭제
+	                deleteFile(oldFileName, directoryName);   // 파일 삭제
+	            }
+	        }
+	        // --- 5. 이미지 수정 안 함 (삭제 없음, 추가 없음) ---
+	        else {
+	            // 아무것도 안함
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        mav.setViewName("redirect:/review/reviewForm?error=true");
+	        return mav;
+	    }
+
+	    mav.setViewName("redirect:/member/myPage");
+	    return mav;
+	}
+
 }

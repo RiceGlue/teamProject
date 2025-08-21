@@ -17,5 +17,6 @@ public interface WaitingDAO {
     int countCurrentWaitings(@Param("storeId") Long storeId);
     int countActiveWaitingsByMemberId(Long memberId);
 
-
+    List<WaitingVO> selectWaitingsByMemberId(@Param("memberId") Long memberId);
+    List<WaitingVO> selectCurrentWaitings(@Param("storeId") Long storeId);
 }

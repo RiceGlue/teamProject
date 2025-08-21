@@ -258,4 +258,25 @@ public class WaitingServiceImpl implements WaitingService {
         int count = waitingDAO.countActiveWaitingsByMemberId(memberId);
         return count > 0;
     }
+
+    @Override
+    public List<WaitingVO> getWaitingsByMemberId(Long memberId) {
+        // WaitingDAO에 해당 회원의 웨이팅 목록을 조회하는 메서드를 호출해야 합니다.
+        // 현재 DAO에는 이 메서드가 없으므로, WaitingDAO.java에 추가해야 합니다.
+        return waitingDAO.selectWaitingsByMemberId(memberId);
+    }
+
+    /**
+     * 특정 매장의 현재 대기 중인 웨이팅 목록을 조회합니다.
+     * @param storeId 가게 ID
+     * @return 대기중인 웨이팅 목록 (오래된 순)
+     */
+//    List<WaitingVO> getCurrentWaitings(Long storeId);
+
+    @Override
+    public List<WaitingVO> getCurrentWaitings(Long storeId) {
+        // WaitingDAO에 해당 매장의 'WAITING' 상태인 웨이팅을 조회하는 메서드를 호출
+        return waitingDAO.selectCurrentWaitings(storeId);
+    }
+
 }
