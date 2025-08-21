@@ -38,7 +38,7 @@ import com.spring.teamProject.service.RecaptchaService;
 import com.spring.teamProject.service.ReservationService;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.service.WaitingService;
-import com.spring.teamProject.util.DebugEmailUtil;
+import com.spring.teamProject.tool.DebugEmailUtil;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.SocialAccountVO;
