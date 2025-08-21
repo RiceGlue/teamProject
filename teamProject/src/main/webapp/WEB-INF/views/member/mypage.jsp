@@ -11,8 +11,50 @@
         window.onload = function() {
             alert("${msg}");
         };
+
+
+
     </script>
 </c:if>
+
+<script type="text/javascript">
+function checkReviewStatus(status, type, storeId, id) {
+    let isReviewable = false;
+    let alertMessage = '';
+    const contextPath = '${contextPath}';
+
+    // 웨이팅 상태 체크
+    if (type === 'waiting') {
+        if (status === 'SEATED') {
+            isReviewable = true;
+        } else {
+            alertMessage = '입장 완료된 웨이팅만 리뷰를 남길 수 있습니다.';
+        }
+    }
+    // 예약 상태 체크
+    else if (type === 'reservation') {
+        // 이 상태 값은 시스템에 맞게 조정해야 합니다.
+        // 'COMPLETED'나 'USED' 등 실제 예약 완료 상태
+        if (status === 'COMPLETED' || status === 'USED') {
+            isReviewable = true;
+        } else {
+            alertMessage = '이용 완료된 예약만 리뷰를 남길 수 있습니다.';
+        }
+    }
+
+    if (isReviewable) {
+        // 리뷰 가능한 상태이면 해당 페이지로 이동
+        if (type === 'waiting') {
+            window.location.href = contextPath + '/review/reviewForm?memberId=${memberInfo.memberId}&storeId=' + storeId + '&waitingId=' + id;
+        } else if (type === 'reservation') {
+            window.location.href = contextPath + '/review/reviewForm?memberId=${memberInfo.memberId}&storeId=' + storeId + '&reservationId=' + id;
+        }
+    } else {
+        // 리뷰 불가능한 상태이면 알림창 표시
+        alert(alertMessage);
+    }
+}
+</script>
 
 <style>
     /* 가로 스크롤을 위한 스타일 */
@@ -91,19 +133,40 @@
             <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
         </div>
         <div class="scroll-container">
-            <%-- TODO: DB에서 실제 웨이팅 목록을 가져와 c:forEach로 반복 --%>
-            <c:forEach var="i" begin="1" end="5">
-                <div class="card scroll-item">
-                    <div class="card-body">
-                        <h5 class="card-title">가게 이름 ${i}</h5>
-                        <p class="card-text">대기번호: <span class="fw-bold text-danger">12번</span></p>
-                        <p class="card-text"><small class="text-muted">내 앞 대기: 6팀</small></p>
-                        <a href="#" class="btn btn-sm btn-primary">상세보기</a>
-                        <a href="${contextPath }/review/reviewForm?memberId=${memberInfo.memberId}&storeId=1&waitingId=14" class="btn btn-sm btn-primary">리뷰쓰기</a>
-                    </div>
-                </div>
-            </c:forEach>
-        </div>
+	        <c:choose>
+	            <c:when test="${not empty waitings}">
+	                <c:forEach var="waiting" items="${waitings}">
+	                    <div class="card scroll-item">
+	                        <div class="card-body">
+	                            <h5 class="card-title">${waiting.storeName}</h5>
+	                            <p class="card-text">
+	                                대기번호: <span class="fw-bold text-danger">${waiting.waitingNumber}번</span>
+	                            </p>
+	                            <p class="card-text">
+	                                <small class="text-muted">내 앞 대기: ${waiting.aheadCount}팀</small>
+	                            </p>
+	                            <p class="card-text">
+	                                <small class="text-muted">상태: ${waiting.status}</small>
+	                            </p>
+	                            <!-- <a href="#" class="btn btn-sm btn-primary">상세보기</a> -->
+	                            <%-- <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${waiting.storeId}&waitingId=${waiting.waitingId}" class="btn btn-sm btn-primary">리뷰쓰기</a> --%>
+	                            <a href="javascript:void(0);" onclick="checkReviewStatus('${waiting.status}', 'waiting', '${waiting.storeId}', '${waiting.waitingId}');"
+	                               class="btn btn-sm btn-primary">
+	                               리뷰쓰기
+                            	</a>
+	                        </div>
+	                    </div>
+	                </c:forEach>
+	            </c:when>
+	            <c:otherwise>
+	                <div class="card scroll-item">
+	                    <div class="card-body text-center">
+	                        <p class="card-text text-muted">웨이팅 정보가 없습니다.</p>
+	                    </div>
+	                </div>
+	            </c:otherwise>
+	        </c:choose>
+	    </div>
     </div>
 
     <%-- 나의 위시리스트 섹션 --%>
@@ -139,8 +202,8 @@
 	                    <div class="card scroll-item">
 	                        <div class="card-body">
 	                            <%-- TODO: ReservationVO에 가게 이름이 없다면 storeId를 표시합니다. --%>
-	                            <h5 class="card-title">가게 ID: ${reservation.storeId}</h5>
-
+	                            <%-- <h5 class="card-title">가게 ID: ${reservation.storeId}</h5> --%>
+								<h5 class="card-title">${reservation.storeName}</h5>
 	                            <p class="card-text">
 	                                예약 시간:
 	                                <strong>
@@ -155,7 +218,12 @@
 	                                상태: <strong>${reservation.status}</strong>
 	                            </p>
 	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">상세보기</a>
-	                            <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">리뷰쓰기</a>
+	                            <%-- <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">리뷰쓰기</a> --%>
+	                            <a href="javascript:void(0);"
+		                           onclick="checkReviewStatus('${reservation.status}', 'reservation', '${reservation.storeId}', '${reservation.reservationId}');"
+		                           class="btn btn-sm btn-primary">
+		                           리뷰쓰기
+	                            </a>
 	                        </div>
 	                    </div>
 	                </c:forEach>
