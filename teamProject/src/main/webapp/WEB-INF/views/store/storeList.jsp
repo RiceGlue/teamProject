@@ -132,8 +132,8 @@
 					<c:choose>
 						<c:when test="${empty menulist }"><h3>검색 결과 없음</h3></c:when>
 						<c:otherwise>
+							<div id="map"></div>
 							<c:forEach var="menu" items="${menulist}" varStatus="status">
-								<div id="map"></div>
 								<div class="store-card">
 									<div class="store-image">
 										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}&ownerId=${menu.ownerId}"><img src="${contextPath }/download?directoryName=store&fileName=${menu.fileName}" alt="${menu.fileName }"></a>
@@ -158,8 +158,8 @@
 					<c:choose>
 						<c:when test="${empty addrlist }"><h3>검색 결과 없음</h3></c:when>
 						<c:otherwise>
-							<c:forEach var="addr" items="${addrlist}" varStatus="status">
-								<div id="map"></div>
+							<div id="map"></div>
+							<c:forEach var="addr" items="${addrlist}" varStatus="status">	
 								<div class="store-card">
 									<div class="store-image">
 										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}&ownerId=${addr.ownerId}"><img src="${contextPath }/download?directoryName=store&fileName=${addr.fileName}" alt="${addr.fileName }"></a>
@@ -170,7 +170,7 @@
 									</div>
 		
 									<div class="store-info">
-										<h4>${store.storeName}</h4>
+										<h4>${addr.storeName}</h4>
 										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
 										<p class="meta-info">${addr.storeType} · ${addr.address}</p>
 										<p class="meta-info">${addr.description}</p>
@@ -184,8 +184,8 @@
 					<c:choose>
 						<c:when test="${empty namelist }"><h3>검색 결과 없음</h3></c:when>
 						<c:otherwise>
+							<div id="map"></div>
 							<c:forEach var="name" items="${namelist}" varStatus="status">
-								<div id="map"></div>
 								<div class="store-card">
 									<div class="store-image">
 										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}&ownerId=${name.ownerId}"><img src="${contextPath }/download?directoryName=store&fileName=${name.fileName}" alt="${name.fileName }"></a>
