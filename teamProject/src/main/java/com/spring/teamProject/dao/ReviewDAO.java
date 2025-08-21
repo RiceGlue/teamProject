@@ -22,4 +22,9 @@ public interface ReviewDAO {
 	public void insertReviewImageFiles(List<ImageFileVO> imgList) throws DataAccessException;
 	public ReviewVO selectReview(long reviewId) throws DataAccessException;
 	public List<ImageFileVO> selectReviewImageFile(long reviewId) throws DataAccessException;
+	public void updateReview (ReviewVO review) throws DataAccessException;
+	public long selectImageId (String fileName) throws DataAccessException;
+	public void updateReviewImage (ImageFileVO imgFile) throws DataAccessException;
+	public void deleteReviewImage(String fileName) throws DataAccessException;
+	public void insertReviewImage(ImageFileVO imgFile) throws DataAccessException;
 }

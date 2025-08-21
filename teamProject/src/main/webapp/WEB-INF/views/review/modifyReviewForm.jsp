@@ -2,7 +2,6 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <c:if test="${param.error eq 'true'}">
     <script>alert("리뷰 작성 실패");</script>
@@ -42,158 +41,106 @@ input[type="button"]:hover { background-color: #f0f0f0; }
 </style>
 
 <script>
-// 전역 변수로 선택된 모든 파일을 저장할 배열을 선언합니다.
-let selectedFiles = [];
-
-function updateRatingMessage(rating) {
-  const message = document.getElementById('rating-message');
-  if (rating >= 4) {
-    message.textContent = '어떤 점이 좋았나요?';
-  } else if (rating === 3) {
-    message.textContent = '어떤 점이 괜찮았나요?';
-  } else if (rating >= 1) {
-    message.textContent = '어떤 점이 아쉬웠나요?';
-  } else {
-    message.textContent = '별점을 선택해주세요';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  const ratingInputs = document.querySelectorAll('input[name="rating"]');
-  ratingInputs.forEach(input => {
-    input.addEventListener('change', function () {
-      updateRatingMessage(parseInt(this.value));
-    });
-  });
-});
+let selectedFiles = [];     // 새로 추가한 파일 객체
+let existingImages = [];    // 서버에서 불러온 기존 이미지 파일 이름
+let deleteFiles = [];       // 삭제할 기존 파일 이름
 
 function previewReviewImage(input) {
-	  const preview = document.getElementById('imagePreview');
 	  const files = Array.from(input.files);
+	  const preview = document.getElementById('imagePreview');
 	  const maxImages = 5;
 
-	  // 새로 선택한 파일 중 중복되지 않은 파일만 추가
+	  // 기존 + 새로 추가된 이미지 수 고려
+	  let totalImages = existingImages.length + selectedFiles.length - deleteFiles.length;
+
 	  files.forEach(file => {
 	    const isDuplicate = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-	    if (!isDuplicate) {
+	    const canAdd = totalImages < maxImages;
+
+	    if (!isDuplicate && canAdd) {
 	      selectedFiles.push(file);
+	      totalImages++;
+
+	      const reader = new FileReader();
+	      reader.onload = function (e) {
+	        const item = document.createElement('div');
+	        item.className = 'image-preview-item';
+
+	        const img = document.createElement('img');
+	        img.src = e.target.result;
+
+	        const removeBtn = document.createElement('span');
+	        removeBtn.className = 'remove-image';
+	        removeBtn.innerHTML = '&times;';
+	        removeBtn.onclick = function () {
+	        	  deleteFiles.push(fileName); // 이때 fileName은 스코프 상 문제 없어야 함
+	        	  existingImages = existingImages.filter(f => f !== fileName);
+	        	  item.remove();
+	        	};
+
+
+	        item.appendChild(img);
+	        item.appendChild(removeBtn);
+	        preview.appendChild(item);
+	      };
+	      reader.readAsDataURL(file);
 	    }
 	  });
 
-	  // 최대 이미지 개수 제한
-	  if (selectedFiles.length > maxImages) {
-	    alert(`이미지는 최대 ${maxImages}장까지 업로드할 수 있습니다.`);
-	    selectedFiles = selectedFiles.slice(0, maxImages);
-	  }
-
-	  // 미리보기 다시 그리기
-	  preview.innerHTML = '';
-	  selectedFiles.forEach(file => {
-	    if (!file.type.startsWith('image/')) return;
-	    const reader = new FileReader();
-	    reader.onload = function(e) {
-	      const item = document.createElement('div');
-	      item.className = 'image-preview-item';
-
-	      const img = document.createElement('img');
-	      img.src = e.target.result;
-
-	      const removeBtn = document.createElement('span');
-	      removeBtn.className = 'remove-image';
-	      removeBtn.innerHTML = '&times;';
-
-	      // 삭제 버튼 클릭 시 해당 파일 제거
-	      removeBtn.onclick = function() {
-	        selectedFiles = selectedFiles.filter(f => f !== file);
-	        previewReviewImage(input);  // 미리보기 갱신
-	      };
-
-	      item.appendChild(img);
-	      item.appendChild(removeBtn);
-	      preview.appendChild(item);
-	    };
-	    reader.readAsDataURL(file);
-	  });
-
-	  // input 초기화 필요 없음 (파일 추가 누적 허용)
+	  // 파일 input 초기화 (같은 파일 다시 선택 가능하게 하려면 필요)
+	  input.value = '';
 	}
 
-
 function clearImages() {
-  const preview = document.getElementById('imagePreview');
-  preview.innerHTML = '';
-  // 배열도 함께 비웁니다.
-  selectedFiles = [];
-  const fileInput = document.getElementById('fileName');
-  fileInput.value = ''; // 이 부분은 비워도 됩니다.
-}
+	  const preview = document.getElementById('imagePreview');
+	  preview.innerHTML = '';
+	  // 배열도 함께 비웁니다.
+	  selectedFiles = [];
+	  const fileInput = document.getElementById('fileName');
+	  fileInput.value = ''; // 이 부분은 비워도 됩니다.
+	}
 
 function checkReview() {
-  const form = document.querySelector('form');
+	  const form = document.querySelector('form');
+	  const formData = new FormData(form);
 
-  const ratingInputs = document.querySelectorAll('input[name="rating"]');
-  if (![...ratingInputs].some(r => r.checked)) {
-    alert('별점을 선택해주세요.');
-    return false; // form.submit() 대신 false 반환
-  }
+	  // 파일 추가
+	  selectedFiles.forEach(file => {
+	    formData.append('fileName', file);
+	  });
 
-  const content = form.content.value.trim();
-  if (content.length < 10) {
-    alert('리뷰 내용을 10자 이상 작성해주세요.');
-    form.content.focus();
-    return false;
-  }
+	  // 삭제 파일 추가
+	  deleteFiles.forEach(fileName => {
+	    formData.append('deleteFileName[]', fileName); // 중요!
+	  });
 
-  const tasteInputs = document.getElementsByName('taste');
-  if (![...tasteInputs].some(r => r.checked)) {
-    alert('음식 맛 평점을 선택해주세요.');
-    return false;
-  }
+	  // 디버깅용 로그
+	  for (let pair of formData.entries()) {
+	    console.log(pair[0] + ': ' + pair[1]);
+	  }
 
-  const moodInputs = document.getElementsByName('mood');
-  if (![...moodInputs].some(r => r.checked)) {
-    alert('분위기 평점을 선택해주세요.');
-    return false;
-  }
+	  // fetch 요청
+	  fetch(form.action, {
+	    method: 'POST',
+	    body: formData
+	  })
+	  .then(response => {
+	    if (!response.ok) throw new Error('리뷰 작성 실패');
+	    window.location.href = `${contextPath}/member/myPage`; // 여기도 수정 필요할 수 있음
+	  })
+	  .catch(error => {
+	    alert(error.message);
+	    const memberId = form.memberId?.value || '';
+	    const storeId = form.storeId?.value || '';
+	    const reservationId = form.reservationId?.value || '';
+	    const waitingId = form.waitingId?.value || '';
+	    
+	    window.location.href = `${contextPath}/review/reviewForm?memberId=${memberId}&storeId=${storeId}&reservationId=${reservationId}&waitingId=${waitingId}&error=true`;
+	  });
 
-  const serviceInputs = document.getElementsByName('service');
-  if (![...serviceInputs].some(r => r.checked)) {
-    alert('서비스 평점을 선택해주세요.');
-    return false;
-  }
+	  return false;
+	}
 
-  const cleanInputs = document.getElementsByName('clean');
-  if (![...cleanInputs].some(r => r.checked)) {
-    alert('청결 상태 평점을 선택해주세요.');
-    return false;
-  }
-  
-  // 폼 제출 전에 FormData에 파일을 추가합니다.
-  const formData = new FormData(form);
-  selectedFiles.forEach((file, index) => {
-      formData.append('fileName[]', file);
-  });
-
-  // AJAX를 통해 폼 데이터를 서버로 보냅니다.
-  fetch(form.action, {
-      method: 'POST',
-      body: formData
-  })
-  .then(response => {
-      if (!response.ok) {
-          throw new Error('리뷰 작성 실패');
-      }
-      // 성공적으로 완료되면 페이지를 리다이렉트합니다.
-      window.location.href = '${contextPath}/member/myPage';
-  })
-  .catch(error => {
-      alert(error.message);
-      // 실패 시 리뷰 작성 페이지로 다시 이동
-      window.location.href = '${contextPath}/review/reviewForm?memberId=' + form.memberId.value + '&storeId=' + form.storeId.value + '&reservationId=' + form.reservationId.value + '&waitingId=' + form.waitingId.value + '&error=true';
-  });
-
-  return false; // 기본 폼 제출을 막습니다.
-}
 </script>
 
 
@@ -247,38 +194,40 @@ function checkReview() {
 				<%-- 이미지 미리보기 로직 --%>
 		<c:if test="${not empty imglist}">
 		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-				const preview = document.getElementById('imagePreview');
-				const imageFiles = [
-					<c:forEach var="image" items="${imglist}" varStatus="loop">
-						'${contextPath}/download?fileName=${image.fileName}&directoryName=review'
-						<c:if test="${not loop.last}">,</c:if>
-					</c:forEach>
-				];
-				
-				imageFiles.forEach(src => {
-					const item = document.createElement('div');
-					item.className = 'image-preview-item';
+		document.addEventListener('DOMContentLoaded', function () {
+		  const preview = document.getElementById('imagePreview');
+		  const imageFiles = [
+		    <c:forEach var="image" items="${imglist}" varStatus="loop">
+		      { src: '${contextPath}/download?fileName=${image.fileName}&directoryName=review', fileName: '${image.fileName}' }
+		      <c:if test="${!loop.last}">,</c:if>
+		    </c:forEach>
+		  ];
 		
-					const img = document.createElement('img');
-					img.src = src;
+		  imageFiles.forEach(({ src, fileName }) => {
+		    existingImages.push(fileName);  // 기존 파일 이름 저장
 		
-					const removeBtn = document.createElement('span');
-					removeBtn.className = 'remove-image';
-					removeBtn.innerHTML = '&times;';
+		    const item = document.createElement('div');
+		    item.className = 'image-preview-item';
 		
-					// 삭제 버튼 로직 추가 필요
-					removeBtn.onclick = function() {
-						// 서버에서 이미지를 삭제하거나, 제출 시 삭제할 목록에 추가하는 로직
-						item.remove();
-					};
+		    const img = document.createElement('img');
+		    img.src = src;
 		
-					item.appendChild(img);
-					item.appendChild(removeBtn);
-					preview.appendChild(item);
-				});
-			});
+		    const removeBtn = document.createElement('span');
+		    removeBtn.className = 'remove-image';
+		    removeBtn.innerHTML = '&times;';
+		    removeBtn.onclick = function () {
+		      deleteFiles.push(fileName); // 삭제 배열에 추가
+		      existingImages = existingImages.filter(f => f !== fileName);
+		      item.remove();
+		    };
+		
+		    item.appendChild(img);
+		    item.appendChild(removeBtn);
+		    preview.appendChild(item);
+		  });
+		});
 		</script>
+
 		</c:if>
 		
 		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">

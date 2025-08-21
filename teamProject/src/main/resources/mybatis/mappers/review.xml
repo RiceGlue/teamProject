@@ -186,5 +186,57 @@
 			select * from image_file where review_id = #{reviewId}
 		]]>
 	</select>
+	
+	<update id="updateReview" parameterType="ReviewVO" >
+		<![CDATA[
+			UPDATE reviews
+			SET
+		        rating = #{rating},
+		        content = #{content},
+		        taste = #{taste},
+		        mood = #{mood},
+		        service = #{service},
+		        clean = #{clean},
+		        updated_at = now()
+		    WHERE review_id = #{reviewId}
+		]]>
+	</update>
 
+	<select id="selectImageId" parameterType="String" resultType="String" >
+		<![CDATA[
+			select image_id from image_file where file_name=#{fileNmae}
+		]]>
+	</select>
+	
+	<update id="updateReviewImage" parameterType="ImageFileVO" >
+		<![CDATA[
+			UPDATE image_file
+			SET
+				file_name=#{fileName},
+				updated_at=now()
+			WHERE image_id=#{imageId}
+		]]>
+	</update>
+	
+	<delete id="deleteReviewImage" parameterType="String" >
+		<![CDATA[
+			delete from image_file where file_name=#{fileName}
+		]]>
+	</delete>
+	
+	<insert id="insertReviewImage" parameterType="ImageFileVO" >
+		<![CDATA[
+			insert into image_file (file_name, display_no, reg_id, store_id, review_id, created_at)
+			values
+			(
+				#{fileName},
+				#{displayNo},
+				#{regId},
+				#{storeId},
+				#{reviewId},
+				now()	 
+			)
+				
+		]]>
+	</insert>
 </mapper>

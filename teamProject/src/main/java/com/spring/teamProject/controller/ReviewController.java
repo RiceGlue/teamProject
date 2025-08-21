@@ -9,5 +9,5 @@ import com.spring.teamProject.vo.ReviewVO;
 public interface ReviewController {
 	
 	public ModelAndView addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
-
+	public ModelAndView modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
 }

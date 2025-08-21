@@ -67,4 +67,30 @@ public class ReviewServiceImpl implements ReviewService {
 		List<ImageFileVO> imglist = reviewDAO.selectReviewImageFile(reviewId);
 		return imglist;
 	}
+	
+	@Override
+	public void modifyReview (ReviewVO review) throws Exception {
+		reviewDAO.updateReview(review);
+	}
+	
+	@Override
+	public long getImageId (String fileName) throws Exception {
+		long imageId = reviewDAO.selectImageId(fileName);
+		return imageId;
+	}
+	
+	@Override
+	public void modifyReviewImage(ImageFileVO imgFile) throws Exception {
+		reviewDAO.updateReviewImage(imgFile);
+	}
+	
+	@Override
+	public void deleteReviewImage(String fileName) throws Exception {
+		reviewDAO.deleteReviewImage(fileName);
+	}
+	
+	@Override
+	public void addReviewImage(ImageFileVO imgFile) throws Exception {
+		reviewDAO.insertReviewImage(imgFile);
+	}
 }
