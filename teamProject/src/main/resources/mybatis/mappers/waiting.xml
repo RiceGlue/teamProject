@@ -49,4 +49,16 @@
           AND status IN ('WAITING', 'CALLED');
     </select>
 
+	<select id="selectWaitingsByMemberId" resultType="com.spring.teamProject.vo.WaitingVO">
+	    SELECT *
+	    FROM waitings  WHERE member_id = #{memberId}
+	    ORDER BY created_at DESC;
+    </select>
+
+	<select id="selectCurrentWaitings" resultType="com.spring.teamProject.vo.WaitingVO">
+	    SELECT *
+	    FROM waitings
+	    WHERE store_id = #{storeId} AND status = 'WAITING'
+	    ORDER BY created_at ASC;
+</select>
 </mapper>
