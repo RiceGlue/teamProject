@@ -223,19 +223,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // 아이디 찾기 로직 구현
+    // [수정] 아이디 찾기 로직을 이름과 이메일로 변경합니다. 
     @Override
-    public String findLoginId(String memberName, String phone) {
-        // 전화번호에서 '-' 등 불필요한 문자 제거
-        String cleanPhone = phone.replaceAll("[^0-9]", "");
+    public String findLoginId(String memberName, String email) {
+        MemberVO member = memberDAO.findByNameAndEmail(memberName, email);
         
-        // DB에 저장된 형식에 맞게 앞자리 '0' 제거 (한국 번호일 경우)
-        if (cleanPhone.startsWith("0")) {
-            cleanPhone = cleanPhone.substring(1);
-        }
-
-        MemberVO member = memberDAO.findByNameAndPhone(memberName, cleanPhone);
-        
-        // 일치하는 회원이 있고, 아이디가 존재할 경우 아이디 반환
         if (member != null && StringUtils.hasText(member.getLoginId())) {
             return member.getLoginId();
         }
@@ -281,6 +273,54 @@ public class MemberServiceImpl implements MemberService {
             // 트랜잭션에 의해 롤백되므로, 여기서 false를 반환하여 실패를 알립니다.
             return false;
         }
+    }
+
+    // ✨ --- [신규] 아이디 찾기 테스트 이메일 발송 로직 구현 --- ✨
+    // @Override
+    // public boolean sendFindIdTestEmail(String memberName, String email) {
+    //     logger.info("테스트 이메일 발송 요청: name={}, email={}", memberName, email);
+    //     MemberVO member = memberDAO.findByNameAndEmail(memberName, email);
+
+    //     if (member != null) {
+    //         try {
+    //             emailService.sendSimpleMessage(
+    //                 email, 
+    //                 "[얌테이블] 발송 기능 테스트", 
+    //                 "이 메일이 성공적으로 도착했다면, 아이디 찾기를 위한 이메일 발송 기능이 정상적으로 작동하는 것입니다."
+    //             );
+    //             logger.info("테스트 이메일 발송 성공: to={}", email);
+    //             return true;
+    //         } catch (Exception e) {
+    //             logger.error("테스트 이메일 발송 중 예외 발생: to={}", email, e);
+    //             return false;
+    //         }
+    //     } else {
+    //         logger.warn("테스트 이메일 발송 실패: 일치하는 회원 정보 없음. name={}, email={}", memberName, email);
+    //         return false;
+    //     }
+    // }
+
+    // ✨ --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ✨
+    @Override
+    public String sendVerificationCodeForId(String memberName, String email) {
+        MemberVO member = memberDAO.findByNameAndEmail(memberName, email);
+        
+        // 일치하는 회원이 있고, 아이디가 존재할 경우
+        if (member != null && StringUtils.hasText(member.getLoginId())) {
+            // 1. 6자리 인증번호 생성
+            String verificationCode = generateVerificationCode();
+
+            // 2. 이메일 발송
+            emailService.sendSimpleMessage(
+                member.getEmail(), 
+                "[얌테이블] 아이디 찾기 인증번호 안내", 
+                "아이디 찾기를 위한 인증번호는 [" + verificationCode + "] 입니다."
+            );
+            
+            // 3. 컨트롤러에서 세션에 저장할 수 있도록 인증번호와 회원 정보를 함께 반환
+            return verificationCode + ":" + member.getLoginId() + ":" + maskEmail(member.getEmail());
+        }
+        return null;
     }
 
     // 8자리 영문+숫자 임시 비밀번호 생성 헬퍼 메소드
@@ -423,5 +463,28 @@ public class MemberServiceImpl implements MemberService {
             }
         }
         // TODO: 다른 국가 코드에 대한 유효성 검사 규칙 추가 가능
+    }
+
+    // 6자리 숫자 인증번호 생성 헬퍼 메소드
+    private String generateVerificationCode() {
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+        return String.format("%06d", number);
+    }
+
+    // 이메일 마스킹 처리 헬퍼 메소드
+    private String maskEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            return "";
+        }
+        int atIndex = email.indexOf('@');
+        String localPart = email.substring(0, atIndex);
+        String domainPart = email.substring(atIndex);
+        
+        if (localPart.length() <= 3) {
+            return localPart.charAt(0) + "**" + domainPart;
+        } else {
+            return localPart.substring(0, 3) + "****" + domainPart;
+        }
     }
 }

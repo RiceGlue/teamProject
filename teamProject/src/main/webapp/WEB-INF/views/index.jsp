@@ -3,50 +3,22 @@
 <div class="row">
 	<!-- test 섹션 -->
 	<div class="container my-4">
-	    <h2>test 링크</h2>
-	    <div class="row row-cols-2 row-cols-md-2 g-3">
+	    <h2>매장 관리자 (점주) TEST 링크</h2>
+	    <div class="row g-3">
 	        <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/waiting/customer/register">사용자(손님) 웨이팅 등록 버튼</a></h5>
+	                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
 	                </div>
 	            </div>
 	        </div>
-	        <div class="col">
+	         <div class="col">
 	            <div class="card text-center">
 	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정,<br> 웨이팅 실시간 대기열 리스트 버튼</a></h5>
+	                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
 	                </div>
 	            </div>
 	        </div>
-
-	    </div>
-	    <div class="row row-cols-2 row-cols-md-2 g-3">
-	        <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/reservation/customer/bookForm?storeId=1"> 사용자(손님)  매장(ID: 1)예약 등록 버튼</a></h5>
-	                </div>
-	            </div>
-	        </div>
-	        <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 매장ID = 1  예약 관리</a></h5>
-	                </div>
-	            </div>
-	        </div>
-
-	    </div>
-	    <div class="row row-cols-2 row-cols-md-2 g-3">
-	        <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/reservation/customer/bookForm?storeId=1"> 사용자(손님)  매장(ID: 1)예약 취소(결제환불)</a></h5>
-	                </div>
-	            </div>
-	        </div>
-
 	    </div>
 	</div>
 
@@ -74,7 +46,7 @@
 	        	<div class="card text-center">
 	                <div class="card-body">
 	                    <h5 class="card-title"><a href="${contextPath}/store/storeList?option=region&keyword=서울">서울</a></h5>
-						
+
 	                </div>
 	            </div>
 	        	<div class="card text-center">
@@ -87,7 +59,7 @@
 	        		<h5 class="card-title"><a href="${contextPath}/review/reviewForm?memberId=1&storeId=1&reservationId=4">리뷰 작성</a></h5>
 	        		<h5 class="card-title"><a href="${contextPath}/review/modifyReviewForm?memberId=1&reviewId=38">리뷰 수정</a></h5>
 	        	</div>
-	            
+
 	        </div>
 	        <div class="col">
 	            <div class="card text-center">

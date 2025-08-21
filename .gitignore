@@ -1,90 +1,58 @@
-teamProject/src/main/resources/firebase-service-account.json
-bin/com/spring/teamProject/common/BaseController.class
-bin/com/spring/teamProject/common/FileDownloadController.class
-bin/com/spring/teamProject/common/ViewNameInterceptor.class
-bin/com/spring/teamProject/common/ViewUtil.class
-bin/com/spring/teamProject/config/FirebaseConfig.class
-bin/com/spring/teamProject/config/OAuth2AuthenticationSuccessHandler.class
-bin/com/spring/teamProject/config/SecurityConfig.class
-bin/com/spring/teamProject/config/WebConfig.class
-bin/com/spring/teamProject/controller/AdminStoreController.class
-bin/com/spring/teamProject/controller/AdminStoreControllerImpl.class
-bin/com/spring/teamProject/controller/HomeController.class
-bin/com/spring/teamProject/controller/MemberController.class
-bin/com/spring/teamProject/controller/ReservationCustomerController.class
-bin/com/spring/teamProject/controller/ReservationOwnerController.class
-bin/com/spring/teamProject/controller/StoreController.class
-bin/com/spring/teamProject/controller/StoreControllerImpl.class
-bin/com/spring/teamProject/controller/WaitingCustomerController.class
-bin/com/spring/teamProject/controller/WaitingOwnerController.class
-bin/com/spring/teamProject/dao/AdminStoreDAO.class
-bin/com/spring/teamProject/dao/MemberDAO.class
-bin/com/spring/teamProject/dao/StoreDAO.class
-bin/com/spring/teamProject/dao/WaitingDAO.class
-bin/com/spring/teamProject/dao/WaitingSettingDAO.class
-bin/com/spring/teamProject/service/AdminStoreService.class
-bin/com/spring/teamProject/service/AdminStoreServiceImpl.class
-bin/com/spring/teamProject/service/CustomOAuth2UserService.class
-bin/com/spring/teamProject/service/EmailService.class
-bin/com/spring/teamProject/service/EmailServiceImpl.class
-bin/com/spring/teamProject/service/FCMService.class
-bin/com/spring/teamProject/service/MemberService.class
-bin/com/spring/teamProject/service/MemberServiceImpl.class
-bin/com/spring/teamProject/service/RecaptchaService.class
-bin/com/spring/teamProject/service/StoreService.class
-bin/com/spring/teamProject/service/StoreServiceImpl.class
-bin/com/spring/teamProject/service/UserDetailsServiceImpl.class
-bin/com/spring/teamProject/service/WaitingService.class
-bin/com/spring/teamProject/service/WaitingServiceImpl.class
-bin/com/spring/teamProject/service/WaitingSettingService.class
-bin/com/spring/teamProject/service/WaitingSettingServiceImpl.class
-bin/com/spring/teamProject/tool/PasswordEncoderUtil.class
-bin/com/spring/teamProject/vo/ImageFileVO.class
-bin/com/spring/teamProject/vo/MemberVO.class
-bin/com/spring/teamProject/vo/MenuVO.class
-bin/com/spring/teamProject/vo/PaymentVO.class
-bin/com/spring/teamProject/vo/ReservationVO.class
-bin/com/spring/teamProject/vo/ReviewVO.class
-bin/com/spring/teamProject/vo/StoreTableVO.class
-bin/com/spring/teamProject/vo/StoreVO.class
-bin/com/spring/teamProject/vo/UserDetailsVO.class
-bin/com/spring/teamProject/vo/WaitingSettingVO.class
-bin/com/spring/teamProject/vo/WaitingVO.class
-teamProject/server.log
-*.class
+# =================================================================
+# == IDE & Editor
+# =================================================================
 .project
-teamProject/bootrun.log
+.settings/
+.vscode/
+/.metadata/
+
+# =================================================================
+# == Build & Dependencies
+# =================================================================
+bin/
+build/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+node_modules/
+
+# =================================================================
+# == Logs & Temporary Files
+# =================================================================
+*.log
 crash_log.txt
+err.txt
+quest.txt
+teamProject/server.log
+teamProject/bootrun.log
+log/
+teamProject/server_startup.log
+
+# =================================================================
+# == Sensitive & Local Configuration
+# =================================================================
+teamProject/src/main/resources/firebase-service-account.json
+teamProject/src/main/resources/application.properties
+teamProject/gradle.properties.txt
+
+# =================================================================
+# == Backups & Archives
+# =================================================================
+backup/
+teamProject_250813.zip
+
+# =================================================================
+# == OS-specific
+# =================================================================
+.DS_Store
+Thumbs.db
+
+# =================================================================
+# == Miscellaneous
+# =================================================================
 join_user_with_id_check.txt
 related_files.txt
 related_files_by_type.txt
-/.metadata/
-teamProject/gradle.properties.txt
-teamProject/src/main/resources/application.properties
-log/server.log
-err.txt
-quest.txt
-teamProject_250813.zip
-텍스트/common.txt
-텍스트/config.txt
-텍스트/controller.txt
-텍스트/dao.txt
-텍스트/service_part1.txt
-텍스트/service_part2.txt
-텍스트/service_part3.txt
-텍스트/service_part4.txt
-텍스트/teamProject.txt
-텍스트/tool.txt
-텍스트/vo.txt
-텍스트/views/admin.txt
-텍스트/views/franchise.txt
-텍스트/views/layout.txt
-텍스트/views/member.txt
-텍스트/views/reservation.txt
-텍스트/views/store.txt
-텍스트/views/waiting.txt
-log/server_startup.log
-.vscode/settings.json
-teamProject/server_startup.log
-backup/
-
+텍스트/
