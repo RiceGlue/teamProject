@@ -74,6 +74,10 @@
 		<result property="avgRating" column="avgRating" />
 		<result property="countRating" column="countRating" />
 		<result property="countScoreRating" column="countScoreRating" />
+		<result property="taste" column="taste" />
+		<result property="mood" column="mood" />
+		<result property="service" column="service" />
+		<result property="clean" column="clean" />
 	</resultMap>
 	
 	<insert id="insertStoreInfo" parameterType="java.util.Map" >

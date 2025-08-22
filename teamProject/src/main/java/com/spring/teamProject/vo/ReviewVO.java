@@ -128,5 +128,4 @@ public class ReviewVO {
 		this.clean = clean;
 	}
 	
-	
 }

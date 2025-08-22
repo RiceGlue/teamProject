@@ -102,4 +102,7 @@ public interface ReservationService {
     boolean deleteTempReservationByTransactionId(String transactionId);
 
     boolean cancelReservationByPaymentId(String paymentId);
+    
+    void increaseUserTemperatureByReservation(long reservationId) throws Exception;
+    void decreaseUserTemperatureByReservation(long reservationId) throws Exception;
 }

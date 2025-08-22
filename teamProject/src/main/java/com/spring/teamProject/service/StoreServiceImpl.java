@@ -55,7 +55,6 @@ public class StoreServiceImpl implements StoreService{
 		Map storeMap = new HashMap<>();
 
 		long storeId = storeVO.getStoreId();
-		long ownerId = storeVO.getOwnerId();
 
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
 		List<ReviewVO> review = storeDAO.selectStoreReview(storeId);

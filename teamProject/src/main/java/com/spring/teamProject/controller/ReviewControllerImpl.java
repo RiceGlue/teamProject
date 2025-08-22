@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -77,76 +79,52 @@ public class ReviewControllerImpl extends BaseController implements ReviewContro
 	}
 
 	@Override
-	@RequestMapping(value="/addReview" , method=RequestMethod.POST)
-	public ModelAndView addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
-		ModelAndView mav = new ModelAndView();
+	@PostMapping("/addReview")
+	@ResponseBody
+	public ResponseEntity<?> addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) {
+	    Long regId = review.getMemberId();
+	    Long storeId = review.getStoreId();
+	    Long reservationId = review.getReservationId();
+	    Long waitingId = review.getWaitingId();
 
-		Long regId = review.getMemberId();
-		Long storeId= review.getStoreId();
+	    try {
+	        long reviewId;
 
-		System.out.println(regId+","+storeId);
+	        if (reservationId != null && reservationId != 0) {
+	            reviewId = reviewService.addReservationReview(review);
+	            System.out.print(reviewId);
+	        } else if (waitingId != null && waitingId != 0) {
+	            reviewId = reviewService.addWaitingReview(review);
+	        } else {
+	            return ResponseEntity.badRequest().body("예약 또는 웨이팅 정보가 누락되었습니다.");
+	        }
 
-		Long reservationId = review.getReservationId();
-		Long waitingId = review.getWaitingId();
+	        // 이미지 업로드 및 매핑
+	        List<ImageFileVO> imgList = upload(multiReq, "review");
+	        for (int i = 0; i < imgList.size(); i++) {
+	            ImageFileVO imageFile = imgList.get(i);
+	            imageFile.setRegId(regId);
+	            imageFile.setStoreId(storeId);
+	            imageFile.setReviewId(reviewId);
+	            imageFile.setDisplayNo(i);
+	        }
 
-		if (reservationId != null && reservationId != 0) {
+	        reviewService.addReviewImageFiles(imgList);
 
-			try {
-				reviewService.addReservationReview(review);
+	        // 성공 시 JSON 응답
+	        return ResponseEntity.ok().body(Map.of("success", true, "redirectUrl", "/member/mypage"));
 
-				List<ImageFileVO> imgList = upload(multiReq, "review");
-
-				// 각 이미지 객체에 필요한 정보를 설정합니다.
-				for (int i = 0; i < imgList.size(); i++) {
-					ImageFileVO imageFile = imgList.get(i);
-					imageFile.setRegId(regId);
-					imageFile.setStoreId(storeId);
-					imageFile.setReviewId(review.getReviewId());
-					imageFile.setDisplayNo(i); // displayNo를 0부터 순차적으로 설정
-				}
-
-				// 이미지 정보를 DB에 저장합니다.
-				reviewService.addReviewImageFiles(imgList);
-
-				mav = ViewUtil.layout("/member/mypage");
-
-			} catch (Exception e) {
-			// 오류 처리
-				e.printStackTrace();
-				mav.addObject("error", true);
-				mav.setViewName("redirect:/review/reviewForm?memberId=" + regId + "&storeId=" + storeId + "&reservationId=" + reservationId);
-			}
-
-		} else if (waitingId != null && waitingId != 0) {
-			try {
-				reviewService.addWaitingReview(review);
-
-				List<ImageFileVO> imgList = upload(multiReq, "review");
-
-				// 각 이미지 객체에 필요한 정보를 설정합니다.
-				for (int i = 0; i < imgList.size(); i++) {
-					ImageFileVO imageFile = imgList.get(i);
-					imageFile.setRegId(regId);
-					imageFile.setStoreId(storeId);
-					imageFile.setReviewId(review.getReviewId());
-					imageFile.setDisplayNo(i); // displayNo를 0부터 순차적으로 설정
-				}
-
-				// 이미지 정보를 DB에 저장합니다.
-				reviewService.addReviewImageFiles(imgList);
-
-				// 리뷰 작성 완료 후 마이페이지로 리다이렉트합니다.
-				mav = ViewUtil.layout("/member/mypage");
-
-			} catch (Exception e) {
-				// 오류 처리
-				e.printStackTrace();
-				mav.addObject("error", true);
-				mav.setViewName("redirect:/review/reviewForm?memberId=" + regId + "&storeId=" + storeId + "&waitingId=" + waitingId);
-			}
-		}
-
-		return mav;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.internalServerError().body(Map.of(
+	            "success", false,
+	            "message", "리뷰 등록 중 오류 발생",
+	            "redirectUrl", "/review/reviewForm?memberId=" + regId + "&storeId=" + storeId +
+	                (reservationId != null ? "&reservationId=" + reservationId : "") +
+	                (waitingId != null ? "&waitingId=" + waitingId : "") +
+	                "&error=true"
+	        ));
+	    }
 	}
 
 	@Override
@@ -231,6 +209,36 @@ public class ReviewControllerImpl extends BaseController implements ReviewContro
 	            "message", "리뷰 수정 중 오류 발생"
 	        ));
 	    }
+	}
+	
+	@Override
+	@RequestMapping(value="/deleteReview", method=RequestMethod.POST)
+	public ModelAndView deleteReview(@RequestParam("reviewId") long reviewId) throws Exception {
+		ModelAndView mav = new ModelAndView();
+		String directoryName = "review";
+		
+		try {
+				List<ImageFileVO> imglist = reviewService.getImageFile(reviewId);
+				
+				for(int i=0;i<imglist.size();i++) {
+					
+					String fileName = imglist.get(i).getFileName();
+					reviewService.deleteReviewImage(imglist.get(i).getFileName());
+					deleteFile(fileName,directoryName);
+				}
+				
+				reviewService.deleteReview(reviewId);
+				
+				mav.addObject("success", true);
+				mav.setViewName("redirect:/member/mypage");
+		}catch (Exception e) {
+			e.printStackTrace();
+			
+			mav.addObject("error", true);
+			mav.setViewName("redirect:/review/modifyReviewForm?reviewId="+reviewId);
+		}
+		
+		return mav;
 	}
 
 	// 공통 메타 설정 함수

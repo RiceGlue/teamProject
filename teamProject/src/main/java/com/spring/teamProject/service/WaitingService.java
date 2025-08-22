@@ -29,5 +29,7 @@ public interface WaitingService {
      * @return 대기중인 웨이팅 목록 (오래된 순)
      */
     List<WaitingVO> getCurrentWaitings(Long storeId);
-
+    
+    void increaseUserTemperatureByWaiting(long waitingId);
+    void decreaseUserTemperatureByWaiting(long waitingId);
 }

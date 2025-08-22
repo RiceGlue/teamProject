@@ -107,65 +107,32 @@
 		]]>
 	</select>
 	
-	<insert id="insertReservationReview" parameterType="ReviewVO" >	    
-	    <![CDATA[
-	    INSERT INTO reviews (
-	    	review_id,
-	        member_id,
-	        store_id,
-	        reservation_id,
-	        rating,
-	        content,
-	        taste,
-	        mood,
-	        service,
-	        clean,
-	        created_at
-	    ) VALUES (
-	    	null,
-	        #{memberId},
-	        #{storeId},
-	        #{reservationId},
-	        #{rating},
-	        #{content},
-	        #{taste},
-	        #{mood},
-	        #{service},
-	        #{clean},
-	        NOW()
-	    )
-	    ]]>
-	    <selectKey keyProperty="reviewId" resultType="int" order="AFTER">
+	<insert id="insertReservationReview" parameterType="ReviewVO">
+	    <selectKey keyProperty="reviewId" resultType="long" order="AFTER">
 	        SELECT LAST_INSERT_ID()
 	    </selectKey>
-	</insert>
-	
-	<insert id="insertWaitingReview" parameterType="ReviewVO" useGeneratedKeys="true" keyProperty="reviewId">
 	    INSERT INTO reviews (
-	        member_id,
-	        store_id,
-	        waiting_id,
-	        rating,
-	        content,
-	        taste,
-	        mood,
-	        service,
-	        clean,
-	        created_at
+	        member_id, store_id, reservation_id,
+	        rating, content, taste, mood, service, clean, created_at
 	    ) VALUES (
-	        #{memberId},
-	        #{storeId},
-	        #{waitingId},
-	        #{rating},
-	        #{content},
-	        #{taste},
-	        #{mood},
-	        #{service},
-	        #{clean},
-	        NOW()
+	        #{memberId}, #{storeId}, #{reservationId},
+	        #{rating}, #{content}, #{taste}, #{mood}, #{service}, #{clean}, NOW()
 	    )
 	</insert>
 	
+	<insert id="insertWaitingReview" parameterType="ReviewVO">
+	    <selectKey keyProperty="reviewId" resultType="long" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	    INSERT INTO reviews (
+	        member_id, store_id, waiting_id,
+	        rating, content, taste, mood, service, clean, created_at
+	    ) VALUES (
+	        #{memberId}, #{storeId}, #{waitingId},
+	        #{rating}, #{content}, #{taste}, #{mood}, #{service}, #{clean}, NOW()
+	    )
+	</insert>
+
 	<insert id="insertReviewImageFiles" parameterType="list">
 	    insert into image_file (file_name, display_no, reg_id, store_id, review_id, created_at)
 	    values
@@ -235,8 +202,19 @@
 				#{storeId},
 				#{reviewId},
 				now()	 
-			)
-				
+			)		
 		]]>
 	</insert>
+	
+	<delete id="deleteReviewImages" parameterType="long" >
+		<![CDATA[
+			delete from image_file where review_id =#{reviewId}
+		]]>
+	</delete>
+	
+	<delete id="deleteReview" parameterType="long" >
+		<![CDATA[
+			delete from reviews where review_id =#{reviewId}
+		]]>
+	</delete>
 </mapper>

@@ -56,8 +56,8 @@
 					<h5 class="card-title"><a href="${contextPath}/franchise/modifyMenuForm?storeId=1">메뉴 수정</a></h5>
 	        	</div>
 	        	<div class="card text-center">
-	        		<h5 class="card-title"><a href="${contextPath}/review/reviewForm?memberId=1&storeId=1&reservationId=4">리뷰 작성</a></h5>
-	        		<h5 class="card-title"><a href="${contextPath}/review/modifyReviewForm?memberId=1&reviewId=38">리뷰 수정</a></h5>
+	        		<h5 class="card-title"><a href="${contextPath}/review/reviewForm?memberId=3&storeId=1&reservationId=114">리뷰 작성</a></h5>
+	        		<h5 class="card-title"><a href="${contextPath}/review/modifyReviewForm?memberId=3&reviewId=60">리뷰 수정</a></h5>
 	        	</div>
 
 	        </div>

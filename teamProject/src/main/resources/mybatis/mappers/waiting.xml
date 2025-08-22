@@ -60,5 +60,25 @@
 	    FROM waitings
 	    WHERE store_id = #{storeId} AND status = 'WAITING'
 	    ORDER BY created_at ASC;
-</select>
+	</select>
+	
+	<update id ="increaseUserTemperatureByWaiting" parameterType="long" >
+	    UPDATE members
+		SET manner_temperature = GREATEST(manner_temperature + 1, 0)
+		WHERE member_id = (
+		    SELECT member_id
+		    FROM waitings
+		    WHERE waiting_id = #{waitingId}
+		)
+    </update>
+    
+    <update id ="decreaseUserTemperatureByWaiting" parameterType="long" >
+    	UPDATE members
+		SET manner_temperature = GREATEST(manner_temperature - 1, 0)
+		WHERE member_id = (
+		    SELECT member_id
+		    FROM waitings
+		    WHERE waiting_id = #{waitingId}
+		)
+    </update>
 </mapper>

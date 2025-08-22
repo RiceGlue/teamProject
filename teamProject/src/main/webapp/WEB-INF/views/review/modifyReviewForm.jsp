@@ -4,37 +4,52 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <style>
-.storeInfo { text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-.storeInfo img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
-.storeInfo h4 { margin: 5px 0; font-weight: 600; font-size: 1.2rem; }
-.storeInfo h2 { margin: 10px 0 0; font-weight: 700; font-size: 1.5rem; }
-form { max-width: 420px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; gap: 10px; }
-.star-rating { direction: rtl; font-size: 2.5rem; unicode-bidi: bidi-override; display: flex; justify-content: center; gap: 8px; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+
+.storeInfo { text-align: center; padding: 40px 20px 20px 20px; background-color: #fff; border-bottom: 1px solid #e0e0e0; }
+.storeInfo img { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.storeInfo h4 { font-size: 22px; color: #333; margin: 10px 0 5px; }
+.storeInfo h2 { font-size: 26px; font-weight: 600; color: #444; margin: 10px 0; }
+
+form { width: 95%; max-width: 750px; margin: 30px auto; background-color: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+
+.form-row { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
+
+.star-rating { direction: rtl; display: flex; justify-content: center; font-size: 2.2rem; gap: 5px; }
 .star-rating input[type="radio"] { display: none; }
-.star-rating label { cursor: pointer; color: #ccc; user-select: none; transition: color 0.2s ease-in-out; }
-.star-rating input[type="radio"]:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: gold; }
-.form-row { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.form-row h4 { margin: 0; font-weight: 500; color: #555; }
-textarea#content { width: 100%; min-height: 100px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; resize: vertical; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-input[type="file"] { width: 100%; padding: 12px; border: 2px dashed #ccc; border-radius: 8px; cursor: pointer; font-size: 0.9rem; color: #666; box-sizing: border-box; }
-#imagePreview {margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; width: 420px; }
-.image-preview-item {position: relative; width: calc(20% - 8px); height: auto; aspect-ratio: 1 / 1;}
-.image-preview-item img {width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 1px solid #ddd;}
-.remove-image {position: absolute; top: -5px; right: -5px; background-color: #000; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 14px; cursor: pointer; z-index: 10;}
-#fileNames {margin-top: 10px; font-size: 0.9em; color: #555;}
-#fileNames > div {margin-bottom: 5px;}
-.clear-button-container {width: 100%; text-align: right; margin-top: 5px;}
-.clear-images-button {background: none; border: 1px solid #ccc; border-radius: 5px; padding: 5px 10px; font-size: 0.9rem; cursor: pointer;}
-input[type="submit"] { width: 100%; padding: 12px 0; background: none; border: 1.5px solid #444; border-radius: 8px; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: background-color 0.2s ease-in-out; }
-input[type="submit"]:hover { background-color: #f0f0f0; }
-.storeRating {display: flex; flex-direction: column; gap: 30px; margin-top: 30px;}
-.rating-group {display: flex; flex-direction: column; align-items: center; gap: 10px;}
-.rating-label {font-weight: bold; font-size: 1rem;}
-.rating-options {display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;}
-.rating-options input[type="radio"] {display: none;}
-.rating-options label {padding: 8px 14px; border: 1px solid #ccc; border-radius: 20px; font-size: 0.9rem; cursor: pointer; color: #333; background-color: #f9f9f9; transition: all 0.2s ease-in-out;}
-.rating-options input[type="radio"]:checked + label {border-color: #000; font-weight: bold; background-color: #eaeaea;}
-#errorMessage { color: red; font-size: 0.9em; text-align: center; margin-bottom: 10px; }
+.star-rating label { color: #ccc; cursor: pointer; transition: color 0.2s; }
+.star-rating input[type="radio"]:checked ~ label { color: #FFD700; }
+.star-rating label:hover, .star-rating label:hover ~ label { color: #FFD700; }
+
+#rating-message { font-size: 16px; color: #666; margin-top: 10px; }
+
+textarea#content { width: 100%; max-width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; font-size: 16px; background-color: #fafafa; }
+
+#imagePreview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; justify-content: center; }
+#imagePreview img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+
+.clear-button-container { margin-top: 10px; text-align: center; }
+.clear-images-button { background-color: #e53935; color: white; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
+.clear-images-button:hover { background-color: #c62828; }
+
+.storeRating { margin-top: 30px; }
+.rating-group { margin-bottom: 20px; }
+.rating-label { font-weight: bold; font-size: 16px; color: #444; margin-bottom: 8px; }
+.rating-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.rating-options input[type="radio"] { display: none; }
+.rating-options label { background-color: #eee; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+.rating-options input[type="radio"]:checked + label { background-color: #2196F3; color: white; }
+
+input[type="submit"] { background-color: #1976D2; color: white; border: none; padding: 14px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
+input[type="submit"]:hover { background-color: #1565C0; }
+
+@media (max-width: 600px) {
+  form { padding: 20px; }
+  .rating-options { justify-content: center; }
+  .storeInfo img { width: 90px; height: 90px; }
+  .star-rating { font-size: 1.8rem; }
+  textarea#content { font-size: 15px; }
+}
 </style>
 
 
@@ -208,6 +223,24 @@ function checkReview() {
     // Ajax를 사용하므로 폼 제출을 막아야 함
     return false;
 }
+
+function confirmDelete(reviewId) {
+    if (confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '${contextPath}/review/deleteReview';
+
+        const reviewIdInput = document.createElement('input');
+        reviewIdInput.type = 'hidden';
+        reviewIdInput.name = 'reviewId';
+        reviewIdInput.value = reviewId;
+
+        form.appendChild(reviewIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 </script>
 
 <div class="storeInfo">
@@ -313,8 +346,9 @@ function checkReview() {
             </div>
         </div>
         
-        <div class="form-row" style="display: flex; margin-top: 20px;">
-            <input type="submit" value="리뷰 수정" />
-        </div>
+        <div class="form-row" style="display: flex; justify-content: space-between; align-items: center;">
+			<input type="button" onclick="confirmDelete(${review.reviewId})" value="리뷰 삭제">
+			<input type="submit" value="리뷰 수정" />
+		</div>
     </form>
 </div>

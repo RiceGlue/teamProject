@@ -27,4 +27,6 @@ public interface ReviewDAO {
 	public void updateReviewImage (ImageFileVO imgFile) throws DataAccessException;
 	public void deleteReviewImage(String fileName) throws DataAccessException;
 	public void insertReviewImage(ImageFileVO imgFile) throws DataAccessException;
+	public void deleteReviewImages(long reviewId) throws DataAccessException;
+	public void deleteReview(long reviewId) throws DataAccessException;
 }

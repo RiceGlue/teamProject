@@ -74,6 +74,10 @@
 		<result property="avgRating" column="avgRating" />
 		<result property="countRating" column="countRating" />
 		<result property="countScoreRating" column="countScoreRating" />
+		<result property="taste" column="taste" />
+		<result property="mood" column="mood" />
+		<result property="service" column="service" />
+		<result property="clean" column="clean" />
 	</resultMap>
 
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
@@ -192,9 +196,11 @@
 
 	<select id="selectReviewImage" parameterType="long" resultMap="imagelist">
 		<![CDATA[
-			select image_id, file_name, file_type, display_no, review_id, created_at, updated_at
-			from image_file
-			where store_id = #{storeId} and review_id is not null
+			SELECT *
+			FROM image_file
+			WHERE store_id = #{storeId}
+			  AND review_id IS NOT NULL
+			  AND display_no = 0;
 		]]>
 	</select>
 
