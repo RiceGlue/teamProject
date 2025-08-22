@@ -58,7 +58,7 @@ public class MemberController {
 
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private StoreService storeService;
 
@@ -229,7 +229,7 @@ public class MemberController {
                                                  HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         String result = memberService.sendVerificationCodeForId(memberName, email);
-        
+
         if (result != null) {
             String[] parts = result.split(":");
             String code = parts[0];
@@ -290,7 +290,7 @@ public class MemberController {
     // =================================================================
     // == 마이페이지 (MyPage) - USER, OWNER, ADMIN 공통 진입점
     // =================================================================
-    
+
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
         MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
@@ -461,7 +461,7 @@ public class MemberController {
 
         return "redirect:/member/edit-profile";
     }
-    
+
     @PostMapping("/set-password")
     public String setPasswordForSocialUser(@RequestParam("loginId") String loginId,
                                            @RequestParam("newLoginPw") String newPassword,
@@ -495,7 +495,7 @@ public class MemberController {
             return "redirect:/member/edit-profile";
         }
     }
-    
+
     @GetMapping("/link-account")
     public String linkAccountForm(Model model, HttpSession session) {
         Object socialLinkInfo = session.getAttribute("socialLinkInfo");
@@ -512,7 +512,7 @@ public class MemberController {
                                      @RequestParam("password") String password,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
-        
+
         Map<String, Object> socialLinkInfo = (Map<String, Object>) session.getAttribute("socialLinkInfo");
         if (socialLinkInfo == null) {
             return "redirect:/";
@@ -529,7 +529,7 @@ public class MemberController {
             UserDetailsVO userDetails = new UserDetailsVO(linkedMember);
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            
+
             session.removeAttribute("socialLinkInfo");
             session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
 
