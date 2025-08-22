@@ -56,4 +56,7 @@ public class BannerEntity {
 
     @Column(name = "view_count")
     private int viewCount;
+
+    @Column(name = "promotion_id")
+    private Long promotionId;
 }

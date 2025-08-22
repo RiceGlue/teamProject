@@ -25,7 +25,7 @@
 	            <div class="carousel-inner">
 	                <c:forEach var="banner" items="${bannerList}" varStatus="status">
 	                    <div class="carousel-item <c:if test="${status.first}">active</c:if>">
-	                        <a href="#">
+	                        <a href="${contextPath}/promotion/detail?id=${banner.promotionId}">
 	                            <img src="${contextPath}/images/banners/${banner.getImagePath()}"
 	                                 class="d-block w-100 img-fluid" alt="${banner.text}">
 								<div class="carousel-caption d-none d-md-block">
@@ -57,30 +57,10 @@
 	</div>
 
 
-	<!-- test 섹션 -->
-	<div class="container my-4">
-	    <h2>매장 관리자 (점주) TEST 링크</h2>
-	    <div class="row g-3">
-	        <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
-	                </div>
-	            </div>
-	        </div>
-	         <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</div>
+
 
 	<div class="container my-4">
 		<div class="col-12">
-			<h2>검색바</h2>
 			<div class="search-container">
 				<input type="text" class="search-input" placeholder="검색어를 입력하세요..." id="keyword">
 				<button type="button" class="search-button" onclick="goSearch()">
@@ -173,4 +153,27 @@
 			<h2>내 지역 맛집</h2>
 		</div>
 	</div>
+
+
+	<!-- test 섹션 -->
+	<div class="container my-4">
+	    <h2>매장 관리자 (점주) TEST 링크</h2>
+	    <div class="row g-3">
+	        <div class="col">
+	            <div class="card text-center">
+	                <div class="card-body">
+	                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
+	                </div>
+	            </div>
+	        </div>
+	         <div class="col">
+	            <div class="card text-center">
+	                <div class="card-body">
+	                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
 </div>
