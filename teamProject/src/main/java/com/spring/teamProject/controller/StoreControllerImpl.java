@@ -4,24 +4,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 AuthenticationPrincipal 추가
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.StoreServiceImpl;
 import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.ui.Model; // 💡 Model 클래스 추가
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 AuthenticationPrincipal 추가
-import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
 @Controller
 @RequestMapping(value="/store")
@@ -86,5 +87,5 @@ public class StoreControllerImpl implements StoreController {
 
 		return mav;
 	}
-
+	
 }

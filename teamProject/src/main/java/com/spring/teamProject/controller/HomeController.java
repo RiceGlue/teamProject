@@ -1,19 +1,25 @@
 package com.spring.teamProject.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.spring.teamProject.vo.BannerEntity; // 💡 올바른 클래스 임포트
 import com.spring.teamProject.service.BannerService;
+import com.spring.teamProject.service.StoreService;
+import com.spring.teamProject.vo.BannerEntity; // 💡 올바른 클래스 임포트
 
 @Controller
 public class HomeController {
 
     private final BannerService bannerService;
+    
+    @Autowired
+    private StoreService storeService;
 
     @Autowired
     public HomeController(BannerService bannerService) {
@@ -32,4 +38,12 @@ public class HomeController {
         // 3. 뷰를 반환합니다.
         return "layout/layout";
     }
+    
+//    @GetMapping("/")
+//    public String getBestReviewByStores(Model model) throws Exception {
+//    	Map storeReivew = storeService.getBestReviewByStores();
+//    	
+//    	model.addAttribute("storeReview", storeReivew);
+//    	return "layout/layout";
+//    } 
 }

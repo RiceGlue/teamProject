@@ -33,4 +33,9 @@ public interface StoreDAO {
 
 	// 매장 ID로 매장 정보를 가져오는 메서드 추가
 	public StoreVO selectStoreById(long storeId) throws DataAccessException;
+	
+	public List<StoreVO> selectStoreNearUser (String address) throws DataAccessException;
+	
+	public List<ReviewVO> selectBestReviewByStores() throws DataAccessException;
+	public List<ImageFileVO> selectBestReviewImageByStores() throws DataAccessException;
 }

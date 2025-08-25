@@ -84,6 +84,20 @@
 		<result property="cleanPercent" column="clean_percent" />
 	</resultMap>
 
+<!-- 	<select id="selectBestReviewByStores" resultMap="storelist" > -->
+<!-- 		<![CDATA[ -->
+<!-- 			WITH RankedReviews AS ( -->
+<!-- 			  SELECT *, -->
+<!-- 			         ROW_NUMBER() OVER (PARTITION BY store_id ORDER BY created_at DESC) AS rn -->
+<!-- 			  FROM reviews -->
+<!-- 			  WHERE rating = 5 -->
+<!-- 			) -->
+<!-- 			SELECT * -->
+<!-- 			FROM RankedReviews -->
+<!-- 			WHERE rn = 1; -->
+<!-- 		]]> -->
+<!-- 	</select> -->
+	
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
@@ -92,13 +106,15 @@
 
 	<select id="selectStoreByRegion" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
-	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
-			FROM stores s
-			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.address LIKE CONCAT('%', #{keyword}, '%')
-			GROUP BY s.store_id
-			ORDER BY s.store_id
+			WITH RankedReviews AS (
+			  SELECT *,
+			         ROW_NUMBER() OVER (PARTITION BY store_id ORDER BY created_at DESC) AS rn
+			  FROM reviews
+			  WHERE rating = 5
+			)
+			SELECT *
+			FROM RankedReviews
+			WHERE rn = 1;
 		]]>
 	</select>
 
@@ -224,6 +240,13 @@
 	<select id="selectStoreById" parameterType="long" resultMap="storelist">
 		<![CDATA[
 			select * from stores where store_id = #{storeId}
+		]]>
+	</select>
+	
+	<select id="selectStoreNearUser" parameterType="String" resultMap="storelist" >
+		<![CDATA[
+			select * from stores
+			where address like concat ('%', #{address}, '%' )
 		]]>
 	</select>
 

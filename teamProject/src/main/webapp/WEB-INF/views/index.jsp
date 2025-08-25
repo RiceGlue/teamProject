@@ -4,21 +4,17 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Google Maps JavaScript API 로드 (API 키 필요) -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap"></script>
+
 <style>
-    .carousel-item img {
-        height: 500px; /* 원하는 높이로 설정 */
-        object-fit: cover; /* 이미지가 잘리지 않고 비율을 유지하며 채워지도록 설정 */
-    }
-    /* 텍스트 배경 스타일 추가 */
-    .carousel-caption {
-        background-color: rgba(0, 0, 0, 0.5); /* 검은색(0,0,0)에 투명도 50%를 적용 */
-        border-radius: 5px; /* 모서리 둥글게 */
-        padding: 10px; /* 내부 여백 추가 */
-    }
+    .carousel-item img { height: 500px; object-fit: cover; }
+    .carousel-caption { background-color: rgba(0, 0, 0, 0.5); border-radius: 5px; padding: 10px; }
+    #map { height:300px; width:100%; background-color:#eee; }
 </style>
 
 <div class="row">
-
 	<div class="container my-4">
 	    <div class="col-12">
 	        <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -56,9 +52,6 @@
 	    </div>
 	</div>
 
-
-
-
 	<div class="container my-4">
 		<div class="col-12">
 			<div class="search-container">
@@ -69,7 +62,6 @@
 			</div>
 		</div>
 	</div>
-	<!-- 지역 선택 섹션 -->
 	<div class="container my-4">
 	    <h2>지역 선택</h2>
 	    <div class="row row-cols-2 row-cols-md-4 g-3">
@@ -116,7 +108,6 @@
 	    </div>
 	</div>
 
-	<!-- 빠른 링크 섹션 -->
 	<div class="container my-4">
 	    <h2>빠른 링크</h2>
 	    <div class="row row-cols-1 row-cols-md-3 g-3">
@@ -139,41 +130,46 @@
 	                <div class="card-body">
 	                    <a href="#" class="stretched-link">테마별</a>
 	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</div>
-	<div class="container my-4">
-		<div class="col-12">
-			<h2>최신인기리뷰</h2>
-		</div>
-	</div>
-	<div class="container my-4">
-		<div class="col-12">
-			<h2>내 지역 맛집</h2>
-		</div>
-	</div>
-
-
-	<!-- test 섹션 -->
-	<div class="container my-4">
-	    <h2>매장 관리자 (점주) TEST 링크</h2>
-	    <div class="row g-3">
-	        <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
-	                </div>
-	            </div>
-	        </div>
-	         <div class="col">
-	            <div class="card text-center">
-	                <div class="card-body">
-	                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container my-4">
+    <div class="col-12">
+        <h2>최신인기리뷰</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="container my-4">
+        <div class="col-12">
+            <h2>내 지역 맛집</h2>
+            <p>사용자 현재 위치 : <span id="address"> 위치 정보를 불러오는 중...</span> </p>
+            <div id="map"></div>
+            <hr />
+            <h4>근처 매장</h4>
+            <div id="nearbyStores"></div>
+         </div>
+    </div>
+</div>
+   
+<div class="container my-4">
+    <h2>매장 관리자 (점주) TEST 링크</h2>
+    <div class="row g-3">
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
+                </div>
+            </div>
+        </div>
+         <div class="col">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>

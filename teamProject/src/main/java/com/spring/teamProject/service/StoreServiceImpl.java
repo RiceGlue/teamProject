@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.spring.teamProject.dao.StoreDAO;
 import com.spring.teamProject.vo.ImageFileVO;
@@ -93,4 +94,21 @@ public class StoreServiceImpl implements StoreService{
 	public StoreVO getStoreById(Long storeId) throws Exception {
 		return storeDAO.selectStoreById(storeId);
 	}
+	
+	@Override
+	public List<StoreVO> searchStoreNearUser(@RequestParam String address) {
+		return storeDAO.selectStoreNearUser(address);
+	}
+	
+//	@Override
+//	public Map getBestReviewByStores() throws Exception {	
+//		Map storeReivew = new HashMap<>();
+//		
+//		List<ReviewVO> reviewList = storeDAO.selectBestReviewByStores();
+//		List<ImageFileVO> reviewImageList = storeDAO.selectBestReviewImageByStores();
+//		
+//		storeReivew.put("reviewList", reviewList);
+//		storeReivew.put("reviewImageList", reviewImageList);
+//		return storeReivew;
+//	}
 }

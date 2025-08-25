@@ -1,6 +1,5 @@
 package com.spring.teamProject.controller;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -14,6 +13,5 @@ public interface StoreController {
 
 	public ModelAndView storeList (@RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception;
 	//public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, HttpServletRequest req, HttpServletResponse res) throws Exception;
-	ModelAndView storeDetail(StoreVO storeVO, UserDetailsVO userDetailsVO, HttpServletRequest req,
-			HttpServletResponse res) throws Exception;
+	ModelAndView storeDetail(StoreVO storeVO, UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception;
 }

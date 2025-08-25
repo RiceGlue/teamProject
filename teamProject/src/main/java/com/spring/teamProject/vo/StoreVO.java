@@ -172,6 +172,5 @@ public class StoreVO {
 	public void setCountRating(int countRating) {
 		this.countRating = countRating;
 	}
-	
-	
+
 }
