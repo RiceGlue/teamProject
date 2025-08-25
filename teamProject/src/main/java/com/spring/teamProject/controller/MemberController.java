@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.teamProject.jpa.dao.WishlistRepository;
 import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.RecaptchaService;
 import com.spring.teamProject.service.ReservationService;
@@ -332,6 +333,9 @@ public class MemberController {
                     return map;
                 }).collect(Collectors.toList());
                 model.addAttribute("reservations", displayReservations);
+
+//                List<WishlistVO> wishlists = wishlistService.getWishlistsByMemberId(memberInfo.getMemberId());
+//                model.addAttribute("wishlists", wishlists);
 
                 // 2. 웨이팅 정보 목록 가져오기
                 List<WaitingVO> waitings = waitingService.getWaitingsByMemberId((long) memberInfo.getMemberId());
