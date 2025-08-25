@@ -138,7 +138,7 @@ function checkReviewStatus(status, type, storeId, id) {
 	                <c:forEach var="waiting" items="${waitings}">
 	                    <div class="card scroll-item">
 	                        <div class="card-body">
-	                            <h5 class="card-title">${waiting.storeName}</h5>
+								<h5><a href="${contextPath}/store/storeDetail?storeId=${waiting.storeId}" class="store-name-link">${waiting.storeName}</a></h5>
 	                            <p class="card-text">
 	                                대기번호: <span class="fw-bold text-danger">${waiting.waitingNumber}번</span>
 	                            </p>
@@ -183,7 +183,7 @@ function checkReviewStatus(status, type, storeId, id) {
                         <div class="card scroll-item">
                             <img src="${contextPath}/download?directoryName=store&fileName=${wishlist.storeFileName}" class="card-img-top" alt="${wishlist.storeName} 이미지">
                             <div class="card-body">
-                                <h6 class="card-title">${wishlist.storeName}</h6>
+                                <h6><a href="${contextPath}/store/storeDetail?storeId=${wishlist.storeId}" class="store-name-link">${wishlist.storeName}</a></h6>
                                 <p class="card-text"><small class="text-muted">${wishlist.address}</small></p>
                             </div>
                         </div>
@@ -214,7 +214,8 @@ function checkReviewStatus(status, type, storeId, id) {
 	                        <div class="card-body">
 	                            <%-- TODO: ReservationVO에 가게 이름이 없다면 storeId를 표시합니다. --%>
 	                            <%-- <h5 class="card-title">가게 ID: ${reservation.storeId}</h5> --%>
-								<h5 class="card-title">${reservation.storeName}</h5>
+								<%-- <h5 class="card-title">${reservation.storeName}</h5> --%>
+								<h5><a href="${contextPath}/store/storeDetail?storeId=${reservation.storeId}" class="store-name-link">${reservation.storeName}</a></h5>
 	                            <p class="card-text">
 	                                예약 시간:
 	                                <strong>

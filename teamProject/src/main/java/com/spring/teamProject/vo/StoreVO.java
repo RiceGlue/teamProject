@@ -3,35 +3,35 @@ package com.spring.teamProject.vo;
 import java.util.Date;
 
 public class StoreVO {
-	
+
 	//stores 테이블
 	private long storeId;
 	private long ownerId;
 	private String storeName;
 	private String storeType;
-	
+
 	private String zipcode;
 	private String address;
 	private String detailAddress;
 	private String extraAddress;
-	
+
 	private String operationType;
 	private String localNumber;
 	private String number1;
 	private String number2;
 	private String description;
-	
+
 	private String closed;
 	private String operatingTime;
 	private String breakTime;
 	private String lastOrder;
-	
+
 	private String amenities;
 	private String fileName;
-	
+
 	private Date createdAt;
 	private Date updatedAt;
-	
+
 	private String avgRating;
 	private int countRating;
 	public long getStoreId() {
@@ -172,6 +172,6 @@ public class StoreVO {
 	public void setCountRating(int countRating) {
 		this.countRating = countRating;
 	}
-	
-	
+
+
 }
