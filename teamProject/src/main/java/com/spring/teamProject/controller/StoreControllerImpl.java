@@ -19,6 +19,10 @@ import com.spring.teamProject.vo.StoreVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.ui.Model; // 💡 Model 클래스 추가
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 AuthenticationPrincipal 추가
+import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
+
 @Controller
 @RequestMapping(value="/store")
 public class StoreControllerImpl implements StoreController {
@@ -62,17 +66,24 @@ public class StoreControllerImpl implements StoreController {
 
 	@Override
 	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
-	public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, @AuthenticationPrincipal UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
+
+		ModelAndView mav = ViewUtil.layout(viewName);
 
 		Map storeMap = storeService.storeDetail(storeVO);
 
 		Long storeId = storeVO.getStoreId();
 		int currentWaitingCount = waitingService.getCurrentWaitingCount(storeId);
 
-		ModelAndView mav = ViewUtil.layout(viewName);
+		if (userDetailsVO != null) {
+			Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
+			mav.addObject("memberId", memberId);
+		}
+
 		mav.addObject("storeMap", storeMap);
 		mav.addObject("currentWaitingCount", currentWaitingCount);
+
 		return mav;
 	}
 

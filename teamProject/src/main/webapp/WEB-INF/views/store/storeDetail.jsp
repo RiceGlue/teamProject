@@ -9,6 +9,7 @@
 <!-- 구글 맵 API -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
 
+<c:set var="memberId" value="${memberId}" />
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview" value="${storeMap.detailReview}" />
@@ -18,7 +19,8 @@
 <%-- <c:set var="res" value="${storeMap.reservation}" /> --%>
 
 <title>${store.storeName}</title>
-
+<!-- 💡 하트 아이콘을 위해 Font Awesome 추가. 기존 script 태그들 아래에 추가하세요. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <style>
 	/* 기존 CSS 유지 */
@@ -37,7 +39,7 @@
 	.tabs li:hover { background-color: white; color:black; }
 	.tabs li a:hover { color:black; }
 	.tab_content { padding: 20px; background-color: #fff; }
-	
+
 	/*메뉴*/
 	.menu_container { display:flex; flex-wrap:wrap; gap:8px; }
 	.menu_card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
@@ -64,7 +66,7 @@
 	.review_text {font-size:14px;color:#333;}
 	.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 	.review-image-thumbnail {object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
-	
+
 	.detail-review-list { margin-top: 20px; }
 	.review-box { border-bottom: 1px solid #d7cece; padding: 10px 5px; }
 	.review-rating { margin-bottom: 5px; }
@@ -75,11 +77,11 @@
 	.review-content { color: #333; line-height: 1.5; }
 	.review-images { display: flex; flex-wrap: wrap; gap: 8px; }
 	.review-image { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
-			
+
 	.detail-box { padding:auto 10px; margin:30px; }
 
 	.wating_container { text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
-		
+
 	#googleMap { width: 100%; height: 300px; border-radius:10px; }
 	.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 	.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
@@ -103,10 +105,103 @@
 	.table-select-area { display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; }
 	.table-slot-btn { margin: 5px; }
 	.table-slot-btn.selected { background-color: #198754; color: white; }
+
+	/* 💡 위시리스트 버튼 CSS 추가 */
+    .wishlist-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        color: #ccc; /* 기본 회색 */
+        transition: color 0.3s ease;
+    }
+    .wishlist-btn.active {
+        color: #ff6347; /* 찜했을 때 빨간색 */
+    }
 </style>
 
 <script>
 let map;
+const memberId = "${memberId}";
+const storeId = ${storeId};
+
+//💡 위시리스트 상태를 확인하는 AJAX 요청
+function checkWishlistStatus() {
+	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+    $.ajax({
+        url: '${contextPath}/wishlist/isWishlisted',
+        type: 'GET',
+        data: {
+            memberId: memberId,
+            storeId: storeId
+        },
+        success: function(response) {
+            if (response === true) {
+                $('#wishlist-btn').addClass('active');
+            } else {
+                $('#wishlist-btn').removeClass('active');
+            }
+        },
+        error: function(error) {
+            console.error('Error checking wishlist status:', error);
+        }
+    });
+}
+
+// 💡 위시리스트 추가/제거를 토글하는 AJAX 요청
+function toggleWishlist() {
+    if (!memberId || memberId === 'null' || memberId === 'undefined') {
+        alert('로그인 후 이용해주세요.');
+        return;
+    }
+
+    const isWishlisted = $('#wishlist-btn').hasClass('active');
+
+    // 💡 이미 위시리스트에 추가된 경우 삭제 여부를 묻는 로직 추가
+    if (isWishlisted) {
+        // '확인'을 누르면 true, '취소'를 누르면 false 반환
+        if (confirm("위시리스트에 이미 추가되었습니다. 삭제하시겠습니까?")) {
+            $.ajax({
+                url: '${contextPath}/wishlist/remove',
+                type: 'DELETE',
+                data: {
+                    memberId: memberId,
+                    storeId: storeId
+                },
+                success: function(response) {
+                    alert(response);
+                    checkWishlistStatus(); // UI 업데이트
+                },
+                error: function(xhr) {
+                    const errorMessage = xhr.responseText || "오류가 발생했습니다.";
+                    alert(errorMessage);
+                    checkWishlistStatus(); // UI 업데이트
+                }
+            });
+        }
+    } else {
+        // 💡 위시리스트에 없는 경우 추가하는 로직
+        $.ajax({
+            url: '${contextPath}/wishlist/add',
+            type: 'POST',
+            data: {
+                memberId: memberId,
+                storeId: storeId
+            },
+            success: function(response) {
+                alert(response);
+                checkWishlistStatus(); // UI 업데이트
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseText || "오류가 발생했습니다.";
+                alert(errorMessage);
+                checkWishlistStatus(); // UI 업데이트
+            }
+        });
+    }
+}
+
+
 function initMap() {
 	const geocoder = new google.maps.Geocoder();
 	const address = '<c:out value="${store.address}"/>';
@@ -146,6 +241,15 @@ function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click
 function openTab3() { document.querySelector('ul.tabs li a[href="#tab3"]').click(); }
 
 $(function () {
+
+	// 💡 페이지 로드 시 위시리스트 상태 확인. 기존 $(function() {}) 내부에 추가하세요.
+	checkWishlistStatus();
+
+	// 💡 위시리스트 버튼 클릭 이벤트
+    $('#wishlist-btn').on('click', function() {
+        toggleWishlist();
+    });
+
 	$("ul.tabs li a").click(function () {
 		const activeTab = $(this).attr("href");
 		$(".tab_content").hide();
@@ -157,7 +261,7 @@ $(function () {
 		}
 		return false;
 	});
-	
+
 	document.getElementById('copyaddress').addEventListener('click', function () {
 		navigator.clipboard.writeText('${store.address}').then(function () {
 			alert("주소가 복사되었습니다.");
@@ -165,7 +269,7 @@ $(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	document.getElementById('copyUrlBtn').addEventListener('click', function () {
 		navigator.clipboard.writeText(window.location.href).then(function () {
 			alert("주소가 복사되었습니다.");
@@ -173,7 +277,7 @@ $(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	$(".tab_content").hide();
 	$("ul.tabs li:first").addClass("active").show();
 	$(".tab_content:first").show();
@@ -184,7 +288,7 @@ $(function () {
 			$('#bookFormBtn').prop('disabled', false);
 		}
 	});
-	
+
 	const today = new Date();
 	const todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
 	$("#reservationDate").val(todayFormatted);
@@ -207,7 +311,7 @@ $(function () {
 						</div>
 					</c:forEach>
 				</div>
-				
+
 				<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
 					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
 					<span class="visually-hidden">Previous</span>
@@ -218,17 +322,18 @@ $(function () {
 				</button>
 			</div>
 		</div>
-		
+
 		<div class="store-details" style="flex: 1;">
 			<div style="display: flex; justify-content: space-between; align-items: center;">
 				<h4 class="mt-3">${store.storeName}</h4>
+				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button>
 				<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 			</div>
 			<div class="rating mt-2 mb-2">
 				<img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지"> ${store.avgRating}&nbsp;&nbsp;&nbsp;리뷰 ${store.countRating}개
 				<button type="button" onClick="openTab3()" class="btn btn-link" style="text-decoration:none; color:black;"><strong>></strong></button>
 			</div>
-			
+
 			<div>
 				<p>
 					<img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} ${store.detailAddress} ${store.extraAddress}
@@ -241,13 +346,13 @@ $(function () {
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="wating_container">
 		<h4>현재 대기</h4>
 		<h6><strong>${currentWaitingCount}</strong>팀</h6>
 		<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
 	</div>
-	
+
 	<div class="tab_container">
 		<div class="tab_container" id="container">
 				<ul class="tabs">
@@ -256,7 +361,7 @@ $(function () {
 				<li><a href="#tab3">리뷰</a></li>
 				<li><a href="#tab4">매장정보</a></li>
 			</ul>
-			
+
 			<div class="tab_container">
 				<div class="tab_content" id="tab1">
 					<h5 class="mt-4">예약</h5>
@@ -277,7 +382,7 @@ $(function () {
 						</div>
 						<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
 					</form>
-					
+
 					<div class="button-group mt-5">
 						<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 					</div>
@@ -300,14 +405,14 @@ $(function () {
 								</div>
 							</c:if>
 						</c:forEach>
-						
+
 						<div class="home_menu_more_btn_wrap">
 							<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
 						</div>
 					</div>
 					<h5 class="mt-4">리뷰</h5>
 				</div>
-				
+
 				<div class="tab_content" id="tab2">
 					<div class="menu_container">
 						<c:forEach var="menu" items="${storeMap.menu}">
@@ -324,7 +429,7 @@ $(function () {
 						</c:forEach>
 					</div>
 				</div>
-				
+
 				<div class="tab_content" id="tab3">
 					<h5 class="mt-4">리뷰</h5>
 					<div class="rating_summary_cards">
@@ -346,7 +451,7 @@ $(function () {
 								</div>
 							</c:forEach>
 						</div>
-						
+
 					</div>
 					<div class="detail-review-list">
 						<h4>리뷰 ${store.countRating}건</h4>
@@ -373,7 +478,7 @@ $(function () {
 									</div>
 									<div class="review-content">${review.content}</div>
 								</div>
-								
+
 								<c:forEach var="img" items="${storeMap.reviewImage}">
 									<c:if test="${img.reviewId == review.reviewId}">
 										<c:if test="${img_status.first}"><div class="review-images"></c:if>
@@ -385,7 +490,7 @@ $(function () {
 						</c:forEach>
 					</div>
 				</div>
-				
+
 				<div class="tab_content" id="tab4">
 					<div class="detail-box">
 						<h4>매장소개</h4>
