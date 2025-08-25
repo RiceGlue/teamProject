@@ -33,7 +33,7 @@
 	.waiting-container h4 { margin-bottom: 5px; font-size: 1.25rem; }
 	.waiting-container h6 { margin-bottom: 15px; font-size: 1.5rem; font-weight: bold; color: #dc3545; }
 	.waiting-container .btn { width: 80%; }
-	
+
 	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
 	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
 	.tabs li:last-child { border-right: none; }
@@ -55,7 +55,6 @@
 	.menu-price { color:#555; margin:2px 0; }
 	.menu-description { color:#777; font-size:12px; margin:2px 0 4px; }
 
-<<<<<<< HEAD
 	.rating-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 5px; margin-bottom: 20px; }
 	.rating-card { padding: 15px; text-align: center; background-color: #fafafa; }
 	.rating-card h2 { font-size: 2rem; margin: 10px 0; }
@@ -78,8 +77,7 @@
 	.load-more-btn:hover { background: #e0e0e0; }
 	.detail-box { padding: 15px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 15px; }
 	.detail-box:last-child { border-bottom: none; }
-		
-=======
+
 	/*리뷰*/
 	.rating{ font-size: 16px; margin-bottom: 10px; }
 	.card-rating, .card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
@@ -112,9 +110,8 @@
 
 	.wating_container { text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
 
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
 	#googleMap { width: 100%; height: 300px; border-radius:10px; }
-	
+
 	.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 	.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
 	.home_menu_image img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
@@ -138,7 +135,6 @@
 	.table-slot-btn { margin: 5px; }
 	.table-slot-btn.selected { background-color: #198754; color: white; }
 
-<<<<<<< HEAD
 	.home_review-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 	.home_review-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 10px; border-bottom: solid 1px #cfcfcf; background-color: #fdfdfd; height: 100px; border-top: solid 1px #cfcfcf;}
 	.home_review-text-wrapper { flex: 1; margin-right: 15px; }
@@ -149,8 +145,7 @@
 	.home_review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 	.home_rating p { margin: 0; font-weight: bold; font-size: 1rem; }
 	.review-view-all button { font-size: 0.9rem; padding: 4px 10px; }
-		
-=======
+
 	/* 💡 위시리스트 버튼 CSS 추가 */
     .wishlist-btn {
         background: none;
@@ -163,7 +158,6 @@
     .wishlist-btn.active {
         color: #ff6347; /* 찜했을 때 빨간색 */
     }
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
 </style>
 
 <script>
@@ -416,13 +410,10 @@ $(document).ready(function(){
 				</button>
 			</div>
 		</div>
-<<<<<<< HEAD
-		
-		<div class="store-details" style="display: table-cell; vertical-align:middle; width:50%; padding-left:20px;">
-=======
+
+<!-- 		<div class="store-details" style="display: table-cell; vertical-align:middle; width:50%; padding-left:20px;"> -->
 
 		<div class="store-details" style="flex: 1;">
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
 			<div style="display: flex; justify-content: space-between; align-items: center;">
 				<h4 class="mt-3">${store.storeName}</h4>
 				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button>
@@ -443,7 +434,7 @@ $(document).ready(function(){
 			<div>
 				<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"><strong>영업중</strong> ${store.operatingTime}</p>
 			</div>
-			
+
 			<div class="waiting-container">
 				<h4>현재 대기</h4>
 				<h6><strong>${currentWaitingCount}</strong>팀</h6>
@@ -451,8 +442,7 @@ $(document).ready(function(){
 			</div>
 		</div>
 	</div>
-<<<<<<< HEAD
-	
+
 	<div class="home_review_container">
 		<div class="home_review-meta">
 			<div class="home_review-header">
@@ -500,14 +490,12 @@ $(document).ready(function(){
 				</c:forEach>
 			</div>
 		</div>
-=======
 
-	<div class="wating_container">
-		<h4>현재 대기</h4>
-		<h6><strong>${currentWaitingCount}</strong>팀</h6>
-		<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
-	</div>
+<!-- 	<div class="wating_container"> -->
+<!-- 		<h4>현재 대기</h4> -->
+<%-- 		<h6><strong>${currentWaitingCount}</strong>팀</h6> --%>
+<%-- 		<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button> --%>
+<!-- 	</div> -->
 
 	<div class="tab_container">
 		<div class="tab_container" id="container">
@@ -545,7 +533,7 @@ $(document).ready(function(){
 					<div class="back-link">
 						<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 					</div>
-					
+
 					<h5 class="mt-4">메뉴</h5>
 					<div class="home_menu_container">
 						<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
@@ -562,16 +550,13 @@ $(document).ready(function(){
 								</div>
 							</c:if>
 						</c:forEach>
-<<<<<<< HEAD
 					</div>
-						
-=======
 
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
+
 						<div class="home_menu_more_btn_wrap">
 							<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
 						</div>
-					</div>					
+					</div>
 				</div>
 
 				<div class="tab_content" id="tab2">
@@ -589,13 +574,10 @@ $(document).ready(function(){
 							</div>
 						</c:forEach>
 					</div>
-<<<<<<< HEAD
-				</div>	
-				
-=======
 				</div>
 
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
+				</div>
+
 				<div class="tab_content" id="tab3">
 					<h5 class="mt-4">리뷰</h5>
 					<div class="rating-summary">
@@ -613,8 +595,7 @@ $(document).ready(function(){
 								</div>
 							</c:forEach>
 						</div>
-<<<<<<< HEAD
-						
+
 						<div class="rating-card">
 							<div class="rating-breakdown-bar">
 								<span class="label">음식 맛 (${detailReview2.tastePercent}%)</span>
@@ -641,9 +622,7 @@ $(document).ready(function(){
 								</div>
 							</div>
 						</div>
-=======
 
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
 					</div>
 					<div class="review-list">
 						<h4>리뷰 ${store.countRating}건</h4>
@@ -656,7 +635,6 @@ $(document).ready(function(){
 										</c:forEach>
 									</div>
 								</div>
-<<<<<<< HEAD
 								<div class="review-writer">
 									${fn:substring(review.writerId, 0, 2)}<c:forEach begin="1" end="${fn:length(review.writerId) - 2}">*</c:forEach>
 								</div>
@@ -670,7 +648,6 @@ $(document).ready(function(){
 									</c:forEach>
 									</div>
 								</c:if>
-=======
 
 								<c:forEach var="img" items="${storeMap.reviewImage}">
 									<c:if test="${img.reviewId == review.reviewId}">
@@ -679,7 +656,6 @@ $(document).ready(function(){
 										<c:if test="${img_status.last}"></c:if>
 									</c:if>
 								</c:forEach>
->>>>>>> 393a74680a628c36b74b9c72b5f89ee13ddf2b3f
 							</div>
 						</c:forEach>
 						<c:if test="${store.countRating > 10}">
