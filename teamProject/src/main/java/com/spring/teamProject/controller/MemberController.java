@@ -33,12 +33,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.spring.teamProject.jpa.dao.WishlistRepository;
 import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.RecaptchaService;
 import com.spring.teamProject.service.ReservationService;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.service.WaitingService;
+import com.spring.teamProject.service.WishlistService;
 import com.spring.teamProject.tool.DebugEmailUtil;
 import com.spring.teamProject.tool.FtpConnectionTestUtil;
 import com.spring.teamProject.vo.MemberVO;
@@ -47,6 +47,7 @@ import com.spring.teamProject.vo.SocialAccountVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 import com.spring.teamProject.vo.WaitingVO;
+import com.spring.teamProject.vo.WishlistEntity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -72,6 +73,9 @@ public class MemberController {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
@@ -334,8 +338,31 @@ public class MemberController {
                 }).collect(Collectors.toList());
                 model.addAttribute("reservations", displayReservations);
 
-//                List<WishlistVO> wishlists = wishlistService.getWishlistsByMemberId(memberInfo.getMemberId());
-//                model.addAttribute("wishlists", wishlists);
+                // 2. 위시리스트 정보 목록 가져오기 (수정된 부분)
+                List<WishlistEntity> wishlists = wishlistService.getWishlistByMemberId((long) memberInfo.getMemberId());
+
+                // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
+                List<Map<String, Object>> displayWishlists = wishlists.stream().map(wish -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("wishlistId", wish.getWishlistId());
+                    map.put("storeId", wish.getStoreId());
+
+                    try {
+                        StoreVO store = storeService.getStoreById(wish.getStoreId());
+                        if (store != null) {
+                            map.put("storeName", store.getStoreName());
+                            map.put("storeFileName", store.getFileName()); // storeFileName 추가
+                        } else {
+                            map.put("storeName", "알 수 없는 가게");
+                            map.put("storeFileName", null);
+                        }
+                    } catch (Exception e) {
+                        map.put("storeName", "가게 정보 오류");
+                        map.put("storeFileName", null);
+                    }
+                    return map;
+                }).collect(Collectors.toList());
+                model.addAttribute("wishlists", displayWishlists);
 
                 // 2. 웨이팅 정보 목록 가져오기
                 List<WaitingVO> waitings = waitingService.getWaitingsByMemberId((long) memberInfo.getMemberId());
