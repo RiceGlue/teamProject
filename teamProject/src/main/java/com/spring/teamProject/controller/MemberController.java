@@ -39,6 +39,7 @@ import com.spring.teamProject.service.ReservationService;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.tool.DebugEmailUtil;
+import com.spring.teamProject.tool.FtpConnectionTestUtil;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.SocialAccountVO;
@@ -577,6 +578,24 @@ public class MemberController {
         } catch (Exception e) {
             e.printStackTrace();
             return "테스트 이메일 발송 중 예외 발생: " + e.getMessage();
+        }
+    }
+
+    // =================================================================
+    // == 테스트용 기능 (Test Utilities)
+    // =================================================================
+    @Autowired
+    private FtpConnectionTestUtil ftpTestUtil; // 방금 만든 테스트 유틸 주입
+
+    @GetMapping("/testFtp")
+    @ResponseBody
+    public String testFtpConnection() {
+        logger.info("FTP 연결 테스트 API 호출됨.");
+        boolean success = ftpTestUtil.runFtpTest();
+        if (success) {
+            return "FTP 테스트 성공! 서버 콘솔 로그와 FTP 서버의 /srv/ftp/riceGlue/upload/test_folder_from_java/ 폴더를 확인하세요.";
+        } else {
+            return "FTP 테스트 실패. 서버 콘솔 로그를 확인하여 원인을 분석하세요.";
         }
     }
 

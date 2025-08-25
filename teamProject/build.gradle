@@ -123,3 +123,8 @@ task runEmailTest(type: JavaExec) {
 bootRun {
     mainClass = 'com.spring.teamProject.TeamProjectApplication'
 }
+
+// Apache Commons Net for FTP
+dependencies {
+    implementation 'commons-net:commons-net:3.10.0'
+}
