@@ -177,15 +177,26 @@ function checkReviewStatus(status, type, storeId, id) {
         </div>
         <div class="scroll-container">
             <%-- TODO: DB에서 실제 위시리스트 목록을 가져와 c:forEach로 반복 --%>
-            <c:forEach var="i" begin="1" end="5">
-                <div class="card scroll-item">
-                    <img src="https://via.placeholder.com/220x150" class="card-img-top" alt="가게 이미지">
-                    <div class="card-body">
-                        <h6 class="card-title">위시리스트 가게 ${i}</h6>
-                        <p class="card-text"><small class="text-muted">서울 강남구</small></p>
+            <c:choose>
+                <c:when test="${not empty wishlists}">
+                    <c:forEach var="wishlist" items="${wishlists}">
+                        <div class="card scroll-item">
+                            <img src="${contextPath}/download?directoryName=store&fileName=${wishlist.storeFileName}" class="card-img-top" alt="${wishlist.storeName} 이미지">
+                            <div class="card-body">
+                                <h6 class="card-title">${wishlist.storeName}</h6>
+                                <p class="card-text"><small class="text-muted">${wishlist.address}</small></p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <div class="card scroll-item">
+                        <div class="card-body text-center">
+                            <p class="card-text text-muted">위시리스트 정보가 없습니다.</p>
+                        </div>
                     </div>
-                </div>
-            </c:forEach>
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
 

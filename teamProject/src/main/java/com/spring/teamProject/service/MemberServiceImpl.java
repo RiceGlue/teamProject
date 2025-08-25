@@ -49,6 +49,10 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private EmailService emailService;
     
+    // [신규] 새로 만든 FtpService를 주입받습니다.
+    @Autowired
+    private FtpService ftpService;
+
     // application.properties에 설정된 파일 업로드 경로를 주입받습니다.
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -388,25 +392,71 @@ public class MemberServiceImpl implements MemberService {
         }
     }
     
+    // /**
+    //  * FTP 적용 전 코드
+    //  * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.
+    //  * @param memberVO 이미지 파일이 포함된 MemberVO 객체
+    //  */
+    // private void saveProfileImage(MemberVO memberVO) {
+    //     MultipartFile file = memberVO.getProfileImageFile();
+    //     if (file != null && !file.isEmpty()) {
+            
+    //         // 1. 서버 측 파일 크기 검사
+    //         long maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    //         if (file.getSize() > maxSizeInBytes) {
+    //             throw new RuntimeException("프로필 사진은 2MB를 초과할 수 없습니다.");
+    //         }
+
+    //         try {
+    //             // 2. 서버 측 해상도 검사
+    //             BufferedImage image = ImageIO.read(file.getInputStream());
+    //             if (image == null) {
+    //                 // 이미지 파일이 아닌 경우
+    //                 throw new RuntimeException("올바른 이미지 파일이 아닙니다.");
+    //             }
+    //             int width = image.getWidth();
+    //             int height = image.getHeight();
+    //             int maxResolution = 500; // 최대 해상도 500px
+
+    //             if (width > maxResolution || height > maxResolution) {
+    //                 throw new RuntimeException("프로필 사진의 해상도는 500x500 픽셀을 초과할 수 없습니다.");
+    //             }
+
+    //             // 3. 파일 저장 로직
+    //             String originalFilename = file.getOriginalFilename();
+    //             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+    //             String savedFilename = UUID.randomUUID().toString() + extension;
+
+    //             File dest = new File(uploadDir + savedFilename);
+    //             // ImageIO.read()로 inputStream을 한 번 사용했으므로, 파일을 다시 저장해야 합니다.
+    //             file.transferTo(dest);
+
+    //             memberVO.setProfileImageUrl("/profile-images/" + savedFilename);
+
+    //         } catch (IOException e) {
+    //             e.printStackTrace();
+    //             throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
+    //         }
+    //     }
+    // }
+
     /**
      * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.
      * @param memberVO 이미지 파일이 포함된 MemberVO 객체
      */
     private void saveProfileImage(MemberVO memberVO) {
-        MultipartFile file = memberVO.getProfileImageFile();
-        if (file != null && !file.isEmpty()) {
+        MultipartFile multipartFile = memberVO.getProfileImageFile();
+        if (multipartFile != null && !multipartFile.isEmpty()) {
             
-            // 1. 서버 측 파일 크기 검사
+            // 1. 서버 측 파일 크기 및 해상도 검사
             long maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-            if (file.getSize() > maxSizeInBytes) {
+            if (multipartFile.getSize() > maxSizeInBytes) {
                 throw new RuntimeException("프로필 사진은 2MB를 초과할 수 없습니다.");
             }
 
             try {
-                // 2. 서버 측 해상도 검사
-                BufferedImage image = ImageIO.read(file.getInputStream());
+                BufferedImage image = ImageIO.read(multipartFile.getInputStream());
                 if (image == null) {
-                    // 이미지 파일이 아닌 경우
                     throw new RuntimeException("올바른 이미지 파일이 아닙니다.");
                 }
                 int width = image.getWidth();
@@ -416,25 +466,49 @@ public class MemberServiceImpl implements MemberService {
                 if (width > maxResolution || height > maxResolution) {
                     throw new RuntimeException("프로필 사진의 해상도는 500x500 픽셀을 초과할 수 없습니다.");
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("프로필 이미지 유효성 검사 중 오류 발생", e);
+            }
 
-                // 3. 파일 저장 로직
-                String originalFilename = file.getOriginalFilename();
-                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-                String savedFilename = UUID.randomUUID().toString() + extension;
+            // 2. 파일 저장 로직을 FTP 업로드 방식으로 변경합니다.
+            String originalFilename = multipartFile.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String savedFilename = UUID.randomUUID().toString() + extension;
 
-                File dest = new File(uploadDir + savedFilename);
-                // ImageIO.read()로 inputStream을 한 번 사용했으므로, 파일을 다시 저장해야 합니다.
-                file.transferTo(dest);
+            // 2-1. 임시 로컬 파일 경로를 생성합니다.
+            File tempLocalFile = new File(uploadDir + savedFilename);
 
-                memberVO.setProfileImageUrl("/profile-images/" + savedFilename);
+            try {
+                // 2-2. 먼저, 업로드된 파일을 임시 로컬 경로에 저장합니다.
+                multipartFile.transferTo(tempLocalFile);
+
+                // ? --- 여기가 핵심 수정 부분입니다 --- ?
+                // 2-3. FtpService를 사용하여 임시 파일을 FTP 서버로 업로드합니다.
+                // FtpService를 호출할 때, "profile"이라는 하위 폴더를 지정해줍니다.
+                boolean uploadSuccess = ftpService.uploadFile(tempLocalFile, "profile", savedFilename);
+
+                if (uploadSuccess) {
+                    // 2-4. 업로드 성공 시, DB에 저장할 URL을 설정합니다.
+                    // DB에 저장할 URL도 "profile" 경로를 포함하도록 수정합니다.
+                    memberVO.setProfileImageUrl("/profile-images/profile/" + savedFilename);
+                } else {
+                    // FTP 업로드 실패 시 예외를 발생시켜 롤백을 유도합니다.
+                    throw new RuntimeException("FTP 서버에 프로필 사진 저장 실패");
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
-                throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
+                throw new RuntimeException("프로필 사진 임시 저장 또는 FTP 업로드 중 오류 발생", e);
+            } finally {
+                // 2-5. 작업이 끝나면(성공하든 실패하든) 임시 로컬 파일을 반드시 삭제합니다.
+                if (tempLocalFile.exists()) {
+                    tempLocalFile.delete();
+                }
             }
         }
     }
-    
+
     /**
      * 전화번호에서 불필요한 문자를 제거하고, 한국 번호의 경우 앞자리 '0'을 제거합니다.
      * @param memberVO 전화번호와 국가 코드가 포함된 MemberVO 객체
