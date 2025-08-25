@@ -172,9 +172,4 @@ public class StoreVO {
 	public void setCountRating(int countRating) {
 		this.countRating = countRating;
 	}
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 9256c2473977b9726851d9a559c1e1b064d96c20
 }
