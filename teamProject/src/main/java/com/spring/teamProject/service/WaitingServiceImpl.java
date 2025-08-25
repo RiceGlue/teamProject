@@ -278,5 +278,14 @@ public class WaitingServiceImpl implements WaitingService {
         // WaitingDAO에 해당 매장의 'WAITING' 상태인 웨이팅을 조회하는 메서드를 호출
         return waitingDAO.selectCurrentWaitings(storeId);
     }
+    
+    @Override
+    public void increaseUserTemperatureByWaiting(long waitingId) {
+    	waitingDAO.increaseUserTemperatureByWaiting(waitingId);
+    }
+    
+    public void decreaseUserTemperatureByWaiting(long waitingId) {
+    	waitingDAO.decreaseUserTemperatureByWaiting(waitingId);
+    }
 
 }

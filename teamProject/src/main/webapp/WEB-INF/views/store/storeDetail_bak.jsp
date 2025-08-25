@@ -48,10 +48,10 @@
 		.rating_bar_bg {background:#e1e1df; width:200px; height:12px; border-radius:6px; overflow:hidden;}
 		.rating_bar_fill {background:#f90;height:100%;border-radius:6px 0 0 6px;}
 		.detailReviewList {margin-top:20px;}
-		.review_box {border:1px solid #ddd;padding:12px;border-radius:6px;margin-bottom:10px;background-color:#fff;}
-		.review_stars {color:#f90;font-size:14px;}
-		.review_user {font-weight:bold;font-size:13px;margin:4px 0;}
-		.review_text {font-size:14px;color:#333;}
+		.review_box {border:1px solid #ddd;padding:12px;border-radius:6px;margin-bottom:10px;background-color:#fff; pont-size:10px; }
+		.review_stars {color:#f90; font-size:14px; }
+		.review_user {font-weight:bold;font-size:13px;margin:4px 0; }
+		.review_text {font-size:14px;color:#333; }
 		.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
 		.detail-box { padding:auto 10px; margin:30px; }
 		.wating_container { text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }

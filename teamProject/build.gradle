@@ -58,7 +58,7 @@ dependencies {
 	// JSTL 구현체
 	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 	implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
-	
+
 	//implementation 'org.springframework.boot:spring-boot-starter-web' //자체 로깅 충돌 방지
 	implementation('org.springframework.boot:spring-boot-starter-web') {
 	    exclude group: 'commons-logging', module: 'commons-logging'
@@ -95,6 +95,15 @@ dependencies {
 
     // Firebase Admin SDK 추가
     implementation 'com.google.firebase:firebase-admin:9.3.0' // 최신 버전
+
+    // Spring Boot Starter for JPA 생산성을 위한 JPA 사용 20250822 밥풀
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Lombok (롬복) 의존성 추가
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // 테스트 환경에서도 필요하다면 추가
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
 }
 // **추가된 부분: Java 컴파일 시 -parameters 플래그 추가**

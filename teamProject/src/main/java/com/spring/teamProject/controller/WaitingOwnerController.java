@@ -148,6 +148,12 @@ public class WaitingOwnerController {
             logger.info("점주 요청: 웨이팅 ID {}의 상태를 {}로 업데이트 (매장 ID: {})", waitingId, newStatus, storeId);
 
             waitingService.updateWaitingStatus(waitingId, newStatus);
+            
+            if(newStatus.equals("SEATED")) {
+            	waitingService.increaseUserTemperatureByWaiting(waitingId);
+            } else if(newStatus.equals("NO_SHOW")) {
+            	waitingService.decreaseUserTemperatureByWaiting(waitingId);
+            }
 
             return ResponseEntity.ok(Map.of(
                 "message", "Waiting status updated successfully",

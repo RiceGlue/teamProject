@@ -23,4 +23,6 @@ public interface ReviewService {
 	public void modifyReviewImage(ImageFileVO imgFile) throws Exception;
 	public void deleteReviewImage(String fileName) throws Exception;
 	public void addReviewImage(ImageFileVO imgFile) throws Exception;
+	public void deleteReviewImages(long reviewId) throws Exception;
+	public void deleteReview(long reviewId) throws Exception;
 }

@@ -186,4 +186,24 @@
     <delete id="deleteReservation" parameterType="long">
         DELETE FROM reservations WHERE reservation_id = #{reservationId}
     </delete>
+    
+    <update id ="increaseUserTemperatureByReservation" parameterType="long" >
+	    UPDATE members
+		SET manner_temperature = GREATEST(manner_temperature + 1, 0)
+		WHERE member_id = (
+		    SELECT member_id
+		    FROM reservations
+		    WHERE reservation_id = #{reservationId}
+		)
+    </update>
+    
+    <update id ="decreaseUserTemperatureByReservation" parameterType="long" >
+    	UPDATE members
+		SET manner_temperature = GREATEST(manner_temperature - 1, 0)
+		WHERE member_id = (
+		    SELECT member_id
+		    FROM reservations
+		    WHERE reservation_id = #{reservationId}
+		)
+    </update>
 </mapper>

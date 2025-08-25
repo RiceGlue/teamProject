@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import com.spring.teamProject.vo.ReservationVO;
@@ -53,4 +54,8 @@ public interface ReservationDAO {
 
     // 임시 예약 정보 삭제
     int deleteReservation(@Param("reservationId") long reservationId);
+    
+    //사용자 벌점 제도
+    void increaseUserTemperatureByReservation (long reservationId) throws DataAccessException;
+    void decreaseUserTemperatureByReservation (long reservationId) throws DataAccessException;
 }

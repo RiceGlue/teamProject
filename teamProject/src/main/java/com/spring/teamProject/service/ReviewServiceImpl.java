@@ -41,14 +41,14 @@ public class ReviewServiceImpl implements ReviewService {
 	
 	@Override
 	public long addReservationReview(ReviewVO review) throws Exception{
-		long reviewId = reviewDAO.insertReservationReview(review);
-		return reviewId;
+		reviewDAO.insertReservationReview(review);
+		return review.getReviewId();
 	}
 	
 	@Override
 	public long addWaitingReview(ReviewVO review) throws Exception{
-		long reviewId = reviewDAO.insertWaitingReview(review);
-		return reviewId;
+		reviewDAO.insertWaitingReview(review);
+		return review.getReviewId();
 	}
 	
 	@Override
@@ -92,5 +92,15 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public void addReviewImage(ImageFileVO imgFile) throws Exception {
 		reviewDAO.insertReviewImage(imgFile);
+	}
+	
+	@Override
+	public void deleteReviewImages(long reviewId) throws Exception {
+		reviewDAO.deleteReviewImages(reviewId);
+	}
+	
+	@Override
+	public void deleteReview (long reviewId) throws Exception {
+		reviewDAO.deleteReview (reviewId);
 	}
 }

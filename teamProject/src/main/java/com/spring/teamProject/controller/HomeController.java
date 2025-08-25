@@ -1,25 +1,35 @@
 package com.spring.teamProject.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.spring.teamProject.vo.BannerEntity; // 💡 올바른 클래스 임포트
+import com.spring.teamProject.service.BannerService;
+
 @Controller
 public class HomeController {
 
-	/**
-	 * 메인 페이지("/") 요청을 처리합니다.
-	 * @param model View에 데이터를 전달하기 위한 Model 객체
-	 * @return layout.jsp를 사용하여 렌더링할 뷰 경로
-	 */
-	@GetMapping("/")
-	public String index(Model model) {
-		System.out.println("HomeController: / 요청 처리됨");
-		
-		model.addAttribute("body", "index.jsp");
-		
-		// (수정) ViewResolver를 거치지 않고, JSP의 전체 경로를 직접 반환하여 경로 문제를 해결합니다.
-		return "layout/layout"; 
-	}
+    private final BannerService bannerService;
 
+    @Autowired
+    public HomeController(BannerService bannerService) {
+        this.bannerService = bannerService;
+    }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        // 1. 서비스에서 활성화된 배너 목록을 가져옵니다.
+        List<BannerEntity> activeBanners = bannerService.getActiveBanners();
+
+        // 2. 모델에 배너 목록을 추가합니다.
+        model.addAttribute("bannerList", activeBanners);
+        model.addAttribute("body", "index.jsp");
+
+        // 3. 뷰를 반환합니다.
+        return "layout/layout";
+    }
 }

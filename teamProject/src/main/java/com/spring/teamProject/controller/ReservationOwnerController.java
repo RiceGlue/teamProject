@@ -72,6 +72,13 @@ public class ReservationOwnerController {
         logger.info("예약 상태 업데이트 요청 - reservationId: {}, status: {}", reservationId, status);
         try {
             reservationService.updateReservationStatus(reservationId, status);
+            
+            if(status.equals("CONFIRMED")) {
+            	reservationService.increaseUserTemperatureByReservation(reservationId);
+            } else if (status.equals("NO_SHOW")) {
+            	reservationService.decreaseUserTemperatureByReservation(reservationId);
+            }
+            
             redirectAttributes.addFlashAttribute("message", "예약 상태가 성공적으로 업데이트되었습니다.");
         } catch (Exception e) {
             logger.error("예약 상태 업데이트 중 오류 발생: {}", e.getMessage(), e);

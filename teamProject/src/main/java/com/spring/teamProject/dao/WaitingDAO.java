@@ -1,7 +1,10 @@
 package com.spring.teamProject.dao;
 
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
+import org.springframework.dao.DataAccessException;
+
 import com.spring.teamProject.vo.WaitingVO;
 
 public interface WaitingDAO {
@@ -19,4 +22,7 @@ public interface WaitingDAO {
 
     List<WaitingVO> selectWaitingsByMemberId(@Param("memberId") Long memberId);
     List<WaitingVO> selectCurrentWaitings(@Param("storeId") Long storeId);
+    
+    void increaseUserTemperatureByWaiting(long waitingId) throws DataAccessException;
+    void decreaseUserTemperatureByWaiting(long waitingId) throws DataAccessException;
 }
