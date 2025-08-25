@@ -25,6 +25,11 @@ public class ReviewVO {
 	private int service;
 	private int clean;
 	
+	private int tastePercent;
+	private int moodPercent;
+	private int servicePercent;
+	private int cleanPercent;
+	
 	public long getReviewId() {
 		return reviewId;
 	}
@@ -127,5 +132,30 @@ public class ReviewVO {
 	public void setClean(int clean) {
 		this.clean = clean;
 	}
+	public int getTastePercent() {
+		return tastePercent;
+	}
+	public void setTastePercent(int tastePercent) {
+		this.tastePercent = tastePercent;
+	}
+	public int getMoodPercent() {
+		return moodPercent;
+	}
+	public void setMoodPercent(int moodPercent) {
+		this.moodPercent = moodPercent;
+	}
+	public int getServicePercent() {
+		return servicePercent;
+	}
+	public void setServicePercent(int servicePercent) {
+		this.servicePercent = servicePercent;
+	}
+	public int getCleanPercent() {
+		return cleanPercent;
+	}
+	public void setCleanPercent(int cleanPercent) {
+		this.cleanPercent = cleanPercent;
+	}
+
 	
 }

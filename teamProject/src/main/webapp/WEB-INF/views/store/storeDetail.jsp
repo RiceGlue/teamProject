@@ -5,14 +5,14 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <!-- 구글 맵 API -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
-<c:set var="detailReview" value="${storeMap.detailReview}" />
-<c:set var="reviewImage" value="${storeMap.reviewImage}" />
+<c:set var="detailReview2" value="${storeMap.detailReview2}" />
 <c:set var="storeId" value="${store.storeId}" />
 
 <%-- <c:set var="res" value="${storeMap.reservation}" /> --%>
@@ -24,9 +24,14 @@
 	/* 기존 CSS 유지 */
 	p { display: flex; align-items: center; gap: 7px;}
 	input[type="text"]:not(.form-control) { width: 50px; text-align: center; }
-	.store-info { margin: 20px auto; max-width: 700px; background: #fff; padding: 20px; border-radius: 10px; }
+	.store-info { margin: 20px auto; max-width: 950px; background: #fff; padding: 20px; border-radius: 10px; }
 	.store-banner { width: 100%; height: 200px; background-color: #eee; display: flex; justify-content: center; align-items: center; }
 
+	.waiting-container { text-align: center; border: 1px solid #e0e0e0; padding: 15px; border-radius: 10px; margin-top: 20px; background-color: #fafafa; }
+	.waiting-container h4 { margin-bottom: 5px; font-size: 1.25rem; }
+	.waiting-container h6 { margin-bottom: 15px; font-size: 1.5rem; font-weight: bold; color: #dc3545; }
+	.waiting-container .btn { width: 80%; }
+	
 	.tabs { display: flex; margin-top: 20px; padding: 0; list-style: none; overflow: hidden;}
 	.tabs li { background-color: #3f3f3f; cursor: pointer; list-style: none; border-right: 1px solid #ddd; flex: 1; text-align: center; }
 	.tabs li:last-child { border-right: none; }
@@ -39,48 +44,40 @@
 	.tab_content { padding: 20px; background-color: #fff; }
 	
 	/*메뉴*/
-	.menu_container { display:flex; flex-wrap:wrap; gap:8px; }
-	.menu_card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
-	.menu_image { width:100%; height:120px; background:#eee; display:flex; justify-content:center; align-items:center; }
-	.menu_image img { max-width:100%; max-height:100%; object-fit:contain; }
-	.menu_info { padding:8px; font-size:14px; line-height:1.2; text-align:center; }
-	.menu_name { font-weight:bold; margin:4px 0 2px; }
-	.menu_price { color:#555; margin:2px 0; }
-	.menu_description { color:#777; font-size:12px; margin:2px 0 4px; }
+	.menu-container { display:flex; flex-wrap:wrap; gap:8px; }
+	.menu-card { flex:0 0 calc(25% - 8px); box-sizing:border-box; border:1px solid #000; border-radius:4px; overflow:hidden; font-family:Arial,sans-serif; margin:0; }
+	.menu-image { width:100%; height:120px; background:#eee; display:flex; justify-content:center; align-items:center; }
+	.menu-image img { max-width:100%; max-height:100%; object-fit:contain; }
+	.menu-info { padding:8px; font-size:14px; line-height:1.2; text-align:center; }
+	.menu-name { font-weight:bold; margin:4px 0 2px; }
+	.menu-price { color:#555; margin:2px 0; }
+	.menu-description { color:#777; font-size:12px; margin:2px 0 4px; }
 
-	/*리뷰*/
-	.rating{ font-size: 16px; margin-bottom: 10px; }
-	.card-rating, .card-detail {flex:1;padding:16px;border:1px solid #ccc;border-radius:6px;text-align:center;background-color:#f9f9f9;}
-	.review_count {font-weight:bold;margin-bottom:12px;}
-	.countRating {margin-bottom:20px;}
-	.rating_bar_container {display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-	.rating_label {width:120px;font-weight:500;}
-	.rating_bar_bg {background:#e1e1df; width:200px; height:12px; border-radius:6px; overflow:hidden;}
-	.rating_bar_fill {background:#f90;height:100%;border-radius:6px 0 0 6px;}
-	.detailReviewList {margin-top:20px;}
-	.review_box {border:1px solid #ddd;padding:12px;border-radius:6px;margin-bottom:10px;background-color:#fff; font-size:10px; }
-	.review_stars {color:#f90;font-size:14px;}
-	.review_user {font-weight:bold;font-size:13px;margin:4px 0;}
-	.review_text {font-size:14px;color:#333;}
-	.rating_summary_cards {display:flex;gap:10px;margin-bottom:16px;}
-	.review-image-thumbnail {object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
-	
-	.detail-review-list { margin-top: 20px; }
-	.review-box { border-bottom: 1px solid #d7cece; padding: 10px 5px; }
-	.review-rating { margin-bottom: 5px; }
-	.star { font-size: 18px; color: #ddd; }
-	.star.filled { color: orange; }
-	.review-meta { margin-bottom: 10px; }
-	.review-writer { font-weight: bold; margin-bottom: 3px; color:#bdc0bd; }
-	.review-content { color: #333; line-height: 1.5; }
+	.rating-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 5px; margin-bottom: 20px; }
+	.rating-card { padding: 15px; text-align: center; background-color: #fafafa; }
+	.rating-card h2 { font-size: 2rem; margin: 10px 0; }
+	.rating-card h7 { font-size: 0.9em; color: #555; }
+	.rating-breakdown-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+	.rating-breakdown-bar .label { width: 120px; flex-shrink: 0; font-size: 0.9em; }
+	.rating-bar-container { flex-grow: 1; background: #cfcfcf; height: 12px; border-radius: 6px; overflow: hidden; }
+	.rating-bar-fill { background: #ffc107; height: 100%; border-radius: 6px; }
+	.review-list { margin-top: 20px; }
+	.review-box { padding: 15px 0; border-bottom: 1px solid #e0e0e0; }
+	.review-box:last-child { border-bottom: none; }
+	.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+	.review-rating .star { color: #ccc; font-size: 1.2rem; }
+	.review-rating .star.filled { color: orange; }
+	.review-writer { font-weight: bold; color: #555; }
+	.review-content { color: #333; line-height: 1.5; margin-bottom: 10px; }
 	.review-images { display: flex; flex-wrap: wrap; gap: 8px; }
-	.review-image { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; }
-			
-	.detail-box { padding:auto 10px; margin:30px; }
-
-	.wating_container { text-align:center; border: 1px solid #d0d0cd; padding:10px; border-radius:10px; }
+	.review-image { width: 70px; height: 70px; object-fit: cover; }
+	.load-more-btn { display: block; width: 100%; padding: 10px; margin-top: 20px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+	.load-more-btn:hover { background: #e0e0e0; }
+	.detail-box { padding: 15px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 15px; }
+	.detail-box:last-child { border-bottom: none; }
 		
 	#googleMap { width: 100%; height: 300px; border-radius:10px; }
+	
 	.home_menu_container { display: flex; flex-direction: column; gap: 20px; padding:20px; margin: 0 auto; }
 	.home_menu_card { display: flex; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
 	.home_menu_image img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
@@ -103,6 +100,18 @@
 	.table-select-area { display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; }
 	.table-slot-btn { margin: 5px; }
 	.table-slot-btn.selected { background-color: #198754; color: white; }
+
+	.home_review-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+	.home_review-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 10px; border-bottom: solid 1px #cfcfcf; background-color: #fdfdfd; height: 100px; border-top: solid 1px #cfcfcf;}
+	.home_review-text-wrapper { flex: 1; margin-right: 15px; }
+	.home_review-image-wrapper { flex-shrink: 0; }
+	.home_review-image { width: 90px; height: 90px; object-fit: cover; border-radius: 5px; align-items: flex-start; }
+	.home_review-writer { font-weight: bold; margin-bottom: 5px; }
+	.home_review-content { font-size: 0.95em; color: #333; white-space: normal; }
+	.home_review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+	.home_rating p { margin: 0; font-weight: bold; font-size: 1rem; }
+	.review-view-all button { font-size: 0.9rem; padding: 4px 10px; }
+		
 </style>
 
 <script>
@@ -190,12 +199,60 @@ $(function () {
 	$("#reservationDate").val(todayFormatted);
 	$('#bookFormBtn').prop('disabled', false);
 });
+
+$(document).ready(function(){
+    // 현재 표시된 리뷰의 개수를 추적합니다.
+    let reviewsLoaded = 10;
+    const totalReviews = ${store.countRating};
+
+    $('#loadMoreBtn').on('click', function() {
+        // 서버에 다음 리뷰 목록을 요청하는 AJAX 호출을 실행합니다.
+        // 서버에서는 이 요청을 처리하고, 다음 10개의 리뷰를 JSON 형태로 반환해야 합니다.
+
+        // 예시 AJAX 호출 (서버의 엔드포인트에 맞게 수정해야 합니다)
+        $.ajax({
+            url: '${contextPath}/reviews/loadMore', // 실제 리뷰 데이터를 가져올 서버 URL
+            type: 'GET',
+            data: {
+                storeId: '${store.storeId}', // 필요한 경우 매장 ID 전달
+                start: reviewsLoaded, // 시작점 (현재까지 로드된 리뷰 수)
+                count: 10 // 가져올 리뷰의 개수
+            },
+            success: function(response) {
+                // 응답으로 받은 새로운 리뷰 목록을 화면에 추가합니다.
+                // 이 예시에서는 응답이 JSON 배열이라고 가정합니다.
+                response.forEach(function(review) {
+                    // 서버 응답(review) 데이터를 활용해 새로운 HTML을 생성합니다.
+                    // 이 부분의 HTML 구조는 기존 review-box와 동일하게 만들어야 합니다.
+                    const newReviewHtml = `
+                        <div class="review-box">
+                            <div class="review-rating">...</div>
+                            <div class="review-meta">...</div>
+                            </div>
+                    `;
+                    $('.detail-review-list').append(newReviewHtml);
+                });
+
+                // 현재 로드된 리뷰 개수를 업데이트합니다.
+                reviewsLoaded += response.length;
+
+                // 모든 리뷰를 불러왔다면 "더보기" 버튼을 숨깁니다.
+                if (reviewsLoaded >= totalReviews) {
+                    $('#loadMoreBtn').hide();
+                }
+            },
+            error: function() {
+                alert('리뷰를 불러오는 데 실패했습니다.');
+            }
+        });
+    });
+});
 </script>
 
 
 <div class="store-info">
-	<div class="store-info d-flex" style="gap: 20px;">
-		<div class="carousel-container" style="flex: 1;">
+	<div class="store-info d-flex" style="gap: 20px; margin:0px; ">
+		<div class="carousel-container" style="display: table-cell; vertical-align:middle; width:50%; padding-right:20px;">
 			<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
 				<div class="carousel-inner">
 					<div class="carousel-item active">
@@ -219,7 +276,7 @@ $(function () {
 			</div>
 		</div>
 		
-		<div class="store-details" style="flex: 1;">
+		<div class="store-details" style="display: table-cell; vertical-align:middle; width:50%; padding-left:20px;">
 			<div style="display: flex; justify-content: space-between; align-items: center;">
 				<h4 class="mt-3">${store.storeName}</h4>
 				<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
@@ -239,15 +296,64 @@ $(function () {
 			<div>
 				<p><img src="${contextPath}/image/openhour.png" width="16" height="16" alt="영업시간"><strong>영업중</strong> ${store.operatingTime}</p>
 			</div>
+			
+			<div class="waiting-container">
+				<h4>현재 대기</h4>
+				<h6><strong>${currentWaitingCount}</strong>팀</h6>
+				<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
+			</div>
 		</div>
 	</div>
 	
-	<div class="wating_container">
-		<h4>현재 대기</h4>
-		<h6><strong>${currentWaitingCount}</strong>팀</h6>
-		<button type="button" style="width:80%" class="btn btn-danger" onClick="window.location.href='${contextPath}/waiting/customer/form?storeId=${storeId}'">웨이팅하기</button>
+	<div class="home_review_container">
+		<div class="home_review-meta">
+			<div class="home_review-header">
+				<div class="home_rating">
+					<p>리뷰 ${store.countRating } <img src="${contextPath}/image/review_rating.jpg" width="20px" alt="리뷰이미지"> ${store.avgRating } / 5</p>
+				</div>
+				<div class="review-view-all">
+					<button class="btn btn-sm btn-outline-secondary" onclick="openTab3()" >전체보기</button>
+				</div>
+			</div>
+			<div class="home_review-grid">
+				<c:forEach var="review" items="${storeMap.review}" varStatus="status">
+					<c:if test="${status.index < 4}">
+						<div class="home_review-item">
+							<div class="home_review-text-wrapper">
+								<div class="review-rating">
+									<c:forEach begin="1" end="5" var="i">
+										<c:choose>
+											<c:when test="${i <= review.rating}">
+												<span class="star filled">★</span>
+											</c:when>
+											<c:otherwise>
+												<span class="star">★</span>
+											</c:otherwise>
+										</c:choose>
+									</c:forEach>
+								</div>
+								<div class="home_review-writer">
+									<c:set var="idLength" value="${fn:length(review.writerId)}" />
+									<c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
+									<c:set var="maskedPart" value="${fn:substring(review.writerId, 2, idLength)}" />
+									${visiblePart}<c:forEach begin="1" end="${fn:length(maskedPart)}">*</c:forEach>
+								</div>
+								<div class="home_review-content">${review.content}</div>
+							</div>
+							<c:forEach var="img" items="${storeMap.reviewImage}" varStatus="img_status">
+								<c:if test="${img.reviewId == review.reviewId && img_status.first}">
+									<div class="home_review-image-wrapper">
+										<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="home_review-image">
+									</div>
+								</c:if>
+							</c:forEach>
+						</div>
+					</c:if>
+				</c:forEach>
+			</div>
+		</div>
 	</div>
-	
+
 	<div class="tab_container">
 		<div class="tab_container" id="container">
 				<ul class="tabs">
@@ -284,105 +390,122 @@ $(function () {
 					<div class="back-link">
 						<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 					</div>
+					
 					<h5 class="mt-4">메뉴</h5>
 					<div class="home_menu_container">
 						<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
-							<c:if test="${status.index < 5}">
-								<div class="home_menu_card">
+							<c:if test="${status.index < 4}">
+								<div class="home_menu_card ">
 									<div class="home_menu_image">
-										<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}">
+										<img src="${contextPath}/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}">
 									</div>
-									<div class="home_menu_info">
-										<p class="home_menu_name">${menu.menuName}</p>
-										<p class="home_menu_price">${menu.price}원</p>
-										<p class="home_menu_description">${menu.description}</p>
+									<div class=".home_menu_info ">
+										<p class="home_menu_name ">${menu.menuName}</p>
+										<p class="home_menu_price ">${menu.price}원</p>
+										<p class="home_menu_description ">${menu.description}</p>
 									</div>
 								</div>
 							</c:if>
 						</c:forEach>
+					</div>
 						
 						<div class="home_menu_more_btn_wrap">
 							<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
 						</div>
-					</div>
-					<h5 class="mt-4">리뷰</h5>
+					</div>					
 				</div>
 				
 				<div class="tab_content" id="tab2">
-					<div class="menu_container">
+					<div class="menu-container">
 						<c:forEach var="menu" items="${storeMap.menu}">
-							<div class="menu_card">
-								<div class="menu_image">
+							<div class="menu-card">
+								<div class="menu-image">
 									<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" width="100px">
 								</div>
-								<div class="menu_info">
-									<p class="menu_name">${menu.menuName}</p>
-									<p class="menu_price">${menu.price}원</p>
-									<p class="menu_description">${menu.description}</p>
+								<div class="menu-info">
+									<p class="menu-name">${menu.menuName}</p>
+									<p class="menu-price">${menu.price}원</p>
+									<p class="menu-description">${menu.description}</p>
 								</div>
 							</div>
 						</c:forEach>
 					</div>
-				</div>
+				</div>	
 				
 				<div class="tab_content" id="tab3">
 					<h5 class="mt-4">리뷰</h5>
-					<div class="rating_summary_cards">
-						<div class="card card-rating">
-							<h7>${store.countRating }개 리뷰 별점 평균</h7>
-							<h2><img src="${contextPath}/image/review_rating.jpg" width="40" alt="리뷰이미지">${store.avgRating }</h2>
+					<div class="rating-summary">
+						<div class="rating-card">
+							<h7>${store.countRating}개 리뷰 별점 평균</h7>
+							<h2><img src="${contextPath}/image/review_rating.jpg" width="40" alt="별점 아이콘">${store.avgRating}</h2>
 						</div>
-						<div class="card card-detail">
-							<c:forEach var="detailReview" items="${storeMap.detailReview}">
-								<div class="rating_bar_container">
-									<span class="rating_label">${detailReview.rating}점 ${detailReview.countScoreRating}명</span>
-									<div class="rating_bar_fill" style="width: calc(${detailReview.countScoreRating * 100 / store.countRating}%);"></div>
-								</div>
-							</c:forEach>
-							<c:forEach var="detailReview" items="${storeMap.detailReview}">
-								<div class="rating_bar_container">
-									<span class="rating_label">${detailReview.rating}점 ${detailReview.countScoreRating}명</span>
-									<div class="rating_bar_fill" style="width: calc(${detailReview.countScoreRating * 100 / store.countRating}%);"></div>
+						<div class="rating-card">
+							<c:forEach var="detailReview1" items="${storeMap.detailReview1}">
+								<div class="rating-breakdown-bar">
+									<span class="label">${detailReview1.rating}점 (${detailReview1.countScoreRating}명)</span>
+									<div class="rating-bar-container">
+										<div class="rating-bar-fill" style="width: calc(${detailReview1.countScoreRating * 100 / store.countRating}%);"></div>
+									</div>
 								</div>
 							</c:forEach>
 						</div>
 						
+						<div class="rating-card">
+							<div class="rating-breakdown-bar">
+								<span class="label">음식 맛 (${detailReview2.tastePercent}%)</span>
+								<div class="rating-bar-container">
+									<div class="rating-bar-fill" style="width: calc(${detailReview2.tastePercent}%);"></div>
+								</div>
+							</div>
+							<div class="rating-breakdown-bar">
+								<span class="label">분위기 (${detailReview2.moodPercent}%)</span>
+								<div class="rating-bar-container">
+									<div class="rating-bar-fill" style="width: calc(${detailReview2.moodPercent}%);"></div>
+								</div>
+							</div>
+							<div class="rating-breakdown-bar">
+								<span class="label">서비스 (${detailReview2.servicePercent}%)</span>
+								<div class="rating-bar-container">
+									<div class="rating-bar-fill" style="width: calc(${detailReview2.servicePercent}%);"></div>
+								</div>
+							</div>
+							<div class="rating-breakdown-bar">
+								<span class="label">청결 (${detailReview2.cleanPercent}%)</span>
+								<div class="rating-bar-container">
+									<div class="rating-bar-fill" style="width: calc(${detailReview2.cleanPercent}%);"></div>
+								</div>
+							</div>
+						</div>
 					</div>
-					<div class="detail-review-list">
+					<div class="review-list">
 						<h4>리뷰 ${store.countRating}건</h4>
-						<c:forEach var="review" items="${storeMap.review}">
+						<c:forEach var="review" items="${storeMap.review}" varStatus="loop">
 							<div class="review-box">
-								<div class="review-rating">
-									<c:forEach begin="1" end="5" var="i">
-										<c:choose>
-											<c:when test="${i <= review.rating}">
-												<span class="star filled">★</span>
-											</c:when>
-											<c:otherwise>
-												<span class="star">★</span>
-											</c:otherwise>
-										</c:choose>
-									</c:forEach>
-								</div>
-								<div class="review-meta">
-									<div class="review-writer">
-										<c:set var="idLength" value="${fn:length(review.writerId)}" />
-										<c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
-										<c:set var="maskedPart" value="${fn:substring(review.writerId, 2, idLength)}" />
-										${visiblePart}<c:forEach begin="1" end="${fn:length(maskedPart)}">*</c:forEach>
+								<div class="review-header">
+									<div class="review-rating">
+										<c:forEach begin="1" end="5" var="i">
+											<span class="star <c:if test="${i <= review.rating}">filled</c:if>">★</span>
+										</c:forEach>
 									</div>
-									<div class="review-content">${review.content}</div>
 								</div>
-								
-								<c:forEach var="img" items="${storeMap.reviewImage}">
-									<c:if test="${img.reviewId == review.reviewId}">
-										<c:if test="${img_status.first}"><div class="review-images"></c:if>
-										<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
-										<c:if test="${img_status.last}"></c:if>
-									</c:if>
-								</c:forEach>
+								<div class="review-writer">
+									${fn:substring(review.writerId, 0, 2)}<c:forEach begin="1" end="${fn:length(review.writerId) - 2}">*</c:forEach>
+								</div>
+								<div class="review-content">${review.content}</div>
+								<c:if test="${not empty storeMap.reviewImage}">
+									<div class="review-images">
+									<c:forEach var="img" items="${storeMap.reviewImage}">
+										<c:if test="${img.reviewId == review.reviewId}">
+											<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
+										</c:if>
+									</c:forEach>
+									</div>
+								</c:if>
 							</div>
 						</c:forEach>
+						<c:if test="${store.countRating > 10}">
+							<button id="loadMoreBtn" class="load-more-btn">더보기</button>
+						</c:if>
 					</div>
 				</div>
 				

@@ -23,7 +23,8 @@ public interface StoreDAO {
 	//가게 상세 페이지
 	public StoreVO selectStoreDetail(long storeId) throws DataAccessException;
 	public List<MenuVO> selectStoreMenu(long storeId) throws DataAccessException;
-	public List<ReviewVO> selectDetailReview(long storeId) throws DataAccessException;
+	public List<ReviewVO> selectDetailReview1(long storeId) throws DataAccessException;
+	public ReviewVO selectDetailReview2(long storeId) throws DataAccessException;
 	public List<ReviewVO> selectStoreReview(long storeId) throws DataAccessException;
 //	public List<ReservationSettingVO> selectStoreReservatioin(long storeId) throws DataAccessException;
 

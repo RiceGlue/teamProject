@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.spring.teamProject.dao.StoreDAO;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
-import com.spring.teamProject.vo.ReservationSettingVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 
@@ -59,7 +58,11 @@ public class StoreServiceImpl implements StoreService{
 		StoreVO store = storeDAO.selectStoreDetail(storeId);
 		List<ReviewVO> review = storeDAO.selectStoreReview(storeId);
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
-		List<ReviewVO> detailReview = storeDAO.selectDetailReview(storeId);
+		List<ReviewVO> detailReview1 = storeDAO.selectDetailReview1(storeId);
+		ReviewVO detailReview2 = storeDAO.selectDetailReview2(storeId);
+		
+		System.out.println(detailReview2.getTastePercent());
+		
 //		List<ReservationSettingVO> reservation = storeDAO.selectStoreReservatioin(storeId);
 
 		//이미지
@@ -70,7 +73,8 @@ public class StoreServiceImpl implements StoreService{
 		storeMap.put("store", store);
 		storeMap.put("review", review);
 		storeMap.put("menu", menu);
-		storeMap.put("detailReview", detailReview);
+		storeMap.put("detailReview1", detailReview1);
+		storeMap.put("detailReview2", detailReview2);
 //		storeMap.put("reservation", reservation);
 
 		storeMap.put("storeImage", storeImage);

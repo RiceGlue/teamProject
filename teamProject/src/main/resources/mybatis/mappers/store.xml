@@ -78,6 +78,10 @@
 		<result property="mood" column="mood" />
 		<result property="service" column="service" />
 		<result property="clean" column="clean" />
+		<result property="tastePercent" column="taste_percent" />
+		<result property="moodPercent" column="mood_percent" />
+		<result property="servicePercent" column="service_percent" />
+		<result property="cleanPercent" column="clean_percent" />
 	</resultMap>
 
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
@@ -173,9 +177,21 @@
 		]]>
 	</select>
 
-	<select id="selectDetailReview" parameterType="long" resultMap="reviewlist" >
+	<select id="selectDetailReview1" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
 			select rating, count(rating) as countScoreRating from reviews where store_id=#{storeId} group by rating order by rating desc
+		]]>
+	</select>
+	
+	<select id="selectDetailReview2" parameterType="long" resultMap="reviewlist" >
+		<![CDATA[
+			SELECT
+			  ROUND(SUM(taste = 5) / COUNT(taste) * 100, 0) AS taste_percent,
+			  ROUND(SUM(mood = 5) / COUNT(mood) * 100, 0) AS mood_percent,
+			  ROUND(SUM(service = 5) / COUNT(service) * 100, 0) AS service_percent,
+			  ROUND(SUM(clean = 5) / COUNT(clean) * 100, 0) AS clean_percent
+			FROM reviews
+			WHERE store_id = #{storeId};
 		]]>
 	</select>
 
