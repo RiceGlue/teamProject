@@ -33,8 +33,8 @@
                                 <c:forEach var="waiting" items="${waitings}" varStatus="status">
                                     <tr>
                                         <td>${status.index + 1}</td>
-                                        <td>${waiting.waitingNumber}</td>
-                                        <td>${waiting.numberOfPeople}명</td>
+										<%-- <td>${waiting.waitingNumber}</td> --%>
+                                        <td>${waiting.guestCount}명</td>
                                         <td>
                                             <span class="badge
                                                 <c:if test="${waiting.status == 'WAITING'}">bg-warning text-dark</c:if>
