@@ -1,58 +1,45 @@
-# =================================================================
-# == IDE & Editor
-# =================================================================
-.project
-.settings/
-.vscode/
-/.metadata/
-
-# =================================================================
-# == Build & Dependencies
-# =================================================================
-bin/
+HELP.md
+.gradle
 build/
-*.class
-*.jar
-*.war
-*.ear
-.gradle/
-node_modules/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# =================================================================
-# == Logs & Temporary Files
-# =================================================================
-*.log
-crash_log.txt
-err.txt
-quest.txt
-teamProject/server.log
-teamProject/bootrun.log
-log/
-teamProject/server_startup.log
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+# Eclipse workspace metadata
+.metadata/
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# =================================================================
-# == Sensitive & Local Configuration
-# =================================================================
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Firebase secret key - DO NOT TRACK
 teamProject/src/main/resources/firebase-service-account.json
+
+# application.properties
 teamProject/src/main/resources/application.properties
 teamProject/gradle.properties.txt
-
-# =================================================================
-# == Backups & Archives
-# =================================================================
-backup/
-teamProject_250813.zip
-
-# =================================================================
-# == OS-specific
-# =================================================================
-.DS_Store
-Thumbs.db
-
-# =================================================================
-# == Miscellaneous
-# =================================================================
-join_user_with_id_check.txt
-related_files.txt
-related_files_by_type.txt
-텍스트/
