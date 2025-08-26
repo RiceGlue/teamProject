@@ -178,7 +178,7 @@
 			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
 				<div class="form-label" style="width: 200px;">현재 이미지</div>
 				<div class="form-input" style="flex: 1;">
-					<img src="${contextPath}/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" style="max-width: 200px;" />
+					<img src="${contextPath}/images/menu/${menu.fileName}" alt="${menu.menuName}" style="max-width: 200px;" />
 					<input type="hidden" name="originalFileName" value="${menu.fileName }">
 				</div>
 			</div>

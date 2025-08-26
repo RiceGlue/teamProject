@@ -159,11 +159,11 @@
 		<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
 			<div class="carousel-inner">
 				<div class="carousel-item active">
-					<img src="${contextPath }/download?directoryName=store&fileName=${store.fileName}" class="d-block w-100" alt="${store.fileName }" height="400px">
+					<img src="${contextPath }/images/store/${store.fileName}" class="d-block w-100" alt="${store.fileName }" height="400px">
 				</div>
 				<c:forEach var="storeImage" items="${storeMap.storeImage}" varStatus="status">
 					<div class="carousel-item">
-						<img src="${contextPath }/download?directoryName=store&fileName=${storeImage.fileName}" alt="${storeImage.fileName }" height="400px">
+						<img src="${contextPath }/images/store/${storeImage.fileName}" alt="${storeImage.fileName }" height="400px">
 					</div>
 				</c:forEach>
 			</div>
@@ -257,7 +257,7 @@
 								<c:if test="${status.index < 5}">
 									<div class="home_menu_card">
 										<div class="home_menu_image">
-											<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}">
+											<img src="${contextPath }/images/menu/${menu.fileName}" alt="${menu.menuName}">
 										</div>
 										<div class="home_menu_info">
 											<p class="home_menu_name">${menu.menuName}</p>
@@ -282,7 +282,7 @@
 							<c:forEach var="menu" items="${storeMap.menu}">
 								<div class="menu_card">
 									<div class="menu_image">
-										<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" width="100px">
+										<img src="${contextPath }/images/menu/${menu.fileName}" alt="${menu.menuName}" width="100px">
 									</div>
 									<div class="menu_info">
 										<p class="menu_name">${menu.menuName}</p>

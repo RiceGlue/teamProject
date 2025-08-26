@@ -410,11 +410,11 @@ document.addEventListener('DOMContentLoaded', function () {
 			<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
 				<div class="carousel-inner">
 					<div class="carousel-item active">
-						<img src="${contextPath }/download?directoryName=store&fileName=${store.fileName}" class="d-block w-100" alt="${store.fileName}" height="400px">
+						<img src="${contextPath }/images/store/${store.fileName}" class="d-block w-100" alt="${store.fileName}" height="400px">
 					</div>
 					<c:forEach var="storeImage" items="${storeMap.storeImage}" varStatus="status">
 						<div class="carousel-item">
-							<img src="${contextPath }/download?directoryName=store&fileName=${storeImage.fileName}" alt="${storeImage.fileName}" height="400px">
+							<img src="${contextPath }/images/store/${storeImage.fileName}" alt="${storeImage.fileName}" height="400px">
 						</div>
 					</c:forEach>
 				</div>
@@ -500,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							<c:forEach var="img" items="${storeMap.reviewImage}" varStatus="img_status">
 								<c:if test="${img.reviewId == review.reviewId && img_status.first}">
 									<div class="home_review-image-wrapper">
-										<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="home_review-image">
+										<img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="home_review-image">
 									</div>
 								</c:if>
 							</c:forEach>
@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							<c:if test="${status.index < 4}">
 								<div class="home_menu_card ">
 									<div class="home_menu_image">
-										<img src="${contextPath}/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}">
+										<img src="${contextPath}/images/menu/${menu.fileName}" alt="${menu.menuName}">
 									</div>
 									<div class=".home_menu_info ">
 										<p class="home_menu_name ">${menu.menuName}</p>
@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						<c:forEach var="menu" items="${storeMap.menu}">
 							<div class="menu-card">
 								<div class="menu-image">
-									<img src="${contextPath }/download?directoryName=menu&fileName=${menu.fileName}" alt="${menu.menuName}" width="100px">
+									<img src="${contextPath }/images/menu/${menu.fileName}" alt="${menu.menuName}" width="100px">
 								</div>
 								<div class="menu-info">
 									<p class="menu-name">${menu.menuName}</p>
@@ -663,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function () {
 									<div class="review-images">
 										<c:forEach var="img" items="${storeMap.reviewImage}">
 											<c:if test="${img.reviewId == review.reviewId}">
-												<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
+												<img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
 											</c:if>
 										</c:forEach>
 									</div>

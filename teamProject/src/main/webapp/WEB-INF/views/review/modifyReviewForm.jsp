@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (imglist) {
         const imageFiles = [
             <c:forEach var="image" items="${imglist}" varStatus="loop">
-            { src: '${contextPath}/download?fileName=${image.fileName}&directoryName=review', fileName: '${image.fileName}' }
+            { src: '${contextPath}/images/review/${image.fileName}', fileName: '${image.fileName}' }
             <c:if test="${!loop.last}">,</c:if>
             </c:forEach>
         ];
@@ -244,7 +244,7 @@ function confirmDelete(reviewId) {
 </script>
 
 <div class="storeInfo">
-    <img src="${contextPath }/download?directoryName=store&fileName=${storeInfo.fileName}" alt="${storeInfo.fileName }">
+    <img src="${contextPath }/images/store/${storeInfo.fileName}" alt="${storeInfo.fileName }">
     <h4>${storeInfo.storeName }</h4>
     <h2>리뷰를 수정해 주세요.</h2>
 </div>

@@ -326,7 +326,9 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	
 		try {
 			for (int i = 0; i < files.size(); i++) {
+				
 				MultipartFile file = files.get(i);
+				
 				String imageId = (imageIds != null && i < imageIds.length) ? imageIds[i] : null;
 				String fileType = (fileTypes != null && i < fileTypes.length) ? fileTypes[i] : null;
 				String displayNo = (displayNos != null && i < displayNos.length) ? displayNos[i] : "0";
@@ -352,6 +354,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 							imageFileVO.setImageId(Integer.parseInt(imageId));
 							imageFileVO.setFileName(savedFilename);
 							imageFileVO.setFileType(isFileTypeTrue);
+							
 							adminStoreService.modifyImage(imageFileVO);
 						
 							if (originalFileName != null && !originalFileName.isEmpty()) {
@@ -376,6 +379,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 						}
 					}
 				} else if (imageId != null && !imageId.isEmpty()) {
+					
 					ImageFileVO orignFileVO = adminStoreService.selectImage(Long.parseLong(imageId));
 					if (orignFileVO != null && orignFileVO.isFileType() != isFileTypeTrue) {
 						ImageFileVO imageFileVO = new ImageFileVO();

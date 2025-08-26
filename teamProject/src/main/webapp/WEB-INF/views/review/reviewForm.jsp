@@ -213,7 +213,7 @@ function checkReview() {
 </script>
 
 <div class="storeInfo">
-	<img src="${contextPath }/download?directoryName=store&fileName=${storeInfo.fileName}" alt="${storeInfo.fileName }">
+	<img src="${contextPath }/images/store/${storeInfo.fileName}" alt="${storeInfo.fileName }">
 	<h4>${storeInfo.storeName }</h4>
 	<h2>방문 어떠셨나요?</h2>
 </div>

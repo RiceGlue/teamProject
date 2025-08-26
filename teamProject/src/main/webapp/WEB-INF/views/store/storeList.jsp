@@ -136,7 +136,7 @@
 							<c:forEach var="menu" items="${menulist}" varStatus="status">
 								<div class="store-card">
 									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${contextPath }/download?directoryName=store&fileName=${menu.fileName}" alt="${menu.fileName }"></a>
+										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${contextPath }/images/store/${menu.fileName}" alt="${menu.fileName }"></a>
 										<!--       대기 팀 수 표시 -->
 										<%--       <c:if test="${store.waitCount > 0}"> --%>
 										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
@@ -162,7 +162,7 @@
 							<c:forEach var="addr" items="${addrlist}" varStatus="status">	
 								<div class="store-card">
 									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${contextPath }/download?directoryName=store&fileName=${addr.fileName}" alt="${addr.fileName }"></a>
+										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${contextPath }/images/store/${addr.fileName}" alt="${addr.fileName }"></a>
 										<!--       대기 팀 수 표시 -->
 										<%--       <c:if test="${store.waitCount > 0}"> --%>
 										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
@@ -188,7 +188,7 @@
 							<c:forEach var="name" items="${namelist}" varStatus="status">
 								<div class="store-card">
 									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${contextPath }/download?directoryName=store&fileName=${name.fileName}" alt="${name.fileName }"></a>
+										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${contextPath }/images/store/${name.fileName}" alt="${name.fileName }"></a>
 										<!--       대기 팀 수 표시 -->
 										<%--       <c:if test="${name.waitCount > 0}"> --%>
 										<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
@@ -224,7 +224,7 @@
 			  <div class="store-card">
 			    <div class="store-image">
 			      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
-			        <img src="${contextPath }/download?directoryName=store&fileName=${region.fileName}" alt="${region.fileName }">
+			        <img src="${contextPath }/images/store/${region.fileName}" alt="${region.fileName }">
 			      </a>
 			<!--       대기 팀 수 표시 -->
 			<%--       <c:if test="${store.waitCount > 0}"> --%>

@@ -537,7 +537,7 @@
 								
 								<span style="font-weight: bold;">현재 이미지</span><br>
 								<div style="margin:35px;"></div>
-								<img src="${contextPath}/download?directoryName=store&fileName=${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
+								<img src="${contextPath}/images/store/${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
 							</div>
 							
 							<div class="form-input" style="flex: 1;">
