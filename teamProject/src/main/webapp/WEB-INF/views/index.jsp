@@ -6,13 +6,149 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Google Maps JavaScript API 로드 (API 키 필요) -->
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap"></script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&libraries=places">
+</script>
+
+
+<!-- jQuery (AJAX 용) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <style>
     .carousel-item img { height: 500px; object-fit: cover; }
     .carousel-caption { background-color: rgba(0, 0, 0, 0.5); border-radius: 5px; padding: 10px; }
-    #map { height:300px; width:100%; background-color:#eee; }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. 사용자 위치 가져오기
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+        document.getElementById("address").innerText = "위치 정보를 지원하지 않는 브라우저입니다.";
+    }
+
+    function success(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        getAddressFromCoords(lat, lng);
+    }
+
+    function error() {
+        document.getElementById("address").innerText = "위치 정보를 불러올 수 없습니다.";
+    }
+
+    // 2. 위도/경도로 주소 얻기
+    function getAddressFromCoords(lat, lng) {
+        const geocoder = new google.maps.Geocoder();
+        const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+        geocoder.geocode({ location: latlng }, function (results, status) {
+            if (status === "OK") {
+                if (results[0]) {
+                    const fullAddress = results[0].formatted_address;
+                    document.getElementById("address").innerText = fullAddress;
+
+                    const dong = extractDongAddress(results[0].address_components);
+                    if (dong) {
+                        fetchNearbyStores(dong);
+                    }
+                }
+            } else {
+                document.getElementById("address").innerText = "주소를 가져올 수 없습니다.";
+            }
+        });
+    }
+
+    // 3. 주소 컴포넌트에서 동 주소 추출
+    function extractDongAddress(components) {
+        for (let i = 0; i < components.length; i++) {
+            const types = components[i].types;
+            if (types.includes("sublocality_level_1") || types.includes("locality") || types.includes("administrative_area_level_3")) {
+                return components[i].long_name;
+            }
+        }
+        return null;
+    }
+
+    // 4. AJAX로 동 주소 전달 → 매장 리스트 받아오기
+    function fetchNearbyStores(dong) {
+        $.ajax({
+            url: "${contextPath}/store/searchStoreNearUser", // 컨트롤러 주소에 맞게 수정
+            method: "GET",
+            data: { location: dong },
+            success: function (storeList) {
+                if (storeList.length === 0) {
+                    document.getElementById("nearbyStores").innerHTML = "<p>근처에 매장이 없습니다.</p>";
+                    return;
+                }
+
+                initMap();
+                displayStoresOnMap(storeList);
+                displayStoreCards(storeList);
+            },
+            error: function () {
+                document.getElementById("nearbyStores").innerHTML = "<p>매장 정보를 불러오는 데 실패했습니다.</p>";
+            }
+        });
+    }
+
+    // 5. 지도 초기화
+    let map;
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 14,
+            center: { lat: 37.5665, lng: 126.9780 }, // 서울 기본 위치
+        });
+    }
+
+    // 6. 매장 주소 → 위도/경도 → 지도 마커 표시
+    function displayStoresOnMap(storeList) {
+        const geocoder = new google.maps.Geocoder();
+
+        storeList.forEach(store => {
+            geocoder.geocode({ address: store.address }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    const location = results[0].geometry.location;
+
+                    new google.maps.Marker({
+                        position: location,
+                        map: map,
+                        title: store.storeName
+                    });
+
+                    // 첫 마커 기준으로 지도 센터 변경
+                    if (store === storeList[0]) {
+                        map.setCenter(location);
+                    }
+                }
+            });
+        });
+    }
+
+    // 7. 매장 카드 UI로 표시
+    function displayStoreCards(storeList) {
+        const container = document.getElementById("nearbyStores");
+        container.innerHTML = ""; // 초기화
+
+        storeList.forEach(store => {
+            const card = document.createElement("div");
+            card.className = "card my-3";
+            card.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${store.storeName}</h5>
+                    <p class="card-text">📍 ${store.address}</p>
+                    <p class="card-text">📞 ${store.localNumber}-${store.number1}-${store.number2}</p>
+                    <p class="card-text">⭐ ${store.avgRating} / 5</p>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+});
+</script>
 
 <div class="row">
 	<div class="container my-4">
@@ -139,16 +275,19 @@
         <h2>최신인기리뷰</h2>
     </div>
 </div>
+
 <div class="row">
     <div class="container my-4">
         <div class="col-12">
             <h2>내 지역 맛집</h2>
-            <p>사용자 현재 위치 : <span id="address"> 위치 정보를 불러오는 중...</span> </p>
-            <div id="map"></div>
-            <hr />
-            <h4>근처 매장</h4>
-            <div id="nearbyStores"></div>
-         </div>
+            <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
+
+            <!-- 지도를 렌더링할 영역 -->
+            <div id="map" style="height: 400px;"></div>
+
+            <!-- 매장 카드 리스트 -->
+            <div id="nearbyStores" class="mt-4"></div>
+        </div>
     </div>
 </div>
    

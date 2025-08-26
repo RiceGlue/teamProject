@@ -218,4 +218,31 @@
 			delete from reviews where review_id =#{reviewId}
 		]]>
 	</delete>
+	
+	<select id="selectBestReview" resultMap="reviewlist" >
+		<![CDATA[
+			SELECT *
+			FROM (
+			    SELECT 
+			        s.store_id,
+			        s.store_name,
+			        s.address,
+			        s.local_number,
+			        s.number1,
+			        s.number2,
+			        r.review_id,
+			        r.content,
+			        r.likes,
+			        r.rating,
+			        r.member_id,
+			        ROW_NUMBER() OVER (PARTITION BY s.store_id ORDER BY r.likes DESC) AS rn
+			    FROM stores s
+			    INNER JOIN reviews r ON s.store_id = r.store_id
+			) ranked
+			WHERE ranked.rn = 1
+			ORDER BY ranked.likes DESC
+			LIMIT 3;
+		]]>
+	</select>
+	
 </mapper>

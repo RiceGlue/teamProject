@@ -400,15 +400,19 @@ document.addEventListener('DOMContentLoaded', function () {
 	
 	likeButtons.forEach(button => {
 		button.addEventListener('click', function () {
-			const isLiked = button.classList.toggle('liked'); // liked 클래스 토글
+			const isLiked = button.classList.toggle('likes');
 			const countSpan = button.querySelector('.like-count');
+			const iconSpan = button.querySelector('.like-icon');
 			let count = parseInt(countSpan.textContent) || 0;
-			
-			// 좋아요 수 증가/감소
+
+			// 숫자 업데이트
 			count = isLiked ? count + 1 : count - 1;
 			countSpan.textContent = count;
-			
-			// 실제로는 서버에 AJAX 요청 보내서 좋아요 반영해야 함
+
+			// 아이콘 업데이트
+			iconSpan.textContent = isLiked ? '👍' : '🤍';
+
+			// TODO: 서버에 AJAX 요청 보내기
 		});
 	});
 });
@@ -500,9 +504,14 @@ document.addEventListener('DOMContentLoaded', function () {
 								</div>
 								<div class="home_review-content">${review.content}</div>
 							</div>
-							<c:if test="${not empty  storeMap.reviewImage}">
+
+							<c:if test="${not empty storeMap.reviewImage}">
 								<div class="home_review-image-wrapper">
-									<img src="${contextPath}/images/review/${reviewImage[0].fileName}" alt="리뷰 이미지" class="home_review-image">
+									<c:forEach var="reviewImage" items="${storeMap.reviewImage}">
+										<c:if test="${reviewImage.reviewId == review.reviewId}">
+											<img src="${contextPath}/images/review/${reviewImage.fileName}" alt="리뷰 이미지" class="home_review-image">
+										</c:if>
+									</c:forEach>
 								</div>
 							</c:if>
 						</div>
@@ -655,17 +664,16 @@ document.addEventListener('DOMContentLoaded', function () {
 									</div>
 								</c:if>
 								<div class="review-like-box">
-									<button class="like-button" data-review-id="${review.reviewId}">
-										👍<span class="like-count" id="like-count-${review.reviewId}">
-											<c:choose>
-												<c:when test="${review.likes > 0}">
-													${review.likes}
-												</c:when>
-												<c:otherwise>
-												</c:otherwise>
-											</c:choose>
+									<span 
+										class="like-button <c:if test='${review.likes}'>likes</c:if>'" 
+										data-review-id="${review.reviewId}" 
+										role="button" 
+										tabindex="0">
+										<span class="like-icon">🤍</span>
+										<span class="like-count" id="like-count-${review.reviewId}">
+											${review.likes}
 										</span>
-									</button>
+									</span>
 								</div>
 							</div>
 						</c:forEach>

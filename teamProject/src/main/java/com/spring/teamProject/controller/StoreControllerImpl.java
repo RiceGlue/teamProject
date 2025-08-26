@@ -1,17 +1,17 @@
 package com.spring.teamProject.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 AuthenticationPrincipal 추가
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.ViewUtil;
@@ -22,7 +22,6 @@ import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping(value="/store")
@@ -107,6 +106,14 @@ public class StoreControllerImpl implements StoreController {
 //		}
 //		return response;
 //	}
+	
+	@GetMapping("/searchStoreNearUser")
+	@ResponseBody
+	public List<StoreVO> searchStoreNearUser(@RequestParam("location") String location) {
+		System.out.println("받아온 주소 : " +location);
+	    return storeService.searchStoreNearUser(location); // 서비스에서 LIKE '%location%' 검색
+	}
+
 
 
 }
