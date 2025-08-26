@@ -144,4 +144,54 @@ public class FtpServiceImpl implements FtpService {
             }
         }
     }
+    
+    @Override
+    public boolean deleteFile(String subDirectory, String fileName) {
+	    FTPClient ftpClient = new FTPClient();
+	    
+	    try {
+		    ftpClient.connect(host, port);
+		    
+		    if (!ftpClient.login(username, password)) {
+			    logger.error("FTP 로그인 실패");
+			    return false;
+		    }
+		    
+		    ftpClient.enterLocalPassiveMode();
+		    ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+		
+		    String remotePath = baseDirectory;
+		    if (StringUtils.hasText(subDirectory)) {
+		    	remotePath += "/" + subDirectory;
+		    }
+		
+		    if (!ftpClient.changeWorkingDirectory(remotePath)) {
+			    logger.error("FTP 디렉토리 이동 실패: {}", remotePath);
+			    return false;
+		    }
+		
+		    boolean deleted = ftpClient.deleteFile(fileName);
+		    if (deleted) {
+		    	logger.info("FTP 파일 삭제 성공: {}/{}", remotePath, fileName);
+		    } else {
+		    	logger.error("FTP 파일 삭제 실패: {}/{}", remotePath, fileName);
+		    }
+		    return deleted;
+		
+	    } catch (IOException e) {
+		    logger.error("FTP 파일 삭제 중 오류 발생", e);
+		    return false;
+	    } finally {
+		    try {
+			    if (ftpClient.isConnected()) {
+				    ftpClient.logout();
+				    ftpClient.disconnect();
+				    logger.info("FTP 서버 연결 종료.");
+			    }
+		    } catch (IOException ex) {
+		    	logger.error("FTP 연결 종료 중 오류 발생", ex);
+		    }
+	    }
+    }
+
 }

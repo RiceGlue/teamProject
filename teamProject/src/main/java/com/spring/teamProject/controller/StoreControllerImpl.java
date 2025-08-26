@@ -88,23 +88,23 @@ public class StoreControllerImpl implements StoreController {
 		return mav;
 	}
 	
-	@RequestMapping(value="/likeReview" , method=RequestMethod.POST)
-	public Map<String, Object> likeReview(@RequestBody Map<String, Object> payload, HttpSession session) {
-		Long reviewId = Long.valueOf(payload.get("reviewId").toString());
-		String userId = (String) session.getAttribute("loginId");
-
-		boolean alreadyLiked = storeService.likeReview(reviewId, userId);
-
-		Map<String, Object> response = new HashMap<>();
-		if (alreadyLiked) {
-			response.put("success", false);
-		} else {
-			int updatedCount = storeService.increaseCountReview(reviewId, userId);
-			response.put("success", true);
-			response.put("likeCount", updatedCount);
-		}
-		return response;
-	}
+//	@RequestMapping(value="/likeReview" , method=RequestMethod.POST)
+//	public Map<String, Object> likeReview(@RequestBody Map<String, Object> payload, HttpSession session) {
+//		Long reviewId = Long.valueOf(payload.get("reviewId").toString());
+//		String userId = (String) session.getAttribute("loginId");
+//
+//		boolean alreadyLiked = storeService.likeReview(reviewId, userId);
+//
+//		Map<String, Object> response = new HashMap<>();
+//		if (alreadyLiked) {
+//			response.put("success", false);
+//		} else {
+//			int updatedCount = storeService.increaseCountReview(reviewId, userId);
+//			response.put("success", true);
+//			response.put("likeCount", updatedCount);
+//		}
+//		return response;
+//	}
 
 	
 }

@@ -23,4 +23,6 @@ public interface FtpService {
      * @throws IOException 파일이 없거나 연결 실패 시 발생
      */
     byte[] downloadFile(String subDirectory, String fileName) throws IOException;
+    
+    public boolean deleteFile(String subDirectory, String fileName);
 }

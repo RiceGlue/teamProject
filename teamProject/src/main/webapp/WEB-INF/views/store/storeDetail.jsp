@@ -146,11 +146,6 @@
 	.home_rating p { margin: 0; font-weight: bold; font-size: 1rem; }
 	.review-view-all button { font-size: 0.9rem; padding: 4px 10px; }
 	
-	/* 리뷰 좋아요 버튼 */
-	.like-button {background: none;border: none;cursor: pointer;font-size: 24px;color: #999; /* 기본 회색 */display: flex;align-items: center;gap: 5px;}
-	.like-button.liked .thumb {color: #007BFF; /* 파란색 (좋아요 누른 상태) */}
-
-
 	/* 💡 위시리스트 버튼 CSS 추가 */
     .wishlist-btn {
         background: none;
