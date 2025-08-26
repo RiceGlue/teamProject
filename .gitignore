@@ -16,7 +16,8 @@ build/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
-
+# Eclipse workspace metadata
+.metadata/
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -41,3 +42,4 @@ teamProject/src/main/resources/firebase-service-account.json
 
 # application.properties
 teamProject/src/main/resources/application.properties
+teamProject/gradle.properties.txt
