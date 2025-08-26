@@ -61,13 +61,9 @@ public class StoreServiceImpl implements StoreService{
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
 		List<ReviewVO> detailReview1 = storeDAO.selectDetailReview1(storeId);
 		ReviewVO detailReview2 = storeDAO.selectDetailReview2(storeId);
-<<<<<<< HEAD
-		
-=======
 
 		System.out.println(detailReview2.getTastePercent());
 
->>>>>>> d826d17a37ca1c68de4d29be7c1f70e8fa9ead6e
 //		List<ReservationSettingVO> reservation = storeDAO.selectStoreReservatioin(storeId);
 
 		//이미지
