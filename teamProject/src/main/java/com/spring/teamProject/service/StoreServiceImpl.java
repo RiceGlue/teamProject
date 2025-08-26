@@ -61,7 +61,13 @@ public class StoreServiceImpl implements StoreService{
 		List<MenuVO> menu = storeDAO.selectStoreMenu(storeId);
 		List<ReviewVO> detailReview1 = storeDAO.selectDetailReview1(storeId);
 		ReviewVO detailReview2 = storeDAO.selectDetailReview2(storeId);
+<<<<<<< HEAD
 		
+=======
+
+		System.out.println(detailReview2.getTastePercent());
+
+>>>>>>> d826d17a37ca1c68de4d29be7c1f70e8fa9ead6e
 //		List<ReservationSettingVO> reservation = storeDAO.selectStoreReservatioin(storeId);
 
 		//이미지
@@ -92,21 +98,26 @@ public class StoreServiceImpl implements StoreService{
 	public StoreVO getStoreById(Long storeId) throws Exception {
 		return storeDAO.selectStoreById(storeId);
 	}
-	
+
 	@Override
 	public List<StoreVO> searchStoreNearUser(@RequestParam String address) {
 		return storeDAO.selectStoreNearUser(address);
 	}
-	
+
 //	@Override
-//	public Map getBestReviewByStores() throws Exception {	
+//	public Map getBestReviewByStores() throws Exception {
 //		Map storeReivew = new HashMap<>();
-//		
+//
 //		List<ReviewVO> reviewList = storeDAO.selectBestReviewByStores();
 //		List<ImageFileVO> reviewImageList = storeDAO.selectBestReviewImageByStores();
-//		
+//
 //		storeReivew.put("reviewList", reviewList);
 //		storeReivew.put("reviewImageList", reviewImageList);
 //		return storeReivew;
 //	}
+
+	@Override
+    public List<StoreVO> getStoresByOwnerId(long ownerId) throws Exception {
+        return storeDAO.selectStoresByOwnerId(ownerId);
+    }
 }

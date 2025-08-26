@@ -22,7 +22,14 @@ public interface WaitingDAO {
 
     List<WaitingVO> selectWaitingsByMemberId(@Param("memberId") Long memberId);
     List<WaitingVO> selectCurrentWaitings(@Param("storeId") Long storeId);
-    
+
     void increaseUserTemperatureByWaiting(long waitingId) throws DataAccessException;
     void decreaseUserTemperatureByWaiting(long waitingId) throws DataAccessException;
+    /**
+     * 특정 매장의 현재 웨이팅 건수를 조회합니다.
+     * @param storeId 매장 ID
+     * @return 현재 웨이팅 팀 수
+     * @throws DataAccessException DB 접근 오류 시
+     */
+    long selectWaitingCountByStoreId(long storeId) throws DataAccessException;
 }

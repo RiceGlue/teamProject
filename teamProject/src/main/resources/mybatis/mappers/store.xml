@@ -98,7 +98,7 @@
 <!-- 			WHERE rn = 1; -->
 <!-- 		]]> -->
 <!-- 	</select> -->
-	
+
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
 			select * from stores where storeId = #{storeId}
@@ -199,7 +199,7 @@
 			select rating, count(rating) as countScoreRating from reviews where store_id=#{storeId} group by rating order by rating desc
 		]]>
 	</select>
-	
+
 	<select id="selectDetailReview2" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
 			SELECT
@@ -243,12 +243,20 @@
 			select * from stores where store_id = #{storeId}
 		]]>
 	</select>
-	
+
 	<select id="selectStoreNearUser" parameterType="String" resultMap="storelist" >
 		<![CDATA[
 			select * from stores
 			where address like concat ('%', #{address}, '%' )
 		]]>
 	</select>
+
+	<select id="selectStoresByOwnerId" parameterType="long" resultMap="storelist">
+        <![CDATA[
+            SELECT store_id, store_name, owner_id, store_type, address, description, file_name
+            FROM stores
+            WHERE owner_id = #{ownerId}
+        ]]>
+    </select>
 
 </mapper>

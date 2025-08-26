@@ -186,7 +186,7 @@
     <delete id="deleteReservation" parameterType="long">
         DELETE FROM reservations WHERE reservation_id = #{reservationId}
     </delete>
-    
+
     <update id ="increaseUserTemperatureByReservation" parameterType="long" >
 	    UPDATE members
 		SET manner_temperature = GREATEST(manner_temperature + 1, 0)
@@ -196,7 +196,7 @@
 		    WHERE reservation_id = #{reservationId}
 		)
     </update>
-    
+
     <update id ="decreaseUserTemperatureByReservation" parameterType="long" >
     	UPDATE members
 		SET manner_temperature = GREATEST(manner_temperature - 1, 0)
@@ -206,4 +206,12 @@
 		    WHERE reservation_id = #{reservationId}
 		)
     </update>
+    <select id="selectReservationCountByStoreId" parameterType="long" resultType="long">
+        <![CDATA[
+            SELECT COUNT(*) FROM reservations
+            WHERE store_id = #{storeId}
+            AND DATE(reservation_date) = CURDATE()
+            AND status = 'CONFIRMED'
+        ]]>
+    </select>
 </mapper>

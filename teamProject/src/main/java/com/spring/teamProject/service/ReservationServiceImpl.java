@@ -291,9 +291,14 @@ public class ReservationServiceImpl implements ReservationService {
     public void increaseUserTemperatureByReservation(long reservationId) throws Exception {
     	reservationDAO.increaseUserTemperatureByReservation(reservationId);
     }
-    
+
     @Override
     public void decreaseUserTemperatureByReservation(long reservationId) throws Exception {
     	reservationDAO.decreaseUserTemperatureByReservation(reservationId);
+    }
+
+    @Override
+    public long getReservationCountByStoreId(long storeId) {
+        return reservationDAO.selectReservationCountByStoreId(storeId);
     }
 }
