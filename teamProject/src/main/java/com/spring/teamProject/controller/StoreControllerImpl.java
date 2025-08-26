@@ -1,5 +1,6 @@
 package com.spring.teamProject.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -7,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal; // 💡 AuthenticationPrincipal 추가
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.ViewUtil;
@@ -23,6 +22,7 @@ import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping(value="/store")
@@ -87,5 +87,24 @@ public class StoreControllerImpl implements StoreController {
 
 		return mav;
 	}
+	
+	@RequestMapping(value="/likeReview" , method=RequestMethod.POST)
+	public Map<String, Object> likeReview(@RequestBody Map<String, Object> payload, HttpSession session) {
+		Long reviewId = Long.valueOf(payload.get("reviewId").toString());
+		String userId = (String) session.getAttribute("loginId");
+
+		boolean alreadyLiked = storeService.likeReview(reviewId, userId);
+
+		Map<String, Object> response = new HashMap<>();
+		if (alreadyLiked) {
+			response.put("success", false);
+		} else {
+			int updatedCount = storeService.increaseCountReview(reviewId, userId);
+			response.put("success", true);
+			response.put("likeCount", updatedCount);
+		}
+		return response;
+	}
+
 	
 }

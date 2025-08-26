@@ -42,6 +42,7 @@
 		<result property="mood" column="mood" />
 		<result property="service" column="service" />
 		<result property="clean" column="clean" />
+		<result property="likes" column="likes" />
 	</resultMap>
 	
 	<resultMap id="storeInfo" type="StoreVO">

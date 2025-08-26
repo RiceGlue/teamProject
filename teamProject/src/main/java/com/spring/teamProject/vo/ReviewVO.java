@@ -30,6 +30,8 @@ public class ReviewVO {
 	private int servicePercent;
 	private int cleanPercent;
 	
+	private int likes;
+	
 	public long getReviewId() {
 		return reviewId;
 	}
@@ -156,6 +158,11 @@ public class ReviewVO {
 	public void setCleanPercent(int cleanPercent) {
 		this.cleanPercent = cleanPercent;
 	}
-
+	public int getLikes() {
+		return likes;
+	}
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
 	
 }

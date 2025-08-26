@@ -145,6 +145,11 @@
 	.home_review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 	.home_rating p { margin: 0; font-weight: bold; font-size: 1rem; }
 	.review-view-all button { font-size: 0.9rem; padding: 4px 10px; }
+	
+	/* 리뷰 좋아요 버튼 */
+	.like-button {background: none;border: none;cursor: pointer;font-size: 24px;color: #999; /* 기본 회색 */display: flex;align-items: center;gap: 5px;}
+	.like-button.liked .thumb {color: #007BFF; /* 파란색 (좋아요 누른 상태) */}
+
 
 	/* 💡 위시리스트 버튼 CSS 추가 */
     .wishlist-btn {
@@ -382,6 +387,25 @@ $(document).ready(function(){
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+  const likeButtons = document.querySelectorAll('.like-button');
+
+  likeButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const isLiked = button.classList.toggle('liked'); // liked 클래스 토글
+      const countSpan = button.querySelector('.like-count');
+      let count = parseInt(countSpan.textContent) || 0;
+
+      // 좋아요 수 증가/감소
+      count = isLiked ? count + 1 : count - 1;
+      countSpan.textContent = count;
+
+      // 실제로는 서버에 AJAX 요청 보내서 좋아요 반영해야 함
+      // 예: fetch('/like', { method: 'POST', body: JSON.stringify({...}) })
+    });
+  });
+});
 </script>
 
 
@@ -551,8 +575,6 @@ $(document).ready(function(){
 							</c:if>
 						</c:forEach>
 					</div>
-
-
 						<div class="home_menu_more_btn_wrap">
 							<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
 						</div>
@@ -635,28 +657,41 @@ $(document).ready(function(){
 										</c:forEach>
 									</div>
 								</div>
+							
 								<div class="review-writer">
 									${fn:substring(review.writerId, 0, 2)}<c:forEach begin="1" end="${fn:length(review.writerId) - 2}">*</c:forEach>
 								</div>
+							
 								<div class="review-content">${review.content}</div>
+							
 								<c:if test="${not empty storeMap.reviewImage}">
 									<div class="review-images">
-									<c:forEach var="img" items="${storeMap.reviewImage}">
-										<c:if test="${img.reviewId == review.reviewId}">
-											<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
-										</c:if>
-									</c:forEach>
+										<c:forEach var="img" items="${storeMap.reviewImage}">
+											<c:if test="${img.reviewId == review.reviewId}">
+												<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
+											</c:if>
+										</c:forEach>
 									</div>
 								</c:if>
+							
+								<!-- ✅ 좋아요 버튼 추가 -->
+								<div class="review-like-box">
+	<button class="like-button" data-review-id="${review.reviewId}">
+		👍<span class="like-count" id="like-count-${review.reviewId}">
+			<c:choose>
+				<c:when test="${review.likes > 0}">
+					${review.likes}
+				</c:when>
+				<c:otherwise>
+					
+				</c:otherwise>
+			</c:choose>
+		</span>
+	</button>
+</div>
 
-								<c:forEach var="img" items="${storeMap.reviewImage}">
-									<c:if test="${img.reviewId == review.reviewId}">
-										<c:if test="${img_status.first}"><div class="review-images"></c:if>
-										<img src="${contextPath}/download?fileName=${img.fileName}&directoryName=review" alt="리뷰 이미지" class="review-image">
-										<c:if test="${img_status.last}"></c:if>
-									</c:if>
-								</c:forEach>
 							</div>
+
 						</c:forEach>
 						<c:if test="${store.countRating > 10}">
 							<button id="loadMoreBtn" class="load-more-btn">더보기</button>

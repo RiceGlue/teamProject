@@ -82,6 +82,7 @@
 		<result property="moodPercent" column="mood_percent" />
 		<result property="servicePercent" column="service_percent" />
 		<result property="cleanPercent" column="clean_percent" />
+		<result property="likes" column="likes" />
 	</resultMap>
 
 <!-- 	<select id="selectBestReviewByStores" resultMap="storelist" > -->
