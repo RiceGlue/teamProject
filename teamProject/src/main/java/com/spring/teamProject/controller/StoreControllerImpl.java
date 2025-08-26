@@ -87,12 +87,14 @@ public class StoreControllerImpl implements StoreController {
 
 		return mav;
 	}
-	
+
+
 //	@RequestMapping(value="/likeReview" , method=RequestMethod.POST)
 //	public Map<String, Object> likeReview(@RequestBody Map<String, Object> payload, HttpSession session) {
 //		Long reviewId = Long.valueOf(payload.get("reviewId").toString());
 //		String userId = (String) session.getAttribute("loginId");
 //
+
 //		boolean alreadyLiked = storeService.likeReview(reviewId, userId);
 //
 //		Map<String, Object> response = new HashMap<>();
@@ -106,5 +108,5 @@ public class StoreControllerImpl implements StoreController {
 //		return response;
 //	}
 
-	
+
 }

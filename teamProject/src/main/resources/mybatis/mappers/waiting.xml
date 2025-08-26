@@ -61,7 +61,7 @@
 	    WHERE store_id = #{storeId} AND status = 'WAITING'
 	    ORDER BY created_at ASC;
 	</select>
-	
+
 	<update id ="increaseUserTemperatureByWaiting" parameterType="long" >
 	    UPDATE members
 		SET manner_temperature = GREATEST(manner_temperature + 1, 0)
@@ -71,7 +71,7 @@
 		    WHERE waiting_id = #{waitingId}
 		)
     </update>
-    
+
     <update id ="decreaseUserTemperatureByWaiting" parameterType="long" >
     	UPDATE members
 		SET manner_temperature = GREATEST(manner_temperature - 1, 0)
@@ -81,4 +81,10 @@
 		    WHERE waiting_id = #{waitingId}
 		)
     </update>
+    <select id="selectWaitingCountByStoreId" parameterType="long" resultType="long">
+        <![CDATA[
+            SELECT COUNT(*) FROM waitings
+            WHERE store_id = #{storeId} AND status = 'WAITING'
+        ]]>
+    </select>
 </mapper>

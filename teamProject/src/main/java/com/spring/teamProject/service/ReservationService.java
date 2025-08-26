@@ -102,7 +102,13 @@ public interface ReservationService {
     boolean deleteTempReservationByTransactionId(String transactionId);
 
     boolean cancelReservationByPaymentId(String paymentId);
-    
+
     void increaseUserTemperatureByReservation(long reservationId) throws Exception;
     void decreaseUserTemperatureByReservation(long reservationId) throws Exception;
+    /**
+	 * 특정 매장의 현재(오늘) 예약 건수를 조회합니다.
+	 * @param storeId 매장 ID
+	 * @return 오늘 예약 건수
+	 */
+	long getReservationCountByStoreId(long storeId);
 }

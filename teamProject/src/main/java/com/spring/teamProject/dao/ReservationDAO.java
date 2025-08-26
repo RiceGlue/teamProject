@@ -54,8 +54,16 @@ public interface ReservationDAO {
 
     // 임시 예약 정보 삭제
     int deleteReservation(@Param("reservationId") long reservationId);
-    
+
     //사용자 벌점 제도
     void increaseUserTemperatureByReservation (long reservationId) throws DataAccessException;
     void decreaseUserTemperatureByReservation (long reservationId) throws DataAccessException;
+
+    /**
+     * 특정 매장의 오늘 예약 건수를 조회합니다.
+     * @param storeId 매장 ID
+     * @return 오늘 예약 건수
+     * @throws DataAccessException DB 접근 오류 시
+     */
+    long selectReservationCountByStoreId(long storeId) throws DataAccessException;
 }

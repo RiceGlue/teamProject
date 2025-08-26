@@ -29,7 +29,13 @@ public interface WaitingService {
      * @return 대기중인 웨이팅 목록 (오래된 순)
      */
     List<WaitingVO> getCurrentWaitings(Long storeId);
-    
+
     void increaseUserTemperatureByWaiting(long waitingId);
     void decreaseUserTemperatureByWaiting(long waitingId);
+    /**
+	 * 특정 매장의 현재 대기 중인 웨이팅 건수를 조회합니다.
+	 * @param storeId 매장 ID
+	 * @return 현재 웨이팅 팀 수
+	 */
+	long getWaitingCountByStoreId(long storeId);
 }

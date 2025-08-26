@@ -33,9 +33,17 @@ public interface StoreDAO {
 
 	// 매장 ID로 매장 정보를 가져오는 메서드 추가
 	public StoreVO selectStoreById(long storeId) throws DataAccessException;
-	
+
 	public List<StoreVO> selectStoreNearUser (String address) throws DataAccessException;
-	
+
 	public List<ReviewVO> selectBestReviewByStores() throws DataAccessException;
 	public List<ImageFileVO> selectBestReviewImageByStores() throws DataAccessException;
+
+    /**
+     * 점주(owner) ID로 소유한 매장 목록을 조회합니다.
+     * @param ownerId 점주 ID
+     * @return 소유한 매장 목록
+     * @throws DataAccessException DB 접근 오류 시
+     */
+    public List<StoreVO> selectStoresByOwnerId(long ownerId) throws DataAccessException;
 }
