@@ -491,7 +491,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		<div class="store-details" style="flex: 1;">
 			<div style="display: flex; justify-content: space-between; align-items: center;">
 				<h4 class="mt-3">${store.storeName}</h4>
-				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button>
+				<!-- <button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button> -->
+				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-bookmark "></i></button>
 				<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 			</div>
 			<div class="rating mt-2 mb-2">
