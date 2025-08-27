@@ -3,10 +3,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
@@ -225,9 +226,9 @@ function toggleWishlist() {
 		alert('로그인 후 이용해주세요.');
 		return;
 	}
-	
+
 	const isWishlisted = $('#wishlist-btn').hasClass('active');
-	
+
 	// 💡 이미 위시리스트에 추가된 경우 삭제 여부를 묻는 로직 추가
 	if (isWishlisted) {
 		// '확인'을 누르면 true, '취소'를 누르면 false 반환
@@ -330,7 +331,7 @@ $("ul.tabs li a").click(function () {
 		}
 		return false;
 	});
-	
+
 	document.getElementById('copyaddress').addEventListener('click', function () {
 		navigator.clipboard.writeText('${store.address}').then(function () {
 			alert("주소가 복사되었습니다.");
@@ -338,7 +339,7 @@ $("ul.tabs li a").click(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	document.getElementById('copyUrlBtn').addEventListener('click', function () {
 		navigator.clipboard.writeText(window.location.href).then(function () {
 			alert("주소가 복사되었습니다.");
@@ -346,7 +347,7 @@ $("ul.tabs li a").click(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	$(".tab_content").hide();
 	$("ul.tabs li:first").addClass("active").show();
 	$(".tab_content:first").show();
@@ -357,7 +358,7 @@ $("ul.tabs li a").click(function () {
 			$('#bookFormBtn').prop('disabled', false);
 		}
 	});
-	
+
 	const today = new Date();
 	const todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
 	$("#reservationDate").val(todayFormatted);
@@ -368,7 +369,7 @@ $(document).ready(function(){
 	// 현재 표시된 리뷰의 개수를 추적합니다.
 	let reviewsLoaded = 10;
 	const totalReviews = ${store.countRating};
-	
+
 	$('#loadMoreBtn').on('click', function() {
 		// 서버에 다음 리뷰 목록을 요청하는 AJAX 호출을 실행합니다.
 		$.ajax({
@@ -390,10 +391,10 @@ $(document).ready(function(){
 					`;
 					$('.detail-review-list').append(newReviewHtml);
 				});
-				
+
 				// 현재 로드된 리뷰 개수를 업데이트합니다.
 				reviewsLoaded += response.length;
-				
+
 				// 모든 리뷰를 불러왔다면 "더보기" 버튼을 숨깁니다.
 				if (reviewsLoaded >= totalReviews) {
 					$('#loadMoreBtn').hide();
@@ -549,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	                            </div>
 	                            <div class="home_review-content">${review.content}</div>
 	                        </div>
-	
+
 	                        <div class="home_review-image">
 	                            <c:forEach var="homeReviewImage" items="${storeMap.homeReviewImage}">
 	                                <c:if test="${homeReviewImage.reviewId == review.reviewId}">
@@ -591,15 +592,17 @@ document.addEventListener('DOMContentLoaded', function () {
 							</div>
 							<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
 						</form>
-						
+
+						<%--
 						<div class="button-group mt-5">
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
-						
+
 						<div class="back-link">
 							<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
-						
+						 --%>
+
 						<h5 class="mt-4">메뉴</h5>
 						<div class="home_menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
@@ -622,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						</div>
 					</div>
 				</div>
-				
+
 				<div class="tab_content" id="tab2">
 					<div class="menu-container">
 						<c:forEach var="menu" items="${storeMap.menu}">
@@ -646,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							<h7>${store.countRating}개 리뷰 별점 평균</h7>
 							<h2><img src="${contextPath}/image/review_rating.jpg" width="40" alt="별점 아이콘">${store.avgRating}</h2>
 						</div>
-						
+
 						<div class="rating-card">
 							<c:forEach var="detailReview1" items="${storeMap.detailReview1}">
 								<div class="rating-breakdown-bar">
@@ -707,11 +710,11 @@ document.addEventListener('DOMContentLoaded', function () {
 									</div>
 								</c:if>
 								<div class="review-like-box">
-									<span 
-									    class="like-button ${review.likes > 0 ? 'likes' : ''}" 
-									    data-review-id="${review.reviewId}" 
-									    data-member-id="${memberId}" 
-									    role="button" 
+									<span
+									    class="like-button ${review.likes > 0 ? 'likes' : ''}"
+									    data-review-id="${review.reviewId}"
+									    data-member-id="${memberId}"
+									    role="button"
 									    tabindex="0">
 									    <span class="like-icon">${review.likes > 0 ? '❤️' : '🤍'}</span>
 									    <span class="like-count" id="like-count-${review.reviewId}">${review.likes}</span>
