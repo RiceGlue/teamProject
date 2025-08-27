@@ -704,12 +704,15 @@ document.addEventListener('DOMContentLoaded', function () {
 								</div>
 								<div class="review-content">${review.content}</div>
 								<c:if test="${not empty reviewImages}">
-									<div class="review-images">
-										<c:forEach var="img" items="${reviewImages}">
-											<img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
-										</c:forEach>
-									</div>
-								</c:if>
+    <div class="review-images">
+        <c:forEach var="img" items="${reviewImages}">
+            <c:if test="${img.reviewId == review.reviewId}">
+                <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
+            </c:if>
+        </c:forEach>
+    </div>
+</c:if>
+
 								<div class="review-like-box">
 									<span
 									    class="like-button ${review.likes > 0 ? 'likes' : ''}"
