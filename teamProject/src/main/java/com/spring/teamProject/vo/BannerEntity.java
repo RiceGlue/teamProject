@@ -59,4 +59,8 @@ public class BannerEntity {
 
     @Column(name = "promotion_id")
     private Long promotionId;
+
+    public void setLinkUrl(Object o) {
+
+    }
 }

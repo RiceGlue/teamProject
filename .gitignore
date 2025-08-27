@@ -1,45 +1,60 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
+# =================================================================
+# == IDE & Editor
+# =================================================================
 .project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-# Eclipse workspace metadata
-.metadata/
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
+.settings/
 .vscode/
+/.metadata/
 
-# Firebase secret key - DO NOT TRACK
+# =================================================================
+# == Build & Dependencies
+# =================================================================
+bin/
+build/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+node_modules/
+
+# =================================================================
+# == Logs & Temporary Files
+# =================================================================
+*.log
+crash_log.txt
+err.txt
+quest.txt
+teamProject/server.log
+teamProject/bootrun.log
+log/
+teamProject/server_startup.log
+
+# =================================================================
+# == Sensitive & Local Configuration
+# =================================================================
 teamProject/src/main/resources/firebase-service-account.json
-
-# application.properties
 teamProject/src/main/resources/application.properties
 teamProject/gradle.properties.txt
+
+# =================================================================
+# == Backups & Archives
+# =================================================================
+backup/
+teamProject_250813.zip
+
+# =================================================================
+# == OS-specific
+# =================================================================
+.DS_Store
+Thumbs.db
+
+# =================================================================
+# == Miscellaneous
+# =================================================================
+join_user_with_id_check.txt
+related_files.txt
+related_files_by_type.txt
+텍스트/
+teamProject_setting.zip
+teamProject_250826.zip
