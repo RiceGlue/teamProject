@@ -220,6 +220,7 @@ function checkReviewStatus(status, type, storeId, id) {
 	                                예약 시간:
 	                                <strong>
 	                                    <%-- Date 객체인 reservationDate를 사용하여 포맷팅 --%>
+	                                    <%-- <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy년 MM월 dd일 HH:mm"/> --%>
 	                                    <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy년 MM월 dd일 HH:mm"/>
 	                                </strong>
 	                            </p>
@@ -229,7 +230,7 @@ function checkReviewStatus(status, type, storeId, id) {
 	                            <p class="card-text">
 	                                상태: <strong>${reservation.status}</strong>
 	                            </p>
-	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">상세보기</a>
+	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.storeId}" class="btn btn-sm btn-primary">상세보기</a>
 	                            <%-- <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">리뷰쓰기</a> --%>
 	                            <a href="javascript:void(0);"
 		                           onclick="checkReviewStatus('${reservation.status}', 'reservation', '${reservation.storeId}', '${reservation.reservationId}');"
