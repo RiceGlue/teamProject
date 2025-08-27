@@ -3,10 +3,11 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
@@ -170,6 +171,17 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 }
 
 
+.like-icon {
+  font-size: 1.2em; /* 필요에 따라 조절 */
+  color: grey; /* 기본 하얀 하트 대신 회색으로 */
+  transition: color 0.3s ease;
+}
+
+.like-button.likes .like-icon {
+  color: red;
+}
+
+
   /* 💡 위시리스트 버튼 CSS 추가 */
 .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
 .wishlist-btn.active{color:#ff6347;}
@@ -214,9 +226,9 @@ function toggleWishlist() {
 		alert('로그인 후 이용해주세요.');
 		return;
 	}
-	
+
 	const isWishlisted = $('#wishlist-btn').hasClass('active');
-	
+
 	// 💡 이미 위시리스트에 추가된 경우 삭제 여부를 묻는 로직 추가
 	if (isWishlisted) {
 		// '확인'을 누르면 true, '취소'를 누르면 false 반환
@@ -319,7 +331,7 @@ $("ul.tabs li a").click(function () {
 		}
 		return false;
 	});
-	
+
 	document.getElementById('copyaddress').addEventListener('click', function () {
 		navigator.clipboard.writeText('${store.address}').then(function () {
 			alert("주소가 복사되었습니다.");
@@ -327,7 +339,7 @@ $("ul.tabs li a").click(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	document.getElementById('copyUrlBtn').addEventListener('click', function () {
 		navigator.clipboard.writeText(window.location.href).then(function () {
 			alert("주소가 복사되었습니다.");
@@ -335,7 +347,7 @@ $("ul.tabs li a").click(function () {
 			alert("복사 실패: " + err);
 		});
 	});
-	
+
 	$(".tab_content").hide();
 	$("ul.tabs li:first").addClass("active").show();
 	$(".tab_content:first").show();
@@ -346,7 +358,7 @@ $("ul.tabs li a").click(function () {
 			$('#bookFormBtn').prop('disabled', false);
 		}
 	});
-	
+
 	const today = new Date();
 	const todayFormatted = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
 	$("#reservationDate").val(todayFormatted);
@@ -357,7 +369,7 @@ $(document).ready(function(){
 	// 현재 표시된 리뷰의 개수를 추적합니다.
 	let reviewsLoaded = 10;
 	const totalReviews = ${store.countRating};
-	
+
 	$('#loadMoreBtn').on('click', function() {
 		// 서버에 다음 리뷰 목록을 요청하는 AJAX 호출을 실행합니다.
 		$.ajax({
@@ -379,10 +391,10 @@ $(document).ready(function(){
 					`;
 					$('.detail-review-list').append(newReviewHtml);
 				});
-				
+
 				// 현재 로드된 리뷰 개수를 업데이트합니다.
 				reviewsLoaded += response.length;
-				
+
 				// 모든 리뷰를 불러왔다면 "더보기" 버튼을 숨깁니다.
 				if (reviewsLoaded >= totalReviews) {
 					$('#loadMoreBtn').hide();
@@ -396,26 +408,60 @@ $(document).ready(function(){
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-	const likeButtons = document.querySelectorAll('.like-button');
-	
-	likeButtons.forEach(button => {
-		button.addEventListener('click', function () {
-			const isLiked = button.classList.toggle('likes');
-			const countSpan = button.querySelector('.like-count');
-			const iconSpan = button.querySelector('.like-icon');
-			let count = parseInt(countSpan.textContent) || 0;
+    const likeButtons = document.querySelectorAll('.like-button');
 
-			// 숫자 업데이트
-			count = isLiked ? count + 1 : count - 1;
-			countSpan.textContent = count;
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const isLiked = button.classList.toggle('likes');
+            const countSpan = button.querySelector('.like-count');
+            const iconSpan = button.querySelector('.like-icon');
+            let count = parseInt(countSpan.textContent) || 0;
 
-			// 아이콘 업데이트
-			iconSpan.textContent = isLiked ? '👍' : '🤍';
+            const reviewId = button.getAttribute('data-review-id');
+            const memberId = button.getAttribute('data-member-id');
 
-			// TODO: 서버에 AJAX 요청 보내기
-		});
-	});
+            // 로그인 안 된 사용자 처리
+            if (!memberId) {
+                alert('로그인 후 이용 가능합니다.');
+                button.classList.toggle('likes'); // 상태 복원
+                return;
+            }
+
+            // 숫자 업데이트
+            count = isLiked ? count + 1 : count - 1;
+            countSpan.textContent = count;
+
+            // 아이콘 업데이트
+            iconSpan.textContent = isLiked ? '❤️' : '🤍';
+
+            // 서버에 AJAX 요청 보내기
+            fetch('/store/likeReview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reviewId: reviewId,
+                    memberId: memberId,
+                    isLiked: isLiked
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('서버 응답:', data);
+                // 서버에서 최신 좋아요 수를 보내줬다면 countSpan.textContent = data.updatedLikes; 처럼 사용 가능
+            })
+            .catch(error => {
+                console.error('요청 실패:', error);
+                // 에러 발생 시 상태 복원
+                button.classList.toggle('likes');
+                countSpan.textContent = isLiked ? count - 1 : count + 1;
+                iconSpan.textContent = isLiked ? '🤍' : '❤️';
+            });
+        });
+    });
 });
+
 </script>
 
 <div class="store-info">
@@ -445,7 +491,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		<div class="store-details" style="flex: 1;">
 			<div style="display: flex; justify-content: space-between; align-items: center;">
 				<h4 class="mt-3">${store.storeName}</h4>
-				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button>
+				<!-- <button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-heart"></i></button> -->
+				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-bookmark "></i></button>
 				<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 			</div>
 			<div class="rating mt-2 mb-2">
@@ -470,54 +517,52 @@ document.addEventListener('DOMContentLoaded', function () {
 		</div>
 	</div>
 	<div class="home_review_container">
-		<div class="home_review-meta">
-			<div class="home_review-header">
-				<div class="home_rating">
-					<p>리뷰 ${store.countRating } <img src="${contextPath}/image/review_rating.jpg" width="20px" alt="리뷰이미지"> ${store.avgRating } / 5</p>
-				</div>
-				<div class="review-view-all">
-					<button class="btn btn-sm btn-outline-secondary" onclick="openTab3()" >전체보기</button>
-				</div>
-			</div>
-			<div class="home_review-grid">
-				<c:forEach var="review" items="${storeMap.review}" varStatus="status">
-					<c:if test="${status.index < 4}">
-						<div class="home_review-item">
-							<div class="home_review-text-wrapper">
-								<div class="review-rating">
-									<c:forEach begin="1" end="5" var="i">
-										<c:choose>
-											<c:when test="${i <= review.rating}">
-												<span class="star filled">★</span>
-											</c:when>
-											<c:otherwise>
-												<span class="star">★</span>
-											</c:otherwise>
-										</c:choose>
-									</c:forEach>
-								</div>
-								<div class="home_review-writer">
-									<c:set var="idLength" value="${fn:length(review.writerId)}" />
-									<c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
-									<c:set var="maskedPart" value="${fn:substring(review.writerId, 2, idLength)}" />
-									${visiblePart}<c:forEach begin="1" end="${fn:length(maskedPart)}">*</c:forEach>
-								</div>
-								<div class="home_review-content">${review.content}</div>
-							</div>
+	    <div class="home_review-meta">
+	        <div class="home_review-header">
+	            <div class="home_rating">
+	                <p>리뷰 ${store.countRating } <img src="${contextPath}/image/review_rating.jpg" width="20px" alt="리뷰이미지"> ${store.avgRating } / 5</p>
+	            </div>
+	            <div class="review-view-all">
+	                <button class="btn btn-sm btn-outline-secondary" onclick="openTab3()">전체보기</button>
+	            </div>
+	        </div>
+	        <div class="home_review-grid">
+	            <c:forEach var="review" items="${storeMap.review}" varStatus="status">
+	                <c:if test="${status.index < 4}">
+	                    <div class="home_review-item">
+	                        <div class="home_review-text-wrapper">
+	                            <div class="review-rating">
+	                                <c:forEach begin="1" end="5" var="i">
+	                                    <c:choose>
+	                                        <c:when test="${i <= review.rating}">
+	                                            <span class="star filled">★</span>
+	                                        </c:when>
+	                                        <c:otherwise>
+	                                            <span class="star">★</span>
+	                                        </c:otherwise>
+	                                    </c:choose>
+	                                </c:forEach>
+	                            </div>
+	                            <div class="home_review-writer">
+	                                <c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
+	                                <c:set var="maskedLength" value="${fn:length(review.writerId) - 2}" />
+	                                ${visiblePart}
+	                                <c:forEach begin="1" end="${maskedLength}">*</c:forEach>
+	                            </div>
+	                            <div class="home_review-content">${review.content}</div>
+	                        </div>
 
-							<c:if test="${not empty storeMap.reviewImage}">
-								<div class="home_review-image-wrapper">
-									<c:forEach var="reviewImage" items="${storeMap.reviewImage}">
-										<c:if test="${reviewImage.reviewId == review.reviewId}">
-											<img src="${contextPath}/images/review/${reviewImage.fileName}" alt="리뷰 이미지" class="home_review-image">
-										</c:if>
-									</c:forEach>
-								</div>
-							</c:if>
-						</div>
-					</c:if>
-				</c:forEach>
-			</div>
+	                        <div class="home_review-image">
+	                            <c:forEach var="homeReviewImage" items="${storeMap.homeReviewImage}">
+	                                <c:if test="${homeReviewImage.reviewId == review.reviewId}">
+	                                    <img src="${contextPath}/images/review/${homeReviewImage.fileName}" alt="리뷰 이미지" class="home_review-image" />
+	                                </c:if>
+	                            </c:forEach>
+	                        </div>
+	                    </div>
+	            	</c:if>
+	            </c:forEach>
+	        </div>
 		</div>
 	</div>
 	<div class="tab_container">
@@ -548,15 +593,17 @@ document.addEventListener('DOMContentLoaded', function () {
 							</div>
 							<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
 						</form>
-						
+
+						<%--
 						<div class="button-group mt-5">
 							<a href="<c:url value='/reservation/owner/manageList?storeId=${store.storeId}'/>">점주 관리 페이지</a>
 						</div>
-						
+
 						<div class="back-link">
 							<a href="<c:url value='${contextPath }/store/storeList'/>">매장 목록으로 돌아가기</a>
 						</div>
-						
+						 --%>
+
 						<h5 class="mt-4">메뉴</h5>
 						<div class="home_menu_container">
 							<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
@@ -579,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						</div>
 					</div>
 				</div>
-				
+
 				<div class="tab_content" id="tab2">
 					<div class="menu-container">
 						<c:forEach var="menu" items="${storeMap.menu}">
@@ -603,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							<h7>${store.countRating}개 리뷰 별점 평균</h7>
 							<h2><img src="${contextPath}/image/review_rating.jpg" width="40" alt="별점 아이콘">${store.avgRating}</h2>
 						</div>
-						
+
 						<div class="rating-card">
 							<c:forEach var="detailReview1" items="${storeMap.detailReview1}">
 								<div class="rating-breakdown-bar">
@@ -664,16 +711,16 @@ document.addEventListener('DOMContentLoaded', function () {
 									</div>
 								</c:if>
 								<div class="review-like-box">
-									<span 
-										class="like-button <c:if test='${review.likes}'>likes</c:if>'" 
-										data-review-id="${review.reviewId}" 
-										role="button" 
-										tabindex="0">
-										<span class="like-icon">🤍</span>
-										<span class="like-count" id="like-count-${review.reviewId}">
-											${review.likes}
-										</span>
+									<span
+									    class="like-button ${review.likes > 0 ? 'likes' : ''}"
+									    data-review-id="${review.reviewId}"
+									    data-member-id="${memberId}"
+									    role="button"
+									    tabindex="0">
+									    <span class="like-icon">${review.likes > 0 ? '❤️' : '🤍'}</span>
+									    <span class="like-count" id="like-count-${review.reviewId}">${review.likes}</span>
 									</span>
+
 								</div>
 							</div>
 						</c:forEach>

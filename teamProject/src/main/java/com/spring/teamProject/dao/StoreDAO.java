@@ -30,6 +30,7 @@ public interface StoreDAO {
 
 	public List<ImageFileVO> selectStoreImage(StoreVO storeVO) throws DataAccessException;
 	public List<ImageFileVO> selectReviewImage(long storeId) throws DataAccessException;
+	public List<ImageFileVO> selectHomeReviewImage(long storeId) throws DataAccessException;
 
 	// 매장 ID로 매장 정보를 가져오는 메서드 추가
 	public StoreVO selectStoreById(long storeId) throws DataAccessException;

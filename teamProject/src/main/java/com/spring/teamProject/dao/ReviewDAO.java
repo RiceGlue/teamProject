@@ -29,4 +29,7 @@ public interface ReviewDAO {
 	public void insertReviewImage(ImageFileVO imgFile) throws DataAccessException;
 	public void deleteReviewImages(long reviewId) throws DataAccessException;
 	public void deleteReview(long reviewId) throws DataAccessException;
+	public void increaseLikes(long reviewId) throws DataAccessException;
+	public void decreaseLikes(long reviewId) throws DataAccessException;
+	public int selectLikes(long reviewId) throws DataAccessException;
 }

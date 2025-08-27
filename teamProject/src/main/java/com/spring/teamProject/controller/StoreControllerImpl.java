@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal; // 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.common.ViewUtil;
+import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.service.StoreServiceImpl;
 import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.vo.StoreVO;
@@ -32,6 +34,9 @@ public class StoreControllerImpl implements StoreController {
 
 	@Autowired
     private WaitingService waitingService;
+	
+	@Autowired
+	private ReviewServiceImpl reviewService;
 
 	@Override
 	@RequestMapping(value="/storeList", method=RequestMethod.GET)
@@ -88,25 +93,17 @@ public class StoreControllerImpl implements StoreController {
 	}
 
 
-//	@RequestMapping(value="/likeReview" , method=RequestMethod.POST)
-//	public Map<String, Object> likeReview(@RequestBody Map<String, Object> payload, HttpSession session) {
-//		Long reviewId = Long.valueOf(payload.get("reviewId").toString());
-//		String userId = (String) session.getAttribute("loginId");
-//
+	@RequestMapping(value="/likeReview", method=RequestMethod.POST)
+	@ResponseBody
+	public int likeReview(@RequestBody Map<String, Object> payload) throws Exception {
+	    long reviewId = Long.parseLong(payload.get("reviewId").toString());
+	    boolean isLiked = Boolean.parseBoolean(payload.get("isLiked").toString());
 
-//		boolean alreadyLiked = storeService.likeReview(reviewId, userId);
-//
-//		Map<String, Object> response = new HashMap<>();
-//		if (alreadyLiked) {
-//			response.put("success", false);
-//		} else {
-//			int updatedCount = storeService.increaseCountReview(reviewId, userId);
-//			response.put("success", true);
-//			response.put("likeCount", updatedCount);
-//		}
-//		return response;
-//	}
-	
+	    int updatedLikes = reviewService.modifyReviewLikes(reviewId, isLiked);
+	    return updatedLikes;
+	}
+
+		
 	@GetMapping("/searchStoreNearUser")
 	@ResponseBody
 	public List<StoreVO> searchStoreNearUser(@RequestParam("location") String location) {
