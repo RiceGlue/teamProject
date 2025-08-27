@@ -12,6 +12,9 @@
 
     <div class="card shadow mb-4">
         <div class="card-body">
+            <c:if test="${not empty msg}">
+                <div class="alert alert-success">${msg}</div>
+            </c:if>
             <div class="table-responsive">
                 <table class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
@@ -33,7 +36,6 @@
                                         <td class="text-center align-middle">${banner.orderIndex}</td>
                                         <td class="text-center">
                                             <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
-                                            <%-- FileController가 인식할 수 있는 가상 경로(/banner-images/)로 수정합니다. --%>
                                             <img src="${contextPath}/banner-images/${banner.imagePath}" alt="${banner.text}" style="max-width: 150px; height: auto;">
                                         </td>
                                         <td class="align-middle">${banner.text}</td>
@@ -55,7 +57,7 @@
                                             <c:if test="${banner.status != 'active'}"><span class="badge bg-secondary">비활성</span></c:if>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <a href="#" class="btn btn-info btn-sm">수정</a>
+                                            <a href="${contextPath}/admin/banners/form/${banner.bannerId}" class="btn btn-info btn-sm">수정</a>
                                             <a href="#" class="btn btn-danger btn-sm">삭제</a>
                                         </td>
                                     </tr>
