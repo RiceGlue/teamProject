@@ -230,7 +230,7 @@ function checkReviewStatus(status, type, storeId, id) {
 	                            <p class="card-text">
 	                                상태: <strong>${reservation.status}</strong>
 	                            </p>
-	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.storeId}" class="btn btn-sm btn-primary">상세보기</a>
+	                            <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">상세보기</a>
 	                            <%-- <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">리뷰쓰기</a> --%>
 	                            <a href="javascript:void(0);"
 		                           onclick="checkReviewStatus('${reservation.status}', 'reservation', '${reservation.storeId}', '${reservation.reservationId}');"
