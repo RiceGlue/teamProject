@@ -99,7 +99,7 @@ var contextPath = '${contextPath}';
                 });
 
                 displayStoresOnMap(storeList, map);
-                displayStoreCards(storeList);
+                displayStoreCards(storeList, dong);
             },
             error: function (xhr, status, error) {
                 console.error("AJAX 요청 실패:", status, error);
@@ -132,47 +132,53 @@ var contextPath = '${contextPath}';
         });
     }
     // 7. 매장 카드 UI로 표시
-    function displayStoreCards(storeList) {
-    	console.log("UI카드 시작")
-        const container = document.getElementById("nearbyStores");
-        const loadMoreBtn = document.getElementById("loadMoreBtn");
+function displayStoreCards(storeList, dong) {
+    console.log("UI카드 시작")
+    const container = document.getElementById("nearbyStores");
 
-        if (!container) {
-            console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
-            return;
-        }	
-        
-        if (!loadMoreBtn) {
-            console.warn("loadMoreBtn 버튼을 찾지 못했습니다.");
-        } else {
-            loadMoreBtn.style.display = 'block'; // 버튼 보이기
-        }
-        
-        container.innerHTML = "";
-        container.classList.add('limited');
-
-        storeList.forEach(store => {
-            const card = document.createElement("div");
-            console.log("가게이름:"+store.storeName);
-            card.className = "card my-3";
-            card.innerHTML = 
-                '<div class="card-body">' +
-                    '<h5 class="card-title"><a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a></h5>' +
-                    '<p class="card-text">📍 ' + store.address + '</p>' +
-                    '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
-                    '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
-                '</div>';
-            console.log(card.outerHTML);
-            container.appendChild(card);
-        });
-
-        // 더보기 버튼 이벤트
-        loadMoreBtn.onclick = function () {
-            container.classList.remove('limited');
-            container.style.overflowX = 'auto';
-            loadMoreBtn.style.display = 'none';
-        };
+    if (!container) {
+        console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
+        return;
     }
+
+    container.innerHTML = ""; // 카드 및 버튼 모두 초기화
+
+    const limitedStoreList = storeList.slice(0, 3);
+
+    // 카드 3개만 추가
+    limitedStoreList.forEach(store => {
+        const card = document.createElement("div");
+        card.className = "card my-3";
+
+        card.innerHTML = 
+            '<div class="card-body">' +
+                '<h5 class="card-title"><a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a></h5>' +
+                '<p class="card-text">📍 ' + store.address + '</p>' +
+                '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
+                '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
+            '</div>';
+
+        container.appendChild(card);
+    });
+
+    // ⭐ storeList가 3개 초과일 경우만 버튼 생성
+    if (storeList.length > 3) {
+        const buttonWrapper = document.createElement("div");
+        buttonWrapper.className = "d-grid mt-2";
+
+        const loadMoreBtn = document.createElement("button");
+        loadMoreBtn.id = "loadMoreBtn";
+        loadMoreBtn.className = "btn btn-light";
+        loadMoreBtn.textContent = "더보기";
+        loadMoreBtn.onclick = function () {
+            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword="+encodeURIComponent(dong);
+        };
+
+        buttonWrapper.appendChild(loadMoreBtn);
+        container.appendChild(buttonWrapper);
+    }
+}
+
 </script>
 
 <div class="row">

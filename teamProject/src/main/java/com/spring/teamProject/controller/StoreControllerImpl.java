@@ -48,6 +48,7 @@ public class StoreControllerImpl implements StoreController {
 		List<StoreVO> addrlist = null ;
 		List<StoreVO> namelist = null ;
 		List<StoreVO> typelist = null ;
+		List<StoreVO> userLocationlist = null ;
 
 		if(option.equals("region")) {
 			regionlist = storeService.selectStoreByRegion(keyword);
@@ -57,6 +58,8 @@ public class StoreControllerImpl implements StoreController {
 			namelist = storeService.selectStoreByName(keyword);
 		} else if(option.equals("storeType")) {
 			typelist = storeService.selectStoreByType(keyword);
+		} else if(option.equals("userLocation")) {
+			userLocationlist = searchStoreNearUser(keyword);
 		}
 
 		ModelAndView mav = ViewUtil.layout(viewName);
@@ -66,6 +69,7 @@ public class StoreControllerImpl implements StoreController {
 		mav.addObject("menulist",menulist);
 		mav.addObject("addrlist",addrlist);
 		mav.addObject("namelist",namelist);
+		mav.addObject("userLocationlist",userLocationlist);
 		return mav;
 	}
 

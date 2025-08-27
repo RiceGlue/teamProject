@@ -59,35 +59,65 @@
         	{ name: "${name.storeName}", address: "${name.address}" }<c:if test="${!status.last}">,</c:if>
       	</c:forEach>
     ];
+    
+    const userLocationStores = [
+		<c:forEach var="userLocation" items="${userLocationlist}" varStatus="status">
+	    	{ name: "${userLocation.storeName}", address: "${userLocation.address}" }<c:if test="${!status.last}">,</c:if>
+	 	</c:forEach>
+	];
 
     let map,markers=[];
 
     function initMap(){map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.5665,lng:126.9780},zoom:11});}
-    function showMarkers(storeList){
-      const geocoder=new google.maps.Geocoder();
-      markers.forEach(m=>m.setMap(null));markers=[];
-      storeList.forEach(store=>{
-        if(store.address){
-          geocoder.geocode({address:store.address},(results,status)=>{
-            if(status==="OK"){
-              const pos=results[0].geometry.location;
-              const marker=new google.maps.Marker({map:map,position:pos,title:store.name});
-              markers.push(marker);
-            }else{console.error(`주소 변환 실패 (${store.address}): ${status}`);}
-          });
-        }
-      });
-    }
+    
+    function showMarkers(storeList) {
+    	  const geocoder = new google.maps.Geocoder();
+    	  markers.forEach(m => m.setMap(null));
+    	  markers = [];
+
+    	  let isFirstMarker = true;
+
+    	  storeList.forEach(store => {
+    	    if (store.address) {
+    	      geocoder.geocode({ address: store.address }, (results, status) => {
+    	        if (status === "OK") {
+    	          const pos = results[0].geometry.location;
+    	          const marker = new google.maps.Marker({
+    	            map: map,
+    	            position: pos,
+    	            title: store.name
+    	          });
+
+    	          // ✅ 첫 마커 위치로 지도 중심 이동
+    	          if (isFirstMarker) {
+    	            map.setCenter(pos);
+    	            map.setZoom(14); // 확대 정도 조절 가능
+    	            isFirstMarker = false;
+    	          }
+
+    	          markers.push(marker);
+    	        } else {
+    	          console.error(`주소 변환 실패 (${store.address}): ${status}`);
+    	        }
+    	      });
+    	    }
+    	  });
+    	}
+
 
     document.addEventListener('DOMContentLoaded', function () {
     	  $(".tab_content").hide();
     	  $("ul.tabs li:first").addClass("active").show();
     	  $(".tab_content:first").show();
 
-    	  // 탭 클릭 이벤트
+    	  const activeTabStores = {
+    	    "#tab1": menuStores,
+    	    "#tab2": addrStores,
+    	    "#tab3": nameStores
+    	  };
+
     	  $("ul.tabs li").click(function (e) {
     	    e.preventDefault();
-
     	    $("ul.tabs li").removeClass("active");
     	    $(this).addClass("active");
     	    $(".tab_content").hide();
@@ -95,22 +125,76 @@
     	    const activeTab = $(this).find("a").attr("href");
     	    $(activeTab).fadeIn();
 
-    	    // 탭에 따라 다른 store 리스트 전달
-    	    if (activeTab === "#tab1") {
-    	      showMarkers(menuStores);
-    	    } else if (activeTab === "#tab2") {
-    	      showMarkers(addrStores);
-    	    } else if (activeTab === "#tab3") {
-    	      showMarkers(nameStores);
-    	    } else {
-    	    	showMarkers(nameStores);
+    	    if (activeTabStores[activeTab]) {
+    	      showMarkers(activeTabStores[activeTab]);
     	    }
     	  });
 
-    	  // 최초 지도 초기화 및 첫 탭 데이터 로딩
+    	  // 지도 초기화
     	  initMap();
-    	  showMarkers(regionStores);
+
+    	  // 어떤 option으로 왔는지에 따라 초기 마커 설정
+    	  const option = "${option}";
+    	  if (option === "userLocation") {
+    	    showMarkers(userLocationStores);
+    	  } else if (option === "region") {
+    	    showMarkers(regionStores);
+    	  } else if (option === "search") {
+    	    // 기본 탭에 따라 결정
+    	    showMarkers(menuStores); // tab1이 기본이므로
+    	  }
     	});
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const option = "${option}";
+
+        if (option === "userLocation") {
+            // 사용자 위치 가져오기 시작
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error);
+            } else {
+                alert("브라우저가 위치 정보를 지원하지 않습니다.");
+            }
+        } else {
+            // 기존 초기화 로직
+            initMap();
+            // 그리고 기존 탭별 마커 표시 등 처리
+            // ...
+        }
+
+        function success(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            getAddressFromCoords(lat, lng);
+        }
+
+        function error() {
+            alert("사용자 위치를 가져오지 못했습니다.");
+        }
+
+        function getAddressFromCoords(lat, lng) {
+            const geocoder = new google.maps.Geocoder();
+            const latlng = { lat: lat, lng: lng };
+            geocoder.geocode({ location: latlng }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    const fullAddress = results[0].formatted_address;
+                    console.log("사용자 주소:", fullAddress);
+
+                    // 여기서 주소를 화면에 출력
+                    const addressElem = document.getElementById("userAddress");
+                    if (addressElem) {
+                        addressElem.innerText = fullAddress;
+                    }
+
+                    // 주소 기반 근처 매장 검색 함수 실행
+                    fetchNearbyStores(fullAddress);
+                } else {
+                    alert("주소를 가져올 수 없습니다.");
+                }
+            });
+        }
+
+    });
 
 </script>
 
@@ -240,6 +324,43 @@
 			      </p>
 			      <p class="meta-info">${region.storeType} · ${region.address}</p>
 			      <p class="meta-info">${region.description}</p>
+			    </div>
+			  </div>
+			</c:forEach>
+		</c:otherwise>
+	</c:choose>
+</c:when>
+<c:when test="${option eq 'userLocation'}">
+	<h2>주변 맛집</h2>
+	<p id="userAddress" class="userLocation"></p>
+
+	<hr>
+
+	<!-- 반복 렌더링 시작 -->
+	<div id="map"></div>
+	<c:choose>
+		<c:when test="${empty userLocationlist }"><h3>검색 결과 없음</h3></c:when>
+		<c:otherwise>
+			<c:forEach var="userLocation" items="${userLocationlist}" varStatus="status">
+			  <div class="store-card">
+			    <div class="store-image">
+			      <a href="${contextPath}/store/storeDetail?storeId=${userLocation.storeId}">
+			        <img src="${contextPath }/images/store/${userLocation.fileName}" alt="${userLocation.fileName }">
+			      </a>
+			<!--       대기 팀 수 표시 -->
+			<%--       <c:if test="${store.waitCount > 0}"> --%>
+			<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
+			<%--       </c:if> --%>
+			    </div>
+		
+			    <div class="store-info">
+			      <h4>${userLocation.storeName}</h4>
+			      <p>
+			        <span class="rating">★ ${userLocation.avgRating}</span>
+			        리뷰 ${userLocation.countRating}개
+			      </p>
+			      <p class="meta-info">${userLocation.storeType} · ${userLocation.address}</p>
+			      <p class="meta-info">${userLocation.description}</p>
 			    </div>
 			  </div>
 			</c:forEach>
