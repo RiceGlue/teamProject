@@ -185,7 +185,7 @@
             const guestCount = parseInt($('#guestCount').val(), 10) || 1;
 
             // ⭐⭐⭐ 디버깅용 로그 추가 ⭐⭐⭐
-            console.log("서버로부터 받은 전체 데이터:", data);
+            //console.log("서버로부터 받은 전체 데이터:", data);
 
             if (data && Object.keys(data).length > 0) {
                 const now = new Date();
@@ -195,7 +195,7 @@
 
                 $.each(data, function(time, tables) {
                     // ⭐⭐⭐ 각 시간대별 데이터 로그 추가 ⭐⭐⭐
-                    console.log("시간:", time, "테이블 데이터:", tables);
+                    //console.log("시간:", time, "테이블 데이터:", tables);
 
                     const totalAvailableCapacity = tables.reduce((sum, table) => sum + table.capacity, 0);
 
@@ -406,8 +406,26 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("임시 예약 정보 저장 오류: ", error);
-                    alert("예약 정보를 저장하는 중 오류가 발생했습니다.");
+                    // ✨ 오류 응답 처리: 401 Unauthorized 코드를 여기서 확인합니다.
+                    if (xhr.status === 401) {
+                        alert("로그인이 필요한 서비스입니다.");
+                        window.location.href = "${pageContext.request.contextPath}/member/login";
+                    } else {
+                        console.error("임시 예약 정보 저장 오류: ", error, xhr.responseText);
+                        var errorMessage = "예약 정보를 저장하는 중 오류가 발생했습니다.";
+                        // 서버에서 보낸 오류 메시지가 있다면 사용
+                        if (xhr.responseText) {
+                            try {
+                                const errorJson = JSON.parse(xhr.responseText);
+                                if (errorJson.message) {
+                                    errorMessage = errorJson.message;
+                                }
+                            } catch (e) {
+                                // JSON 파싱 실패 시 기본 메시지 사용
+                            }
+                        }
+                        alert("예약 정보를 저장하는 중 오류가 발생했습니다." + "에러 내용: "+ errorMessage);
+                    }
                 }
             });
         }

@@ -8,9 +8,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.spring.teamProject.service.CustomOAuth2UserService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -71,8 +74,24 @@ public class SecurityConfig {
             // ? --- 2. 접근 거부(403) 상황이 발생하면, 우리가 만든 핸들러를 사용하도록 설정합니다. --- ?
             .exceptionHandling(exception -> exception
                 .accessDeniedHandler(customAccessDeniedHandler)
+                .authenticationEntryPoint(ajaxAwareAuthenticationEntryPoint())
             );
 
         return http.build();
+    }
+
+    // ✨ 새로운 Bean을 추가하여 AJAX 요청을 구분합니다. ✨
+    @Bean
+    public AuthenticationEntryPoint ajaxAwareAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            // 'X-Requested-With' 헤더로 AJAX 요청인지 확인합니다.
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+                // AJAX 요청인 경우, 401 Unauthorized 상태 코드를 반환합니다.
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            } else {
+                // 일반적인 웹 브라우저 요청인 경우, 로그인 페이지로 리디렉션합니다.
+                response.sendRedirect("/member/login");
+            }
+        };
     }
 }
