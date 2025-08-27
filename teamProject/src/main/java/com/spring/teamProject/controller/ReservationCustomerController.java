@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,7 @@ import com.spring.teamProject.vo.PaymentVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreTableVO;
 import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.UserDetailsVO;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -123,6 +125,7 @@ public class ReservationCustomerController {
     @PostMapping("/book-temp")
     @ResponseBody
     public String processBookingFormTemp(@ModelAttribute ReservationVO reservation,
+    									 @AuthenticationPrincipal UserDetailsVO userDetailsVO,
                                          @RequestParam("reservationTimeStr") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reservationTime,
                                          @RequestParam("amount") BigDecimal amount,
                                          @RequestParam("paymentMethod") String paymentMethod,
@@ -130,12 +133,11 @@ public class ReservationCustomerController {
                                          @RequestParam("tableIds") List<Long> tableIds,
                                          HttpSession session) {
 
+    	Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
+        logger.info("로그인된 사용자 ID: {}", memberId);
+
         try {
             reservation.setReservationTime(reservationTime);
-            Long memberId = (Long) session.getAttribute("memberId");
-            if (memberId == null) {
-                memberId = 1L;
-            }
             reservation.setMemberId(memberId);
             reservation.setStatus("PENDING");
 

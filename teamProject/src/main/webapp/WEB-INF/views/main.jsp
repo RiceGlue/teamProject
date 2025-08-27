@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
@@ -37,6 +38,37 @@
         border: 1px solid #eee;
     }
     .category-icons .nav-link:hover .icon-circle { background-color: var(--yum-dark-red); color: #fff; }
+
+    /* --- 반응형 배너 스타일 --- */
+    .banner-carousel {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    
+    .banner-carousel img {
+        width: 100%;
+        height: auto; /* 자동 높이로 변경 */
+        max-height: 400px; /* PC 최대 높이 제한 */
+        object-fit: contain; /* 전체 이미지를 보여주도록 변경 */
+        background-color: var(--yum-cream); /* 여백 부분 배경색 */
+    }
+    
+    /* 모바일에서 배너 높이 조정 */
+    @media (max-width: 768px) {
+        .banner-carousel img {
+            max-height: 250px; /* 모바일 최대 높이를 더 작게 조정 */
+        }
+        
+        .search-bar {
+            padding: 1.5rem;
+        }
+        
+        .category-icons .icon-circle {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
 
     /* --- 사이드바 (로그인 박스 등) --- */
     .sidebar-box {
@@ -79,6 +111,17 @@
     .store-card .card-title { font-weight: 700; }
     .store-card .card-text { color: #5a6a7b; }
     .store-card .rating-text { color: var(--yum-beige); font-weight: bold; }
+
+    /* 디버깅용 스타일 - 필요시 주석 해제하여 사용 */
+    /*
+    .debug-info {
+        font-size: 0.85em;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+    }
+    */
 </style>
 
 <main class="container py-5 yum-main-page">
@@ -105,15 +148,135 @@
                 </ul>
             </section>
 
-            <!-- 메인 배너 -->
+            <!-- 
+            ========================================
+            배너 반응형 디버깅 정보 (개발용)
+            ========================================
+            필요시 아래 주석을 해제하여 디버깅 정보 표시
+            - 배너 개수 및 이미지 경로 확인
+            - 현재 화면 모드 (PC/모바일) 표시
+            - Bootstrap 반응형 클래스 작동 상태 확인
+            ========================================
+            -->
+            <!--
+            <div class="alert alert-warning debug-info">
+                <strong>?? 배너 디버깅 정보:</strong><br>
+                배너 개수: ${fn:length(bannerList)}<br>
+                <c:forEach var="banner" items="${bannerList}" varStatus="status">
+                    배너${status.index + 1}: PC="${banner.imagePath}", 모바일="${banner.mobileImagePath}" (${not empty banner.mobileImagePath ? '있음' : '없음'})<br>
+                </c:forEach>
+                현재 화면 크기: <span id="screenSize"></span><br>
+                Bootstrap 반응형 테스트: 
+                <span class="d-none d-md-inline text-success fw-bold">? 데스크톱 모드 (md 이상)</span>
+                <span class="d-md-none text-primary fw-bold">?? 모바일 모드 (md 미만)</span>
+            </div>
+            -->
+
+            <!-- 메인 배너 - 반응형 개선 -->
             <section class="main-banner mb-5">
-                <div id="mainBannerCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner" style="border-radius: 1rem;">
-                        <div class="carousel-item active"><img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1200&h=400&fit=crop" class="d-block w-100" alt="배너1"></div>
-                        <div class="carousel-item"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&h=400&fit=crop" class="d-block w-100" alt="배너2"></div>
+                <div id="mainBannerCarousel" class="carousel slide banner-carousel" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <c:choose>
+                            <c:when test="${not empty bannerList}">
+                                <c:forEach var="banner" items="${bannerList}" varStatus="status">
+                                    <div class="carousel-item <c:if test='${status.first}'>active</c:if>">
+                                        <%-- 
+                                        배너별 디버깅 정보 (개발용)
+                                        필요시 주석 해제하여 각 배너 상태 확인
+                                        --%>
+                                        <%--
+                                        <div class="position-absolute top-0 start-0 bg-dark text-white p-2 small" style="z-index: 10; opacity: 0.8;">
+                                            배너${status.index + 1}: ${not empty banner.mobileImagePath ? '모바일용 별도 이미지 있음' : 'PC용만 사용'}
+                                        </div>
+                                        --%>
+                                        
+                                        <%-- 연결 유형에 따라 다른 링크를 생성합니다. --%>
+                                        <c:choose>
+                                            <c:when test="${not empty banner.promotionId}">
+                                                <a href="${contextPath}/promotion/detail?id=${banner.promotionId}">
+                                            </c:when>
+                                            <c:when test="${not empty banner.linkUrl}">
+                                                <a href="${banner.linkUrl}" target="_blank">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a> <%-- 링크가 없는 경우 --%>
+                                            </c:otherwise>
+                                        </c:choose>
+                                            <%-- 모바일용 배너가 있는 경우 --%>
+                                            <c:choose>
+                                                <c:when test="${not empty banner.mobileImagePath}">
+                                                    <%-- PC/태블릿: PC용 배너 --%>
+                                                    <img src="${contextPath}/banner-images/${banner.imagePath}" 
+                                                         class="d-block w-100 d-none d-md-block" 
+                                                         alt="${banner.text}">
+                                                         <%-- 디버깅용 테두리: style="border: 3px solid red;" --%>
+                                                    <%-- 모바일: 모바일용 배너 --%>
+                                                    <img src="${contextPath}/banner-images/${banner.mobileImagePath}" 
+                                                         class="d-block w-100 d-md-none" 
+                                                         alt="${banner.text}">
+                                                         <%-- 디버깅용 테두리: style="border: 3px solid blue;" --%>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <%-- 모바일용 배너가 없으면 PC용 배너를 모든 환경에서 사용 --%>
+                                                    <img src="${contextPath}/banner-images/${banner.imagePath}" 
+                                                         class="d-block w-100" 
+                                                         alt="${banner.text}">
+                                                         <%-- 디버깅용 테두리: style="border: 3px solid green;" --%>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </a>
+                                    </div>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <%-- 표시할 배너가 없을 때 기본 이미지 --%>
+                                <div class="carousel-item active">
+                                    <img src="https://placehold.co/1200x400/FDF6EC/7B2D26?text=Yum+Table" 
+                                         class="d-block w-100" 
+                                         alt="기본 배너">
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
+                    
+                    <%-- 배너가 2개 이상일 때만 컨트롤러 표시 --%>
+                    <c:if test="${fn:length(bannerList) > 1}">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#mainBannerCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">이전</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#mainBannerCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">다음</span>
+                        </button>
+                        
+                        <%-- 인디케이터 --%>
+                        <div class="carousel-indicators">
+                            <c:forEach var="banner" items="${bannerList}" varStatus="status">
+                                <button type="button" data-bs-target="#mainBannerCarousel" 
+                                        data-bs-slide-to="${status.index}" 
+                                        <c:if test="${status.first}">class="active"</c:if>
+                                        aria-label="슬라이드 ${status.index + 1}"></button>
+                            </c:forEach>
+                        </div>
+                    </c:if>
                 </div>
             </section>
+            
+            <!-- 
+            ========================================
+            배너 상태 디버깅 정보 (개발용)
+            ========================================
+            필요시 아래 주석을 해제하여 현재 배너 표시 모드 확인
+            ========================================
+            -->
+            <!--
+            <div class="alert alert-info debug-info">
+                <strong>현재 배너 상태:</strong>
+                <div class="d-none d-md-block">??? <strong>PC/태블릿 모드</strong> - PC용 배너가 표시됩니다 (빨간 테두리) | object-fit: contain (전체 표시, 최대 400px)</div>
+                <div class="d-md-none">?? <strong>모바일 모드</strong> - 모바일용 배너가 있으면 모바일용(파란 테두리), 없으면 PC용(초록 테두리)이 표시됩니다 | object-fit: contain (전체 표시, 최대 250px)</div>
+            </div>
+            -->
             
             <!-- 가게 목록 -->
             <section>
@@ -171,3 +334,46 @@
         </div>
     </div>
 </main>
+
+<!-- 
+========================================
+배너 반응형 디버깅 JavaScript (개발용)
+========================================
+필요시 아래 주석을 해제하여 콘솔에서 상세 디버깅 정보 확인
+- 화면 크기 및 Bootstrap 버전 정보
+- 현재 보이는 배너 이미지 분석
+========================================
+-->
+<!--
+<script>
+    // 화면 크기 정보 업데이트
+    function updateScreenInfo() {
+        const screenSizeElement = document.getElementById('screenSize');
+        if (screenSizeElement) {
+            screenSizeElement.textContent = window.innerWidth + 'x' + window.innerHeight;
+        }
+        
+        // 콘솔에 디버깅 정보 출력
+        console.log('=== 배너 반응형 디버깅 정보 ===');
+        console.log('화면 크기:', window.innerWidth + 'x' + window.innerHeight);
+        console.log('Bootstrap md 브레이크포인트(768px) 기준:', window.innerWidth >= 768 ? '데스크톱 모드' : '모바일 모드');
+        console.log('Bootstrap 버전:', typeof bootstrap !== 'undefined' ? 'Bootstrap 5.x 감지됨' : 'Bootstrap 미감지');
+        
+        // 현재 보이는 배너 이미지들 체크
+        const visibleImages = document.querySelectorAll('.carousel-inner img:not([style*="display: none"])');
+        console.log('현재 보이는 배너 이미지 수:', visibleImages.length);
+        visibleImages.forEach((img, index) => {
+            console.log(`배너 ${index + 1}:`, {
+                src: img.src,
+                classes: img.className,
+                alt: img.alt,
+                border: img.style.border
+            });
+        });
+    }
+    
+    // 페이지 로드 시와 화면 크기 변경 시 정보 업데이트
+    updateScreenInfo();
+    window.addEventListener('resize', updateScreenInfo);
+</script>
+-->

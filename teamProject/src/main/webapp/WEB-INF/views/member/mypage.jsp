@@ -220,6 +220,7 @@ function checkReviewStatus(status, type, storeId, id) {
 	                                예약 시간:
 	                                <strong>
 	                                    <%-- Date 객체인 reservationDate를 사용하여 포맷팅 --%>
+	                                    <%-- <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy년 MM월 dd일 HH:mm"/> --%>
 	                                    <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy년 MM월 dd일 HH:mm"/>
 	                                </strong>
 	                            </p>
