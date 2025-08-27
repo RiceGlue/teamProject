@@ -1,5 +1,7 @@
 package com.spring.teamProject.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,4 +15,5 @@ public interface ReviewController {
 	public ResponseEntity<?> addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
 	public ResponseEntity<?> modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
 	public ModelAndView deleteReview(@RequestParam("reviewId") long reviewId) throws Exception;
+    public ResponseEntity<Map<String, Object>> getBestReview() throws Exception;
 }

@@ -1,5 +1,8 @@
 package com.spring.teamProject.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,4 +119,39 @@ public class ReviewServiceImpl implements ReviewService {
 	    return reviewDAO.selectLikes(reviewId);
 	}
 
+	@Override
+	public List<ReviewVO> getBestReviewList() throws Exception {
+	    List<ReviewVO> reviewList = reviewDAO.selectBestReview();
+	    System.out.println("여기");
+	    
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+	    for (ReviewVO review : reviewList) {
+	        Date fullDate = review.getCreatedAt();
+	        
+	        if (fullDate != null) {
+	            // Date -> String (yyyy-MM-dd)
+	            String dateOnlyString = dateFormat.format(fullDate);
+	            
+	            // String -> Date (시간은 00:00:00으로 초기화됨)
+	            Date dateOnly = dateFormat.parse(dateOnlyString);
+	            
+	            // 다시 Date 타입으로 저장
+	            review.setCreatedAt(dateOnly);
+	            
+	            System.out.println("수정된 날짜 (Date): " + review.getCreatedAt());
+	        }
+	    }
+	    
+	    for(int i=0;i<reviewList.size();i++) {
+	    	System.out.println("리뷰 작성 아이디" + reviewList.get(i).getMemberId());
+	    }
+	    return reviewList;
+	}
+
+	
+	@Override
+	public ImageFileVO getBestReviewImage(long reviewId) throws Exception{
+		return reviewDAO.selectBestReviewImage(reviewId);
+	}
 }

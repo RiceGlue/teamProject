@@ -3,6 +3,7 @@ package com.spring.teamProject.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -162,100 +164,108 @@ public class ReviewControllerImpl implements ReviewController{
 	@Override
 	@PostMapping("/modifyReview")
 	public ResponseEntity<?> modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
-		String directoryName = "review";
-	
-		long reviewId = review.getReviewId();
-		long memberId = review.getMemberId();
-		long storeId = review.getStoreId();
-	
-		String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
-	
-		List<ImageFileVO> addedFiles = new ArrayList<>();
-		Iterator<String> fileNames = multiReq.getFileNames();
-	
-		while (fileNames.hasNext()) {
-			String fileName = fileNames.next();
-			List<MultipartFile> files = multiReq.getFiles(fileName);
-		
-			for (MultipartFile mf : files) {
-				if (!mf.isEmpty()) {
-					File tempFile = File.createTempFile("upload-", mf.getOriginalFilename());
-					mf.transferTo(tempFile);
-					boolean uploadResult = ftpService.uploadFile(tempFile, directoryName, mf.getOriginalFilename());
-					
-					if (uploadResult) {
-						ImageFileVO fileVO = new ImageFileVO();
-						fileVO.setFileName(mf.getOriginalFilename());
-						addedFiles.add(fileVO);
-					} else {
-						tempFile.delete();
-						throw new IOException("FTP 업로드 실패: " + mf.getOriginalFilename());
-					}
-					tempFile.delete();
-				}
-			}
-		}
-	
-		int deleteCount = deleteFileNames != null ? deleteFileNames.length : 0;
-		int addCount = addedFiles.size();
-	
-		try {
-			reviewService.modifyReview(review);
-		
-			int displayNo = 5 - deleteCount;
-		
-			if (deleteCount > 0 && addCount > 0) {
-				int min = Math.min(deleteCount, addCount);
-			
-				for (int i = 0; i < min; i++) {
-					ImageFileVO oldFile = new ImageFileVO();
-					String oldFileName = deleteFileNames[i];
-					oldFile.setFileName(oldFileName);
-					oldFile.setReviewId(reviewId);
-					long imageId = reviewService.getImageId(oldFile);
-					ImageFileVO newFile = addedFiles.get(i);
-					newFile.setImageId(imageId);
-					newFile.setReviewId(reviewId);
-					reviewService.modifyReviewImage(newFile);
-					ftpService.deleteFile(directoryName, oldFileName);
-				}
-			
-				for (int i = min; i < addCount; i++) {
-					ImageFileVO newFile = addedFiles.get(i);
-					populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
-					reviewService.addReviewImage(newFile);
-				}
-			
-				for (int i = min; i < deleteCount; i++) {
-					String oldFileName = deleteFileNames[i];
-					reviewService.deleteReviewImage(oldFileName);
-					ftpService.deleteFile(directoryName, oldFileName);
-				}
-			} else if (deleteCount > 0) {
-			for (String fileName : deleteFileNames) {
-				reviewService.deleteReviewImage(fileName);
-				ftpService.deleteFile(directoryName, fileName);
-			}
-		
-			} else if (addCount > 0) {
-				for (ImageFileVO newFile : addedFiles) {
-					populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
-					reviewService.addReviewImage(newFile);
-				}
-			}
-		
-			return ResponseEntity.ok().body(Map.of(
-			"status", "success",
-			"reviewId", reviewId,
-			"memberId", memberId
-			));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-				"status", "error",
-				"message", "리뷰 수정 중 오류 발생"
-			));
-		}
+	    String directoryName = "review";
+
+	    long reviewId = review.getReviewId();
+	    long memberId = review.getMemberId();
+	    long storeId = review.getStoreId();
+
+	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
+
+	    List<ImageFileVO> addedFiles = new ArrayList<>();
+	    Iterator<String> fileNames = multiReq.getFileNames();
+
+	    while (fileNames.hasNext()) {
+	        String fileName = fileNames.next();
+	        List<MultipartFile> files = multiReq.getFiles(fileName);
+
+	        for (MultipartFile mf : files) {
+	            if (!mf.isEmpty()) {
+	                // 기존 파일명에서 확장자를 추출하고, UUID로 고유한 파일명 생성
+	                String originalFilename = mf.getOriginalFilename();
+	                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+	                String savedFilename = UUID.randomUUID().toString() + extension;
+	                
+	                File tempFile = File.createTempFile("upload-", extension);
+	                mf.transferTo(tempFile);
+	                
+	                // FTP 업로드 시 UUID로 생성된 고유 파일명 사용
+	                boolean uploadResult = ftpService.uploadFile(tempFile, directoryName, savedFilename);
+
+	                if (uploadResult) {
+	                    ImageFileVO fileVO = new ImageFileVO();
+	                    // ImageFileVO에 고유한 파일명(savedFilename) 저장
+	                    fileVO.setFileName(savedFilename);
+	                    addedFiles.add(fileVO);
+	                } else {
+	                    tempFile.delete();
+	                    throw new IOException("FTP 업로드 실패: " + originalFilename);
+	                }
+	                tempFile.delete();
+	            }
+	        }
+	    }
+
+	    int deleteCount = deleteFileNames != null ? deleteFileNames.length : 0;
+	    int addCount = addedFiles.size();
+
+	    try {
+	        reviewService.modifyReview(review);
+
+	        int displayNo = 5 - deleteCount;
+	        
+	        if (deleteCount > 0 && addCount > 0) {
+	            int min = Math.min(deleteCount, addCount);
+
+	            for (int i = 0; i < min; i++) {
+	                ImageFileVO oldFile = new ImageFileVO();
+	                String oldFileName = deleteFileNames[i];
+	                oldFile.setFileName(oldFileName);
+	                oldFile.setReviewId(reviewId);
+	                long imageId = reviewService.getImageId(oldFile);
+	                ImageFileVO newFile = addedFiles.get(i);
+	                newFile.setImageId(imageId);
+	                newFile.setReviewId(reviewId);
+	                reviewService.modifyReviewImage(newFile);
+	                ftpService.deleteFile(directoryName, oldFileName);
+	            }
+
+	            for (int i = min; i < addCount; i++) {
+	                ImageFileVO newFile = addedFiles.get(i);
+	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
+	                reviewService.addReviewImage(newFile);
+	            }
+
+	            for (int i = min; i < deleteCount; i++) {
+	                String oldFileName = deleteFileNames[i];
+	                reviewService.deleteReviewImage(oldFileName);
+	                ftpService.deleteFile(directoryName, oldFileName);
+	            }
+	        } else if (deleteCount > 0) {
+	            for (String fileName : deleteFileNames) {
+	                reviewService.deleteReviewImage(fileName);
+	                ftpService.deleteFile(directoryName, fileName);
+	            }
+
+	        } else if (addCount > 0) {
+	            for (ImageFileVO newFile : addedFiles) {
+	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
+	                reviewService.addReviewImage(newFile);
+	            }
+	        }
+
+	        return ResponseEntity.ok().body(Map.of(
+	            "status", "success",
+	            "reviewId", reviewId,
+	            "memberId", memberId
+	        ));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+	            "status", "error",
+	            "message", "리뷰 수정 중 오류 발생"
+	        ));
+	    }
 	}
 	
 	@Override
@@ -285,7 +295,28 @@ public class ReviewControllerImpl implements ReviewController{
 	
 		return mav;
 	}
+	
+	@Override
+	@GetMapping("/getBestReview")
+	public ResponseEntity<Map<String, Object>> getBestReview() throws Exception {
+	    List<ReviewVO> reviewList = reviewService.getBestReviewList();
+	    List<ImageFileVO> reviewImageList = new ArrayList<>();
 
+	    for (int i = 0; i < reviewList.size(); i++) {
+	        long reviewId = reviewList.get(i).getReviewId();
+	        ImageFileVO imageVO = reviewService.getBestReviewImage(reviewId);
+
+	        if (imageVO != null) {
+	            reviewImageList.add(imageVO);  // null이 아닌 경우에만 추가
+	        }
+	    }
+
+	    Map<String, Object> responseMap = new HashMap<>();
+	    responseMap.put("reviewList", reviewList);
+	    responseMap.put("reviewImageList", reviewImageList);
+
+	    return ResponseEntity.ok(responseMap);
+	}
 
 	// 공통 메타 설정 함수
 	private void populateFileMeta(ImageFileVO file, long storeId, long reviewId, long memberId, int displayNo) {

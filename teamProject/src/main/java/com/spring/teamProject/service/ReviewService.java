@@ -26,4 +26,7 @@ public interface ReviewService {
 	public void deleteReviewImages(long reviewId) throws Exception;
 	public void deleteReview(long reviewId) throws Exception;
 	public int modifyReviewLikes(long reviewId, boolean isLiked) throws Exception;
+	
+	public List<ReviewVO> getBestReviewList() throws Exception;
+	public ImageFileVO getBestReviewImage(long reviewId) throws Exception;
 }

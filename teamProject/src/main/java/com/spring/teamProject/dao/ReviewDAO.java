@@ -32,4 +32,7 @@ public interface ReviewDAO {
 	public void increaseLikes(long reviewId) throws DataAccessException;
 	public void decreaseLikes(long reviewId) throws DataAccessException;
 	public int selectLikes(long reviewId) throws DataAccessException;
+	
+	public List<ReviewVO> selectBestReview() throws DataAccessException;
+	public ImageFileVO selectBestReviewImage(long reviewId) throws DataAccessException;
 }

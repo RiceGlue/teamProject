@@ -29,6 +29,12 @@
 		<result property="memberId" column="member_id" />
 		<result property="writerId" column="writerId" />
 		<result property="storeId" column="store_id" />
+		<result property="storeName" column="store_name" />
+		<result property="address" column="address"/>
+		<result property="localNumber" column="local_number" />
+		<result property="number1" column="number1" />
+		<result property="number2" column="number2" />
+		<result property="storeType" column="store_type" />
 		<result property="reservationId" column="reservation_id" />
 		<result property="waitingId" column="waiting_id" />
 		<result property="rating" column="rating" />
@@ -230,18 +236,28 @@
 			        s.local_number,
 			        s.number1,
 			        s.number2,
+			        s.store_type,
 			        r.review_id,
+			        r.member_id,
 			        r.content,
+			        r.created_at,
 			        r.likes,
 			        r.rating,
-			        r.member_id,
+			        m.login_id as writerId,
 			        ROW_NUMBER() OVER (PARTITION BY s.store_id ORDER BY r.likes DESC) AS rn
 			    FROM stores s
 			    INNER JOIN reviews r ON s.store_id = r.store_id
+			    INNER JOIN members m ON r.member_id = m.member_id
 			) ranked
 			WHERE ranked.rn = 1
 			ORDER BY ranked.likes DESC
-			LIMIT 3;
+			LIMIT 10;
+		]]>
+	</select>
+	
+	<select id="selectBestReviewImage" parameterType="long" resultMap="imagelist" >
+		<![CDATA[
+			select review_id, file_name, store_id from image_file where review_id=#{reviewId} and display_no=0
 		]]>
 	</select>
 	

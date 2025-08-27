@@ -161,8 +161,8 @@ function displayStoreCards(storeList, dong) {
         container.appendChild(card);
     });
 
-    // ⭐ storeList가 3개 초과일 경우만 버튼 생성
-    if (storeList.length > 3) {
+    // ⭐ 항상 버튼 생성 (조건 제거)
+    {
         const buttonWrapper = document.createElement("div");
         buttonWrapper.className = "d-grid mt-2";
 
@@ -171,13 +171,95 @@ function displayStoreCards(storeList, dong) {
         loadMoreBtn.className = "btn btn-light";
         loadMoreBtn.textContent = "더보기";
         loadMoreBtn.onclick = function () {
-            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword="+encodeURIComponent(dong);
+            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
         };
 
         buttonWrapper.appendChild(loadMoreBtn);
         container.appendChild(buttonWrapper);
     }
 }
+
+    
+$(document).ready(function () {
+    $.ajax({
+        url: '/review/getBestReview',
+        type: 'GET',
+        success: function (data) {
+            const reviewList = data.reviewList;
+            const reviewImageList = data.reviewImageList;
+
+            let html = '';
+
+            const limitedReviewList = reviewList.slice(0, 10);
+
+            function formatDate(dateString) {
+                if (dateString && dateString.includes('T')) {
+                    return dateString.split('T')[0];
+                }
+                return dateString;
+            }
+
+            function createStarRating(rating) {
+                const maxRating = 5;
+                let starsHtml = '';
+                for (let i = 0; i < rating; i++) {
+                    starsHtml += '★';
+                }
+                for (let i = 0; i < (maxRating - rating); i++) {
+                    starsHtml += '☆';
+                }
+                return starsHtml;
+            }
+
+            function maskWriterId(writerId) {
+                if (!writerId) return '';
+                const visible = writerId.slice(0, 2);
+                const maskedLength = writerId.length - 2;
+                const masked = '*'.repeat(maskedLength > 0 ? maskedLength : 0);
+                return visible + masked;
+            }
+
+            for (let i = 0; i < limitedReviewList.length; i++) {
+                const review = limitedReviewList[i];
+                const image = reviewImageList.find(img => img.reviewId === review.reviewId);
+
+                const formattedDate = formatDate(review.createdAt);
+                const starRating = createStarRating(review.rating);
+                const maskedWriterId = maskWriterId(review.writerId);
+
+                html +=
+                    '<div class="review-item" style="flex: 0 0 calc(33.333% - 10px); border:1px solid #ddd; padding:10px; margin-bottom:10px; position: relative; overflow: hidden;">' +
+                        '<div class="writer" style="display: flex; justify-content: space-between; margin:10px 0;">' +
+                            '<h6>' + maskedWriterId + '</h6>' +
+                            '<h6>' + formattedDate + '</h6>' +
+                        '</div>' +
+
+                        '<div class="review-image" style="position: relative; height: 170px;">' +
+                            (image && image.fileName
+                                ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지">'
+                                : '') +
+                            '<div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: black; background-color: rgb(193 193 193 / 50%);">' +
+                                '<p>' + starRating + ' / 좋아요: ' + review.likes + '</p>' +
+                                '<p>' + review.content + '</p>' +
+                            '</div>' +
+                        '</div>' +
+
+                        '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
+                            '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
+                            '<h6>📞' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
+                            '<h6>📍' + review.address + '</h6>' +
+                        '</div>' +
+                    '</div>';
+            }
+
+            $('#reviewContainer').html(html);
+        },
+        error: function (err) {
+            console.error("데이터 가져오기 실패:", err);
+            $('#reviewContainer').html('<p>리뷰를 불러오는 데 실패했습니다.</p>');
+        }
+    });
+});
 
 </script>
 
@@ -305,6 +387,7 @@ function displayStoreCards(storeList, dong) {
     <div class="col-12">
         <h2>최신인기리뷰</h2>
     </div>
+    <div id="reviewContainer" style="display: flex; overflow-x: auto; gap: 15px; padding: 10px;"></div>
 </div>
 
 <div class="container my-4">
@@ -319,6 +402,41 @@ function displayStoreCards(storeList, dong) {
         <button id="loadMoreBtn" class="btn btn-primary mt-2" style="display:none;">더보기</button>
     </div>
 </div>
+
+<!-- <div class="review-item" style="height: 250px; width:200px; border:1px solid #ddd; padding:10px; margin-bottom:10px;"> -->
+<!-- 	<div class="writer" style="display: flex; justify-content: space-between;"> -->
+<!--     <p>작성자</p> -->
+<!--     <p>작성 날짜</p> -->
+<!-- </div> -->
+<!-- 	<div calss="review-image"> -->
+<!-- 		<image src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%;" > -->
+<!-- 		<p>★★★★★ -->
+<!-- 		<p>리뷰 내용 -->
+<!-- 	</div> -->
+	
+<!-- </div> -->
+
+<!-- <div class="review-item" style="padding: 0px; flex: 0 0 calc(33.333% - 10px); height: 300px; border:1px solid #ddd; margin-bottom:10px; position: relative; overflow: hidden;"> -->
+<!--     <div class="writer" style="display: flex; justify-content: space-between; margin:10px;"> -->
+<!--         <h6>작성자ID</h6> -->
+<!--         <h6>2025-08-27</h6> -->
+<!--     </div> -->
+    
+<!--     <div class="review-image" style="position: relative; height: 170px;"> -->
+<!--         <img src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지"> -->
+<!--         <div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: white; background-color: rgba(0, 0, 0, 0.5);"> -->
+<!--             <p>★★★★☆ / 좋아요: 15</p> -->
+<!--             <p>리뷰 내용 예시입니다.</p> -->
+<!--         </div> -->
+<!--     </div> -->
+<!--     <div class="review-store" style="padding: 10px; z-index: 10;"> -->
+<!--         <h6>예시가게 | 음식점</h6> -->
+<!--         <h6>📞042-000-0000</h6> -->
+<!--         <h6>📍대전시 대덕구 어쩌구저쩌구</h6> -->
+<!--     </div> -->
+<!-- </div> -->
+
+
 
 
 <!-- <div class="container my-4"> -->

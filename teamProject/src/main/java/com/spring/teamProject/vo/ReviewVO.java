@@ -30,6 +30,13 @@ public class ReviewVO {
 	private int servicePercent;
 	private int cleanPercent;
 	
+	private String storeName;
+	private String address;
+	private String localNumber;
+	private String number1;
+	private String number2;
+	private String storeType;
+	
 	private int likes;
 	
 	public long getReviewId() {
@@ -163,6 +170,42 @@ public class ReviewVO {
 	}
 	public void setLikes(int likes) {
 		this.likes = likes;
+	}
+	public String getStoreName() {
+		return storeName;
+	}
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getLocalNumber() {
+		return localNumber;
+	}
+	public void setLocalNumber(String localNumber) {
+		this.localNumber = localNumber;
+	}
+	public String getNumber1() {
+		return number1;
+	}
+	public void setNumber1(String number1) {
+		this.number1 = number1;
+	}
+	public String getNumber2() {
+		return number2;
+	}
+	public void setNumber2(String number2) {
+		this.number2 = number2;
+	}
+	public String getStoreType() {
+		return storeType;
+	}
+	public void setStoreType(String storeType) {
+		this.storeType = storeType;
 	}
 	
 }

@@ -73,10 +73,10 @@ public class ImageFileVO {
 	public void setReviewId(long reviewId) {
 		this.reviewId = reviewId;
 	}
-	public long getMenuId() {
+	public Long getMenuId() {
 		return menuId;
 	}
-	public void setMenuId(long menuId) {
+	public void setMenuId(Long menuId) {
 		this.menuId = menuId;
 	}
 
