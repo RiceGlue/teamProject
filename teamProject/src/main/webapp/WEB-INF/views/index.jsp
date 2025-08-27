@@ -303,25 +303,25 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     </div>
 </div>
-   
-<div class="container my-4">
-    <h2>매장 관리자 (점주) TEST 링크</h2>
-    <div class="row g-3">
-        <div class="col">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5>
-                </div>
-            </div>
-        </div>
-         <div class="col">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
+<!-- <div class="container my-4"> -->
+<!--     <h2>매장 관리자 (점주) TEST 링크</h2> -->
+<!--     <div class="row g-3"> -->
+<!--         <div class="col"> -->
+<!--             <div class="card text-center"> -->
+<!--                 <div class="card-body"> -->
+<%--                     <h5 class="card-title"><a href="${contextPath}/waiting/owner/settings?storeId=1">사용자(점주) 웨이팅 설정 관리</h5> --%>
+<!--                 </div> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--          <div class="col"> -->
+<!--             <div class="card text-center"> -->
+<!--                 <div class="card-body"> -->
+<!--                     <h5 class="card-title"><a href="/reservation/owner/manageList?storeId=1">사용자(점주) 예약 관리</a></h5> -->
+<!--                 </div> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--     </div> -->
+<!-- </div> -->
 
 </div>

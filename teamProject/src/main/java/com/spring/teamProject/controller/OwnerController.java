@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,8 @@ import com.spring.teamProject.vo.WaitingVO;
 @Controller
 @RequestMapping("/owner")
 public class OwnerController {
+
+	private static final Logger logger = LoggerFactory.getLogger(OwnerController.class);
 
     // MemberService를 주입받아 회원 정보를 처리합니다.
     @Autowired
@@ -226,6 +230,34 @@ public class OwnerController {
         return "owner/owner_layout";
     }
 
+    @GetMapping("/api/realtimeWaitingCounts")
+    @ResponseBody
+    public Map<Long, Integer> getRealtimeWaitingCounts(@AuthenticationPrincipal UserDetailsVO userDetailsVO) {
+        // 1. 로그인 점주 ID 확인
+        if (userDetailsVO == null || !"OWNER".equals(userDetailsVO.getMemberVO().getRole())) {
+            return new HashMap<>();
+        }
+        Long ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+
+        Map<Long, Integer> waitingCounts = new HashMap<>();
+
+        try {
+            List<StoreVO> stores = storeService.getStoresByOwnerId(ownerId);
+
+            for (StoreVO store : stores) {
+                // 예외가 발생할 수 있는 메소드를 try 블록 내에 둡니다.
+                int count = waitingService.getCurrentWaitingCount(store.getStoreId());
+                waitingCounts.put(store.getStoreId(), count);
+            }
+        } catch (Exception e) {
+            // 예외 발생 시 로그를 남기고 빈 Map을 반환하거나,
+            // 사용자에게 에러를 알리는 다른 처리를 할 수 있습니다.
+            logger.error("실시간 웨이팅 수를 가져오는 중 오류 발생: {}", e.getMessage(), e);
+            // 또는 특정 HTTP 상태 코드를 가진 ResponseEntity를 반환할 수도 있습니다.
+        }
+
+        return waitingCounts;
+    }
 
 
 }

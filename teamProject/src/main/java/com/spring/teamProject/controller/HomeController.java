@@ -30,26 +30,24 @@ public class HomeController {
         List<BannerEntity> bannerList = bannerService.getActiveBanners();
         model.addAttribute("bannerList", bannerList);
         model.addAttribute("body", "index.jsp");
-        return "layout/layout";
+        return "layout/layout"; // 기존 레이아웃 사용
     }
 
     /**
-     * ✨ --- [신규] 실제 사용자용 메인 페이지 --- ✨
+     * 실제 사용자용 메인 페이지
      * URL: /main
      */
     @GetMapping("/main")
     public String showMainPage(Model model) {
         logger.info("HomeController: /main 요청 처리됨 (사용자용)");
         
-        // 1. BannerService를 통해 현재 활성화된 배너 목록을 DB에서 조회합니다.
         List<BannerEntity> bannerList = bannerService.getActiveBanners();
-        
-        // 2. 조회된 배너 목록을 "bannerList"라는 이름으로 모델에 담아 JSP로 전달합니다.
-        //    (main.jsp에서는 이 목록을 PC용과 모바일용으로 나누어 사용하게 됩니다.)
         model.addAttribute("bannerList", bannerList);
         
-        // 3. 새로 만든 main.jsp 파일을 본문(body)으로 지정합니다.
         model.addAttribute("body", "main.jsp"); 
-        return "layout/layout";
+        
+        // ✨ --- 여기가 핵심 수정 부분입니다 --- ✨
+        // 새로 만든 main_layout.jsp를 사용하도록 변경합니다.
+        return "layout/main_layout"; 
     }
 }

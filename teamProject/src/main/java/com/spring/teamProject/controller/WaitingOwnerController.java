@@ -56,8 +56,9 @@ public class WaitingOwnerController {
         List<WaitingSettingVO> settings = settingService.getAllSettingsByStoreId(storeId);
         model.addAttribute("settings", settings); // 단일 설정이어도 List로 받아서 JSTL에서 처리 가능
         model.addAttribute("storeId", storeId);
-        model.addAttribute("store", getDummyStoreInfo(storeId));
-        return "waiting/owner/settingList";
+        //model.addAttribute("store", getDummyStoreInfo(storeId));
+        model.addAttribute("body", "waiting/owner/settingList.jsp"); // 기존 JSP 재활용
+        return "owner/owner_layout";
     }
 
     // 새 웨이팅 설정 추가 폼 페이지 (JSP 반환)
@@ -148,7 +149,7 @@ public class WaitingOwnerController {
             logger.info("점주 요청: 웨이팅 ID {}의 상태를 {}로 업데이트 (매장 ID: {})", waitingId, newStatus, storeId);
 
             waitingService.updateWaitingStatus(waitingId, newStatus);
-            
+
             if(newStatus.equals("SEATED")) {
             	waitingService.increaseUserTemperatureByWaiting(waitingId);
             } else if(newStatus.equals("NO_SHOW")) {
