@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -61,7 +62,7 @@ public class MemberController {
 
     @Autowired
     private MemberService memberService;
-
+    
     @Autowired
     private StoreService storeService;
 
@@ -97,18 +98,26 @@ public class MemberController {
     }
 
     @GetMapping("/join-select")
-    public String joinSelectForm(Model model) {
+    public String joinSelectForm(Model model, HttpSession session) {
+        if (isAuthenticated()) {
+            session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
+            return "redirect:/main";
+        }
         model.addAttribute("body", "member/join_select.jsp");
         return "layout/layout";
     }
 
     @GetMapping("/login")
-    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
+    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        if (isAuthenticated()) {
+            session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
+            return "redirect:/main";
+        }
+        
         // Spring Security가 저장한 '원래 가려던 페이지' 정보를 가져옵니다.
         RequestCache requestCache = new HttpSessionRequestCache();
         SavedRequest savedRequest = requestCache.getRequest(request, response);
 
-        // '원래 가려던 페이지' 정보가 있다면, 로그인 유도 메시지를 모델에 추가합니다.
         if (savedRequest != null) {
             model.addAttribute("loginRedirectMessage", "로그인이 필요한 서비스입니다. 로그인 후 이전 페이지로 이동합니다.");
         }
@@ -127,7 +136,12 @@ public class MemberController {
     }
 
     @GetMapping("/join")
-    public String joinForm(@RequestParam("role") String role, Model model, @ModelAttribute("memberVO") MemberVO memberVO) {
+    public String joinForm(@RequestParam("role") String role, Model model, @ModelAttribute("memberVO") MemberVO memberVO, HttpSession session) {
+        if (isAuthenticated()) {
+            session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
+            return "redirect:/main";
+        }
+        
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey);
         if ("OWNER".equals(role)) {
             model.addAttribute("body", "member/join_owner.jsp");
@@ -167,6 +181,11 @@ public class MemberController {
 
     @GetMapping("/join_social")
     public String joinSocialForm(Model model, HttpSession session) {
+        if (isAuthenticated()) {
+            session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
+            return "redirect:/main";
+        }
+        
         Object socialUserInfo = session.getAttribute("socialUserInfo");
         if (socialUserInfo == null) {
             return "redirect:/";
@@ -235,7 +254,7 @@ public class MemberController {
                                                  HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         String result = memberService.sendVerificationCodeForId(memberName, email);
-
+        
         if (result != null) {
             String[] parts = result.split(":");
             String code = parts[0];
@@ -296,7 +315,7 @@ public class MemberController {
     // =================================================================
     // == 마이페이지 (MyPage) - USER, OWNER, ADMIN 공통 진입점
     // =================================================================
-
+    
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
         MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
@@ -338,7 +357,7 @@ public class MemberController {
                 }).collect(Collectors.toList());
                 model.addAttribute("reservations", displayReservations);
 
-                // 2. 위시리스트 정보 목록 가져오기 (수정된 부분)
+                // 2. 위시리스트 정보 목록 가져오기
                 List<WishlistEntity> wishlists = wishlistService.getWishlistByMemberId((long) memberInfo.getMemberId());
 
                 // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
@@ -364,7 +383,7 @@ public class MemberController {
                 }).collect(Collectors.toList());
                 model.addAttribute("wishlists", displayWishlists);
 
-                // 2. 웨이팅 정보 목록 가져오기
+                // 3. 웨이팅 정보 목록 가져오기
                 List<WaitingVO> waitings = waitingService.getWaitingsByMemberId((long) memberInfo.getMemberId());
                 List<Map<String, Object>> displayWaitings = waitings.stream().map(wait -> {
                     Map<String, Object> map = new HashMap<>();
@@ -493,7 +512,7 @@ public class MemberController {
 
         return "redirect:/member/edit-profile";
     }
-
+    
     @PostMapping("/set-password")
     public String setPasswordForSocialUser(@RequestParam("loginId") String loginId,
                                            @RequestParam("newLoginPw") String newPassword,
@@ -527,7 +546,7 @@ public class MemberController {
             return "redirect:/member/edit-profile";
         }
     }
-
+    
     @GetMapping("/link-account")
     public String linkAccountForm(Model model, HttpSession session) {
         Object socialLinkInfo = session.getAttribute("socialLinkInfo");
@@ -544,7 +563,7 @@ public class MemberController {
                                      @RequestParam("password") String password,
                                      HttpSession session,
                                      RedirectAttributes redirectAttributes) {
-
+        
         Map<String, Object> socialLinkInfo = (Map<String, Object>) session.getAttribute("socialLinkInfo");
         if (socialLinkInfo == null) {
             return "redirect:/";
@@ -561,7 +580,7 @@ public class MemberController {
             UserDetailsVO userDetails = new UserDetailsVO(linkedMember);
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            
             session.removeAttribute("socialLinkInfo");
             session.setAttribute("successMessage", "소셜 계정이 성공적으로 연동되었습니다.");
 
@@ -594,8 +613,11 @@ public class MemberController {
     }
 
     // =================================================================
-    // == 테스트 이메일 발송 (Test Email Send) - 테스트 후 반드시 삭제!
+    // == 테스트용 기능 (Test Utilities)
     // =================================================================
+    @Autowired
+    private FtpConnectionTestUtil ftpTestUtil;
+
     @GetMapping("/testEmailSend")
     @ResponseBody
     public String testEmailSend(@RequestParam String to) {
@@ -612,12 +634,6 @@ public class MemberController {
         }
     }
 
-    // =================================================================
-    // == 테스트용 기능 (Test Utilities)
-    // =================================================================
-    @Autowired
-    private FtpConnectionTestUtil ftpTestUtil; // 방금 만든 테스트 유틸 주입
-
     @GetMapping("/testFtp")
     @ResponseBody
     public String testFtpConnection() {
@@ -633,6 +649,14 @@ public class MemberController {
     // =================================================================
     // == 헬퍼 메소드 (Helper Method)
     // =================================================================
+
+    private boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return false;
+        }
+        return authentication.isAuthenticated();
+    }
 
     private MemberVO getMemberInfoFromPrincipal(Object principal) {
         if (principal instanceof UserDetailsVO) {
