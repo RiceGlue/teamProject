@@ -10,14 +10,15 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&libraries=places">
 </script>
 
-
 <!-- jQuery (AJAX 용) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 
 <style>
     .carousel-item img { height: 500px; object-fit: cover; }
     .carousel-caption { background-color: rgba(0, 0, 0, 0.5); border-radius: 5px; padding: 10px; }
+    .store-carousel { display: flex; overflow-x: auto; gap: 16px; scroll-snap-type: x mandatory; padding-bottom: 10px; }
+	.store-carousel .card { min-width: 250px; flex: 0 0 auto; scroll-snap-align: start; }
+	.store-carousel.limited { max-width: calc(250px * 3 + 32px); overflow-x: hidden; }
 </style>
 
 <script>
@@ -131,21 +132,31 @@ document.addEventListener("DOMContentLoaded", function () {
     // 7. 매장 카드 UI로 표시
     function displayStoreCards(storeList) {
         const container = document.getElementById("nearbyStores");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
+
         container.innerHTML = ""; // 초기화
+        container.classList.add('limited'); // 처음엔 제한 모드
 
         storeList.forEach(store => {
             const card = document.createElement("div");
             card.className = "card my-3";
             card.innerHTML = `
                 <div class="card-body">
-                    <h5 class="card-title">${store.storeName}</h5>
-                    <p class="card-text">📍 ${store.address}</p>
-                    <p class="card-text">📞 ${store.localNumber}-${store.number1}-${store.number2}</p>
-                    <p class="card-text">⭐ ${store.avgRating} / 5</p>
+                    <h5 class="card-title">${storeList.storeName}</h5>
+                    <p class="card-text">📍 ${storeList.address}</p>
+                    <p class="card-text">📞 ${storeList.localNumber}-${storeList.number1}-${storeList.number2}</p>
+                    <p class="card-text">⭐ ${storeList.avgRating} / 5</p>
                 </div>
             `;
             container.appendChild(card);
         });
+
+        // 더보기 버튼 이벤트
+        loadMoreBtn.onclick = function () {
+            container.classList.remove('limited'); // 제한 해제
+            container.style.overflowX = 'auto'; // 슬라이드 허용
+            loadMoreBtn.style.display = 'none'; // 버튼 숨기기
+        };
     }
 });
 </script>
@@ -283,10 +294,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
 
             <!-- 지도를 렌더링할 영역 -->
-            <div id="map" style="height: 400px;"></div>
+            <div id="map" style="height: 300px;"></div>
 
-            <!-- 매장 카드 리스트 -->
-            <div id="nearbyStores" class="mt-4"></div>
+            <div id="storeWrapper" style="position: relative;">
+			    <div id="nearbyStores" class="store-carousel"></div>
+			    <button id="loadMoreBtn" class="btn btn-primary mt-2">더보기</button>
+			</div>
         </div>
     </div>
 </div>

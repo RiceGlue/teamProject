@@ -187,7 +187,7 @@
 
 	<select id="selectStoreReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
-			select r.review_id, m.login_id as writerId, r.reservation_id, r.waiting_id, r.rating, r.content, r.created_at, r.updated_at, r.likes
+			select r.*, m.login_id as writerId
 			from reviews r inner join members m on r.member_id=m.member_id
 			where store_id=#{storeId}
 			order by r.created_at desc
@@ -233,7 +233,16 @@
 			FROM image_file
 			WHERE store_id = #{storeId}
 			  AND review_id IS NOT NULL
-			  AND display_no = 0;
+		]]>
+	</select>
+	
+	<select id="selectHomeReviewImage" parameterType="long" resultMap="imagelist">
+		<![CDATA[
+			SELECT *
+			FROM image_file
+			WHERE store_id = #{storeId}
+			  AND review_id IS NOT NULL
+			  AND display_no = 0
 		]]>
 	</select>
 

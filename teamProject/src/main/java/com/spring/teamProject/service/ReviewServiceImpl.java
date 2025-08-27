@@ -103,4 +103,17 @@ public class ReviewServiceImpl implements ReviewService {
 	public void deleteReview (long reviewId) throws Exception {
 		reviewDAO.deleteReview (reviewId);
 	}
+	
+	@Override
+	public int modifyReviewLikes(long reviewId, boolean isLiked) throws Exception {
+	    int reviewLikes = reviewDAO.selectLikes(reviewId);
+		
+		if (isLiked) {
+	        reviewDAO.increaseLikes(reviewId);
+	    } else {
+	    	if(reviewLikes > 0 ) { reviewDAO.decreaseLikes(reviewId); }
+	    }
+	    return reviewDAO.selectLikes(reviewId);
+	}
+
 }

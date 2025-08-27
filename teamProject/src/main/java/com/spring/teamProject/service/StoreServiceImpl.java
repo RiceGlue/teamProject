@@ -69,7 +69,7 @@ public class StoreServiceImpl implements StoreService{
 		//이미지
 		List<ImageFileVO> storeImage = storeDAO.selectStoreImage(storeVO);
 		List<ImageFileVO> reviewImage = storeDAO.selectReviewImage(storeId);
-
+		List<ImageFileVO> homeReviewImage = storeDAO.selectHomeReviewImage(storeId);
 
 		storeMap.put("store", store);
 		storeMap.put("review", review);
@@ -80,6 +80,7 @@ public class StoreServiceImpl implements StoreService{
 
 		storeMap.put("storeImage", storeImage);
 		storeMap.put("reviewImage", reviewImage);
+		storeMap.put("homeReviewImage", homeReviewImage);
 
 		return storeMap;
 	}

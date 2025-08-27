@@ -170,6 +170,17 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 }
 
 
+.like-icon {
+  font-size: 1.2em; /* 필요에 따라 조절 */
+  color: grey; /* 기본 하얀 하트 대신 회색으로 */
+  transition: color 0.3s ease;
+}
+
+.like-button.likes .like-icon {
+  color: red;
+}
+
+
   /* 💡 위시리스트 버튼 CSS 추가 */
 .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
 .wishlist-btn.active{color:#ff6347;}
@@ -396,26 +407,60 @@ $(document).ready(function(){
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-	const likeButtons = document.querySelectorAll('.like-button');
-	
-	likeButtons.forEach(button => {
-		button.addEventListener('click', function () {
-			const isLiked = button.classList.toggle('likes');
-			const countSpan = button.querySelector('.like-count');
-			const iconSpan = button.querySelector('.like-icon');
-			let count = parseInt(countSpan.textContent) || 0;
+    const likeButtons = document.querySelectorAll('.like-button');
 
-			// 숫자 업데이트
-			count = isLiked ? count + 1 : count - 1;
-			countSpan.textContent = count;
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const isLiked = button.classList.toggle('likes');
+            const countSpan = button.querySelector('.like-count');
+            const iconSpan = button.querySelector('.like-icon');
+            let count = parseInt(countSpan.textContent) || 0;
 
-			// 아이콘 업데이트
-			iconSpan.textContent = isLiked ? '👍' : '🤍';
+            const reviewId = button.getAttribute('data-review-id');
+            const memberId = button.getAttribute('data-member-id');
 
-			// TODO: 서버에 AJAX 요청 보내기
-		});
-	});
+            // 로그인 안 된 사용자 처리
+            if (!memberId) {
+                alert('로그인 후 이용 가능합니다.');
+                button.classList.toggle('likes'); // 상태 복원
+                return;
+            }
+
+            // 숫자 업데이트
+            count = isLiked ? count + 1 : count - 1;
+            countSpan.textContent = count;
+
+            // 아이콘 업데이트
+            iconSpan.textContent = isLiked ? '❤️' : '🤍';
+
+            // 서버에 AJAX 요청 보내기
+            fetch('/store/likeReview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reviewId: reviewId,
+                    memberId: memberId,
+                    isLiked: isLiked
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('서버 응답:', data);
+                // 서버에서 최신 좋아요 수를 보내줬다면 countSpan.textContent = data.updatedLikes; 처럼 사용 가능
+            })
+            .catch(error => {
+                console.error('요청 실패:', error);
+                // 에러 발생 시 상태 복원
+                button.classList.toggle('likes');
+                countSpan.textContent = isLiked ? count - 1 : count + 1;
+                iconSpan.textContent = isLiked ? '🤍' : '❤️';
+            });
+        });
+    });
 });
+
 </script>
 
 <div class="store-info">
@@ -470,54 +515,52 @@ document.addEventListener('DOMContentLoaded', function () {
 		</div>
 	</div>
 	<div class="home_review_container">
-		<div class="home_review-meta">
-			<div class="home_review-header">
-				<div class="home_rating">
-					<p>리뷰 ${store.countRating } <img src="${contextPath}/image/review_rating.jpg" width="20px" alt="리뷰이미지"> ${store.avgRating } / 5</p>
-				</div>
-				<div class="review-view-all">
-					<button class="btn btn-sm btn-outline-secondary" onclick="openTab3()" >전체보기</button>
-				</div>
-			</div>
-			<div class="home_review-grid">
-				<c:forEach var="review" items="${storeMap.review}" varStatus="status">
-					<c:if test="${status.index < 4}">
-						<div class="home_review-item">
-							<div class="home_review-text-wrapper">
-								<div class="review-rating">
-									<c:forEach begin="1" end="5" var="i">
-										<c:choose>
-											<c:when test="${i <= review.rating}">
-												<span class="star filled">★</span>
-											</c:when>
-											<c:otherwise>
-												<span class="star">★</span>
-											</c:otherwise>
-										</c:choose>
-									</c:forEach>
-								</div>
-								<div class="home_review-writer">
-									<c:set var="idLength" value="${fn:length(review.writerId)}" />
-									<c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
-									<c:set var="maskedPart" value="${fn:substring(review.writerId, 2, idLength)}" />
-									${visiblePart}<c:forEach begin="1" end="${fn:length(maskedPart)}">*</c:forEach>
-								</div>
-								<div class="home_review-content">${review.content}</div>
-							</div>
-
-							<c:if test="${not empty storeMap.reviewImage}">
-								<div class="home_review-image-wrapper">
-									<c:forEach var="reviewImage" items="${storeMap.reviewImage}">
-										<c:if test="${reviewImage.reviewId == review.reviewId}">
-											<img src="${contextPath}/images/review/${reviewImage.fileName}" alt="리뷰 이미지" class="home_review-image">
-										</c:if>
-									</c:forEach>
-								</div>
-							</c:if>
-						</div>
-					</c:if>
-				</c:forEach>
-			</div>
+	    <div class="home_review-meta">
+	        <div class="home_review-header">
+	            <div class="home_rating">
+	                <p>리뷰 ${store.countRating } <img src="${contextPath}/image/review_rating.jpg" width="20px" alt="리뷰이미지"> ${store.avgRating } / 5</p>
+	            </div>
+	            <div class="review-view-all">
+	                <button class="btn btn-sm btn-outline-secondary" onclick="openTab3()">전체보기</button>
+	            </div>
+	        </div>
+	        <div class="home_review-grid">
+	            <c:forEach var="review" items="${storeMap.review}" varStatus="status">
+	                <c:if test="${status.index < 4}">
+	                    <div class="home_review-item">
+	                        <div class="home_review-text-wrapper">
+	                            <div class="review-rating">
+	                                <c:forEach begin="1" end="5" var="i">
+	                                    <c:choose>
+	                                        <c:when test="${i <= review.rating}">
+	                                            <span class="star filled">★</span>
+	                                        </c:when>
+	                                        <c:otherwise>
+	                                            <span class="star">★</span>
+	                                        </c:otherwise>
+	                                    </c:choose>
+	                                </c:forEach>
+	                            </div>
+	                            <div class="home_review-writer">
+	                                <c:set var="visiblePart" value="${fn:substring(review.writerId, 0, 2)}" />
+	                                <c:set var="maskedLength" value="${fn:length(review.writerId) - 2}" />
+	                                ${visiblePart}
+	                                <c:forEach begin="1" end="${maskedLength}">*</c:forEach>
+	                            </div>
+	                            <div class="home_review-content">${review.content}</div>
+	                        </div>
+	
+	                        <div class="home_review-image">
+	                            <c:forEach var="homeReviewImage" items="${storeMap.homeReviewImage}">
+	                                <c:if test="${homeReviewImage.reviewId == review.reviewId}">
+	                                    <img src="${contextPath}/images/review/${homeReviewImage.fileName}" alt="리뷰 이미지" class="home_review-image" />
+	                                </c:if>
+	                            </c:forEach>
+	                        </div>
+	                    </div>
+	            	</c:if>
+	            </c:forEach>
+	        </div>
 		</div>
 	</div>
 	<div class="tab_container">
@@ -665,15 +708,15 @@ document.addEventListener('DOMContentLoaded', function () {
 								</c:if>
 								<div class="review-like-box">
 									<span 
-										class="like-button <c:if test='${review.likes}'>likes</c:if>'" 
-										data-review-id="${review.reviewId}" 
-										role="button" 
-										tabindex="0">
-										<span class="like-icon">🤍</span>
-										<span class="like-count" id="like-count-${review.reviewId}">
-											${review.likes}
-										</span>
+									    class="like-button ${review.likes > 0 ? 'likes' : ''}" 
+									    data-review-id="${review.reviewId}" 
+									    data-member-id="${memberId}" 
+									    role="button" 
+									    tabindex="0">
+									    <span class="like-icon">${review.likes > 0 ? '❤️' : '🤍'}</span>
+									    <span class="like-count" id="like-count-${review.reviewId}">${review.likes}</span>
 									</span>
+
 								</div>
 							</div>
 						</c:forEach>
