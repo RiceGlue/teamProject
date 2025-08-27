@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 initMap();
                 displayStoresOnMap(storeList);
-                displayStoreCards(storeList);
+                displayStoreCards(storeList); // 'storeList'를 전달
             },
             error: function () {
                 document.getElementById("nearbyStores").innerHTML = "<p>매장 정보를 불러오는 데 실패했습니다.</p>";
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 7. 매장 카드 UI로 표시
-    function displayStoreCards(storeList) {
+    function displayStoreCards(storeList) { // 매개변수 이름을 'storeList'로 수정
         const container = document.getElementById("nearbyStores");
         const loadMoreBtn = document.getElementById("loadMoreBtn");
 
@@ -142,10 +142,10 @@ document.addEventListener("DOMContentLoaded", function () {
             card.className = "card my-3";
             card.innerHTML = `
                 <div class="card-body">
-                    <h5 class="card-title">${storeList.storeName}</h5>
-                    <p class="card-text">📍 ${storeList.address}</p>
-                    <p class="card-text">📞 ${storeList.localNumber}-${storeList.number1}-${storeList.number2}</p>
-                    <p class="card-text">⭐ ${storeList.avgRating} / 5</p>
+                    <h5 class="card-title">${store.storeName}</h5>
+                    <p class="card-text">📍 ${store.address}</p>
+                    <p class="card-text">📞 ${store.localNumber}-${store.number1}-${store.number2}</p>
+                    <p class="card-text">⭐ ${store.avgRating} / 5</p>
                 </div>
             `;
             container.appendChild(card);

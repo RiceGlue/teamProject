@@ -108,9 +108,7 @@ public class StoreControllerImpl implements StoreController {
 	@ResponseBody
 	public List<StoreVO> searchStoreNearUser(@RequestParam("location") String location) {
 		System.out.println("받아온 주소 : " +location);
-		
-		List<StoreVO> storeList = storeService.searchStoreNearUser(location);
-	    return storeList;
+	    return storeService.searchStoreNearUser(location); // 서비스에서 LIKE '%location%' 검색
 	}
 
 
