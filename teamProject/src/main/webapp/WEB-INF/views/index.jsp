@@ -7,7 +7,7 @@
 
 <!-- Google Maps JavaScript API 로드 (API 키 필요) -->
 <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&libraries=places">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&libraries=places">
 </script>
 
 <!-- jQuery (AJAX 용) -->
@@ -16,18 +16,22 @@
 <style>
     .carousel-item img { height: 500px; object-fit: cover; }
     .carousel-caption { background-color: rgba(0, 0, 0, 0.5); border-radius: 5px; padding: 10px; }
-    .store-carousel { display: flex; overflow-x: auto; gap: 16px; scroll-snap-type: x mandatory; padding-bottom: 10px; }
+    .store-carousel { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
 	.store-carousel .card { min-width: 250px; flex: 0 0 auto; scroll-snap-align: start; }
 	.store-carousel.limited { max-width: calc(250px * 3 + 32px); overflow-x: hidden; }
+	    
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // 1. 사용자 위치 가져오기
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(success, error);
-    } else {
-        document.getElementById("address").innerText = "위치 정보를 지원하지 않는 브라우저입니다.";
+var contextPath = '${contextPath}';
+    // Google Maps API가 로드되면 자동으로 실행되는 콜백 함수
+    function initMap() {
+        // 1. 사용자 위치 가져오기
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error);
+        } else {
+            document.getElementById("address").innerText = "위치 정보를 지원하지 않는 브라우저입니다.";
+        }
     }
 
     function success(position) {
@@ -76,37 +80,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 4. AJAX로 동 주소 전달 → 매장 리스트 받아오기
     function fetchNearbyStores(dong) {
+        console.log("AJAX 요청 시작. 동 주소:", dong);
         $.ajax({
-            url: "${contextPath}/store/searchStoreNearUser", // 컨트롤러 주소에 맞게 수정
+            url: "${contextPath}/store/searchStoreNearUser",
             method: "GET",
             data: { location: dong },
             success: function (storeList) {
+                console.log("AJAX 요청 성공! 받은 데이터:", storeList);
                 if (storeList.length === 0) {
                     document.getElementById("nearbyStores").innerHTML = "<p>근처에 매장이 없습니다.</p>";
                     return;
                 }
+                
+                // initMap은 API 로드 시에만 호출되므로, 여기서는 지도 객체만 생성합니다.
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 14,
+                    center: { lat: 37.5665, lng: 126.9780 },
+                });
 
-                initMap();
-                displayStoresOnMap(storeList);
-                displayStoreCards(storeList); // 'storeList'를 전달
+                displayStoresOnMap(storeList, map);
+                displayStoreCards(storeList);
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error("AJAX 요청 실패:", status, error);
                 document.getElementById("nearbyStores").innerHTML = "<p>매장 정보를 불러오는 데 실패했습니다.</p>";
             }
         });
     }
 
-    // 5. 지도 초기화
-    let map;
-    function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 14,
-            center: { lat: 37.5665, lng: 126.9780 }, // 서울 기본 위치
-        });
-    }
-
     // 6. 매장 주소 → 위도/경도 → 지도 마커 표시
-    function displayStoresOnMap(storeList) {
+    function displayStoresOnMap(storeList, map) {
         const geocoder = new google.maps.Geocoder();
 
         storeList.forEach(store => {
@@ -128,37 +131,48 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-
     // 7. 매장 카드 UI로 표시
-    function displayStoreCards(storeList) { // 매개변수 이름을 'storeList'로 수정
+    function displayStoreCards(storeList) {
+    	console.log("UI카드 시작")
         const container = document.getElementById("nearbyStores");
         const loadMoreBtn = document.getElementById("loadMoreBtn");
 
-        container.innerHTML = ""; // 초기화
-        container.classList.add('limited'); // 처음엔 제한 모드
+        if (!container) {
+            console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
+            return;
+        }	
+        
+        if (!loadMoreBtn) {
+            console.warn("loadMoreBtn 버튼을 찾지 못했습니다.");
+        } else {
+            loadMoreBtn.style.display = 'block'; // 버튼 보이기
+        }
+        
+        container.innerHTML = "";
+        container.classList.add('limited');
 
         storeList.forEach(store => {
             const card = document.createElement("div");
+            console.log("가게이름:"+store.storeName);
             card.className = "card my-3";
-            card.innerHTML = `
-                <div class="card-body">
-                    <h5 class="card-title">${store.storeName}</h5>
-                    <p class="card-text">📍 ${store.address}</p>
-                    <p class="card-text">📞 ${store.localNumber}-${store.number1}-${store.number2}</p>
-                    <p class="card-text">⭐ ${store.avgRating} / 5</p>
-                </div>
-            `;
+            card.innerHTML = 
+                '<div class="card-body">' +
+                    '<h5 class="card-title"><a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a></h5>' +
+                    '<p class="card-text">📍 ' + store.address + '</p>' +
+                    '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
+                    '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
+                '</div>';
+            console.log(card.outerHTML);
             container.appendChild(card);
         });
 
         // 더보기 버튼 이벤트
         loadMoreBtn.onclick = function () {
-            container.classList.remove('limited'); // 제한 해제
-            container.style.overflowX = 'auto'; // 슬라이드 허용
-            loadMoreBtn.style.display = 'none'; // 버튼 숨기기
+            container.classList.remove('limited');
+            container.style.overflowX = 'auto';
+            loadMoreBtn.style.display = 'none';
         };
     }
-});
 </script>
 
 <div class="row">
@@ -287,22 +301,19 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </div>
 
-<div class="row">
-    <div class="container my-4">
-        <div class="col-12">
-            <h2>내 지역 맛집</h2>
-            <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
-
-            <!-- 지도를 렌더링할 영역 -->
-            <div id="map" style="height: 300px;"></div>
-
-            <div id="storeWrapper" style="position: relative;">
-			    <div id="nearbyStores" class="store-carousel"></div>
-			    <button id="loadMoreBtn" class="btn btn-primary mt-2">더보기</button>
-			</div>
-        </div>
+<div class="container my-4">
+    <div class="col-12">
+        <h2>내 지역 맛집</h2>
+        <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
+        
+        <div id="map" style="height: 300px;"></div>
+        
+        <div id="nearbyStores" class="store-carousel"></div> 
+        
+        <button id="loadMoreBtn" class="btn btn-primary mt-2" style="display:none;">더보기</button>
     </div>
 </div>
+
 
 <!-- <div class="container my-4"> -->
 <!--     <h2>매장 관리자 (점주) TEST 링크</h2> -->
