@@ -13,7 +13,7 @@ public class ReservationVO {
     private LocalDateTime createdAt;
     private String cancelledReason;
     private String paymentId;
-
+    private String storeName;
     // --- 변경점 ---
     // 단일 테이블 ID(tableId) 필드를 제거했습니다.
     // 하나의 예약에 여러 테이블이 할당될 수 있도록 List<StoreTableVO> 필드를 유지합니다.
@@ -125,4 +125,13 @@ public class ReservationVO {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+
 }

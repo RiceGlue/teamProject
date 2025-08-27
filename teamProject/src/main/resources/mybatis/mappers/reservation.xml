@@ -29,6 +29,22 @@
 					select="selectTablesForReservation" column="reservation_id" />
 	</resultMap>
 
+	<resultMap id="reservationWithStoreResultMap" type="com.spring.teamProject.vo.ReservationVO">
+        <id property="reservationId" column="reservation_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="storeId" column="store_id"/>
+        <result property="reservationTime" column="reservation_time"/>
+        <result property="guestCount" column="guest_count"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="cancelledReason" column="cancelled_reason"/>
+
+        <result property="storeName" column="store_name"/>
+
+        <collection property="tables" ofType="com.spring.teamProject.vo.StoreTableVO"
+                    select="selectTablesForReservation" column="reservation_id" />
+    </resultMap>
+
 	<!-- 특정 reservation_id에 연결된 모든 테이블 정보를 조회하는 쿼리 -->
 	<select id="selectTablesForReservation" parameterType="long" resultMap="storeTableResultMap">
 		SELECT
@@ -159,8 +175,8 @@
             reservation_id = #{reservationId}
     </update>
 
-    <select id="selectReservationsByMemberId" parameterType="long" resultMap="reservationResultMap">
-        SELECT
+    <select id="selectReservationsByMemberId" parameterType="long" resultMap="reservationWithStoreResultMap">
+        <!-- SELECT
             reservation_id, member_id, store_id, reservation_time, guest_count,
             status, cancelled_reason, created_at
         FROM
@@ -168,7 +184,16 @@
         WHERE
             member_id = #{memberId}
         ORDER BY
-            reservation_time DESC
+            reservation_time DESC -->
+		<![CDATA[
+	        SELECT
+	            r.*,
+	            s.store_name
+	        FROM reservations r
+	        JOIN stores s ON r.store_id = s.store_id
+	        WHERE r.member_id = #{memberId}
+	        ORDER BY r.created_at DESC
+	    ]]>
     </select>
 
     <select id="selectPendingReservationByPaymentId" resultType="com.spring.teamProject.vo.ReservationVO">
