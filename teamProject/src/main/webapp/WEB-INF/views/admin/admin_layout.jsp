@@ -144,7 +144,7 @@
                 <i class="bi bi-megaphone-fill me-2"></i>광고
             </a>
             <div id="collapseAds" class="collapse">
-                <a class="nav-link" href="#">- 배너 관리</a>
+                <a class="nav-link" href="${contextPath}/admin/banners">- 배너 관리</a>
             </div>
         </div>
 
