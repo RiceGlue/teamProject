@@ -424,7 +424,7 @@ public class MemberController {
                 model.addAttribute("waitings", displayWaitings);
                 
                 List<ReviewVO> reviewList = reviewService.getUserReview((long) memberInfo.getMemberId());
-                model.addAttribute("review", reviewList);
+                model.addAttribute("reviewList", reviewList);
 
             } catch (Exception e) {
                  logger.error("마이페이지 정보 조회 중 오류 발생: {}", e.getMessage(), e);
