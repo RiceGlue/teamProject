@@ -13,6 +13,7 @@ import com.spring.teamProject.vo.StoreVO;
 @Mapper
 public interface AdminStoreDAO {
 	
+	public List<StoreVO> selectOwnerStore(long ownerId) throws DataAccessException;
 	long insertStoreInfo(Map storeInfo) throws DataAccessException;
 	public void insertStoreImage(List<ImageFileVO> imgfile) throws DataAccessException;
 	public long insertMenu(MenuVO meunVO) throws DataAccessException;

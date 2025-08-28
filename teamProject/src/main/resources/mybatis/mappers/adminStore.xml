@@ -82,6 +82,11 @@
 		<result property="likes" column="likes" />
 	</resultMap>
 	
+	<select id="selectOwnerStore" parameterType="long" resultMap="storelist">
+		<![CDATA[
+			select * from stores where owner_id=#{ownerId}
+		]]>
+	</select>
 	<insert id="insertStoreInfo" parameterType="java.util.Map" >
 			insert into stores
 			(

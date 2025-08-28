@@ -104,6 +104,7 @@
                     - 매장 관리
                 </a>
                 <div id="collapseStoreSubMenu" class="collapse">
+                	<a class="nav-link" href="${contextPath }/franchise/storeManage?type=storeInfo">> 매장 정보 관리</a>
                     <a class="nav-link" href="#">> 메뉴 관리</a>
                     <a class="nav-link" href="#">> 웨이팅 설정/현황</a>
                     <a class="nav-link" href="#">> 예약 설정/현황</a>

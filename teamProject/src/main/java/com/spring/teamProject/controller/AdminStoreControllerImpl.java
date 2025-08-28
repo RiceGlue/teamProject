@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.spring.teamProject.common.BaseController;
 import com.spring.teamProject.common.StringUtil;
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
@@ -26,6 +26,7 @@ import com.spring.teamProject.service.FtpService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
 import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.UserDetailsVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +47,26 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	@Value("${file.upload-dir}")
 	private String uploadDir;
 
+	
+	@RequestMapping(value="/storeManage")
+	public ModelAndView storeManage (@AuthenticationPrincipal UserDetailsVO userDetailsVO,@RequestParam("type") String type, HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
+		String viewName = (String)req.getAttribute("viewName");
+		Long ownerId = null;
+		
+		ModelAndView mav = ViewUtil.layout(viewName);
+		
+		if (userDetailsVO != null) {
+			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+		}
+		
+		List<StoreVO> storeList = adminStoreService.getOwnerStore(ownerId);
+
+		mav.addObject("ownerId", ownerId);
+		mav.addObject("storeList", storeList);
+		mav.addObject("type", type);
+		return mav;
+	}
+	
 	@RequestMapping(value="/addStoreInfoForm")
 	public ModelAndView addStoreInfoForm (@RequestParam("ownerId") long ownerId,HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
