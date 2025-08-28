@@ -1,6 +1,8 @@
 package com.spring.teamProject.service;
 
 import com.spring.teamProject.vo.BannerEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +33,21 @@ public interface BannerService {
     // 기존 배너 정보를 수정하는 메소드
     void updateBanner(BannerEntity banner, MultipartFile pcImageFile, MultipartFile mobileImageFile);
     
-    // ✨ --- [신규] 배너 ID로 배너 정보와 관련 파일을 모두 삭제하는 메소드 --- ✨
+    //  배너 ID로 배너 정보와 관련 파일을 모두 삭제하는 메소드
     void deleteBanner(String bannerId);
+
+    /**
+     * ✨ --- [신규] 현재 게시 중인 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
+     */
+    Page<BannerEntity> getActiveBannersForAdmin(Pageable pageable);
+
+    /**
+     * ✨ --- [신규] 게시 예정인 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
+     */
+    Page<BannerEntity> getScheduledBanners(Pageable pageable);
+
+    /**
+     * ✨ --- [신규] 게시 종료된 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
+     */
+    Page<BannerEntity> getEndedBanners(Pageable pageable);
 }

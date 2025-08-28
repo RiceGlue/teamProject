@@ -4,6 +4,8 @@ import com.spring.teamProject.jpa.dao.BannerRepository;
 import com.spring.teamProject.vo.BannerEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,7 +115,7 @@ public class BannerServiceImpl implements BannerService {
         bannerRepository.save(existingBanner);
     }
 
-    // ✨ --- [신규] 배너 삭제 로직 구현 --- ✨
+    // 배너 삭제 로직 구현
     @Override
     @Transactional
     public void deleteBanner(String bannerId) {
@@ -134,6 +136,22 @@ public class BannerServiceImpl implements BannerService {
         if (mobileImagePath != null) {
             ftpService.deleteFile("banners", mobileImagePath);
         }
+    }
+
+    // ✨ --- [신규] 페이징 조회 로직 구현 --- ✨
+    @Override
+    public Page<BannerEntity> getActiveBannersForAdmin(Pageable pageable) {
+        return bannerRepository.findActiveBannersForAdmin(LocalDate.now(), pageable);
+    }
+
+    @Override
+    public Page<BannerEntity> getScheduledBanners(Pageable pageable) {
+        return bannerRepository.findScheduledBanners(LocalDate.now(), pageable);
+    }
+
+    @Override
+    public Page<BannerEntity> getEndedBanners(Pageable pageable) {
+        return bannerRepository.findEndedBanners(LocalDate.now(), pageable);
     }
 
     /**

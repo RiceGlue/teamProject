@@ -1,10 +1,14 @@
 package com.spring.teamProject.controller;
 
+import com.spring.teamProject.jpa.dao.PromotionRepository;
 import com.spring.teamProject.service.BannerService;
 import com.spring.teamProject.service.PromotionService;
 import com.spring.teamProject.vo.BannerEntity;
 import com.spring.teamProject.vo.PromotionEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +27,36 @@ public class AdminBannerController {
     private PromotionService promotionService;
 
     // 배너 목록 조회
+    // @GetMapping("")
+    // public String listBanners(Model model) {
+    //     // BannerService를 통해 DB에 저장된 모든 배너 목록을 가져옵니다.
+    //     List<BannerEntity> bannerList = bannerService.getAllBanners();
+    //     // JSP로 전달
+    //     model.addAttribute("bannerList", bannerList);
+    //     model.addAttribute("body", "admin/banner_list.jsp");
+    //     return "admin/admin_layout";
+    // }
+
+    // ✨ --- [수정] 페이징 및 탭 기능 추가 --- ✨
     @GetMapping("")
-    public String listBanners(Model model) {
-        // BannerService를 통해 DB에 저장된 모든 배너 목록을 가져옵니다.
-        List<BannerEntity> bannerList = bannerService.getAllBanners();
-        // JSP로 전달
-        model.addAttribute("bannerList", bannerList);
+    public String listBanners(@RequestParam(value = "tab", defaultValue = "active") String tab,
+                              @PageableDefault(size = 10, sort = "orderIndex") Pageable pageable,
+                              Model model) {
+        
+        Page<BannerEntity> bannerPage;
+
+        // 1. 'tab' 파라미터 값에 따라 다른 서비스 메소드를 호출합니다.
+        if ("scheduled".equals(tab)) {
+            bannerPage = bannerService.getScheduledBanners(pageable);
+        } else if ("ended".equals(tab)) {
+            bannerPage = bannerService.getEndedBanners(pageable);
+        } else {
+            bannerPage = bannerService.getActiveBannersForAdmin(pageable);
+        }
+
+        // 2. 조회된 페이지 정보(배너 목록, 전체 페이지 수 등)를 모델에 담아 전달합니다.
+        model.addAttribute("bannerPage", bannerPage);
+        model.addAttribute("currentTab", tab); // 현재 활성화된 탭을 알려주기 위한 정보
         model.addAttribute("body", "admin/banner_list.jsp");
         return "admin/admin_layout";
     }
