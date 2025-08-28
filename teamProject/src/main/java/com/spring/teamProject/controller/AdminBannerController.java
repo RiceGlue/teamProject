@@ -22,7 +22,7 @@ public class AdminBannerController {
     @Autowired
     private PromotionService promotionService;
 
-    // 1. 배너 목록 조회
+    // 배너 목록 조회
     @GetMapping("")
     public String listBanners(Model model) {
         // BannerService를 통해 DB에 저장된 모든 배너 목록을 가져옵니다.
@@ -33,7 +33,7 @@ public class AdminBannerController {
         return "admin/admin_layout";
     }
 
-    // 2. 신규 배너 등록 폼
+    // 새 배너 등록 폼
     @GetMapping("/form")
     public String showNewBannerForm(Model model) {
         // Service를 사용하여 프로모션 목록을 조회합니다.
@@ -45,7 +45,7 @@ public class AdminBannerController {
         return "admin/admin_layout";
     }
 
-    // 3. ? [신규] 배너 수정 폼
+    // 배너 수정 폼
     @GetMapping("/form/{bannerId}")
     public String showEditBannerForm(@PathVariable String bannerId, Model model) {
         // 수정할 배너 정보를 DB에서 가져옵니다.
@@ -59,7 +59,7 @@ public class AdminBannerController {
         return "admin/admin_layout";
     }
 
-    // 4. ? 배너 저장/수정 처리 (신규 & 수정 통합)
+    // 배너 저장 및 수정 처리
     @PostMapping("/save")
     public String saveOrUpdateBanner(@ModelAttribute BannerEntity banner,
                                      @RequestParam("pcImageFile") MultipartFile pcImageFile,
@@ -94,6 +94,19 @@ public class AdminBannerController {
             return "redirect:/admin/banners/form";
         }
         
+        return "redirect:/admin/banners";
+    }
+
+    // ✨ --- [신규] 배너 삭제를 처리하는 메소드 --- ✨
+    @PostMapping("/delete/{bannerId}")
+    public String deleteBanner(@PathVariable String bannerId, RedirectAttributes redirectAttributes) {
+        try {
+            bannerService.deleteBanner(bannerId);
+            redirectAttributes.addFlashAttribute("msg", "배너가 성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            // Service에서 오류가 발생했을 경우를 대비
+            redirectAttributes.addFlashAttribute("error", "배너 삭제 중 오류가 발생했습니다.");
+        }
         return "redirect:/admin/banners";
     }
 }

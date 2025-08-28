@@ -58,7 +58,10 @@
                                         </td>
                                         <td class="text-center align-middle">
                                             <a href="${contextPath}/admin/banners/form/${banner.bannerId}" class="btn btn-info btn-sm">수정</a>
-                                            <a href="#" class="btn btn-danger btn-sm">삭제</a>
+                                            <%-- ✨ --- 여기가 핵심 수정 부분입니다 --- ✨ --%>
+                                            <form action="${contextPath}/admin/banners/delete/${banner.bannerId}" method="post" style="display: inline;" onsubmit="return confirm('정말로 이 배너를 삭제하시겠습니까?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 </c:forEach>
