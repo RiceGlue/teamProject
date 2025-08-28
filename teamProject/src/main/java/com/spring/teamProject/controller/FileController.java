@@ -72,4 +72,16 @@ public class FileController {
 
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
+    
+    @GetMapping("/images/{subDirectory}/{fileName}")
+    @ResponseBody
+    public ResponseEntity<byte[]> getImage(@PathVariable String subDirectory, @PathVariable String fileName) {
+        try {
+            // FtpService를 통해 FTP 서버의 'profile' 폴더에서 파일을 가져옵니다.
+            byte[] fileContent = ftpService.downloadFile(subDirectory, fileName);
+            return createResponseEntity(fileName, fileContent);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
