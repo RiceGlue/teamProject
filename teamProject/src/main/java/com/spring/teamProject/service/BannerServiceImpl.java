@@ -48,8 +48,8 @@ public class BannerServiceImpl implements BannerService {
         // 1. PC용 이미지 처리 (필수)
         if (pcImageFile != null && !pcImageFile.isEmpty()) {
             String savedPcFileName = uploadAndValidateBannerImage(pcImageFile, 1200, 400);
-            // ? --- 여기가 핵심 수정 부분입니다 --- ?
-            banner.setImagePath("/banner-images/" + savedPcFileName); // 전체 가상 경로 저장
+            // 전체 가상 경로 저장 "경로주소" + savedPcFileName 으로 할경우 경로를 포함한 파일명으로 저장 가능합니다
+            banner.setImagePath(savedPcFileName);
         } else {
             throw new IllegalArgumentException("PC용 배너 이미지는 필수입니다.");
         }
@@ -57,8 +57,8 @@ public class BannerServiceImpl implements BannerService {
         // 2. 모바일용 이미지 처리 (선택)
         if (mobileImageFile != null && !mobileImageFile.isEmpty()) {
             String savedMobileFileName = uploadAndValidateBannerImage(mobileImageFile, 1200, 400);
-            // ? --- 여기가 핵심 수정 부분입니다 --- ?
-            banner.setMobileImagePath("/banner-images/" + savedMobileFileName); // 전체 가상 경로 저장
+            // 전체 가상 경로 저장 "경로주소" + savedPcFileName 으로 할경우 경로를 포함한 파일명으로 저장 가능합니다
+            banner.setMobileImagePath(savedMobileFileName);
         }
         
         // 3. DB에 저장하기 전, 필수 값들을 설정합니다.
@@ -69,7 +69,7 @@ public class BannerServiceImpl implements BannerService {
         bannerRepository.save(banner);
     }
 
-    // ✨ --- [신규] ID로 배너를 조회하는 로직 구현 --- ✨
+    // ID로 배너를 조회하는 로직 구현
     @Override
     public BannerEntity getBannerById(String bannerId) {
         // JPA Repository의 findById 메소드는 Optional을 반환하므로, 없으면 null을 반환하도록 처리합니다.
@@ -77,7 +77,7 @@ public class BannerServiceImpl implements BannerService {
         return banner.orElse(null);
     }
 
-    // ✨ --- [신규] 배너 수정 로직 구현 --- ✨
+    // 배너 수정 로직 구현
     @Override
     @Transactional
     public void updateBanner(BannerEntity banner, MultipartFile pcImageFile, MultipartFile mobileImageFile) {
@@ -111,6 +111,29 @@ public class BannerServiceImpl implements BannerService {
         
         // 5. JPA의 변경 감지(Dirty Checking) 기능에 의해, 메소드가 끝나면 자동으로 DB에 UPDATE 쿼리가 실행됩니다.
         bannerRepository.save(existingBanner);
+    }
+
+    // ✨ --- [신규] 배너 삭제 로직 구현 --- ✨
+    @Override
+    @Transactional
+    public void deleteBanner(String bannerId) {
+        // 1. 삭제할 배너 정보를 DB에서 먼저 조회하여 파일 경로를 확보합니다.
+        BannerEntity bannerToDelete = bannerRepository.findById(bannerId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 배너입니다. ID: " + bannerId));
+
+        String pcImagePath = bannerToDelete.getImagePath();
+        String mobileImagePath = bannerToDelete.getMobileImagePath();
+
+        // 2. (DB 먼저) 데이터베이스에서 배너 정보를 삭제합니다.
+        bannerRepository.deleteById(bannerId);
+
+        // 3. (파일은 나중에) DB 삭제가 성공하면, FTP 서버에서 관련 이미지 파일들을 삭제합니다.
+        if (pcImagePath != null) {
+            ftpService.deleteFile("banners", pcImagePath);
+        }
+        if (mobileImagePath != null) {
+            ftpService.deleteFile("banners", mobileImagePath);
+        }
     }
 
     /**
