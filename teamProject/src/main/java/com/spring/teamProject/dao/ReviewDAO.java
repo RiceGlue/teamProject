@@ -7,6 +7,7 @@ import org.springframework.dao.DataAccessException;
 
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.WaitingVO;
@@ -29,9 +30,11 @@ public interface ReviewDAO {
 	public void insertReviewImage(ImageFileVO imgFile) throws DataAccessException;
 	public void deleteReviewImages(long reviewId) throws DataAccessException;
 	public void deleteReview(long reviewId) throws DataAccessException;
-	public void increaseLikes(long reviewId) throws DataAccessException;
-	public void decreaseLikes(long reviewId) throws DataAccessException;
-	public int selectLikes(long reviewId) throws DataAccessException;
+	
+	public void increaseLikes(ReviewLikeVO reviewLikeVO) throws DataAccessException;
+	public void decreaseLikes(ReviewLikeVO reviewLikeVO) throws DataAccessException;
+	public int getLikeCount(long reviewId) throws DataAccessException;
+	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws DataAccessException;
 	
 	public List<ReviewVO> selectBestReview() throws DataAccessException;
 	public ImageFileVO selectBestReviewImage(long reviewId) throws DataAccessException;

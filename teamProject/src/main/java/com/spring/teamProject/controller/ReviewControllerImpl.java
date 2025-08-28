@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.FtpService;
 import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 
@@ -317,6 +319,29 @@ public class ReviewControllerImpl implements ReviewController{
 
 	    return ResponseEntity.ok(responseMap);
 	}
+	
+	@PostMapping("/increaseLikes")
+	@ResponseBody
+	public int increaseLikes(@RequestParam long reviewId, @RequestParam long memberId) throws Exception{
+	    ReviewLikeVO likeVO = new ReviewLikeVO();
+	    likeVO.setMemberId(memberId);
+	    likeVO.setReviewId(reviewId);
+	    
+		reviewService.increaseLike(likeVO);
+	    return reviewService.getLikeCount(reviewId);
+	}
+
+	@DeleteMapping("/decreaseLikes")
+	@ResponseBody
+	public int decreaseLikes(@RequestParam long reviewId, @RequestParam long memberId) throws Exception{
+		ReviewLikeVO likeVO = new ReviewLikeVO();
+	    likeVO.setMemberId(memberId);
+	    likeVO.setReviewId(reviewId);
+		
+		reviewService.decreaseLike(likeVO);
+	    return reviewService.getLikeCount(reviewId);
+	}
+
 
 	// 공통 메타 설정 함수
 	private void populateFileMeta(ImageFileVO file, long storeId, long reviewId, long memberId, int displayNo) {

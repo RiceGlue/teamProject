@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.spring.teamProject.dao.ReviewDAO;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.WaitingVO;
@@ -106,18 +107,6 @@ public class ReviewServiceImpl implements ReviewService {
 	public void deleteReview (long reviewId) throws Exception {
 		reviewDAO.deleteReview (reviewId);
 	}
-	
-	@Override
-	public int modifyReviewLikes(long reviewId, boolean isLiked) throws Exception {
-	    int reviewLikes = reviewDAO.selectLikes(reviewId);
-		
-		if (isLiked) {
-	        reviewDAO.increaseLikes(reviewId);
-	    } else {
-	    	if(reviewLikes > 0 ) { reviewDAO.decreaseLikes(reviewId); }
-	    }
-	    return reviewDAO.selectLikes(reviewId);
-	}
 
 	@Override
 	public List<ReviewVO> getBestReviewList() throws Exception {
@@ -151,5 +140,25 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public List<ReviewVO> getUserReview(long memberId) throws Exception {
 		return reviewDAO.selectUserReview(memberId);
+	}
+	
+	@Override
+	public void increaseLike(ReviewLikeVO reviewLikeVO) throws Exception{
+		reviewDAO.increaseLikes(reviewLikeVO);
+	}
+	
+	@Override
+	public void decreaseLike(ReviewLikeVO reviewLikeVO) throws Exception{
+		reviewDAO.decreaseLikes(reviewLikeVO);
+	}
+	
+	@Override
+	public int getLikeCount(long reviewId) throws Exception{
+		return reviewDAO.getLikeCount(reviewId);
+	}
+	
+	@Override
+	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws Exception {
+		return reviewDAO.uesrLikeReview(memberId);
 	}
 }

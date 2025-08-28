@@ -8,7 +8,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal; // 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +18,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.service.StoreServiceImpl;
 import com.spring.teamProject.service.WaitingService;
+import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
@@ -85,6 +85,7 @@ public class StoreControllerImpl implements StoreController {
 		String viewName = (String)req.getAttribute("viewName");
 		String roadAddress = null;
 		String storeType = null;
+		Long memberId = null;
 		
 		ModelAndView mav = ViewUtil.layout(viewName);
 
@@ -94,7 +95,7 @@ public class StoreControllerImpl implements StoreController {
 		int currentWaitingCount = waitingService.getCurrentWaitingCount(storeId);
 
 		if (userDetailsVO != null) {
-			Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
+			memberId = (long) userDetailsVO.getMemberVO().getMemberId();
 			mav.addObject("memberId", memberId);
 		}
 
@@ -102,32 +103,21 @@ public class StoreControllerImpl implements StoreController {
 		if (storedStoreVO != null) {
 			roadAddress = getAddress(storedStoreVO.getRoadAddress());
 		    storeType=storedStoreVO.getStoreType();
-		    System.out.println("Address from storeVO inside storeMap: " + roadAddress);
 		}
 
 		
 		List<StoreVO> nearByStoreList = storeService.searchStoreNearUser(roadAddress);
 		List<StoreVO> storeTypeList = storeService.searchStoreSameStoreType(storedStoreVO);
+		List<ReviewLikeVO> userLikeReview = reviewService.uesrLikeReview(memberId);
 		
 		mav.addObject("storeMap", storeMap);
 		mav.addObject("currentWaitingCount", currentWaitingCount);
 		mav.addObject("nearByStoreList", nearByStoreList);
 		mav.addObject("storeTypeList", storeTypeList);
+		mav.addObject("userLikeReview", userLikeReview);
 
 		return mav;
 	}
-
-
-	@RequestMapping(value="/likeReview", method=RequestMethod.POST)
-	@ResponseBody
-	public int likeReview(@RequestBody Map<String, Object> payload) throws Exception {
-	    long reviewId = Long.parseLong(payload.get("reviewId").toString());
-	    boolean isLiked = Boolean.parseBoolean(payload.get("isLiked").toString());
-
-	    int updatedLikes = reviewService.modifyReviewLikes(reviewId, isLiked);
-	    return updatedLikes;
-	}
-
 		
 	@GetMapping("/searchStoreNearUser")
 	@ResponseBody

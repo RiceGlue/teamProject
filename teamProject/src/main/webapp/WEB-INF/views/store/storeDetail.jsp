@@ -200,6 +200,7 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 let map;
 const memberId = "${memberId}";
 const storeId = ${storeId};
+const contextPath = '${contextPath}';
 
 // 💡 위시리스트 상태를 확인하는 AJAX 요청
 function checkWishlistStatus() {
@@ -226,10 +227,12 @@ function checkWishlistStatus() {
 
 // 💡 위시리스트 추가/제거를 토글하는 AJAX 요청
 function toggleWishlist() {
-	if (!memberId || memberId === 'null' || memberId === 'undefined') {
-		alert('로그인 후 이용해주세요.');
-		return;
-	}
+	if (!memberId || memberId.trim() === '') {
+        if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+            window.location.href = contextPath + '/member/login';
+        }
+        return;
+    }
 
 	const isWishlisted = $('#wishlist-btn').hasClass('active');
 
@@ -411,61 +414,56 @@ $(document).ready(function(){
 	});
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const likeButtons = document.querySelectorAll('.like-button');
+$(document).ready(function () {
+    $('.like-button').on('click', function () {
+        const $btn = $(this);
+        const reviewId = $btn.data('review-id');
+        const memberId = $btn.data('member-id');
 
-    likeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const isLiked = button.classList.toggle('likes');
-            const countSpan = button.querySelector('.like-count');
-            const iconSpan = button.querySelector('.like-icon');
-            let count = parseInt(countSpan.textContent) || 0;
-
-            const reviewId = button.getAttribute('data-review-id');
-            const memberId = button.getAttribute('data-member-id');
-
-            // 로그인 안 된 사용자 처리
-            if (!memberId) {
-                alert('로그인 후 이용 가능합니다.');
-                button.classList.toggle('likes'); // 상태 복원
-                return;
+        if (!memberId) {
+            if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+                window.location.href = contextPath + '/member/login';
             }
+            return;
+        }
+        
+        console.log('contextPath:', contextPath);
+        console.log('reviewId:', reviewId);
+        console.log('memberId:', memberId);
 
-            // 숫자 업데이트
-            count = isLiked ? count + 1 : count - 1;
-            countSpan.textContent = count;
+        const isLiked = $btn.hasClass('likes');
+        const url = isLiked 
+            ? `${contextPath}/review/decreaseLikes` 
+            : `${contextPath}/review/increaseLikes`;
+        const type = isLiked ? 'DELETE' : 'POST';
 
-            // 아이콘 업데이트
-            iconSpan.textContent = isLiked ? '❤️' : '🤍';
+        $.ajax({
+            url: url,
+            type: type,
+            data: {
+                reviewId: reviewId,
+                memberId: memberId
+            },
+            success: function (newLikes) {
+                // 버튼 UI 업데이트
+                const $icon = $btn.find('.like-icon');
+                const $count = $btn.find('.like-count');
+                $count.text(newLikes);
 
-            // 서버에 AJAX 요청 보내기
-            fetch('/store/likeReview', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    reviewId: reviewId,
-                    memberId: memberId,
-                    isLiked: isLiked
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('서버 응답:', data);
-                // 서버에서 최신 좋아요 수를 보내줬다면 countSpan.textContent = data.updatedLikes; 처럼 사용 가능
-            })
-            .catch(error => {
-                console.error('요청 실패:', error);
-                // 에러 발생 시 상태 복원
-                button.classList.toggle('likes');
-                countSpan.textContent = isLiked ? count - 1 : count + 1;
-                iconSpan.textContent = isLiked ? '🤍' : '❤️';
-            });
+                if (isLiked) {
+                    $btn.removeClass('likes');
+                    $icon.text('🤍');
+                } else {
+                    $btn.addClass('likes');
+                    $icon.text('❤️');
+                }
+            },
+            error: function () {
+                alert("좋아요 처리 중 오류가 발생했습니다.");
+            }
         });
     });
 });
-
 </script>
 
 <div class="store-info">
@@ -740,26 +738,33 @@ document.addEventListener('DOMContentLoaded', function () {
 								<div class="review-writer">
 									${fn:substring(review.writerId, 0, 2)}<c:forEach begin="1" end="${fn:length(review.writerId) - 2}">*</c:forEach>
 								</div>
-								<div class="review-content">${review.content}</div>
-								<c:if test="${not empty reviewImages}">
+								
+								<c:if test="${not empty storeMap.reviewImage}">
 								    <div class="review-images">
-								        <c:forEach var="img" items="${reviewImages}">
+								        <c:forEach var="img" items="${storeMap.reviewImage}">
 								            <c:if test="${img.reviewId == review.reviewId}">
 								                <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
 								            </c:if>
 								        </c:forEach>
 								    </div>
 								</c:if>
+								<div class="review-content">${review.content}</div>
 
 								<div class="review-like-box">
 									<span
-									    class="like-button ${review.likes > 0 ? 'likes' : ''}"
+									    class="like-button ${(review.likes == 1 && memberId != null) ? 'likes' : ''}"
 									    data-review-id="${review.reviewId}"
 									    data-member-id="${memberId}"
 									    role="button"
-									    tabindex="0">
-									    <span class="like-icon">${review.likes > 0 ? '❤️' : '🤍'}</span>
-									    <span class="like-count" id="like-count-${review.reviewId}">${review.likes}</span>
+									    tabindex="${review.likes}">
+									    
+									    <span class="like-icon">
+									        ${(review.likes == 1 && memberId != null) ? '❤️' : '🤍'}
+									    </span>
+									    
+									    <span class="like-count" id="like-count-${review.reviewId}">
+									        ${review.likes}
+									    </span>
 									</span>
 
 								</div>

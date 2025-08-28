@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.WaitingVO;
@@ -25,9 +26,13 @@ public interface ReviewService {
 	public void addReviewImage(ImageFileVO imgFile) throws Exception;
 	public void deleteReviewImages(long reviewId) throws Exception;
 	public void deleteReview(long reviewId) throws Exception;
-	public int modifyReviewLikes(long reviewId, boolean isLiked) throws Exception;
 	
 	public List<ReviewVO> getBestReviewList() throws Exception;
 	public ImageFileVO getBestReviewImage(long reviewId) throws Exception;
 	public List<ReviewVO> getUserReview(long memberId) throws Exception;
+	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws Exception;
+	
+	public void increaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
+	public void decreaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
+	public int getLikeCount(long reviewId) throws Exception;
 }
