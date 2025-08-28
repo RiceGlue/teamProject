@@ -138,4 +138,5 @@ public interface ReservationService {
      * @throws Exception DB 처리 오류 발생 시
      */
     long getTotalConfirmedReservationCount(Long storeId) throws Exception;
+
 }
