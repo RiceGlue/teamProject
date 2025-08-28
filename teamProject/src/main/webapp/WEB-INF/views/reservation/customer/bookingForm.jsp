@@ -64,7 +64,7 @@
 <body>
 <div class="container">
     <h2 class="mb-4">${store.storeName} 예약하기</h2>
-    <p class="text-muted">주소: ${store.address}</p>
+    <p class="text-muted">주소: ${store.roadAddress}</p>
     <hr>
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger" role="alert">

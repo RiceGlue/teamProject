@@ -185,6 +185,10 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
   /* 💡 위시리스트 버튼 CSS 추가 */
 .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
 .wishlist-btn.active{color:#ff6347;}
+
+.type-store-container { display: flex; flex-wrap: wrap; gap: 20px; }
+.type-store {width: calc((100% - 40px) / 3);border: 1px solid grey;border-radius: 10px;padding: 5px 5px;}
+
 </style>
 
 </head>
@@ -275,7 +279,7 @@ function toggleWishlist() {
 
 function initMap() {
 	const geocoder = new google.maps.Geocoder();
-	const address = '<c:out value="${store.address}"/>';
+	const address = '<c:out value="${store.roadAddress}"/>';
 	if (!address) {
 		console.log('address : ',address);
 		alert("주소 정보가 없습니다.");
@@ -333,7 +337,7 @@ $("ul.tabs li a").click(function () {
 	});
 
 	document.getElementById('copyaddress').addEventListener('click', function () {
-		navigator.clipboard.writeText('${store.address}').then(function () {
+		navigator.clipboard.writeText('${store.roadAddress}').then(function () {
 			alert("주소가 복사되었습니다.");
 		}).catch(function (err) {
 			alert("복사 실패: " + err);
@@ -501,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			</div>
 			<div>
 				<p>
-					<img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} ${store.detailAddress} ${store.extraAddress}
+					<img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.roadAddress} ${store.detailAddress} ${store.extraAddress}
 					<button class="btn btn-link btn-sm" id="copyaddress">위치</button>
 				</p>
 				<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.localNumber} - ${store.number1} - ${store.number2}</p>
@@ -574,25 +578,25 @@ document.addEventListener('DOMContentLoaded', function () {
 				<li><a href="#tab4">매장정보</a></li>
 			</ul>
 			<div class="tab_container">
-					<div class="tab_content" id="tab1">
-						<h5 class="mt-4">예약</h5>
-						<hr>
-						<form action="${contextPath}/reservation/customer/bookForm" method="get" id="reservationForm">
-							<input type="hidden" name="storeId" value="${storeId}" />
-							<div class="mb-3">
-								<label for="reservationDate" class="form-label">예약 날짜:</label>
-								<input type="text" class="form-control" id="reservationDate" name="reservationDate" placeholder="날짜를 선택하세요" required>
+				<div class="tab_content" id="tab1">
+					<h5 class="mt-4">예약</h5>
+					<hr>
+					<form action="${contextPath}/reservation/customer/bookForm" method="get" id="reservationForm">
+						<input type="hidden" name="storeId" value="${storeId}" />
+						<div class="mb-3">
+							<label for="reservationDate" class="form-label">예약 날짜:</label>
+							<input type="text" class="form-control" id="reservationDate" name="reservationDate" placeholder="날짜를 선택하세요" required>
+						</div>
+						<div class="mb-3 mt-4">
+							<label class="form-label">예약 인원:</label>
+							<div>
+								<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(-1)">-</button>
+									<input type="text" id="guestCount" name="guestCount" value="1" readonly style="width: 50px; text-align: center;">
+								<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(1)">+</button>
 							</div>
-							<div class="mb-3 mt-4">
-								<label class="form-label">예약 인원:</label>
-								<div>
-									<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(-1)">-</button>
-										<input type="text" id="guestCount" name="guestCount" value="1" readonly style="width: 50px; text-align: center;">
-									<button type="button" class="btn btn-outline-secondary" onclick="changeGuestCount(1)">+</button>
-								</div>
-							</div>
-							<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
-						</form>
+						</div>
+						<button type="submit" class="btn btn-primary mt-3" id="bookFormBtn" disabled>예약 폼으로 이동</button>
+					</form>
 
 						<%--
 						<div class="button-group mt-5">
@@ -604,26 +608,44 @@ document.addEventListener('DOMContentLoaded', function () {
 						</div>
 						 --%>
 
-						<h5 class="mt-4">메뉴</h5>
-						<div class="home_menu_container">
-							<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
-								<c:if test="${status.index < 4}">
-									<div class="home_menu_card ">
-										<div class="home_menu_image">
-											<img src="${contextPath}/images/menu/${menu.fileName}" alt="${menu.menuName}">
-										</div>
-										<div class=".home_menu_info ">
-											<p class="home_menu_name ">${menu.menuName}</p>
-											<p class="home_menu_price ">${menu.price}원</p>
-											<p class="home_menu_description ">${menu.description}</p>
-										</div>
+					<h5 class="mt-4">메뉴</h5>
+					<div class="home_menu_container">
+						<c:forEach var="menu" items="${storeMap.menu}" varStatus="status">
+							<c:if test="${status.index < 4}">
+								<div class="home_menu_card ">
+									<div class="home_menu_image">
+										<img src="${contextPath}/images/menu/${menu.fileName}" alt="${menu.menuName}">
 									</div>
-								</c:if>
-							</c:forEach>
-						</div>
-						<div class="home_menu_more_btn_wrap">
-							<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
-						</div>
+									<div class=".home_menu_info ">
+										<p class="home_menu_name ">${menu.menuName}</p>
+										<p class="home_menu_price ">${menu.price}원</p>
+										<p class="home_menu_description ">${menu.description}</p>
+									</div>
+								</div>
+							</c:if>
+						</c:forEach>
+					</div>
+					<div class="home_menu_more_btn_wrap">
+						<button class="home_menu_more_btn" onclick="openTab2()">메뉴 전체 보기</button>
+					</div>
+					
+					<h5 class="mt-4">비슷한 가게 추천</h5>
+					<div class="type-store-container">
+						<c:forEach var="type" items="${storeTypeList}">
+							<div class="type-store">
+								<img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="180px">
+								<div class="type-storeInfo">
+									<h6>${type.storeName} | ${type.storeType}</h6>
+									<h6>${type.roadAddress}</h6>
+									<h6>${type.localNumber} - ${type.number1} - ${type.number2}</h6>
+								</div>
+							</div>
+						</c:forEach>
+					</div>
+					
+					<h5 class="mt-4">가게 주변 맛집</h5>
+					<div>
+						
 					</div>
 				</div>
 
@@ -704,14 +726,14 @@ document.addEventListener('DOMContentLoaded', function () {
 								</div>
 								<div class="review-content">${review.content}</div>
 								<c:if test="${not empty reviewImages}">
-    <div class="review-images">
-        <c:forEach var="img" items="${reviewImages}">
-            <c:if test="${img.reviewId == review.reviewId}">
-                <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
-            </c:if>
-        </c:forEach>
-    </div>
-</c:if>
+								    <div class="review-images">
+								        <c:forEach var="img" items="${reviewImages}">
+								            <c:if test="${img.reviewId == review.reviewId}">
+								                <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
+								            </c:if>
+								        </c:forEach>
+								    </div>
+								</c:if>
 
 								<div class="review-like-box">
 									<span
@@ -744,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="detail-box">
 						<h4>위치</h4>
 						<div id="googleMap"></div>
-						<p ><img src="${contextPath}/image/location.png" width="10" height="10" alt="위치">${store.address } <button class="btn btn-outline-secondary btn-sm" id="copyaddress">복사</button> </p>
+						<p ><img src="${contextPath}/image/location.png" width="10" height="10" alt="위치">${store.roadAddress } <button class="btn btn-outline-secondary btn-sm" id="copyaddress">복사</button> </p>
 					</div>
 					<div class="detail-box">
 						<h4>상세정보</h4>

@@ -26,7 +26,7 @@
 							data-store-id="${store.storeId}">
 							<div class="card-body p-4">
 								<h4 class="card-title mb-4">${store.storeName}
-									(${store.address})</h4>
+									(${store.roadAddress})</h4>
 								<div class="row g-3 text-center">
 									<div class="col-4">
 										<a href="/owner/reservations/manage?storeId=${store.storeId}"

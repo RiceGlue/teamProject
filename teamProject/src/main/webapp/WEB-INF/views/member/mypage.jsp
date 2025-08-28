@@ -184,7 +184,7 @@ function checkReviewStatus(status, type, storeId, id) {
                             <img src="${contextPath}/download?directoryName=store&fileName=${wishlist.storeFileName}" class="card-img-top" alt="${wishlist.storeName} 이미지">
                             <div class="card-body">
                                 <h6><a href="${contextPath}/store/storeDetail?storeId=${wishlist.storeId}" class="store-name-link">${wishlist.storeName}</a></h6>
-                                <p class="card-text"><small class="text-muted">${wishlist.address}</small></p>
+                                <p class="card-text"><small class="text-muted">${wishlist.roadAddress}</small></p>
                             </div>
                         </div>
                     </c:forEach>

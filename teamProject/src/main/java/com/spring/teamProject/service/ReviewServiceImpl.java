@@ -122,7 +122,6 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public List<ReviewVO> getBestReviewList() throws Exception {
 	    List<ReviewVO> reviewList = reviewDAO.selectBestReview();
-	    System.out.println("여기");
 	    
 	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -137,14 +136,8 @@ public class ReviewServiceImpl implements ReviewService {
 	            Date dateOnly = dateFormat.parse(dateOnlyString);
 	            
 	            // 다시 Date 타입으로 저장
-	            review.setCreatedAt(dateOnly);
-	            
-	            System.out.println("수정된 날짜 (Date): " + review.getCreatedAt());
+	            review.setCreatedAt(dateOnly); 
 	        }
-	    }
-	    
-	    for(int i=0;i<reviewList.size();i++) {
-	    	System.out.println("리뷰 작성 아이디" + reviewList.get(i).getMemberId());
 	    }
 	    return reviewList;
 	}

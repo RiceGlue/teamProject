@@ -37,7 +37,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>매장 이름:</strong> ${store.storeName}</p>
-                            <p><strong>매장 주소:</strong> ${store.address}</p>
+                            <p><strong>매장 주소:</strong> ${store.roadAddress}</p>
                             <p><strong>예약 번호:</strong> ${confirmedReservation.reservationId}</p>
                             <c:if test="${not empty paymentId}">
                                 <p><strong>결제 ID:</strong> ${paymentId}</p>

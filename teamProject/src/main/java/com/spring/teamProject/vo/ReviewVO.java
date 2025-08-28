@@ -31,7 +31,7 @@ public class ReviewVO {
 	private int cleanPercent;
 	
 	private String storeName;
-	private String address;
+	private String jibunAddress;
 	private String localNumber;
 	private String number1;
 	private String number2;
@@ -177,11 +177,11 @@ public class ReviewVO {
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
 	}
-	public String getAddress() {
-		return address;
+	public String getJibunAddress() {
+		return jibunAddress;
 	}
-	public void setAddress(String address) {
-		this.address = address;
+	public void setJibunAddress(String jibunAddress) {
+		this.jibunAddress = jibunAddress;
 	}
 	public String getLocalNumber() {
 		return localNumber;

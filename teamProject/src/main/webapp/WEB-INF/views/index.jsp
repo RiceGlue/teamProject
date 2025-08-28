@@ -2,8 +2,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
+
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <!-- Google Maps JavaScript API 로드 (API 키 필요) -->
 <script async defer
@@ -19,10 +25,12 @@
     .store-carousel { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 10px; scroll-snap-type: x mandatory; }
 	.store-carousel .card { min-width: 250px; flex: 0 0 auto; scroll-snap-align: start; }
 	.store-carousel.limited { max-width: calc(250px * 3 + 32px); overflow-x: hidden; }
-	    
+	.wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
+	.wishlist-btn.active{color:#ff6347;}  
 </style>
 
 <script>
+const memberId = "${memberId}";
 var contextPath = '${contextPath}';
     // Google Maps API가 로드되면 자동으로 실행되는 콜백 함수
     function initMap() {
@@ -113,7 +121,7 @@ var contextPath = '${contextPath}';
         const geocoder = new google.maps.Geocoder();
 
         storeList.forEach(store => {
-            geocoder.geocode({ address: store.address }, function (results, status) {
+            geocoder.geocode({ address: store.roadAddress }, function (results, status) {
                 if (status === "OK" && results[0]) {
                     const location = results[0].geometry.location;
 
@@ -133,7 +141,7 @@ var contextPath = '${contextPath}';
     }
     // 7. 매장 카드 UI로 표시
 function displayStoreCards(storeList, dong) {
-    console.log("UI카드 시작")
+    console.log("UI카드 시작");
     const container = document.getElementById("nearbyStores");
 
     if (!container) {
@@ -141,43 +149,55 @@ function displayStoreCards(storeList, dong) {
         return;
     }
 
-    container.innerHTML = ""; // 카드 및 버튼 모두 초기화
+    container.innerHTML = ""; // 초기화
 
     const limitedStoreList = storeList.slice(0, 3);
 
-    // 카드 3개만 추가
     limitedStoreList.forEach(store => {
         const card = document.createElement("div");
         card.className = "card my-3";
 
+        // ✅ 위시리스트 버튼은 항상 생성 (로그인 여부와 무관)
         card.innerHTML = 
             '<div class="card-body">' +
-                '<h5 class="card-title"><a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a></h5>' +
-                '<p class="card-text">📍 ' + store.address + '</p>' +
+                '<h5 class="card-title">' +
+                    '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
+                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
+                        '<i class="fa fa-bookmark"></i>' +
+                    '</button>' +
+                '</h5>' +	
+                '<p class="card-text">📍 ' + store.roadAddress + '</p>' +
                 '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
                 '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
             '</div>';
 
         container.appendChild(card);
+
+        // ✅ 로그인한 경우에만 위시리스트 상태 체크
+        if (memberId && memberId !== 'null' && memberId !== 'undefined') {
+            const wishlistBtn = card.querySelector('.wishlist-btn');
+            if (wishlistBtn) {
+                checkWishlistStatus(store.storeId, wishlistBtn);
+            }
+        }
     });
 
-    // ⭐ 항상 버튼 생성 (조건 제거)
-    {
-        const buttonWrapper = document.createElement("div");
-        buttonWrapper.className = "d-grid mt-2";
+    // 더보기 버튼
+    const buttonWrapper = document.createElement("div");
+    buttonWrapper.className = "d-grid mt-2";
 
-        const loadMoreBtn = document.createElement("button");
-        loadMoreBtn.id = "loadMoreBtn";
-        loadMoreBtn.className = "btn btn-light";
-        loadMoreBtn.textContent = "더보기";
-        loadMoreBtn.onclick = function () {
-            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
-        };
+    const loadMoreBtn = document.createElement("button");
+    loadMoreBtn.id = "loadMoreBtn";
+    loadMoreBtn.className = "btn btn-light";
+    loadMoreBtn.textContent = "더보기";
+    loadMoreBtn.onclick = function () {
+        window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
+    };
 
-        buttonWrapper.appendChild(loadMoreBtn);
-        container.appendChild(buttonWrapper);
-    }
+    buttonWrapper.appendChild(loadMoreBtn);
+    container.appendChild(buttonWrapper);
 }
+
 
     
 $(document).ready(function () {
@@ -247,7 +267,7 @@ $(document).ready(function () {
                         '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
                             '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
                             '<h6>📞' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
-                            '<h6>📍' + review.address + '</h6>' +
+                            '<h6>📍' + review.roadAddress + '</h6>' +
                         '</div>' +
                     '</div>';
             }
@@ -261,6 +281,84 @@ $(document).ready(function () {
     });
 });
 
+function checkWishlistStatus(storeId, btnElement) {
+	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+
+	$.ajax({
+		url: `${contextPath}/wishlist/isWishlisted`,
+		type: 'GET',
+		data: {
+			memberId: memberId,
+			storeId: storeId
+		},
+		success: function(response) {
+			if (response === true) {
+				$(btnElement).addClass('active');
+			} else {
+				$(btnElement).removeClass('active');
+			}
+		},
+		error: function(error) {
+			console.error('Error checking wishlist status:', error);
+		}
+	});
+}
+
+//위시리스트 버튼 클릭 처리
+$(document).on('click', '.wishlist-btn', function () {
+    const storeId = $(this).data('store-id');
+    toggleWishlist(storeId, this);
+});
+
+
+function toggleWishlist(storeId, btnElement) {
+    if (!memberId || memberId == null || memberId.trim() === '') {
+        alert('로그인 후 이용해주세요.');
+        return;
+    }
+
+    const isWishlisted = $(btnElement).hasClass('active');
+
+    if (isWishlisted) {
+        if (confirm("위시리스트에 이미 추가되었습니다. 삭제하시겠습니까?")) {
+            $.ajax({
+                url: `${contextPath}/wishlist/remove`,
+                type: 'DELETE',
+                data: { memberId, storeId },
+                success: function(response) {
+                    alert(response);
+                    $(btnElement).removeClass('active');
+                },
+                error: function(xhr) {
+                    alert(xhr.responseText || "오류가 발생했습니다.");
+                }
+            });
+        }
+    } else {
+        $.ajax({
+            url: `${contextPath}/wishlist/add`,
+            type: 'POST',
+            data: { memberId, storeId },
+            success: function(response) {
+                alert(response);
+                $(btnElement).addClass('active');
+            },
+            error: function(xhr) {
+                alert(xhr.responseText || "오류가 발생했습니다.");
+            }
+        });
+    }
+}
+
+$(function () {
+	// 💡 페이지 로드 시 위시리스트 상태 확인.
+	checkWishlistStatus();
+
+	// 💡 위시리스트 버튼 클릭 이벤트
+	$('#wishlist-btn').on('click', function() {
+	toggleWishlist();
+	});
+});
 </script>
 
 <div class="row">

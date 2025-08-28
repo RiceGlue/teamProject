@@ -8,9 +8,9 @@
 		<result property="ownerId" column="owner_id"/>
 		<result property="storeName" column="store_Name"/>
 		<result property="storeType" column="store_type" />
-		<result property="zipcode" column="zipcode" />
-		<result property="address" column="address"/>
-		<result property="detailAddress" column="detail_address"/>
+		<result property="postcode" column="postcode" />
+		<result property="roadAddress" column="road_address"/>
+		<result property="jibunAddress" column="jibun_address"/>
 		<result property="extraAddress" column="extra_address"/>
 		<result property="operationType" column="operation_type" />
 		<result property="localNumber" column="local_number" />
@@ -111,7 +111,7 @@
 	      s.*, ROUND(AVG(r.rating), 2) AS avgRating, COUNT(r.review_id) AS countRating
 	    FROM stores s
 	    INNER JOIN reviews r ON s.store_id = r.store_id
-	    WHERE s.address REGEXP CONCAT('(^| )', #{keyword}, '( |$)')
+	    WHERE s.jibun_address REGEXP CONCAT('(^| )', #{keyword}, '( |$)')
 	    GROUP BY s.store_id
 	    ORDER BY s.store_id
 	  ]]>
@@ -119,7 +119,7 @@
 
 	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
 		<![CDATA[
-		    SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+		    SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 		    ROUND(AVG(r.rating), 2) AS avgRating,COUNT(r.review_id) AS countRating
 		    FROM stores s
 		    INNER JOIN menu m ON s.store_id = m.store_id
@@ -132,11 +132,11 @@
 
 	<select id="selectStoreByAddr" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.address LIKE CONCAT('%', #{keyword}, '%')
+			WHERE s.jibun_address LIKE CONCAT('%', #{keyword}, '%')
 			GROUP BY s.store_id
 			ORDER BY s.store_id
 		]]>
@@ -144,7 +144,7 @@
 
 	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -156,7 +156,7 @@
 
 	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
@@ -253,11 +253,11 @@
 
 	<select id="selectStoreNearUser" parameterType="String" resultMap="storelist" >
 		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
+			SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.address LIKE CONCAT('%', #{keyword}, '%')
+			WHERE s.jibun_address LIKE CONCAT('%', #{keyword}, '%')
 			GROUP BY s.store_id
 			ORDER BY s.store_id
 		]]>
@@ -265,10 +265,26 @@
 
 	<select id="selectStoresByOwnerId" parameterType="long" resultMap="storelist">
         <![CDATA[
-            SELECT store_id, store_name, owner_id, store_type, address, description, file_name
+            SELECT store_id, store_name, owner_id, store_type, jibun_address, description, file_name
             FROM stores
             WHERE owner_id = #{ownerId}
         ]]>
+    </select>
+    
+    <select id="selectStoreSameStoreType" parameterType="String" resultMap="storelist">
+    	<![CDATA[
+    		SELECT s.store_id, s.owner_id, s.store_name, s.jibun_address, s.local_number, s.number1, s.number2,
+			       s.description, s.file_name, s.store_type,
+			       ROUND(AVG(r.rating), 2) AS avgRating,
+			       COUNT(r.review_id) AS countRating
+			FROM stores s
+			INNER JOIN menu m ON s.store_id = m.store_id
+			LEFT JOIN reviews r ON s.store_id = r.store_id
+			WHERE s.store_type = #{storeType}
+			GROUP BY s.store_id
+			ORDER BY RAND()
+			LIMIT 3
+    	]]>
     </select>
 
 </mapper>

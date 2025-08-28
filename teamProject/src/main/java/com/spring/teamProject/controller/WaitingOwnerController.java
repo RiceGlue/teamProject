@@ -43,7 +43,7 @@ public class WaitingOwnerController {
         StoreVO store = new StoreVO();
         store.setStoreId(storeId);
         store.setStoreName("더미 매장 " + storeId);
-        store.setAddress("서울시 가짜구 더미동 " + storeId + "번지");
+        store.setJibunAddress("서울시 가짜구 더미동 " + storeId + "번지");
         return store;
     }
 

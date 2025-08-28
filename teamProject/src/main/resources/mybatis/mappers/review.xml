@@ -56,8 +56,9 @@
 		<result property="ownerId" column="owner_id"/>
 		<result property="storeName" column="store_Name"/>
 		<result property="storeType" column="store_type" />
-		<result property="zipcode" column="zipcode" />
-		<result property="address" column="address"/>
+		<result property="postcode" column="postcode" />
+		<result property="roadAddress" column="road_address"/>
+		<result property="jibunAddress" column="jibun_address"/>
 		<result property="detailAddress" column="detail_address"/>
 		<result property="extraAddress" column="extra_address"/>
 		<result property="operationType" column="operation_type" />
@@ -232,7 +233,7 @@
 			    SELECT 
 			        s.store_id,
 			        s.store_name,
-			        s.address,
+			        s.jibun_address,
 			        s.local_number,
 			        s.number1,
 			        s.number2,

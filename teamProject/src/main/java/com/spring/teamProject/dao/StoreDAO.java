@@ -46,5 +46,7 @@ public interface StoreDAO {
      * @return 소유한 매장 목록
      * @throws DataAccessException DB 접근 오류 시
      */
+	
     public List<StoreVO> selectStoresByOwnerId(long ownerId) throws DataAccessException;
+    public List<StoreVO> selectStoreSameStoreType(String storeType) throws DataAccessException;
 }

@@ -1,6 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
 <style>
 	.store-card { border-bottom:1px solid #ccc; display:flex; padding:12px; margin-bottom:16px; margin: 0 auto 0; font-family:'Segoe UI', sans-serif; align-items:center; }
 	.store-image { position:relative; width:120px; height:120px; border-radius:6px; overflow:hidden; flex-shrink:0; }
@@ -15,9 +21,15 @@
 	.meta-info i { margin-right:4px; }
 
 	#map{ width: 100%; height:300px; margin: 0px auto 20px; position: relative; overflow: hidden; border-radius: 5px;}
+	
+	.wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
+	.wishlist-btn.active{color:#ff6347;}  
 </style>
 
 <script>
+const memberId = "${memberId}";
+var contextPath = '${contextPath}';
+
 	document.addEventListener('DOMContentLoaded', function () {
 		$(".tab_content").hide(); // 모든 탭 콘텐츠 숨김
 		$("ul.tabs li:first").addClass("active").show(); // 첫 번째 탭 활성화
@@ -38,31 +50,31 @@
 
 	const regionStores = [
 		<c:forEach var="region" items="${regionlist}" varStatus="status">
-	    	{ name: "${region.storeName}", address: "${region.address}" }<c:if test="${!status.last}">,</c:if>
+	    	{ name: "${region.storeName}", address: "${region.roadAddress}" }<c:if test="${!status.last}">,</c:if>
 	 	</c:forEach>
 	];
 
     const menuStores = [
     	<c:forEach var="menu" items="${menulist}" varStatus="status">
-        	{ name: "${menu.storeName}", address: "${menu.address}" }<c:if test="${!status.last}">,</c:if>
+        	{ name: "${menu.storeName}", address: "${menu.roadAddress}" }<c:if test="${!status.last}">,</c:if>
       	</c:forEach>
     ];
 
     const addrStores = [
     	<c:forEach var="addr" items="${addrlist}" varStatus="status">
-        	{ name: "${addr.storeName}", address: "${addr.address}" }<c:if test="${!status.last}">,</c:if>
+        	{ name: "${addr.storeName}", address: "${addr.roadAddress}" }<c:if test="${!status.last}">,</c:if>
       	</c:forEach>
     ];
 
     const nameStores = [
       	<c:forEach var="name" items="${namelist}" varStatus="status">
-        	{ name: "${name.storeName}", address: "${name.address}" }<c:if test="${!status.last}">,</c:if>
+        	{ name: "${name.storeName}", address: "${name.roadAddress}" }<c:if test="${!status.last}">,</c:if>
       	</c:forEach>
     ];
     
     const userLocationStores = [
 		<c:forEach var="userLocation" items="${userLocationlist}" varStatus="status">
-	    	{ name: "${userLocation.storeName}", address: "${userLocation.address}" }<c:if test="${!status.last}">,</c:if>
+	    	{ name: "${userLocation.storeName}", address: "${userLocation.roadAddress}" }<c:if test="${!status.last}">,</c:if>
 	 	</c:forEach>
 	];
 
@@ -79,7 +91,7 @@
 
     	  storeList.forEach(store => {
     	    if (store.address) {
-    	      geocoder.geocode({ address: store.address }, (results, status) => {
+    	      geocoder.geocode({ address: store.roadAddress }, (results, status) => {
     	        if (status === "OK") {
     	          const pos = results[0].geometry.location;
     	          const marker = new google.maps.Marker({
@@ -97,7 +109,7 @@
 
     	          markers.push(marker);
     	        } else {
-    	          console.error(`주소 변환 실패 (${store.address}): ${status}`);
+    	          console.error(`주소 변환 실패 (${store.roadAddress}): ${status}`);
     	        }
     	      });
     	    }
@@ -196,6 +208,84 @@
 
     });
 
+    function checkWishlistStatus(storeId, btnElement) {
+        if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+
+        $.ajax({
+            url: `${contextPath}/wishlist/isWishlisted`,
+            type: 'GET',
+            data: {
+                memberId: memberId,
+                storeId: storeId
+            },
+            success: function(response) {
+                if (response === true) {
+                    $(btnElement).addClass('active');
+                } else {
+                    $(btnElement).removeClass('active');
+                }
+            },
+            error: function(error) {
+                console.error('Error checking wishlist status:', error);
+            }
+        });
+    }
+
+    $(document).on('click', '.wishlist-btn', function () {
+        const storeId = $(this).data('store-id');
+        toggleWishlist(storeId, this);
+    });
+
+    function toggleWishlist(storeId, btnElement) {
+    	if (!memberId || memberId == null || memberId.trim() === '') {
+            if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+                window.location.href = contextPath + '/member/login';  // 로그인 페이지 경로 맞게 수정하세요
+            }
+            return;
+        }
+
+        const isWishlisted = $(btnElement).hasClass('active');
+
+        if (isWishlisted) {
+            if (confirm("위시리스트에 이미 추가되었습니다. 삭제하시겠습니까?")) {
+                $.ajax({
+                    url: `${contextPath}/wishlist/remove`,
+                    type: 'DELETE',
+                    data: { memberId, storeId },
+                    success: function(response) {
+                        alert(response);
+                        $(btnElement).removeClass('active');
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseText || "오류가 발생했습니다.");
+                    }
+                });
+            }
+        } else {
+            $.ajax({
+                url: `${contextPath}/wishlist/add`,
+                type: 'POST',
+                data: { memberId, storeId },
+                success: function(response) {
+                    alert(response);
+                    $(btnElement).addClass('active');
+                },
+                error: function(xhr) {
+                    alert(xhr.responseText || "오류가 발생했습니다.");
+                }
+            });
+        }
+    }
+
+    $(function () {
+        // 로그인 된 상태라면 위시리스트 상태 확인 실행
+        if (memberId) {
+            $('.wishlist-btn').each(function() {
+                const storeId = $(this).data('store-id');
+                checkWishlistStatus(storeId, this);
+            });
+        }
+    });
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&v=weekly&libraries=marker" defer></script>
@@ -228,9 +318,14 @@
 									</div>
 		
 									<div class="store-info">
-										<h4>${menu.storeName}</h4>
+										<div style="display: flex; align-items: center; gap: 10px;">
+									      <h4>${menu.storeName}</h4>
+									      <button class="wishlist-btn" data-store-id="${menu.storeId }" aria-label="위시리스트 추가/제거">
+						                        <i class="fa fa-bookmark"></i>
+						                  </button>
+						                 </div>
 										<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
-										<p class="meta-info">${menu.storeType} · ${menu.address}</p>
+										<p class="meta-info">${menu.storeType} · ${menu.roadAddress}</p>
 										<p class="meta-info">${menu.description}</p>
 									</div>
 								</div>
@@ -254,9 +349,14 @@
 									</div>
 		
 									<div class="store-info">
-										<h4>${addr.storeName}</h4>
+										<div style="display: flex; align-items: center; gap: 10px;">
+									      <h4>${addr.storeName}</h4>
+									      <button class="wishlist-btn" data-store-id="${addr.storeId }" aria-label="위시리스트 추가/제거">
+						                        <i class="fa fa-bookmark"></i>
+						                  </button>
+						                 </div>
 										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
-										<p class="meta-info">${addr.storeType} · ${addr.address}</p>
+										<p class="meta-info">${addr.storeType} · ${addr.roadAddress}</p>
 										<p class="meta-info">${addr.description}</p>
 									</div>
 								</div>
@@ -280,9 +380,14 @@
 									</div>
 		
 									<div class="store-info">
-										<h4>${name.storeName}</h4>
+										<div style="display: flex; align-items: center; gap: 10px;">
+										    <h4>${name.storeName}</h4>
+										    <button class="wishlist-btn" data-store-id="${name.storeId }" aria-label="위시리스트 추가/제거">
+							                	<i class="fa fa-bookmark"></i>
+							                </button>
+						                </div>
 										<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
-										<p class="meta-info">${name.storeType} · ${name.address}</p>
+										<p class="meta-info">${name.storeType} · ${name.roadAddress}</p>
 										<p class="meta-info">${name.description}</p>
 									</div>
 								</div>
@@ -317,12 +422,17 @@
 			    </div>
 		
 			    <div class="store-info">
-			      <h4>${region.storeName}</h4>
+			    	<div style="display: flex; align-items: center; gap: 10px;">
+				      <h4>${region.storeName}</h4>
+				      <button class="wishlist-btn" data-store-id="${region.storeId }" aria-label="위시리스트 추가/제거">
+	                        <i class="fa fa-bookmark"></i>
+	                  </button>
+	                 </div>
 			      <p>
 			        <span class="rating">★ ${region.avgRating}</span>
 			        리뷰 ${region.countRating}개
 			      </p>
-			      <p class="meta-info">${region.storeType} · ${region.address}</p>
+			      <p class="meta-info">${region.storeType} · ${region.roadAddress}</p>
 			      <p class="meta-info">${region.description}</p>
 			    </div>
 			  </div>
@@ -354,12 +464,17 @@
 			    </div>
 		
 			    <div class="store-info">
-			      <h4>${userLocation.storeName}</h4>
+			     <div style="display: flex; align-items: center; gap: 10px;">
+				      <h4>${userLocation.storeName}</h4>
+				      <button class="wishlist-btn" data-store-id="${userLocation.storeId }" aria-label="위시리스트 추가/제거">
+	                        <i class="fa fa-bookmark"></i>
+	                  </button>
+	             </div>
 			      <p>
 			        <span class="rating">★ ${userLocation.avgRating}</span>
 			        리뷰 ${userLocation.countRating}개
 			      </p>
-			      <p class="meta-info">${userLocation.storeType} · ${userLocation.address}</p>
+			      <p class="meta-info">${userLocation.storeType} · ${userLocation.roadAddress}</p>
 			      <p class="meta-info">${userLocation.description}</p>
 			    </div>
 			  </div>

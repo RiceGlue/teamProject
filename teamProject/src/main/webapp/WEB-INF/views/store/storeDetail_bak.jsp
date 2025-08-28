@@ -183,7 +183,7 @@
 		</div>
 		<div class="rating"><img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지">${store.avgRating}&nbsp;&nbsp;&nbsp;리뷰 ${store.countRating}개 <button type="button" onClick="openTab3()" class="btn btn-link" style="text-decoration:none; color:black;"><strong>></strong></button></div>
 		<div>
-			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.address} ${store.detailAddress } ${store.extraAddress }<button class="btn btn-link btn-sm" id="copyaddress">위치</button></p>
+			<p><img src="${contextPath}/image/address_pin.jpg" width="16" height="16" alt="위치"> ${store.roadAddress} ${store.detailAddress } ${store.extraAddress }<button class="btn btn-link btn-sm" id="copyaddress">위치</button></p>
 			<p><img src="${contextPath}/image/calling.png" width="16" height="16" alt="전화번호"> ${store.localNumber } - ${store.number1 } - ${store.number2 }</p>
 		</div>
 		<div>
@@ -369,7 +369,7 @@
 	let map;
     function initMap() {
         const geocoder = new google.maps.Geocoder();
-        const address = '<c:out value="${store.address}"/>';
+        const address = '<c:out value="${store.roadAddress}"/>';
 
         if (!address) {
             console.error('주소 정보가 없습니다.');
@@ -682,7 +682,7 @@
 
 		// 복사 기능 (주소)
 		document.getElementById('copyaddress').addEventListener('click', function () {
-			navigator.clipboard.writeText('${store.address}').then(function () {
+			navigator.clipboard.writeText('${store.roadAddress}').then(function () {
 				alert("주소가 복사되었습니다.");
 			}).catch(function (err) {
 				alert("복사 실패: " + err);

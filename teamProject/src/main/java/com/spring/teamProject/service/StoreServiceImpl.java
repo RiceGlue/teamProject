@@ -101,20 +101,15 @@ public class StoreServiceImpl implements StoreService{
 		return storeDAO.selectStoreNearUser(address);
 	}
 
-//	@Override
-//	public Map getBestReviewByStores() throws Exception {
-//		Map storeReivew = new HashMap<>();
-//
-//		List<ReviewVO> reviewList = storeDAO.selectBestReviewByStores();
-//		List<ImageFileVO> reviewImageList = storeDAO.selectBestReviewImageByStores();
-//
-//		storeReivew.put("reviewList", reviewList);
-//		storeReivew.put("reviewImageList", reviewImageList);
-//		return storeReivew;
-//	}
-
 	@Override
     public List<StoreVO> getStoresByOwnerId(long ownerId) throws Exception {
         return storeDAO.selectStoresByOwnerId(ownerId);
     }
+	
+	@Override
+	public List<StoreVO> searchStoreSameStoreType(String storeType) throws Exception {
+		return storeDAO.selectStoreSameStoreType(storeType);
+	}
+	
+	
 }

@@ -21,7 +21,7 @@
 <body>
 <div class="container">
     <h2 class="mb-4">${store.storeName} 예약 관리</h2>
-    <p class="text-muted">매장 주소: ${store.address}</p>
+    <p class="text-muted">매장 주소: ${store.roadAddress}</p>
     <hr>
 
     <c:if test="${not empty message}">

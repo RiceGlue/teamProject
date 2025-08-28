@@ -40,7 +40,7 @@ public class StoreControllerImpl implements StoreController {
 
 	@Override
 	@RequestMapping(value="/storeList", method=RequestMethod.GET)
-	public ModelAndView storeList (@RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public ModelAndView storeList ( @AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
 
 		List<StoreVO> regionlist = null ;
@@ -63,6 +63,12 @@ public class StoreControllerImpl implements StoreController {
 		}
 
 		ModelAndView mav = ViewUtil.layout(viewName);
+		
+		if (userDetailsVO != null) {
+			Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
+			mav.addObject("memberId", memberId);
+		}
+		
 		mav.addObject("option", option);
 		mav.addObject("keyword",keyword);
 		mav.addObject("regionlist",regionlist);
@@ -77,11 +83,13 @@ public class StoreControllerImpl implements StoreController {
 	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
 	public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, @AuthenticationPrincipal UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
-
+		String roadAddress = null;
+		String storeType = null;
+		
 		ModelAndView mav = ViewUtil.layout(viewName);
 
 		Map storeMap = storeService.storeDetail(storeVO);
-
+		
 		Long storeId = storeVO.getStoreId();
 		int currentWaitingCount = waitingService.getCurrentWaitingCount(storeId);
 
@@ -90,8 +98,21 @@ public class StoreControllerImpl implements StoreController {
 			mav.addObject("memberId", memberId);
 		}
 
+		StoreVO storedStoreVO = (StoreVO) storeMap.get("store");
+		if (storedStoreVO != null) {
+			roadAddress = getAddress(storedStoreVO.getRoadAddress());
+		    storeType=storedStoreVO.getStoreType();
+		    System.out.println("Address from storeVO inside storeMap: " + roadAddress);
+		}
+
+		
+		List<StoreVO> nearByStoreList = storeService.searchStoreNearUser(roadAddress);
+		List<StoreVO> storeTypeList = storeService.searchStoreSameStoreType(storeType);
+		
 		mav.addObject("storeMap", storeMap);
 		mav.addObject("currentWaitingCount", currentWaitingCount);
+		mav.addObject("nearByStoreList", nearByStoreList);
+		mav.addObject("storeTypeList", storeTypeList);
 
 		return mav;
 	}
@@ -111,14 +132,23 @@ public class StoreControllerImpl implements StoreController {
 	@GetMapping("/searchStoreNearUser")
 	@ResponseBody
 	public List<StoreVO> searchStoreNearUser(@RequestParam("location") String location) {
-		System.out.println("받아온 주소 : " +location);
+		System.out.println("사용자 주소 : " +location);
 		
 		List<StoreVO> store = storeService.searchStoreNearUser(location);
-		
-		for(int i=0;i<store.size();i++) {
-			System.out.println("받아온 주소 근처 가게 : " + store.get(i).getStoreName());
-		}
 	    return store;// 서비스에서 LIKE '%location%' 검색
 	}
+	
+	public static String getAddress(String fullRoadAddress) {
+        if (fullRoadAddress == null || fullRoadAddress.trim().isEmpty()) {
+            return "";
+        }
+
+        String[] parts = fullRoadAddress.trim().split("\\s+");
+        if (parts.length >= 3) {
+            return parts[0] + " " + parts[1] + " " + parts[2];
+        } else {
+            return fullRoadAddress; // fallback: 가능한 만큼만 리턴
+        }
+    }
 
 }

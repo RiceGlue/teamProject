@@ -31,7 +31,7 @@ public class ReservationOwnerController {
         StoreVO store = new StoreVO();
         store.setStoreId(storeId);
         store.setStoreName("더미 매장 (ID:" + storeId + ")");
-        store.setAddress("서울시 가짜구 더미동 123");
+        store.setRoadAddress("서울시 가짜구 더미동 123");
         return store;
     }
 

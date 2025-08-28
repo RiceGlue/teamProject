@@ -10,8 +10,9 @@ public class StoreVO {
 	private String storeName;
 	private String storeType;
 
-	private String zipcode;
-	private String address;
+	private String postcode;
+	private String roadAddress;
+	private String jibunAddress;
 	private String detailAddress;
 	private String extraAddress;
 
@@ -58,17 +59,23 @@ public class StoreVO {
 	public void setStoreType(String storeType) {
 		this.storeType = storeType;
 	}
-	public String getZipcode() {
-		return zipcode;
+	public String getPostcode() {
+		return postcode;
 	}
-	public void setZipcode(String zipcode) {
-		this.zipcode = zipcode;
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
 	}
-	public String getAddress() {
-		return address;
+	public String getRoadAddress() {
+		return roadAddress;
 	}
-	public void setAddress(String address) {
-		this.address = address;
+	public void setRoadAddress(String roadAddress) {
+		this.roadAddress = roadAddress;
+	}
+	public String getJibunAddress() {
+		return jibunAddress;
+	}
+	public void setJibunAddress(String jibunAddress) {
+		this.jibunAddress = jibunAddress;
 	}
 	public String getDetailAddress() {
 		return detailAddress;
