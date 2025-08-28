@@ -31,5 +31,5 @@ public interface StoreService {
 	 * @throws Exception DB 처리 오류 발생 시
 	 */
 	public List<StoreVO> getStoresByOwnerId(long ownerId) throws Exception;
-	public List<StoreVO> searchStoreSameStoreType(String storeType) throws Exception;
+	public List<StoreVO> searchStoreSameStoreType(StoreVO storeVO) throws Exception;
 }

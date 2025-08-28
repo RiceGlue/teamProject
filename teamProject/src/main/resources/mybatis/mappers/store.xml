@@ -12,6 +12,7 @@
 		<result property="roadAddress" column="road_address"/>
 		<result property="jibunAddress" column="jibun_address"/>
 		<result property="extraAddress" column="extra_address"/>
+		<result property="detailAddress" column="detail_address"/>
 		<result property="operationType" column="operation_type" />
 		<result property="localNumber" column="local_number" />
 		<result property="number1" column="number1" />
@@ -111,7 +112,7 @@
 	      s.*, ROUND(AVG(r.rating), 2) AS avgRating, COUNT(r.review_id) AS countRating
 	    FROM stores s
 	    INNER JOIN reviews r ON s.store_id = r.store_id
-	    WHERE s.jibun_address REGEXP CONCAT('(^| )', #{keyword}, '( |$)')
+	    WHERE s.road_address REGEXP CONCAT('(^| )', #{keyword}, '( |$)')
 	    GROUP BY s.store_id
 	    ORDER BY s.store_id
 	  ]]>
@@ -136,7 +137,7 @@
 	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
 			FROM stores s
 			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.jibun_address LIKE CONCAT('%', #{keyword}, '%')
+			WHERE s.road_address LIKE CONCAT('%', #{keyword}, '%')
 			GROUP BY s.store_id
 			ORDER BY s.store_id
 		]]>
@@ -271,16 +272,15 @@
         ]]>
     </select>
     
-    <select id="selectStoreSameStoreType" parameterType="String" resultMap="storelist">
+    <select id="selectStoreSameStoreType" parameterType="StoreVO" resultMap="storelist">
     	<![CDATA[
     		SELECT s.store_id, s.owner_id, s.store_name, s.road_address, s.local_number, s.number1, s.number2,
 			       s.description, s.file_name, s.store_type,
 			       ROUND(AVG(r.rating), 2) AS avgRating,
 			       COUNT(r.review_id) AS countRating
 			FROM stores s
-			INNER JOIN menu m ON s.store_id = m.store_id
 			LEFT JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.store_type = #{storeType}
+			WHERE s.store_type = #{storeType} AND s.store_id != #{storeId}
 			GROUP BY s.store_id
 			ORDER BY RAND()
 			LIMIT 3

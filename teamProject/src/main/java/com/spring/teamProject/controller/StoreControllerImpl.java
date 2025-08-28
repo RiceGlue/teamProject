@@ -107,7 +107,7 @@ public class StoreControllerImpl implements StoreController {
 
 		
 		List<StoreVO> nearByStoreList = storeService.searchStoreNearUser(roadAddress);
-		List<StoreVO> storeTypeList = storeService.searchStoreSameStoreType(storeType);
+		List<StoreVO> storeTypeList = storeService.searchStoreSameStoreType(storedStoreVO);
 		
 		mav.addObject("storeMap", storeMap);
 		mav.addObject("currentWaitingCount", currentWaitingCount);
@@ -145,7 +145,7 @@ public class StoreControllerImpl implements StoreController {
 
         String[] parts = fullRoadAddress.trim().split("\\s+");
         if (parts.length >= 3) {
-            return parts[0] + " " + parts[1] + " " + parts[2];
+            return parts[0] + " " + parts[1];
         } else {
             return fullRoadAddress; // fallback: 가능한 만큼만 리턴
         }

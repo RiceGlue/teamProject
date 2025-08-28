@@ -147,4 +147,9 @@ public class ReviewServiceImpl implements ReviewService {
 	public ImageFileVO getBestReviewImage(long reviewId) throws Exception{
 		return reviewDAO.selectBestReviewImage(reviewId);
 	}
+	
+	@Override
+	public List<ReviewVO> getUserReview(long memberId) throws Exception {
+		return reviewDAO.selectUserReview(memberId);
+	}
 }

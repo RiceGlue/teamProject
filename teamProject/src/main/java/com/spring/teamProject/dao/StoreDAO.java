@@ -48,5 +48,5 @@ public interface StoreDAO {
      */
 	
     public List<StoreVO> selectStoresByOwnerId(long ownerId) throws DataAccessException;
-    public List<StoreVO> selectStoreSameStoreType(String storeType) throws DataAccessException;
+    public List<StoreVO> selectStoreSameStoreType(StoreVO storeVO) throws DataAccessException;
 }

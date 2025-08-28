@@ -37,6 +37,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.RecaptchaService;
 import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.service.ReviewService;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.service.WaitingService;
 import com.spring.teamProject.service.WishlistService;
@@ -44,6 +45,7 @@ import com.spring.teamProject.tool.DebugEmailUtil;
 import com.spring.teamProject.tool.FtpConnectionTestUtil;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.ReservationVO;
+import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.SocialAccountVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO;
@@ -77,6 +79,9 @@ public class MemberController {
 
     @Autowired
     private WishlistService wishlistService;
+    
+    @Autowired
+    private ReviewService reviewService;
 
     @Value("${google.recaptcha.site-key}")
     private String recaptchaSiteKey;
@@ -417,6 +422,9 @@ public class MemberController {
                     return map;
                 }).collect(Collectors.toList());
                 model.addAttribute("waitings", displayWaitings);
+                
+                List<ReviewVO> reviewList = reviewService.getUserReview((long) memberInfo.getMemberId());
+                model.addAttribute("review", reviewList);
 
             } catch (Exception e) {
                  logger.error("마이페이지 정보 조회 중 오류 발생: {}", e.getMessage(), e);
