@@ -311,4 +311,14 @@ public class ReservationServiceImpl implements ReservationService {
         int offset = page * size;
         return reservationDAO.selectReservationsByStoreIdAndStatusWithPaging(storeId, status, size, offset);
     }
+
+    @Override
+    public long getTodaysConfirmedReservationCount(Long storeId) throws Exception {
+        return reservationDAO.selectTodaysConfirmedReservationCount(storeId);
+    }
+
+    @Override
+    public long getTotalConfirmedReservationCount(Long storeId) throws Exception {
+        return reservationDAO.selectTotalConfirmedReservationCount(storeId);
+    }
 }

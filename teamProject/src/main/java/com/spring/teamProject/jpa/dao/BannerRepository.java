@@ -40,4 +40,10 @@ public interface BannerRepository extends JpaRepository<BannerEntity, String> {
      */
     @Query("SELECT b FROM BannerEntity b WHERE b.endAt < :currentDate ORDER BY b.endAt DESC")
     Page<BannerEntity> findEndedBanners(@Param("currentDate") LocalDate currentDate, Pageable pageable);
+
+    /**
+     * ✨ --- [신규] 순서 변경을 위해 '게시 중'인 모든 배너 목록을 조회하는 메소드 (페이징 없음) --- ✨
+     */
+    @Query("SELECT b FROM BannerEntity b WHERE b.status = 'active' AND b.startAt <= :currentDate AND b.endAt >= :currentDate ORDER BY b.orderIndex ASC, b.updateAt DESC")
+    List<BannerEntity> findActiveBannersForOrdering(@Param("currentDate") LocalDate currentDate);
 }

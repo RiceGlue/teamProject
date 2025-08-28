@@ -256,4 +256,20 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+	<select id="selectTodaysConfirmedReservationCount" parameterType="long" resultType="long">
+	    <![CDATA[
+	        SELECT COUNT(*)
+	        FROM reservations
+	        WHERE store_id = #{storeId}
+	        AND DATE(reservation_time) = CURDATE()
+	        AND status = 'CONFIRMED'
+	    ]]>
+	</select>
+
+	<select id="selectTotalConfirmedReservationCount" parameterType="long" resultType="long">
+	    SELECT COUNT(*)
+	    FROM reservations
+	    WHERE store_id = #{storeId} AND status = 'CONFIRMED'
+	</select>
+
 </mapper>

@@ -5,9 +5,17 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">배너 관리</h1>
-        <a href="${contextPath}/admin/banners/form" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg"></i> 새 배너 등록
-        </a>
+        <div>
+            <%-- ? --- [신규] '현재 게시 중' 탭일 때만 '순서 변경 모드' 버튼을 보여줍니다. --- ? --%>
+            <c:if test="${currentTab == 'active'}">
+                <a href="${contextPath}/admin/banners/order" class="btn btn-warning btn-sm">
+                    <i class="bi bi-arrow-down-up"></i> 순서 변경 모드
+                </a>
+            </c:if>
+            <a href="${contextPath}/admin/banners/form" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg"></i> 새 배너 등록
+            </a>
+        </div>
     </div>
 
     <%-- ? --- 1. 탭(Tab) UI 구조 --- ? --%>
@@ -44,7 +52,7 @@
                     <tbody>
                         <%-- ? --- 2. bannerPage.content로 목록을 반복 --- ? --%>
                         <c:choose>
-                            <c:when test="${not empty bannerPage.content}">
+                            <c:when test="${bannerPage.hasContent()}">
                                 <c:forEach var="banner" items="${bannerPage.content}">
                                     <tr>
                                         <td class="text-center align-middle">${banner.orderIndex}</td>

@@ -39,7 +39,6 @@ public class OwnerController {
 
 	private static final Logger logger = LoggerFactory.getLogger(OwnerController.class);
 
-    // MemberService를 주입받아 회원 정보를 처리합니다.
     @Autowired
     private MemberService memberService;
 
@@ -63,31 +62,48 @@ public class OwnerController {
             return "redirect:/member/login";
         }
 
-        // 1. 현재 로그인된 점주(owner)가 등록한 가게 목록을 가져옵니다.
         List<StoreVO> stores = storeService.getStoresByOwnerId(memberInfo.getMemberId());
-
-        // 2. 각 가게별로 예약, 웨이팅 건수를 조회하여 모델에 추가합니다.
         Map<Long, Long> reservationCounts = new HashMap<>();
         Map<Long, Long> waitingCounts = new HashMap<>();
 
+        Map<Long, Long> todayConfirmedCounts = new HashMap<>();
+        Map<Long, Long> totalConfirmedCounts = new HashMap<>();
+
         for (StoreVO store : stores) {
             try {
-                long reservationCount = reservationService.getReservationCountByStoreId(store.getStoreId());
+                // long reservationCount = reservationService.getReservationCountByStoreId(store.getStoreId());
+
                 long waitingCount = waitingService.getWaitingCountByStoreId(store.getStoreId());
 
-                reservationCounts.put(store.getStoreId(), reservationCount);
+                long todayConfirmedCount = reservationService.getTodaysConfirmedReservationCount(store.getStoreId());
+                long totalConfirmedCount = reservationService.getTotalConfirmedReservationCount(store.getStoreId());
+
+                // ⭐ 이 부분이 문제입니다. `reservationCount` 변수 대신 `todayConfirmedCount`를 사용하도록 수정하세요.
+                reservationCounts.put(store.getStoreId(), todayConfirmedCount);
                 waitingCounts.put(store.getStoreId(), waitingCount);
+
+                todayConfirmedCounts.put(store.getStoreId(), todayConfirmedCount);
+                totalConfirmedCounts.put(store.getStoreId(), totalConfirmedCount);
+
+                //System.out.println("매장 ID " + store.getStoreId() + "의 오늘 확정 건수: " + todayConfirmedCount);
+                //System.out.println("매장 ID " + store.getStoreId() + "의 총 확정 건수: " + totalConfirmedCount);
+
             } catch (Exception e) {
-                // 예외 발생 시 로그를 남기고, 카운트를 0으로 처리
-                // logger.error("매장 ID {}의 예약/웨이팅 카운트 조회 중 오류 발생: {}", store.getStoreId(), e.getMessage());
+                logger.error("매장 ID {}의 확정된 예약 카운트 조회 중 오류 발생: {}", store.getStoreId(), e.getMessage());
+
                 reservationCounts.put(store.getStoreId(), 0L);
                 waitingCounts.put(store.getStoreId(), 0L);
+                todayConfirmedCounts.put(store.getStoreId(), 0L);
+                totalConfirmedCounts.put(store.getStoreId(), 0L);
             }
         }
 
         model.addAttribute("stores", stores);
         model.addAttribute("reservationCounts", reservationCounts);
         model.addAttribute("waitingCounts", waitingCounts);
+
+        model.addAttribute("todayConfirmedCounts", todayConfirmedCounts);
+        model.addAttribute("totalConfirmedCounts", totalConfirmedCounts);
 
         model.addAttribute("body", "owner/owner_dashboard.jsp");
         return "owner/owner_layout";

@@ -36,18 +36,23 @@ public interface BannerService {
     //  배너 ID로 배너 정보와 관련 파일을 모두 삭제하는 메소드
     void deleteBanner(String bannerId);
 
-    /**
-     * ✨ --- [신규] 현재 게시 중인 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
-     */
+    // 현재 게시 중인 배너 목록을 페이징하여 조회합니다. (관리자용)
     Page<BannerEntity> getActiveBannersForAdmin(Pageable pageable);
 
-    /**
-     * ✨ --- [신규] 게시 예정인 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
-     */
+    // 게시 예정인 배너 목록을 페이징하여 조회합니다. (관리자용)
     Page<BannerEntity> getScheduledBanners(Pageable pageable);
 
-    /**
-     * ✨ --- [신규] 게시 종료된 배너 목록을 페이징하여 조회합니다. (관리자용) --- ✨
-     */
+    // 게시 종료된 배너 목록을 페이징하여 조회합니다. (관리자용)
     Page<BannerEntity> getEndedBanners(Pageable pageable);
+
+    /**
+     * ✨ --- [신규] 순서 변경을 위해 '게시 중'인 모든 배너 목록을 조회합니다. (페이징 없음) --- ✨
+     */
+    List<BannerEntity> getActiveBannersForOrdering();
+
+    /**
+     * ✨ --- [신규] 변경된 배너 순서를 DB에 일괄 업데이트합니다. --- ✨
+     * @param bannerIds 정렬된 순서의 배너 ID 목록
+     */
+    void updateBannerOrder(List<String> bannerIds);
 }

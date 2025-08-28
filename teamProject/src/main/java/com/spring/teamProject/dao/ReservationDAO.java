@@ -81,4 +81,17 @@ public interface ReservationDAO {
         @Param("size") int size,
         @Param("offset") int offset
     );
+    /**
+     * 특정 매장의 오늘 'CONFIRMED' 상태 예약 건수를 조회합니다.
+     * @param storeId 매장 ID
+     * @return 오늘 'CONFIRMED' 상태인 예약 건수
+     */
+    long selectTodaysConfirmedReservationCount(@Param("storeId") long storeId) throws DataAccessException;
+
+    /**
+     * 특정 매장의 모든 'CONFIRMED' 상태 예약 건수를 조회합니다.
+     * @param storeId 매장 ID
+     * @return 총 'CONFIRMED' 예약 건수
+     */
+    long selectTotalConfirmedReservationCount(@Param("storeId") long storeId) throws DataAccessException;
 }

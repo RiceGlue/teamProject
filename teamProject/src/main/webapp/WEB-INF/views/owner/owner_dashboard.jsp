@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="container-fluid">
 	<h1 class="h3 mb-4">대시보드 홈</h1>
@@ -29,11 +30,13 @@
 									(${store.roadAddress})</h4>
 								<div class="row g-3 text-center">
 									<div class="col-4">
-										<%-- <a href="/owner/reservations/manage?storeId=${store.storeId}" --%>
 										<a href="/reservation/owner/manageList?storeId=${store.storeId}"
 											class="d-block p-3 rounded-3 text-decoration-none bg-light">
-											<div class="fs-2 fw-bold text-primary">${reservationCounts[store.storeId]}</div>
-											<div class="small text-muted">오늘의 예약</div>
+											<%-- <div class="fs-2 fw-bold text-primary">${reservationCounts[store.storeId]}</div>
+											<div class="small text-muted">오늘의 예약</div> --%>
+
+											<div class="fs-2 fw-bold text-primary">${todayConfirmedCounts[store.storeId]} / ${totalConfirmedCounts[store.storeId]}</div>
+											<div class="small text-muted">오늘 확정 예약 / 총 확정 예약</div>
 										</a>
 									</div>
 									<div class="col-4">
@@ -51,10 +54,6 @@
 										</a>
 									</div>
 								</div>
-								<!-- <hr class="my-4">
-								<a href="#" class="btn btn-outline-secondary w-100"> 매장 관리
-									바로가기 <i class="bi bi-arrow-right-short"></i>
-								</a> -->
 							</div>
 						</div>
 					</div>
@@ -63,6 +62,7 @@
 		</c:choose>
 	</div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 	$(document).ready(
