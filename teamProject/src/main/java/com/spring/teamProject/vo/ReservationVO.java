@@ -19,6 +19,10 @@ public class ReservationVO {
     // 하나의 예약에 여러 테이블이 할당될 수 있도록 List<StoreTableVO> 필드를 유지합니다.
     private List<StoreTableVO> tables;
 
+    // --- 추가된 필드 ---
+    // 여러 테이블 이름을 쉼표로 구분한 문자열을 담을 필드
+    private String tablesName;
+
     // 기본 생성자
     public ReservationVO() {}
 
@@ -132,6 +136,15 @@ public class ReservationVO {
 
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+
+ // --- 새로 추가할 getter/setter ---
+    public String getTablesName() {
+        return tablesName;
+    }
+
+    public void setTablesName(String tablesName) {
+        this.tablesName = tablesName;
     }
 
 }

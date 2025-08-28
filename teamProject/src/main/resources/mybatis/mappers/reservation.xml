@@ -24,6 +24,7 @@
 		<result property="status" column="status"/>
 		<result property="createdAt" column="created_at"/>
 		<result property="cancelledReason" column="cancelled_reason"/>
+		<result property="tablesName" column="tables_name"/>
 
 		<collection property="tables" ofType="com.spring.teamProject.vo.StoreTableVO"
 					select="selectTablesForReservation" column="reservation_id" />
@@ -239,4 +240,20 @@
             AND status = 'CONFIRMED'
         ]]>
     </select>
+    <select id="selectReservationsByStoreIdAndStatusWithPaging" resultMap="reservationResultMap">
+        SELECT
+            r.*,
+            GROUP_CONCAT(st.table_info ORDER BY st.table_info ASC SEPARATOR ', ') AS tables_name
+        FROM reservations r
+        LEFT JOIN reservation_table rt ON r.reservation_id = rt.reservation_id
+        LEFT JOIN store_tables st ON rt.table_id = st.table_id
+        WHERE r.store_id = #{storeId}
+        <if test="status != null and status != 'ALL'">
+            AND r.status = #{status}
+        </if>
+        GROUP BY r.reservation_id
+        ORDER BY r.created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
 </mapper>

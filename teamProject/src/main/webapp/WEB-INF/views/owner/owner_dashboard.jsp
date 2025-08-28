@@ -29,7 +29,8 @@
 									(${store.roadAddress})</h4>
 								<div class="row g-3 text-center">
 									<div class="col-4">
-										<a href="/owner/reservations/manage?storeId=${store.storeId}"
+										<%-- <a href="/owner/reservations/manage?storeId=${store.storeId}" --%>
+										<a href="/reservation/owner/manageList?storeId=${store.storeId}"
 											class="d-block p-3 rounded-3 text-decoration-none bg-light">
 											<div class="fs-2 fw-bold text-primary">${reservationCounts[store.storeId]}</div>
 											<div class="small text-muted">오늘의 예약</div>

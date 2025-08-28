@@ -301,4 +301,14 @@ public class ReservationServiceImpl implements ReservationService {
     public long getReservationCountByStoreId(long storeId) {
         return reservationDAO.selectReservationCountByStoreId(storeId);
     }
+
+    /**
+     * 특정 매장의 예약 목록을 상태별, 페이지별로 조회합니다.
+     */
+    @Override
+    public List<ReservationVO> getReservationsByStoreIdAndStatusWithPaging(Long storeId, String status, int page, int size) throws Exception {
+        // offset은 DB에서 데이터를 어디부터 가져올지 결정합니다.
+        int offset = page * size;
+        return reservationDAO.selectReservationsByStoreIdAndStatusWithPaging(storeId, status, size, offset);
+    }
 }

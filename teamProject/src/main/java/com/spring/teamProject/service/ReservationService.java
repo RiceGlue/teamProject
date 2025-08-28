@@ -111,4 +111,15 @@ public interface ReservationService {
 	 * @return 오늘 예약 건수
 	 */
 	long getReservationCountByStoreId(long storeId);
+
+	/**
+     * 특정 매장의 예약 목록을 상태별, 페이지별로 조회합니다.
+     * @param storeId 매장 ID
+     * @param status 예약 상태 (ALL, PENDING, CONFIRMED 등)
+     * @param page 현재 페이지 번호 (0부터 시작)
+     * @param size 페이지당 데이터 수
+     * @return 조건에 맞는 예약 목록
+     * @throws Exception DB 처리 오류 발생 시
+     */
+    List<ReservationVO> getReservationsByStoreIdAndStatusWithPaging(Long storeId, String status, int page, int size) throws Exception;
 }
