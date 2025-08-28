@@ -154,6 +154,28 @@ public class BannerServiceImpl implements BannerService {
         return bannerRepository.findEndedBanners(LocalDate.now(), pageable);
     }
 
+    // ✨ --- [신규] 순서 변경을 위해 '게시 중'인 모든 배너 목록을 조회하는 로직 구현 --- ✨
+    @Override
+    public List<BannerEntity> getActiveBannersForOrdering() {
+        return bannerRepository.findActiveBannersForOrdering(LocalDate.now());
+    }
+
+    // ✨ --- [신규] 변경된 배너 순서를 DB에 일괄 업데이트하는 로직 구현 --- ✨
+    @Override
+    @Transactional
+    public void updateBannerOrder(List<String> bannerIds) {
+        for (int i = 0; i < bannerIds.size(); i++) {
+            String bannerId = bannerIds.get(i);
+            int newOrderIndex = i + 1; // 순서는 1부터 시작
+
+            // ID로 배너를 찾아서 orderIndex를 업데이트합니다.
+            bannerRepository.findById(bannerId).ifPresent(banner -> {
+                banner.setOrderIndex(newOrderIndex);
+                bannerRepository.save(banner);
+            });
+        }
+    }
+
     /**
      * 배너 이미지를 검증하고, 임시 폴더에 저장한 뒤, FTP 서버로 업로드하는 헬퍼 메소드입니다.
      * @param multipartFile 사용자가 업로드한 원본 파일

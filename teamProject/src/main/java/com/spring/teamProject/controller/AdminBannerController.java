@@ -27,17 +27,7 @@ public class AdminBannerController {
     private PromotionService promotionService;
 
     // 배너 목록 조회
-    // @GetMapping("")
-    // public String listBanners(Model model) {
-    //     // BannerService를 통해 DB에 저장된 모든 배너 목록을 가져옵니다.
-    //     List<BannerEntity> bannerList = bannerService.getAllBanners();
-    //     // JSP로 전달
-    //     model.addAttribute("bannerList", bannerList);
-    //     model.addAttribute("body", "admin/banner_list.jsp");
-    //     return "admin/admin_layout";
-    // }
-
-    // ✨ --- [수정] 페이징 및 탭 기능 추가 --- ✨
+    // 페이징 및 탭 기능 추가
     @GetMapping("")
     public String listBanners(@RequestParam(value = "tab", defaultValue = "active") String tab,
                               @PageableDefault(size = 10, sort = "orderIndex") Pageable pageable,
@@ -59,6 +49,28 @@ public class AdminBannerController {
         model.addAttribute("currentTab", tab); // 현재 활성화된 탭을 알려주기 위한 정보
         model.addAttribute("body", "admin/banner_list.jsp");
         return "admin/admin_layout";
+    }
+
+    // ✨ --- [신규] 순서 변경 전용 페이지를 보여주는 메소드 --- ✨
+    @GetMapping("/order")
+    public String showBannerOrderForm(Model model) {
+        // 페이징 없이 '게시 중'인 모든 배너를 가져옵니다.
+        List<BannerEntity> bannerList = bannerService.getActiveBannersForOrdering();
+        model.addAttribute("bannerList", bannerList);
+        model.addAttribute("body", "admin/banner_order_form.jsp");
+        return "admin/admin_layout";
+    }
+
+    // ✨ --- [신규] 변경된 배너 순서를 저장하는 API --- ✨
+    @PostMapping("/update-order")
+    @ResponseBody
+    public String updateBannerOrder(@RequestBody List<String> bannerIds) {
+        try {
+            bannerService.updateBannerOrder(bannerIds);
+            return "success";
+        } catch (Exception e) {
+            return "error";
+        }
     }
 
     // 새 배너 등록 폼
@@ -125,7 +137,7 @@ public class AdminBannerController {
         return "redirect:/admin/banners";
     }
 
-    // ✨ --- [신규] 배너 삭제를 처리하는 메소드 --- ✨
+    // 배너 삭제를 처리하는 메소드
     @PostMapping("/delete/{bannerId}")
     public String deleteBanner(@PathVariable String bannerId, RedirectAttributes redirectAttributes) {
         try {
