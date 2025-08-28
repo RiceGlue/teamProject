@@ -365,29 +365,36 @@ public class MemberController {
 
                 // 2. 위시리스트 정보 목록 가져오기
                 List<WishlistEntity> wishlists = wishlistService.getWishlistByMemberId((long) memberInfo.getMemberId());
-
-                // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
-                List<Map<String, Object>> displayWishlists = wishlists.stream().map(wish -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("wishlistId", wish.getWishlistId());
-                    map.put("storeId", wish.getStoreId());
-
-                    try {
-                        StoreVO store = storeService.getStoreById(wish.getStoreId());
-                        if (store != null) {
-                            map.put("storeName", store.getStoreName());
-                            map.put("storeFileName", store.getFileName()); // storeFileName 추가
-                        } else {
-                            map.put("storeName", "알 수 없는 가게");
-                            map.put("storeFileName", null);
-                        }
-                    } catch (Exception e) {
-                        map.put("storeName", "가게 정보 오류");
-                        map.put("storeFileName", null);
-                    }
-                    return map;
-                }).collect(Collectors.toList());
-                model.addAttribute("wishlists", displayWishlists);
+                
+                List<StoreVO> wishlistStore = new ArrayList<>();
+                
+                for (int i=0;i<wishlists.size();i++) {
+                	StoreVO storeVO = storeService.getStoreById(wishlists.get(i).getStoreId());
+                	wishlistStore.add(storeVO);
+                }
+//
+//                // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
+//                List<Map<String, Object>> displayWishlists = wishlists.stream().map(wish -> {
+//                    Map<String, Object> map = new HashMap<>();
+//                    map.put("wishlistId", wish.getWishlistId());
+//                    map.put("storeId", wish.getStoreId());
+//
+//                    try {
+//                        StoreVO store = storeService.getStoreById(wish.getStoreId());
+//                        if (store != null) {
+//                            map.put("store", store);
+//                            map.put("storeFileName", store.getFileName()); // storeFileName 추가
+//                        } else {
+//                            map.put("storeName", "알 수 없는 가게");
+//                            map.put("storeFileName", null);
+//                        }
+//                    } catch (Exception e) {
+//                        map.put("storeName", "가게 정보 오류");
+//                        map.put("storeFileName", null);
+//                    }
+//                    return map;
+//                }).collect(Collectors.toList());
+                model.addAttribute("wishlistStore", wishlistStore);
 
                 // 3. 웨이팅 정보 목록 가져오기
                 List<WaitingVO> waitings = waitingService.getWaitingsByMemberId((long) memberInfo.getMemberId());

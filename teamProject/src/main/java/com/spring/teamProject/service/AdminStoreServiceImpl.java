@@ -21,6 +21,10 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	private AdminStoreDAO adminStoreDAO;
 
 	@Override
+	public List<StoreVO> getOwnerStore(long ownerId) throws Exception {
+		return adminStoreDAO.selectOwnerStore(ownerId);
+	}
+	@Override
 	public long addStoreInfo(Map storeInfo) throws Exception {
 		long storeId = adminStoreDAO.insertStoreInfo(storeInfo);
 		return storeId;

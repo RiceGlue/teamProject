@@ -3,6 +3,11 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
 <!-- 컨트롤러에서 보낸 성공 메시지(msg)가 있을 경우, alert 창을 띄웁니다. -->
 <c:if test="${not empty msg}">
@@ -18,6 +23,9 @@
 </c:if>
 
 <script type="text/javascript">
+const memberId = '${memberInfo.memberId}' ;
+const contextPath = '${pageContext.request.contextPath}';
+
 function checkReviewStatus(status, type, storeId, id) {
     let isReviewable = false;
     let alertMessage = '';
@@ -54,6 +62,60 @@ function checkReviewStatus(status, type, storeId, id) {
         alert(alertMessage);
     }
 }
+
+//위시리스트 상태 확인 함수 (AJAX)
+function checkWishlistStatus(storeId, btnElement) {
+    if (!memberId || memberId === 'null' || memberId === 'undefined' || memberId.trim() === '') return;
+
+    $.ajax({
+        url: `${contextPath}/wishlist/isWishlisted`,
+        type: 'GET',
+        data: { memberId: memberId, storeId: storeId },
+        success: function(response) {
+            if (response === true) {
+                $(btnElement).addClass('active');
+            } else {
+                $(btnElement).removeClass('active');
+            }
+        },
+        error: function(error) {
+            console.error('위시리스트 상태 확인 중 오류:', error);
+        }
+    });
+}
+
+// 위시리스트 추가/제거 토글 함수 (AJAX)
+function toggleWishlist(storeId, btnElement) {
+    if (!memberId || memberId.trim() === '') {
+        if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+            window.location.href = contextPath + '/member/login';
+        }
+        return;
+    }
+
+    const isWishlisted = $(btnElement).hasClass('active');
+    const url = isWishlisted ? `${contextPath}/wishlist/remove` : `${contextPath}/wishlist/add`;
+    const type = isWishlisted ? 'DELETE' : 'POST';
+    const confirmMsg = isWishlisted ? "위시리스트에서 삭제하시겠습니까?" : "위시리스트에 추가하시겠습니까?";
+    const successMsg = isWishlisted ? "위시리스트에서 삭제되었습니다." : "위시리스트에 추가되었습니다.";
+    const newClass = isWishlisted ? 'removeClass' : 'addClass';
+
+    if (confirm(confirmMsg)) {
+        $.ajax({
+            url: url,
+            type: type,
+            data: { memberId, storeId },
+            success: function(response) {
+                alert(successMsg);
+                $(btnElement)[newClass]('active');
+            },
+            error: function(xhr) {
+                alert(xhr.responseText || "오류가 발생했습니다.");
+            }
+        });
+    }
+}
+
 </script>
 
 <style>
@@ -92,6 +154,9 @@ function checkReviewStatus(status, type, storeId, id) {
 /*         pointer-events: none; */
 /*         z-index: 1; /* z-index를 추가하여 콘텐츠 위에 겹쳐지도록 합니다. */ */
 /*     } */
+	.card-img-top { width:150px; }
+	.wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
+	.wishlist-btn.active{color:#ff6347;}
 </style>
 
 <div class="container my-5">
@@ -187,36 +252,40 @@ function checkReviewStatus(status, type, storeId, id) {
 	    </div>
     </div>
 
-    <%-- 나의 위시리스트 섹션 --%>
-    <div class="mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4><i class="bi bi-heart-fill"></i> 나의 위시리스트</h4>
-            <a href="#" class="text-decoration-none">&gt;&gt; 더보기</a>
-        </div>
-        <div class="scroll-container">
-            <%-- TODO: DB에서 실제 위시리스트 목록을 가져와 c:forEach로 반복 --%>
-            <c:choose>
-                <c:when test="${not empty wishlists}">
-                    <c:forEach var="wishlist" items="${wishlists}">
-                        <div class="card scroll-item">
-                            <img src="${contextPath}/download?directoryName=store&fileName=${wishlist.storeFileName}" class="card-img-top" alt="${wishlist.storeName} 이미지">
-                            <div class="card-body">
-                                <h6><a href="${contextPath}/store/storeDetail?storeId=${wishlist.storeId}" class="store-name-link">${wishlist.storeName}</a></h6>
-                                <p class="card-text"><small class="text-muted">${wishlist.roadAddress}</small></p>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <div class="card scroll-item">
-                        <div class="card-body text-center">
-                            <p class="card-text text-muted">위시리스트 정보가 없습니다.</p>
-                        </div>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </div>
+	<%-- 나의 위시리스트 섹션 --%>
+	<div class="mb-5">
+	    <div class="d-flex justify-content-between align-items-center mb-3">
+	        <h4><i class="bi bi-heart-fill"></i> 나의 위시리스트</h4>
+	        <a href="${pageContext.request.contextPath}/wishlist" class="text-decoration-none">&gt;&gt; 더보기</a>
+	    </div>
+	
+	    <div class="scroll-container">
+	        <c:if test="${not empty wishlistStore}">
+	            <c:forEach var="wishlist" items="${wishlistStore}">
+	                <div class="card scroll-item">
+	                    <img src="${pageContext.request.contextPath}/images/store/${wishlist.fileName}" class="card-img-top" alt="${wishlist.storeName} 이미지">
+	                    <div class="card-body">
+	                    	<div style="display: flex; align-items: center; gap: 10px;" >
+	                        	<h6><a href="${pageContext.request.contextPath}/store/storeDetail?storeId=${wishlist.storeId}" class="store-name-link">${wishlist.storeName}</a></h6>
+	                        	<button class="wishlist-btn" data-store-id="${menu.storeId }" aria-label="위시리스트 추가/제거"><i class="fa fa-bookmark"></i></button>
+	                        </div>
+	                        <p class="card-text">${wishlist.roadAddress}</p>
+	                        <p class="card-text">${wishlist.localNumber} - ${wishlist.number1} - ${wishlist.number2}</p>
+	                    </div>
+	                </div>
+	            </c:forEach>
+	        </c:if>
+	
+	        <c:if test="${empty wishlistStore}">
+	            <div class="card scroll-item">
+	                <div class="card-body text-center">
+	                    <p class="card-text text-muted">위시리스트 정보가 없습니다.</p>
+	                </div>
+	            </div>
+	        </c:if>
+	    </div>
+	</div>
+
 
     <%-- 예약 정보 섹션 --%>
     <div>

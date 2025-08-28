@@ -9,6 +9,7 @@ import com.spring.teamProject.vo.StoreVO;
 
 public interface AdminStoreService {
 	
+	public List<StoreVO> getOwnerStore(long ownerId) throws Exception;
 	public long addStoreInfo(Map storeInfo) throws Exception;
 	public void addStoreInfoImage(List<ImageFileVO> imgfile) throws Exception;
 	public long addMenu(MenuVO menuVO) throws Exception;
