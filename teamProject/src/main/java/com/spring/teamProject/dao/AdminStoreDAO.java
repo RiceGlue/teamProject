@@ -14,6 +14,9 @@ import com.spring.teamProject.vo.StoreVO;
 public interface AdminStoreDAO {
 	
 	public List<StoreVO> selectOwnerStore(long ownerId) throws DataAccessException;
+	public int selectStoreCount(long ownerId) throws DataAccessException;
+	public int selectMenuCount(long storeId) throws DataAccessException;
+	
 	long insertStoreInfo(Map storeInfo) throws DataAccessException;
 	public void insertStoreImage(List<ImageFileVO> imgfile) throws DataAccessException;
 	public long insertMenu(MenuVO meunVO) throws DataAccessException;

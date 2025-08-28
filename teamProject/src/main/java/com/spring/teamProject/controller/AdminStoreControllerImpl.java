@@ -52,14 +52,28 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	public ModelAndView storeManage (@AuthenticationPrincipal UserDetailsVO userDetailsVO,@RequestParam("type") String type, HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
 		Long ownerId = null;
+		List<StoreVO> storeList = new ArrayList<>();
+		Map<String, Object> menuMap = new HashMap<>();
+
+		ModelAndView mav = ViewUtil.adminLayout(viewName);
 		
-		ModelAndView mav = ViewUtil.layout(viewName);
 		
 		if (userDetailsVO != null) {
 			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
 		}
 		
-		List<StoreVO> storeList = adminStoreService.getOwnerStore(ownerId);
+		if(type.equals("store")) {
+			int storeCount = adminStoreService.getStoreCount(ownerId);
+			if(storeCount >= 1) {
+				storeList = adminStoreService.getOwnerStore(ownerId);
+			}
+		} else if(type.equals("menu")) {
+			storeList = adminStoreService.getOwnerStore(ownerId);
+			for(int i=0;i<storeList.size();i++) {
+				int menuCount = adminStoreService.getMenuCount(storeList.get(i).getStoreId());
+				storeList.get(i).setMenuCount(menuCount);
+			}
+		}
 
 		mav.addObject("ownerId", ownerId);
 		mav.addObject("storeList", storeList);
@@ -68,19 +82,29 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	}
 	
 	@RequestMapping(value="/addStoreInfoForm")
-	public ModelAndView addStoreInfoForm (@RequestParam("ownerId") long ownerId,HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
+	public ModelAndView addStoreInfoForm (@AuthenticationPrincipal UserDetailsVO userDetailsVO,HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
-
-		ModelAndView mav = ViewUtil.layout(viewName);
+		Long ownerId = null;
+		
+		if (userDetailsVO != null) {
+			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+		}
+		
+		ModelAndView mav = ViewUtil.adminLayout(viewName);
 		mav.addObject("ownerId", ownerId);
 		return mav;
 	} 
 
 	@RequestMapping(value="/addMenuForm")
-	public ModelAndView addMenuForm (@RequestParam("storeId") long storeId, @RequestParam("ownerId") long ownerId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
+	public ModelAndView addMenuForm (@AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception { //메뉴 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
+		Long ownerId = null;
+		
+		if (userDetailsVO != null) {
+			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+		}
 
-		ModelAndView mav = ViewUtil.layout(viewName);
+		ModelAndView mav = ViewUtil.adminLayout(viewName);
 		System.out.println(storeId);
 		mav.addObject("storeId", storeId);
 		mav.addObject("ownerId", ownerId);
@@ -117,7 +141,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	    List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
 
 	    // 모델과 뷰 반환
-	    ModelAndView mav = ViewUtil.layout(viewName);
+	    ModelAndView mav = ViewUtil.adminLayout(viewName);
 	    mav.addObject("menuList", menuList);
 	    mav.addObject("storeMap", storeMap);
 
@@ -127,7 +151,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 
 	@Override
 	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)
-	public ModelAndView addStoreInfo(MultipartHttpServletRequest multiReq) throws Exception {
+	public ModelAndView addStoreInfo(@AuthenticationPrincipal UserDetailsVO userDetailsVO, MultipartHttpServletRequest multiReq) throws Exception {
 		ModelAndView mav = new ModelAndView();
 		String directoryName = "store";
 		multiReq.setCharacterEncoding("UTF-8");
@@ -212,7 +236,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 
 	@Override
 	@RequestMapping(value = "/addMenu", method = RequestMethod.POST)
-	public ModelAndView addMenu(MultipartHttpServletRequest multiReq) throws Exception {
+	public ModelAndView addMenu(@AuthenticationPrincipal UserDetailsVO userDetailsVO, MultipartHttpServletRequest multiReq) throws Exception {
 		String directoryName = "menu";
 		multiReq.setCharacterEncoding("UTF-8");
 		

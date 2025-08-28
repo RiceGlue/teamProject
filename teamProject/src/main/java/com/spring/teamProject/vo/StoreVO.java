@@ -35,6 +35,10 @@ public class StoreVO {
 
 	private String avgRating;
 	private int countRating;
+	
+	public int menuCount;
+	public int storeCount;
+	
 	public long getStoreId() {
 		return storeId;
 	}
@@ -179,4 +183,12 @@ public class StoreVO {
 	public void setCountRating(int countRating) {
 		this.countRating = countRating;
 	}
+	public int getMenuCount() {
+		return menuCount;
+	}
+	public void setMenuCount(int menuCount) {
+		this.menuCount = menuCount;
+	}
+	
+	
 }

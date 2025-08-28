@@ -87,6 +87,19 @@
 			select * from stores where owner_id=#{ownerId}
 		]]>
 	</select>
+	
+	<select id="selectStoreCount" parameterType="long" resultType="int">
+		<![CDATA[
+			select count(store_id) from stores where owner_id=#{ownerId}
+		]]>
+	</select>
+	
+	<select id="selectMenuCount" parameterType="long" resultType="int" >
+		<![CDATA[
+			select count(menu_id) from menu where store_id=#{storeId}
+		]]>
+	</select>
+	
 	<insert id="insertStoreInfo" parameterType="java.util.Map" >
 			insert into stores
 			(

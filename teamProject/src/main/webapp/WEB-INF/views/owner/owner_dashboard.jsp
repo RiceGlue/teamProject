@@ -12,8 +12,8 @@
 						<div class="card-body p-4 text-center">
 							<h4 class="card-title mb-3">등록된 매장이 없습니다.</h4>
 							<p class="text-muted">지금 바로 새로운 매장을 등록하고 관리하세요!</p>
-							<a href="/owner/store/new" class="btn btn-primary mt-3"> <i
-								class="bi bi-plus-circle me-2"></i>새 매장 등록하기
+							<a href="${contextPath }/franchise/addStoreInfoForm?ownerId=${memberId}" class="btn btn-primary mt-3">
+								<i class="bi bi-plus-circle me-2"></i>새 매장 등록하기
 							</a>
 						</div>
 					</div>

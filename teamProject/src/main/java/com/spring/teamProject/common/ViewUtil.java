@@ -9,5 +9,12 @@ public class ViewUtil {
 		mav.addObject("body", viewName);
 		return mav;
 	}
+	
+	public static ModelAndView adminLayout(String viewName) {
+		viewName = viewName+".jsp";
+		ModelAndView mav = new ModelAndView("owner/owner_layout");
+		mav.addObject("body", viewName);
+		return mav;
+	}
 
 }
