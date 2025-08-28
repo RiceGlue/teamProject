@@ -109,6 +109,19 @@ public class OwnerController {
         return "owner/owner_layout";
     }
 
+    @GetMapping("/select-store")
+    public String selectStore(@AuthenticationPrincipal Object principal, Model model) throws Exception {
+        MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
+        if (memberInfo == null) {
+            return "redirect:/member/login";
+        }
+
+        List<StoreVO> stores = storeService.getStoresByOwnerId(memberInfo.getMemberId());
+        model.addAttribute("stores", stores);
+        model.addAttribute("body", "owner/select_store.jsp");
+        return "owner/owner_layout";
+    }
+
     // ✨ --- [1. 신규] 프로필 수정 페이지를 보여주는 메소드 추가 --- ✨
     @GetMapping("/edit-profile")
     public String editProfileForm(@AuthenticationPrincipal Object principal, Model model) {
