@@ -66,4 +66,19 @@ public interface ReservationDAO {
      * @throws DataAccessException DB 접근 오류 시
      */
     long selectReservationCountByStoreId(long storeId) throws DataAccessException;
+
+    /**
+     * 특정 매장의 예약 목록을 상태별, 페이지별로 조회합니다.
+     * @param storeId 매장 ID
+     * @param status 예약 상태 (ALL, PENDING, CONFIRMED 등)
+     * @param size 페이지당 데이터 수
+     * @param offset 시작 위치 (페이징을 위한 offset)
+     * @return 조건에 맞는 예약 목록
+     */
+    List<ReservationVO> selectReservationsByStoreIdAndStatusWithPaging(
+        @Param("storeId") Long storeId,
+        @Param("status") String status,
+        @Param("size") int size,
+        @Param("offset") int offset
+    );
 }
