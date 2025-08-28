@@ -107,8 +107,8 @@ public class StoreServiceImpl implements StoreService{
     }
 	
 	@Override
-	public List<StoreVO> searchStoreSameStoreType(String storeType) throws Exception {
-		return storeDAO.selectStoreSameStoreType(storeType);
+	public List<StoreVO> searchStoreSameStoreType(StoreVO storeVO) throws Exception {
+		return storeDAO.selectStoreSameStoreType(storeVO);
 	}
 	
 	

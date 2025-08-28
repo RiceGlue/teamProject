@@ -27,265 +27,291 @@
 </style>
 
 <script>
-const memberId = "${memberId}";
-var contextPath = '${contextPath}';
+const regionStores = [
+    <c:forEach var="store" items="${regionlist}" varStatus="status">
+        {
+            storeId: '${store.storeId}',
+            storeName: '${store.storeName}',
+            roadAddress: '${store.roadAddress}',
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-	document.addEventListener('DOMContentLoaded', function () {
-		$(".tab_content").hide(); // 모든 탭 콘텐츠 숨김
-		$("ul.tabs li:first").addClass("active").show(); // 첫 번째 탭 활성화
-		$(".tab_content:first").show(); // 첫 번째 탭 콘텐츠 보여줌
+const menuStores = [
+    <c:forEach var="store" items="${menulist}" varStatus="status">
+        {
+            storeId: '${store.storeId}',
+            storeName: '${store.storeName}',
+            roadAddress: '${store.roadAddress}',
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-		// 탭 클릭 이벤트
-		$("ul.tabs li").click(function (e) {
-			e.preventDefault();
+const addrStores = [
+    <c:forEach var="store" items="${addrlist}" varStatus="status">
+        {
+            storeId: '${store.storeId}',
+            storeName: '${store.storeName}',
+            roadAddress: '${store.roadAddress}',
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-			$("ul.tabs li").removeClass("active"); // 모든 탭 비활성화
-			$(this).addClass("active"); // 클릭한 탭 활성화
-			$(".tab_content").hide(); // 모든 탭 콘텐츠 숨김
+const nameStores = [
+    <c:forEach var="store" items="${namelist}" varStatus="status">
+        {
+            storeId: '${store.storeId}',
+            storeName: '${store.storeName}',
+            roadAddress: '${store.roadAddress}',
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-			var activeTab = $(this).find("a").attr("href"); // href에서 id 가져옴
-			$(activeTab).fadeIn(); // 해당 콘텐츠 표시
-		});
-	});
+const userLocationStores = [
+    <c:forEach var="store" items="${userLocationlist}" varStatus="status">
+        {
+            storeId: '${store.storeId}',
+            storeName: '${store.storeName}',
+            roadAddress: '${store.roadAddress}',
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-	const regionStores = [
-		<c:forEach var="region" items="${regionlist}" varStatus="status">
-	    	{ name: "${region.storeName}", address: "${region.roadAddress}" }<c:if test="${!status.last}">,</c:if>
-	 	</c:forEach>
-	];
+const memberId = "${memberId != null ? memberId : ''}";
+const contextPath = '${contextPath}';
+const option = "${option}";
 
-    const menuStores = [
-    	<c:forEach var="menu" items="${menulist}" varStatus="status">
-        	{ name: "${menu.storeName}", address: "${menu.roadAddress}" }<c:if test="${!status.last}">,</c:if>
-      	</c:forEach>
-    ];
+let map;
+let markers = [];
 
-    const addrStores = [
-    	<c:forEach var="addr" items="${addrlist}" varStatus="status">
-        	{ name: "${addr.storeName}", address: "${addr.roadAddress}" }<c:if test="${!status.last}">,</c:if>
-      	</c:forEach>
-    ];
-
-    const nameStores = [
-      	<c:forEach var="name" items="${namelist}" varStatus="status">
-        	{ name: "${name.storeName}", address: "${name.roadAddress}" }<c:if test="${!status.last}">,</c:if>
-      	</c:forEach>
-    ];
-    
-    const userLocationStores = [
-		<c:forEach var="userLocation" items="${userLocationlist}" varStatus="status">
-	    	{ name: "${userLocation.storeName}", address: "${userLocation.roadAddress}" }<c:if test="${!status.last}">,</c:if>
-	 	</c:forEach>
-	];
-
-    let map,markers=[];
-
-    function initMap(){map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.5665,lng:126.9780},zoom:11});}
-    
-    function showMarkers(storeList) {
-    	  const geocoder = new google.maps.Geocoder();
-    	  markers.forEach(m => m.setMap(null));
-    	  markers = [];
-
-    	  let isFirstMarker = true;
-
-    	  storeList.forEach(store => {
-    	    if (store.address) {
-    	      geocoder.geocode({ address: store.roadAddress }, (results, status) => {
-    	        if (status === "OK") {
-    	          const pos = results[0].geometry.location;
-    	          const marker = new google.maps.Marker({
-    	            map: map,
-    	            position: pos,
-    	            title: store.name
-    	          });
-
-    	          // ✅ 첫 마커 위치로 지도 중심 이동
-    	          if (isFirstMarker) {
-    	            map.setCenter(pos);
-    	            map.setZoom(14); // 확대 정도 조절 가능
-    	            isFirstMarker = false;
-    	          }
-
-    	          markers.push(marker);
-    	        } else {
-    	          console.error(`주소 변환 실패 (${store.roadAddress}): ${status}`);
-    	        }
-    	      });
-    	    }
-    	  });
-    	}
-
-
-    document.addEventListener('DOMContentLoaded', function () {
-    	  $(".tab_content").hide();
-    	  $("ul.tabs li:first").addClass("active").show();
-    	  $(".tab_content:first").show();
-
-    	  const activeTabStores = {
-    	    "#tab1": menuStores,
-    	    "#tab2": addrStores,
-    	    "#tab3": nameStores
-    	  };
-
-    	  $("ul.tabs li").click(function (e) {
-    	    e.preventDefault();
-    	    $("ul.tabs li").removeClass("active");
-    	    $(this).addClass("active");
-    	    $(".tab_content").hide();
-
-    	    const activeTab = $(this).find("a").attr("href");
-    	    $(activeTab).fadeIn();
-
-    	    if (activeTabStores[activeTab]) {
-    	      showMarkers(activeTabStores[activeTab]);
-    	    }
-    	  });
-
-    	  // 지도 초기화
-    	  initMap();
-
-    	  // 어떤 option으로 왔는지에 따라 초기 마커 설정
-    	  const option = "${option}";
-    	  if (option === "userLocation") {
-    	    showMarkers(userLocationStores);
-    	  } else if (option === "region") {
-    	    showMarkers(regionStores);
-    	  } else if (option === "search") {
-    	    // 기본 탭에 따라 결정
-    	    showMarkers(menuStores); // tab1이 기본이므로
-    	  }
-    	});
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        const option = "${option}";
-
-        if (option === "userLocation") {
-            // 사용자 위치 가져오기 시작
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(success, error);
-            } else {
-                alert("브라우저가 위치 정보를 지원하지 않습니다.");
-            }
-        } else {
-            // 기존 초기화 로직
-            initMap();
-            // 그리고 기존 탭별 마커 표시 등 처리
-            // ...
-        }
-
-        function success(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            getAddressFromCoords(lat, lng);
-        }
-
-        function error() {
-            alert("사용자 위치를 가져오지 못했습니다.");
-        }
-
-        function getAddressFromCoords(lat, lng) {
-            const geocoder = new google.maps.Geocoder();
-            const latlng = { lat: lat, lng: lng };
-            geocoder.geocode({ location: latlng }, function (results, status) {
-                if (status === "OK" && results[0]) {
-                    const fullAddress = results[0].formatted_address;
-                    console.log("사용자 주소:", fullAddress);
-
-                    // 여기서 주소를 화면에 출력
-                    const addressElem = document.getElementById("userAddress");
-                    if (addressElem) {
-                        addressElem.innerText = fullAddress;
-                    }
-
-                    // 주소 기반 근처 매장 검색 함수 실행
-                    fetchNearbyStores(fullAddress);
-                } else {
-                    alert("주소를 가져올 수 없습니다.");
-                }
-            });
-        }
-
+// 지도 초기화 함수
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 37.5665, lng: 126.9780 },
+        zoom: 11
     });
+}
 
-    function checkWishlistStatus(storeId, btnElement) {
-        if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+// 주소 -> 좌표 변환 Promise 함수
+function geocodeAddress(geocoder, address) {
+    return new Promise((resolve, reject) => {
+        geocoder.geocode({ address: address }, (results, status) => {
+            if (status === "OK" && results[0]) {
+                resolve(results[0].geometry.location);
+            } else {
+                reject(`Geocode failed for ${address}: ${status}`);
+            }
+        });
+    });
+}
 
+// 마커 표시 함수 (async/await 사용)
+async function showMarkers(storeList) {
+    console.log("showMarkers 호출, 데이터 개수:", storeList.length);
+    // 기존 마커 제거
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+
+    const geocoder = new google.maps.Geocoder();
+    let isFirstMarker = true;
+
+    for (const store of storeList) {
+        const address = store.roadAddress || store.address;
+        if (!address) {
+            console.warn("주소 누락된 매장 건너뜀:", store);
+            continue;
+        }
+
+        try {
+            const pos = await geocodeAddress(geocoder, address);
+            console.log("마커 생성 위치:", pos.toString());
+
+            const marker = new google.maps.Marker({
+                map: map,
+                position: pos,
+                title: store.storeName || store.name
+            });
+
+            markers.push(marker);
+
+            if (isFirstMarker) {
+                map.setCenter(pos);
+                map.setZoom(14);
+                isFirstMarker = false;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}
+
+// 사용자 좌표 -> 주소 변환 및 표시
+function getAddressFromCoords(lat, lng) {
+    const geocoder = new google.maps.Geocoder();
+    const latlng = { lat: lat, lng: lng };
+    geocoder.geocode({ location: latlng }, function (results, status) {
+        if (status === "OK" && results[0]) {
+            const fullAddress = results[0].formatted_address;
+            console.log("사용자 주소:", fullAddress);
+
+            const addressElem = document.getElementById("userAddress");
+            if (addressElem) {
+                addressElem.innerText = fullAddress;
+            }
+
+            // TODO: 주소 기반 근처 매장 검색 API 호출 가능
+        } else {
+            alert("주소를 가져올 수 없습니다.");
+        }
+    });
+}
+
+async function centerMapToFirstStore(storeList) {
+    if (!storeList || storeList.length === 0) return;
+
+    const firstStore = storeList[0];
+    const address = firstStore.roadAddress || firstStore.address;
+
+    if (!address) {
+        console.warn("첫 번째 매장의 주소가 없습니다.");
+        return;
+    }
+
+    const geocoder = new google.maps.Geocoder();
+
+    try {
+        const pos = await geocodeAddress(geocoder, address);
+        map.setCenter(pos);
+        map.setZoom(14);
+        console.log("지도 중심을 첫 번째 매장으로 이동:", pos.toString());
+    } catch (error) {
+        console.error("지도 중심 이동 실패:", error);
+    }
+}
+
+
+// 위시리스트 상태 확인 함수 (AJAX)
+function checkWishlistStatus(storeId, btnElement) {
+    if (!memberId || memberId === 'null' || memberId === 'undefined' || memberId.trim() === '') return;
+
+    $.ajax({
+        url: `${contextPath}/wishlist/isWishlisted`,
+        type: 'GET',
+        data: { memberId: memberId, storeId: storeId },
+        success: function(response) {
+            if (response === true) {
+                $(btnElement).addClass('active');
+            } else {
+                $(btnElement).removeClass('active');
+            }
+        },
+        error: function(error) {
+            console.error('위시리스트 상태 확인 중 오류:', error);
+        }
+    });
+}
+
+// 위시리스트 추가/제거 토글 함수 (AJAX)
+function toggleWishlist(storeId, btnElement) {
+    if (!memberId || memberId.trim() === '') {
+        if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+            window.location.href = contextPath + '/member/login';
+        }
+        return;
+    }
+
+    const isWishlisted = $(btnElement).hasClass('active');
+    const url = isWishlisted ? `${contextPath}/wishlist/remove` : `${contextPath}/wishlist/add`;
+    const type = isWishlisted ? 'DELETE' : 'POST';
+    const confirmMsg = isWishlisted ? "위시리스트에서 삭제하시겠습니까?" : "위시리스트에 추가하시겠습니까?";
+    const successMsg = isWishlisted ? "위시리스트에서 삭제되었습니다." : "위시리스트에 추가되었습니다.";
+    const newClass = isWishlisted ? 'removeClass' : 'addClass';
+
+    if (confirm(confirmMsg)) {
         $.ajax({
-            url: `${contextPath}/wishlist/isWishlisted`,
-            type: 'GET',
-            data: {
-                memberId: memberId,
-                storeId: storeId
-            },
+            url: url,
+            type: type,
+            data: { memberId, storeId },
             success: function(response) {
-                if (response === true) {
-                    $(btnElement).addClass('active');
-                } else {
-                    $(btnElement).removeClass('active');
-                }
+                alert(successMsg);
+                $(btnElement)[newClass]('active');
             },
-            error: function(error) {
-                console.error('Error checking wishlist status:', error);
+            error: function(xhr) {
+                alert(xhr.responseText || "오류가 발생했습니다.");
             }
         });
     }
+}
 
+document.addEventListener('DOMContentLoaded', function () {
+    // 초기 탭 UI 세팅
+    $(".tab_content").hide();
+    $("ul.tabs li:first").addClass("active").show();
+    $(".tab_content:first").show();
+
+    const activeTabStores = {
+        "#tab1": menuStores,
+        "#tab2": addrStores,
+        "#tab3": nameStores
+    };
+
+    // 탭 클릭 시 마커 갱신
+    $("ul.tabs li").click(function (e) {
+        e.preventDefault();
+        $("ul.tabs li").removeClass("active");
+        $(this).addClass("active");
+        $(".tab_content").hide();
+
+        const activeTab = $(this).find("a").attr("href");
+        $(activeTab).fadeIn();
+
+        if (activeTabStores[activeTab]) {
+            showMarkers(activeTabStores[activeTab]);
+        }
+    });
+
+    // 위시리스트 버튼 클릭
     $(document).on('click', '.wishlist-btn', function () {
         const storeId = $(this).data('store-id');
         toggleWishlist(storeId, this);
     });
 
-    function toggleWishlist(storeId, btnElement) {
-    	if (!memberId || memberId == null || memberId.trim() === '') {
-            if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
-                window.location.href = contextPath + '/member/login';  // 로그인 페이지 경로 맞게 수정하세요
-            }
-            return;
-        }
+    // 지도 초기화
+    initMap();
 
-        const isWishlisted = $(btnElement).hasClass('active');
-
-        if (isWishlisted) {
-            if (confirm("위시리스트에 이미 추가되었습니다. 삭제하시겠습니까?")) {
-                $.ajax({
-                    url: `${contextPath}/wishlist/remove`,
-                    type: 'DELETE',
-                    data: { memberId, storeId },
-                    success: function(response) {
-                        alert(response);
-                        $(btnElement).removeClass('active');
-                    },
-                    error: function(xhr) {
-                        alert(xhr.responseText || "오류가 발생했습니다.");
-                    }
-                });
-            }
-        } else {
-            $.ajax({
-                url: `${contextPath}/wishlist/add`,
-                type: 'POST',
-                data: { memberId, storeId },
-                success: function(response) {
-                    alert(response);
-                    $(btnElement).addClass('active');
+    // 옵션에 따라 초기 마커 표시
+    if (option === "userLocation") {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    getAddressFromCoords(lat, lng);
+                    showMarkers(userLocationStores);
                 },
-                error: function(xhr) {
-                    alert(xhr.responseText || "오류가 발생했습니다.");
+                () => {
+                    alert("사용자 위치를 가져오지 못했습니다.");
                 }
-            });
+            );
+        } else {
+            alert("브라우저가 위치 정보를 지원하지 않습니다.");
         }
+    } else if (option === "region") {
+        showMarkers(regionStores);
+    } else if (option === "search") {
+        showMarkers(menuStores);
     }
 
-    $(function () {
-        // 로그인 된 상태라면 위시리스트 상태 확인 실행
-        if (memberId) {
-            $('.wishlist-btn').each(function() {
-                const storeId = $(this).data('store-id');
-                checkWishlistStatus(storeId, this);
-            });
-        }
-    });
+    // 로그인 상태라면 위시리스트 상태 초기화
+    if (memberId && memberId.trim() !== '') {
+        $('.wishlist-btn').each(function() {
+            const storeId = $(this).data('store-id');
+            checkWishlistStatus(storeId, this);
+        });
+    }
+});
+
+
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&v=weekly&libraries=marker" defer></script>

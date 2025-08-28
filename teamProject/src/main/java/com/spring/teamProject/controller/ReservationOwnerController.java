@@ -2,6 +2,7 @@
 package com.spring.teamProject.controller;
 
 import com.spring.teamProject.service.ReservationService;
+import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.StoreVO;
 import org.slf4j.Logger;
@@ -9,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -26,38 +24,51 @@ public class ReservationOwnerController {
     @Autowired
     private ReservationService reservationService;
 
-    // JSP에 전달할 가데이터 StoreVO 생성
-    private StoreVO getDummyStoreInfo(Long storeId) {
-        StoreVO store = new StoreVO();
-        store.setStoreId(storeId);
-        store.setStoreName("더미 매장 (ID:" + storeId + ")");
-        store.setRoadAddress("서울시 가짜구 더미동 123");
-        return store;
-    }
+    @Autowired
+    private StoreService storeService;
 
     /**
-     * 점주용 예약 목록을 보여주는 메서드
+     * 점주용 예약 목록을 보여주는 메서드 (JSP 화면 반환)
      * GET /reservation/owner/manageList?storeId={storeId}
-     * 이 메서드는 manageBookingList.jsp 화면을 반환하고 해당 매장의 예약 목록을 전달합니다.
      */
     @GetMapping("/manageList")
     public String manageReservations(@RequestParam("storeId") Long storeId, Model model) {
-        logger.info("점주 예약 관리 목록 요청 - storeId: {}", storeId);
-
-        StoreVO store = getDummyStoreInfo(storeId);
-        model.addAttribute("store", store);
-        model.addAttribute("storeId", storeId);
+        logger.info("점주 예약 관리 목록 페이지 요청 - storeId: {}", storeId);
 
         try {
-            List<ReservationVO> reservations = reservationService.getReservationsByStoreId(storeId);
-            model.addAttribute("reservations", reservations);
-            logger.info("매장 ID {}의 예약 {}건 조회.", storeId, reservations.size());
+            // 실제 DB에서 StoreVO 데이터를 가져옵니다.
+            StoreVO store = storeService.getStoreById(storeId);
+            model.addAttribute("store", store);
+            model.addAttribute("storeId", storeId);
+            logger.info("매장 ID {}의 정보 조회 성공: {}", storeId, store.getStoreName());
+
         } catch (Exception e) {
-            logger.error("매장 ID {} 예약 목록 조회 중 오류 발생: {}", storeId, e.getMessage(), e);
-            model.addAttribute("errorMessage", "예약 목록을 불러오는데 오류가 발생했습니다.");
+            logger.error("매장 ID {} 정보 조회 중 오류 발생: {}", storeId, e.getMessage(), e);
+            model.addAttribute("errorMessage", "매장 정보를 불러오는데 오류가 발생했습니다.");
         }
 
-        return "reservation/owner/manageBookingList";
+        model.addAttribute("body", "reservation/owner/manageBookingList.jsp");
+
+        return "owner/owner_layout";
+    }
+
+    /**
+     * 무한 스크롤을 위한 예약 목록 API
+     * GET /reservation/owner/api/reservations
+     * @throws Exception
+     */
+    @GetMapping("/api/reservations")
+    @ResponseBody
+    public List<ReservationVO> getReservationsByApi(@RequestParam("storeId") Long storeId,
+                                                    @RequestParam("status") String status,
+                                                    @RequestParam("page") int page,
+                                                    @RequestParam("size") int size) throws Exception {
+        logger.info("무한 스크롤을 위한 예약 목록 API 요청 - storeId: {}, status: {}, page: {}, size: {}", storeId, status, page, size);
+
+        List<ReservationVO> reservationsFromService = reservationService.getReservationsByStoreIdAndStatusWithPaging(storeId, status, page, size);
+        logger.info("무한 스크롤 API 응답 - {} 건의 데이터 반환", reservationsFromService.size());
+
+        return reservationsFromService;
     }
 
     /**
@@ -72,13 +83,13 @@ public class ReservationOwnerController {
         logger.info("예약 상태 업데이트 요청 - reservationId: {}, status: {}", reservationId, status);
         try {
             reservationService.updateReservationStatus(reservationId, status);
-            
+
             if(status.equals("CONFIRMED")) {
             	reservationService.increaseUserTemperatureByReservation(reservationId);
             } else if (status.equals("NO_SHOW")) {
             	reservationService.decreaseUserTemperatureByReservation(reservationId);
             }
-            
+
             redirectAttributes.addFlashAttribute("message", "예약 상태가 성공적으로 업데이트되었습니다.");
         } catch (Exception e) {
             logger.error("예약 상태 업데이트 중 오류 발생: {}", e.getMessage(), e);
@@ -90,11 +101,10 @@ public class ReservationOwnerController {
     /*
      * 가맹점 회원이 매장 테이블을 생성합니다 (벽, 유리, 테이블)
      */
-
     @GetMapping("/layout_editor")
-    public String layoutEditor(@RequestParam("storeId") Long storeId, Model model) {
+    public String layoutEditor(@RequestParam("storeId") Long storeId, Model model) throws Exception {
         logger.info("레이아웃 에디터 요청 - storeId: {}", storeId);
-        StoreVO store = getDummyStoreInfo(storeId);
+        StoreVO store = storeService.getStoreById(storeId);
         model.addAttribute("store", store);
         model.addAttribute("storeId", storeId);
         return "reservation/owner/layout_editor";

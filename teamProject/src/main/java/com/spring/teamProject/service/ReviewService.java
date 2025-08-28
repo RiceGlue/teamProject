@@ -29,4 +29,5 @@ public interface ReviewService {
 	
 	public List<ReviewVO> getBestReviewList() throws Exception;
 	public ImageFileVO getBestReviewImage(long reviewId) throws Exception;
+	public List<ReviewVO> getUserReview(long memberId) throws Exception;
 }

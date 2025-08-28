@@ -35,4 +35,5 @@ public interface ReviewDAO {
 	
 	public List<ReviewVO> selectBestReview() throws DataAccessException;
 	public ImageFileVO selectBestReviewImage(long reviewId) throws DataAccessException;
+	public List<ReviewVO> selectUserReview(long memberId) throws DataAccessException;
 }

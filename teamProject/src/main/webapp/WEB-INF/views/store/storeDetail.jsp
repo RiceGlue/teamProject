@@ -188,7 +188,7 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 
 .type-store-container { display: flex; flex-wrap: wrap; gap: 20px; }
 .type-store {width: calc((100% - 40px) / 3);border: 1px solid grey;border-radius: 10px;padding: 5px 5px;}
-
+.meta-info { font-size:13px; color:#777; margin:0; }
 </style>
 
 </head>
@@ -499,6 +499,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				<button class="wishlist-btn" id="wishlist-btn" aria-label="위시리스트 추가/제거"><i class="fa fa-bookmark "></i></button>
 				<button class="btn btn-outline-secondary btn-sm mt-2" id="copyUrlBtn">공유</button>
 			</div>
+			<small>${store.storeType }</small>
 			<div class="rating mt-2 mb-2">
 				<img src="${contextPath}/image/review_rating.jpg" width="16" height="16" alt="리뷰이미지"> ${store.avgRating}&nbsp;&nbsp;&nbsp;리뷰 ${store.countRating}개
 				<button type="button" onClick="openTab3()" class="btn btn-link" style="text-decoration:none; color:black;"><strong>></strong></button>
@@ -633,19 +634,34 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="type-store-container">
 						<c:forEach var="type" items="${storeTypeList}">
 							<div class="type-store">
-								<img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="180px">
+								<a href="${contextPath}/store/storeDetail?storeId=${type.storeId}"><img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="180px"></a>
 								<div class="type-storeInfo">
-									<h6>${type.storeName} | ${type.storeType}</h6>
-									<h6>${type.roadAddress}</h6>
-									<h6>${type.localNumber} - ${type.number1} - ${type.number2}</h6>
+									<p><span class="rating">⭐ ${type.avgRating}</span> 리뷰 ${type.countRating}개</p> 
+									<h5>${type.storeName} · ${type.storeType}</h5>
+									<p class="meta-info">📍${type.roadAddress}</p>
+								    <p class="meta-info">📞${type.localNumber} - ${type.number1} - ${type.number2}</p>
+								    <p class="meta-info">📝${type.description}</p>
 								</div>
 							</div>
 						</c:forEach>
 					</div>
 					
 					<h5 class="mt-4">가게 주변 맛집</h5>
-					<div>
-						
+					<div class="type-store-container">
+						<c:forEach var="near" items="${nearByStoreList}">
+						    <c:if test="${near.storeId != store.storeId}">
+						        <div class="type-store">
+						            <a href="${contextPath}/store/storeDetail?storeId=${near.storeId}"><img alt="${near.storeName}" src="${contextPath}/images/store/${near.fileName}" width="180px"></a>
+						            <div class="type-storeInfo">
+						                <p><span class="rating">⭐ ${near.avgRating}</span> 리뷰 ${near.countRating}개</p> 
+						                <h5>${near.storeName} · ${near.storeType}</h5>
+						                <p class="meta-info">📍${near.roadAddress}</p>
+						                <p class="meta-info">📞${near.localNumber} - ${near.number1} - ${near.number2}</p>
+						                <p class="meta-info">📝${near.description}</p>
+						            </div>
+						        </div>
+						    </c:if>
+						</c:forEach>
 					</div>
 				</div>
 
@@ -791,5 +807,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			</div>
 		</div>
 	</div>
+</div>
 </body>
 </html>
