@@ -89,7 +89,7 @@
     <div class="sidebar">
         <a class="sidebar-brand" href="${contextPath}/owner/dashboard">얌테이블 점주센터</a>
         <hr class="sidebar-divider">
-        
+
         <div class="nav-item">
             <a class="nav-link active" href="${contextPath}/owner/dashboard"> <i class="bi bi-house-door-fill me-2"></i> 대시보드 홈 </a>
         </div>
@@ -106,8 +106,8 @@
                 <div id="collapseStoreSubMenu" class="collapse">
                 	<a class="nav-link" href="${contentPath }/franchise/storeManage?type=store">> 매장 정보 관리</a>
                     <a class="nav-link" href="${contentPath }/franchise/storeManage?type=menu">> 메뉴 관리</a>
-                    <a class="nav-link" href="#">> 웨이팅 설정/현황</a>
-                    <a class="nav-link" href="#">> 예약 설정/현황</a>
+                    <a class="nav-link" href="${contextPath}/owner/select-store">> 웨이팅 설정/현황</a>
+     				<a class="nav-link" href="${contextPath}/owner/select-store">> 예약 설정/현황</a>
                 </div>
             </div>
         </div>
@@ -135,9 +135,9 @@
                 <a class="nav-link" href="#">- 회원탈퇴</a>
             </div>
         </div>
-        
+
         <hr class="sidebar-divider">
-        
+
         <div class="nav-item">
             <a class="nav-link" href="${contextPath}/" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>메인 페이지로</a>
         </div>
