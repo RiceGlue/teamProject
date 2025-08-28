@@ -25,7 +25,7 @@
                             <div class="card-body p-4">
                                 <h5 class="card-title">${store.storeName}</h5>
                                 <p class="card-text text-muted">${store.roadAddress}</p>
-                                <a href="${contextPath}/owner/waitings/manage?storeId=${store.storeId}" class="btn btn-info btn-sm">웨이팅 관리</a>
+                                <a href="${contextPath}/waiting/owner/settings?storeId=${store.storeId}" class="btn btn-info btn-sm">웨이팅 관리</a>
                                 <a href="${contextPath}/owner/reservations/manage?storeId=${store.storeId}" class="btn btn-primary btn-sm">예약 관리</a>
                                 <a href="${contextPath}/owner/store/layoutEditor?storeId=${store.storeId}" class="btn btn-secondary btn-sm">레이아웃 편집</a>
                             </div>
