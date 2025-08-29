@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class BannerServiceImpl implements BannerService {
@@ -38,20 +38,14 @@ public class BannerServiceImpl implements BannerService {
         return bannerRepository.findByStatusAndStartAtLessThanEqualAndEndAtGreaterThanEqualOrderByOrderIndexAsc("active", LocalDate.now(), LocalDate.now());
     }
 
-    // 관리자 페이지용 기능
-    @Override
-    public List<BannerEntity> getAllBanners() {
-        return bannerRepository.findAll();
-    }
-
+    // 신규 배너 저장
     @Override
     @Transactional
     public void saveBanner(BannerEntity banner, MultipartFile pcImageFile, MultipartFile mobileImageFile) {
         // 1. PC용 이미지 처리 (필수)
         if (pcImageFile != null && !pcImageFile.isEmpty()) {
             String savedPcFileName = uploadAndValidateBannerImage(pcImageFile, 1200, 400);
-            // 전체 가상 경로 저장 "경로주소" + savedPcFileName 으로 할경우 경로를 포함한 파일명으로 저장 가능합니다
-            banner.setImagePath(savedPcFileName);
+            banner.setImagePath(savedPcFileName); // 순수 파일명만 저장
         } else {
             throw new IllegalArgumentException("PC용 배너 이미지는 필수입니다.");
         }
@@ -59,8 +53,7 @@ public class BannerServiceImpl implements BannerService {
         // 2. 모바일용 이미지 처리 (선택)
         if (mobileImageFile != null && !mobileImageFile.isEmpty()) {
             String savedMobileFileName = uploadAndValidateBannerImage(mobileImageFile, 1200, 400);
-            // 전체 가상 경로 저장 "경로주소" + savedPcFileName 으로 할경우 경로를 포함한 파일명으로 저장 가능합니다
-            banner.setMobileImagePath(savedMobileFileName);
+            banner.setMobileImagePath(savedMobileFileName); // 순수 파일명만 저장
         }
         
         // 3. DB에 저장하기 전, 필수 값들을 설정합니다.
@@ -71,7 +64,7 @@ public class BannerServiceImpl implements BannerService {
         bannerRepository.save(banner);
     }
 
-    // ID로 배너를 조회하는 로직 구현
+    // ID로 배너 조회
     @Override
     public BannerEntity getBannerById(String bannerId) {
         // JPA Repository의 findById 메소드는 Optional을 반환하므로, 없으면 null을 반환하도록 처리합니다.
@@ -79,7 +72,7 @@ public class BannerServiceImpl implements BannerService {
         return banner.orElse(null);
     }
 
-    // 배너 수정 로직 구현
+    // 배너 정보 수정
     @Override
     @Transactional
     public void updateBanner(BannerEntity banner, MultipartFile pcImageFile, MultipartFile mobileImageFile) {
@@ -93,14 +86,14 @@ public class BannerServiceImpl implements BannerService {
             ftpService.deleteFile("banners", existingBanner.getImagePath());
             // 2-2. 새 파일 업로드 후 파일명 저장
             String savedPcFileName = uploadAndValidateBannerImage(pcImageFile, 1200, 400);
-            existingBanner.setImagePath(savedPcFileName);
+            existingBanner.setImagePath(savedPcFileName); // 순수 파일명만 저장
         }
 
         // 3. 새로운 모바일 이미지가 업로드되었으면, 기존 파일을 삭제하고 새 파일로 교체합니다.
         if (mobileImageFile != null && !mobileImageFile.isEmpty()) {
             ftpService.deleteFile("banners", existingBanner.getMobileImagePath());
             String savedMobileFileName = uploadAndValidateBannerImage(mobileImageFile, 1200, 400);
-            existingBanner.setMobileImagePath(savedMobileFileName);
+            existingBanner.setMobileImagePath(savedMobileFileName); // 순수 파일명만 저장
         }
 
         // 4. 폼에서 넘어온 나머지 정보들을 업데이트합니다.
@@ -114,8 +107,8 @@ public class BannerServiceImpl implements BannerService {
         // 5. JPA의 변경 감지(Dirty Checking) 기능에 의해, 메소드가 끝나면 자동으로 DB에 UPDATE 쿼리가 실행됩니다.
         bannerRepository.save(existingBanner);
     }
-
-    // 배너 삭제 로직 구현
+    
+    // 배너 삭제
     @Override
     @Transactional
     public void deleteBanner(String bannerId) {
@@ -138,43 +131,74 @@ public class BannerServiceImpl implements BannerService {
         }
     }
 
-    // ✨ --- [신규] 페이징 조회 로직 구현 --- ✨
+    // 관리자용 페이징 조회 - 현재 게시 중
     @Override
     public Page<BannerEntity> getActiveBannersForAdmin(Pageable pageable) {
         return bannerRepository.findActiveBannersForAdmin(LocalDate.now(), pageable);
     }
 
+    // 관리자용 페이징 조회 - 게시 예정
     @Override
     public Page<BannerEntity> getScheduledBanners(Pageable pageable) {
         return bannerRepository.findScheduledBanners(LocalDate.now(), pageable);
     }
 
+    // 관리자용 페이징 조회 - 게시 종료
     @Override
     public Page<BannerEntity> getEndedBanners(Pageable pageable) {
         return bannerRepository.findEndedBanners(LocalDate.now(), pageable);
     }
 
-    // ✨ --- [신규] 순서 변경을 위해 '게시 중'인 모든 배너 목록을 조회하는 로직 구현 --- ✨
+    // 순서 변경용 목록 조회 (페이징 없음)
     @Override
     public List<BannerEntity> getActiveBannersForOrdering() {
         return bannerRepository.findActiveBannersForOrdering(LocalDate.now());
     }
 
-    // ✨ --- [신규] 변경된 배너 순서를 DB에 일괄 업데이트하는 로직 구현 --- ✨
+    // 순서 일괄 업데이트
     @Override
     @Transactional
     public void updateBannerOrder(List<String> bannerIds) {
         for (int i = 0; i < bannerIds.size(); i++) {
             String bannerId = bannerIds.get(i);
-            int newOrderIndex = i + 1; // 순서는 1부터 시작
-
-            // ID로 배너를 찾아서 orderIndex를 업데이트합니다.
+            int newOrderIndex = i + 1;
             bannerRepository.findById(bannerId).ifPresent(banner -> {
                 banner.setOrderIndex(newOrderIndex);
                 bannerRepository.save(banner);
             });
         }
     }
+    
+    // 기본 배너 저장
+    @Override
+    @Transactional
+    public void saveDefaultBanner(MultipartFile defaultImageFile) {
+        if (defaultImageFile == null || defaultImageFile.isEmpty()) {
+            throw new IllegalArgumentException("기본 배너로 등록할 이미지 파일을 선택해주세요.");
+        }
+        validateFile(defaultImageFile, 1200, 400);
+
+        // 기본 배너는 항상 고정된 파일명으로 저장 (확장자는 원본 유지)
+        String extension = getFileExtension(defaultImageFile);
+        String defaultBannerName = "default_banner" + extension;
+        
+        File tempLocalFile = new File(tempDir + UUID.randomUUID().toString() + extension);
+        try {
+            defaultImageFile.transferTo(tempLocalFile);
+            boolean success = ftpService.uploadFile(tempLocalFile, "banners", defaultBannerName);
+            if (!success) {
+                throw new RuntimeException("FTP 서버에 기본 배너 이미지 저장 실패");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("기본 배너 이미지 파일 처리 중 오류 발생", e);
+        } finally {
+            if (tempLocalFile.exists()) {
+                tempLocalFile.delete();
+            }
+        }
+    }
+
+    // --- Private Helper Methods ---
 
     /**
      * 배너 이미지를 검증하고, 임시 폴더에 저장한 뒤, FTP 서버로 업로드하는 헬퍼 메소드입니다.
@@ -187,9 +211,7 @@ public class BannerServiceImpl implements BannerService {
         // --- 1. 파일 유효성 검사 ---
         validateFile(multipartFile, maxWidth, maxHeight);
 
-        // --- 2. 파일 저장 로직 ---
-        String originalFilename = multipartFile.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String extension = getFileExtension(multipartFile);
         String savedFilename = UUID.randomUUID().toString() + extension;
         File tempLocalFile = new File(tempDir + savedFilename);
 
@@ -215,8 +237,7 @@ public class BannerServiceImpl implements BannerService {
     private void validateFile(MultipartFile file, int maxWidth, int maxHeight) {
         // 확장자 검사
         List<String> allowedExtensions = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        String extension = getFileExtension(file).toLowerCase();
         if (!allowedExtensions.contains(extension)) {
             throw new IllegalArgumentException("허용되지 않는 파일 형식입니다. (JPG, PNG, GIF만 가능)");
         }
@@ -239,5 +260,13 @@ public class BannerServiceImpl implements BannerService {
         } catch (IOException e) {
             throw new RuntimeException("이미지 파일을 읽는 중 오류가 발생했습니다.", e);
         }
+    }
+
+    private String getFileExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            return "";
+        }
+        return originalFilename.substring(originalFilename.lastIndexOf("."));
     }
 }

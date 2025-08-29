@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity // JPA 엔티티임을 명시
 @Table(name = "promotions") // 매핑할 테이블 이름
@@ -37,9 +39,11 @@ public class PromotionEntity {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }
