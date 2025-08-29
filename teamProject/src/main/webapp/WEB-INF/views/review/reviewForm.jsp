@@ -147,6 +147,9 @@ function clearImages() {
 }
 
 function checkReview() {
+	debugger;
+	console.log('✅ checkReview() 함수 시작');
+
   const form = document.querySelector('form');
 
   const ratingInputs = document.querySelectorAll('input[name="rating"]');
@@ -155,11 +158,21 @@ function checkReview() {
     return false; // form.submit() 대신 false 반환
   }
 
-  const content = form.content.value.trim();
+//   const content = form.content.value.trim();
+//   if (content.length < 10) {
+//     alert('리뷰 내용을 10자 이상 작성해주세요.');
+//     form.content.focus();
+//     return false;
+//   }
+
+  //const content = form.content.value.trim();
+
+  const contentElement = document.getElementById('content'); // ✨ ID로 직접 요소 가져오기
+  const content = contentElement.value.trim(); // ✨ 가져온 요소의 value에 접근
   if (content.length < 10) {
-    alert('리뷰 내용을 10자 이상 작성해주세요.');
-    form.content.focus();
-    return false;
+      console.log('리뷰 내용이 10자 미만입니다. return false를 실행합니다.');
+      form.content.focus();
+      return false; // 이 줄이 실행되는지 확인하세요.
   }
 
   const tasteInputs = document.getElementsByName('taste');
@@ -185,30 +198,32 @@ function checkReview() {
     alert('청결 상태 평점을 선택해주세요.');
     return false;
   }
-  
+
   // 폼 제출 전에 FormData에 파일을 추가합니다.
   const formData = new FormData(form);
   selectedFiles.forEach((file, index) => {
       formData.append('fileName[]', file);
   });
-  
+  console.log('✅ fetch 요청 시작');
   fetch(form.action, {
 	    method: 'POST',
 	    body: formData
 	})
 	.then(response => {
+		console.log('✅ fetch 응답 받음:', response.status);
 	    // HTTP 응답이 성공적인지 확인
 	    if (!response.ok) {
 	        throw new Error('네트워크 응답이 실패했습니다.');
 	    }
 	    // 응답 본문을 텍스트로 먼저 변환하여 오류를 방지
-	    return response.text(); 
+	    return response.text();
 	})
 	.then(text => {
 	    try {
+	    	console.log('✅ 서버 응답 텍스트:', text);
 	        // 텍스트를 JSON으로 파싱 시도
 	        const data = JSON.parse(text);
-	        console.log(data); // 서버가 보낸 데이터를 콘솔에 출력
+	        console.log('✅ JSON 파싱 성공:',data); // 서버가 보낸 데이터를 콘솔에 출력
 	        if (data.success) {
 	            alert(data.message);
 	            window.location.href='${contextPath}/member/mypage';
@@ -251,7 +266,7 @@ function checkReview() {
 				<input type="hidden" name="waitingId" value="${waitingId}" />
 			</c:otherwise>
 		</c:choose>
-		
+
 		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
 			<div class="form-input" style="flex: 1;">
 				<div class="star-rating">
@@ -267,16 +282,16 @@ function checkReview() {
 					<label for="star1" title="1점">★</label>
 				</div>
 			</div>
-	
+
 			<h4 id="rating-message">별점을 선택해주세요</h4>
 		</div>
-		
+
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
 			<div class="form-input" style="flex: 1;">
 				<textarea id="content" name="content" rows="5" cols="100" placeholder="리뷰를 작성해주세요." required></textarea>
 			</div>
 		</div>
-		
+
 		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
 			<div class="form-input" style="flex: 1;">
 				<input type="file" id="fileName" name="fileName" accept="image/*" multiple="multiple" onchange="previewReviewImage(this)" />
@@ -286,7 +301,7 @@ function checkReview() {
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="storeRating">
 			<div class="rating-group">
 				<div class="rating-label">음식 맛은 어떤가요?</div>
@@ -298,7 +313,7 @@ function checkReview() {
 					<input type="radio" id="taste-5" name="taste" value="5"><label for="taste-5">최고</label>
 				</div>
 			</div>
-			
+
 			<div class="rating-group">
 				<div class="rating-label">분위기는 어떤가요?</div>
 				<div class="rating-options">
@@ -309,7 +324,7 @@ function checkReview() {
 					<input type="radio" id="mood-5" name="mood" value="5"><label for="mood-5">최고</label>
 				</div>
 			</div>
-			
+
 			<div class="rating-group">
 				<div class="rating-label">서비스는 친절했나요?</div>
 				<div class="rating-options">
@@ -320,7 +335,7 @@ function checkReview() {
 					<input type="radio" id="service-5" name="service" value="5"><label for="service-5">최고</label>
 				</div>
 			</div>
-			
+
 			<div class="rating-group">
 				<div class="rating-label">매장 청결상태는 양호한가요?</div>
 				<div class="rating-options">

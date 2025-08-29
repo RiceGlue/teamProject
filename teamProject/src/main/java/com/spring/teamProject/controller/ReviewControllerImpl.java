@@ -46,7 +46,7 @@ public class ReviewControllerImpl implements ReviewController{
 
 	@Autowired
 	private ReviewServiceImpl reviewService;
-	
+
 	@Autowired
 	private FtpService ftpService;
 
@@ -107,66 +107,90 @@ public class ReviewControllerImpl implements ReviewController{
 		long storeId = review.getStoreId();
 		long reservationId = review.getReservationId();
 		long waitingId = review.getWaitingId();
-		
+
 		String contextPath = multiReq.getContextPath();
-		
+
+		System.out.println("---- addReview 메서드 시작 ----");
+	    System.out.println("memberId: " + regId);
+	    System.out.println("storeId: " + storeId);
+	    System.out.println("reservationId: " + reservationId);
+	    System.out.println("waitingId: " + waitingId);
+
 		try {
 			long reviewId;
-			
+
+			System.out.println("1. 리뷰 ID 생성 시도");
 			if (reservationId != 0) {
 				reviewId = reviewService.addReservationReview(review);
+				System.out.println("리뷰 ID (예약): " + reviewId);
 				System.out.print(reviewId);
 			} else if (waitingId != 0) {
 				reviewId = reviewService.addWaitingReview(review);
+				System.out.println("리뷰 ID (웨이팅): " + reviewId);
 			} else {
+				System.out.println("예약/웨이팅 정보 누락. HTTP 400 반환.");
 				return ResponseEntity.badRequest().body("예약 또는 웨이팅 정보가 누락되었습니다.");
 			}
-		
+
 			List<MultipartFile> files = multiReq.getFiles("fileName");
 			List<ImageFileVO> imgList = new ArrayList<>();
-		
+
+			System.out.println("2. 이미지 파일 처리 시작. 파일 수: " + files.size());
 			for (MultipartFile file : files) {
-				if (file.isEmpty()) continue;
-			
+				if (file.isEmpty()) {
+					System.out.println(" - 빈 파일 건너뛰기");
+					continue;
+				}
+
 				String originalFilename = file.getOriginalFilename();
 				String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 				String savedFilename = UUID.randomUUID().toString() + extension;
-			
+
+				System.out.println(" - 원본 파일명: " + originalFilename + ", 저장 파일명: " + savedFilename);
+
 				File tempFile = File.createTempFile("upload-", extension);
 				file.transferTo(tempFile);
-			
+
+				System.out.println("3. FTP 업로드 시도");
 				boolean uploadSuccess = ftpService.uploadFile(tempFile, "review", savedFilename);
 				tempFile.delete();
-			
+
 				if (!uploadSuccess) {
+					System.out.println("4. FTP 업로드 실패! 예외 발생.");
 					throw new Exception("FTP 업로드 실패");
 				}
-			
+				System.out.println("4. FTP 업로드 성공.");
+
 				ImageFileVO imageFile = new ImageFileVO();
 				imageFile.setFileName(savedFilename);
 				imageFile.setRegId(regId);
 				imageFile.setStoreId(storeId);
 				imageFile.setReviewId(reviewId);
 				imageFile.setDisplayNo(imgList.size());
-			
+
 				imgList.add(imageFile);
+				System.out.println(" - 이미지 VO 리스트에 추가");
 			}
-			
+
+			System.out.println("5. 이미지 DB 저장 시도. 이미지 수: " + imgList.size());
 			if (!imgList.isEmpty()) {
 			    reviewService.addReviewImageFiles(imgList);
 			}
-		
+
 			// HTTP 응답 헤더를 설정하여 JSON임을 명시합니다.
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.APPLICATION_JSON);
-			
+
+	        System.out.println("6. 최종 성공 응답 반환");
 	        return new ResponseEntity<>(Map.of(
 	                "success", true,
 	                "message", "리뷰가 성공적으로 등록되었습니다."
 	            ), headers, HttpStatus.OK);
-	        
+
 		    } catch (Exception e) {
+		    	System.out.println("---- catch 블록 실행됨! ----");
 		        e.printStackTrace();
+		        System.out.println("예외 메시지: " + e.getMessage());
 		        return ResponseEntity.internalServerError().body(Map.of( "error", true, "message", "리뷰 등록 중 오류 발생"  ));
 		    }
 	}
@@ -195,10 +219,10 @@ public class ReviewControllerImpl implements ReviewController{
 	                String originalFilename = mf.getOriginalFilename();
 	                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 	                String savedFilename = UUID.randomUUID().toString() + extension;
-	                
+
 	                File tempFile = File.createTempFile("upload-", extension);
 	                mf.transferTo(tempFile);
-	                
+
 	                // FTP 업로드 시 UUID로 생성된 고유 파일명 사용
 	                boolean uploadResult = ftpService.uploadFile(tempFile, directoryName, savedFilename);
 
@@ -223,7 +247,7 @@ public class ReviewControllerImpl implements ReviewController{
 	        reviewService.modifyReview(review);
 
 	        int displayNo = 5 - deleteCount;
-	        
+
 	        if (deleteCount > 0 && addCount > 0) {
 	            int min = Math.min(deleteCount, addCount);
 
@@ -277,24 +301,24 @@ public class ReviewControllerImpl implements ReviewController{
 	        ));
 	    }
 	}
-	
+
 	@Override
 	@RequestMapping(value="/deleteReview", method=RequestMethod.POST)
 	public ModelAndView deleteReview(@RequestParam("reviewId") long reviewId) throws Exception {
 		ModelAndView mav = new ModelAndView();
 		String directoryName = "review";
-	
+
 		try {
 			List<ImageFileVO> imglist = reviewService.getImageFile(reviewId);
-		
+
 			for(int i=0;i<imglist.size();i++) {
 			String fileName = imglist.get(i).getFileName();
 			reviewService.deleteReviewImage(fileName);
 			ftpService.deleteFile(directoryName, fileName);
 			}
-		
+
 			reviewService.deleteReview(reviewId);
-		
+
 			mav.addObject("success", true);
 			mav.setViewName("redirect:/member/mypage");
 		} catch (Exception e) {
@@ -302,10 +326,10 @@ public class ReviewControllerImpl implements ReviewController{
 			mav.addObject("error", true);
 			mav.setViewName("redirect:/review/modifyReviewForm?reviewId=" + reviewId);
 		}
-	
+
 		return mav;
 	}
-	
+
 	@Override
 	@GetMapping("/getBestReview")
 	public ResponseEntity<Map<String, Object>> getBestReview() throws Exception {
@@ -327,7 +351,7 @@ public class ReviewControllerImpl implements ReviewController{
 
 	    return ResponseEntity.ok(responseMap);
 	}
-	
+
 	@PostMapping("/increaseLikes")
 	@ResponseBody
 	public Map<String, Object> increaseLikes(@RequestParam("reviewId") long reviewId, @RequestParam("memberId") long memberId) throws Exception {
@@ -361,7 +385,7 @@ public class ReviewControllerImpl implements ReviewController{
 	@GetMapping("/isLiked")
 	public ResponseEntity<Boolean> isLiked(@RequestParam("memberId") Long memberId, @RequestParam("reviewId") Long reviewId) throws Exception{
 		boolean result = reviewService.isLiked(memberId, reviewId);
-		
+
 		if(result) {
 			System.out.println("리뷰 좋아요 누름");
 		} else {
