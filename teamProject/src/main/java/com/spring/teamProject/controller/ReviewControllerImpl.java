@@ -3,17 +3,15 @@ package com.spring.teamProject.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,7 +36,6 @@ import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Controller("reviewController")
 @RequestMapping(value="/review")
@@ -102,7 +99,9 @@ public class ReviewControllerImpl implements ReviewController{
 	@Override
 	@PostMapping("/addReview")
 	@ResponseBody
-	public ResponseEntity<?> addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) {
+	public ModelAndView addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
+		ModelAndView mav = new ModelAndView();
+		
 		long regId = review.getMemberId();
 		long storeId = review.getStoreId();
 		long reservationId = review.getReservationId();
@@ -110,16 +109,9 @@ public class ReviewControllerImpl implements ReviewController{
 
 		String contextPath = multiReq.getContextPath();
 
-		System.out.println("---- addReview 메서드 시작 ----");
-	    System.out.println("memberId: " + regId);
-	    System.out.println("storeId: " + storeId);
-	    System.out.println("reservationId: " + reservationId);
-	    System.out.println("waitingId: " + waitingId);
-
 		try {
 			long reviewId;
-
-			System.out.println("1. 리뷰 ID 생성 시도");
+			
 			if (reservationId != 0) {
 				reviewId = reviewService.addReservationReview(review);
 				System.out.println("리뷰 ID (예약): " + reviewId);
@@ -129,18 +121,21 @@ public class ReviewControllerImpl implements ReviewController{
 				System.out.println("리뷰 ID (웨이팅): " + reviewId);
 			} else {
 				System.out.println("예약/웨이팅 정보 누락. HTTP 400 반환.");
-				return ResponseEntity.badRequest().body("예약 또는 웨이팅 정보가 누락되었습니다.");
+				mav = ViewUtil.layout("/member/mypage");
+				return mav;
 			}
 
-			List<MultipartFile> files = multiReq.getFiles("fileName");
+			List<MultipartFile> files = multiReq.getFiles("reviewImage");
+			System.out.println("업로드된 파일 개수: " + files.size());
+			for (MultipartFile file : files) {
+			    System.out.println("파일 이름: " + file.getOriginalFilename());
+			}
+
+			
 			List<ImageFileVO> imgList = new ArrayList<>();
 
-			System.out.println("2. 이미지 파일 처리 시작. 파일 수: " + files.size());
 			for (MultipartFile file : files) {
-				if (file.isEmpty()) {
-					System.out.println(" - 빈 파일 건너뛰기");
-					continue;
-				}
+				if (file.isEmpty()) continue;
 
 				String originalFilename = file.getOriginalFilename();
 				String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
@@ -151,15 +146,8 @@ public class ReviewControllerImpl implements ReviewController{
 				File tempFile = File.createTempFile("upload-", extension);
 				file.transferTo(tempFile);
 
-				System.out.println("3. FTP 업로드 시도");
 				boolean uploadSuccess = ftpService.uploadFile(tempFile, "review", savedFilename);
 				tempFile.delete();
-
-				if (!uploadSuccess) {
-					System.out.println("4. FTP 업로드 실패! 예외 발생.");
-					throw new Exception("FTP 업로드 실패");
-				}
-				System.out.println("4. FTP 업로드 성공.");
 
 				ImageFileVO imageFile = new ImageFileVO();
 				imageFile.setFileName(savedFilename);
@@ -169,138 +157,112 @@ public class ReviewControllerImpl implements ReviewController{
 				imageFile.setDisplayNo(imgList.size());
 
 				imgList.add(imageFile);
-				System.out.println(" - 이미지 VO 리스트에 추가");
 			}
 
-			System.out.println("5. 이미지 DB 저장 시도. 이미지 수: " + imgList.size());
 			if (!imgList.isEmpty()) {
 			    reviewService.addReviewImageFiles(imgList);
 			}
 
-			// HTTP 응답 헤더를 설정하여 JSON임을 명시합니다.
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
-
-	        System.out.println("6. 최종 성공 응답 반환");
-	        return new ResponseEntity<>(Map.of(
-	                "success", true,
-	                "message", "리뷰가 성공적으로 등록되었습니다."
-	            ), headers, HttpStatus.OK);
-
+	        mav.setViewName("redirect:/member/mypage");
 		    } catch (Exception e) {
-		    	System.out.println("---- catch 블록 실행됨! ----");
 		        e.printStackTrace();
 		        System.out.println("예외 메시지: " + e.getMessage());
-		        return ResponseEntity.internalServerError().body(Map.of( "error", true, "message", "리뷰 등록 중 오류 발생"  ));
+		        if(reservationId!=0) {
+		        	mav.setViewName("redirect:/review/reviewForm?memberId="+regId+"&storeId="+storeId+"&reservationId="+reservationId);
+		        	return mav;
+		        } else if(waitingId!=0) {
+		        	mav.setViewName("redirect:/review/reviewForm?memberId="+regId+"&storeId="+storeId+"&waitingId="+waitingId);
+		        	return mav;
+		        }
 		    }
+		 return mav;
 	}
 
 	@Override
 	@PostMapping("/modifyReview")
-	public ResponseEntity<?> modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
+	public ModelAndView modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception {
 	    String directoryName = "review";
+	    ModelAndView mav = new ModelAndView();
 
 	    long reviewId = review.getReviewId();
 	    long memberId = review.getMemberId();
 	    long storeId = review.getStoreId();
 
-	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileName");
+	    // 기존 이미지 배열
+	    String[] existingFileNames = multiReq.getParameterValues("existingFileNames");
 
-	    List<ImageFileVO> addedFiles = new ArrayList<>();
-	    Iterator<String> fileNames = multiReq.getFileNames();
+	    // 삭제할 이미지 배열
+	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileNames");
+	    boolean hasFilesToDelete = (deleteFileNames != null && deleteFileNames.length > 0);
 
-	    while (fileNames.hasNext()) {
-	        String fileName = fileNames.next();
-	        List<MultipartFile> files = multiReq.getFiles(fileName);
-
-	        for (MultipartFile mf : files) {
-	            if (!mf.isEmpty()) {
-	                // 기존 파일명에서 확장자를 추출하고, UUID로 고유한 파일명 생성
-	                String originalFilename = mf.getOriginalFilename();
-	                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-	                String savedFilename = UUID.randomUUID().toString() + extension;
-
-	                File tempFile = File.createTempFile("upload-", extension);
-	                mf.transferTo(tempFile);
-
-	                // FTP 업로드 시 UUID로 생성된 고유 파일명 사용
-	                boolean uploadResult = ftpService.uploadFile(tempFile, directoryName, savedFilename);
-
-	                if (uploadResult) {
-	                    ImageFileVO fileVO = new ImageFileVO();
-	                    // ImageFileVO에 고유한 파일명(savedFilename) 저장
-	                    fileVO.setFileName(savedFilename);
-	                    addedFiles.add(fileVO);
-	                } else {
-	                    tempFile.delete();
-	                    throw new IOException("FTP 업로드 실패: " + originalFilename);
-	                }
-	                tempFile.delete();
-	            }
-	        }
-	    }
-
-	    int deleteCount = deleteFileNames != null ? deleteFileNames.length : 0;
-	    int addCount = addedFiles.size();
+	    // 새로 추가된 파일
+	    List<MultipartFile> newFiles = multiReq.getFiles("newFiles");
+	    boolean hasFilesToAdd = (newFiles != null && !newFiles.isEmpty() && !newFiles.get(0).isEmpty());
 
 	    try {
+	        // ✅ 조건 1: 이미지 변경 없이 본문만 수정
+	        if (!hasFilesToDelete && !hasFilesToAdd) {
+	            reviewService.modifyReview(review);
+	            mav.setViewName("redirect:/member/mypage");
+	            return mav;
+	        }
+
+	        // ✅ 모든 경우 리뷰 본문은 수정
 	        reviewService.modifyReview(review);
 
-	        int displayNo = 5 - deleteCount;
-
-	        if (deleteCount > 0 && addCount > 0) {
-	            int min = Math.min(deleteCount, addCount);
-
-	            for (int i = 0; i < min; i++) {
-	                ImageFileVO oldFile = new ImageFileVO();
-	                String oldFileName = deleteFileNames[i];
-	                oldFile.setFileName(oldFileName);
-	                oldFile.setReviewId(reviewId);
-	                long imageId = reviewService.getImageId(oldFile);
-	                ImageFileVO newFile = addedFiles.get(i);
-	                newFile.setImageId(imageId);
-	                newFile.setReviewId(reviewId);
-	                reviewService.modifyReviewImage(newFile);
-	                ftpService.deleteFile(directoryName, oldFileName);
-	            }
-
-	            for (int i = min; i < addCount; i++) {
-	                ImageFileVO newFile = addedFiles.get(i);
-	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
-	                reviewService.addReviewImage(newFile);
-	            }
-
-	            for (int i = min; i < deleteCount; i++) {
-	                String oldFileName = deleteFileNames[i];
-	                reviewService.deleteReviewImage(oldFileName);
-	                ftpService.deleteFile(directoryName, oldFileName);
-	            }
-	        } else if (deleteCount > 0) {
-	            for (String fileName : deleteFileNames) {
-	                reviewService.deleteReviewImage(fileName);
-	                ftpService.deleteFile(directoryName, fileName);
-	            }
-
-	        } else if (addCount > 0) {
-	            for (ImageFileVO newFile : addedFiles) {
-	                populateFileMeta(newFile, storeId, reviewId, memberId, displayNo++);
-	                reviewService.addReviewImage(newFile);
+	        // ✅ 조건 3 or 4: 삭제할 파일 처리 (기존 이미지 배열에 존재할 경우만)
+	        if (hasFilesToDelete && existingFileNames != null) {
+	            for(int i=0;i<existingFileNames.length;i++) {
+	            	if(existingFileNames[i].equals(deleteFileNames[i])) {
+	            		reviewService.deleteReviewImage(existingFileNames[i]);
+	            	}
 	            }
 	        }
 
-	        return ResponseEntity.ok().body(Map.of(
-	            "status", "success",
-	            "reviewId", reviewId,
-	            "memberId", memberId
-	        ));
+	        // ✅ 조건 2 or 4: 이미지 추가
+	        if (hasFilesToAdd) {
+	            // 현재 남아 있는 이미지 개수 → displayNo 설정
+	            List<ImageFileVO> remainingImages = reviewService.getImageFile(reviewId);
+	            int displayNo = remainingImages.size();
+
+	            for (MultipartFile file : newFiles) {
+	                if (!file.isEmpty()) {
+	                    String originalFilename = file.getOriginalFilename();
+	                    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+	                    String savedFilename = UUID.randomUUID().toString() + extension;
+	                    
+	                    File tempFile = File.createTempFile("upload-", extension);
+	    				file.transferTo(tempFile);
+
+	    				boolean uploaded = ftpService.uploadFile(tempFile, directoryName, savedFilename);
+	                    if (!uploaded) {
+	                        throw new IOException("FTP 업로드 실패: " + originalFilename);
+	                    }
+	                    
+	                    tempFile.delete();
+
+	                    ImageFileVO image = new ImageFileVO();
+	                    image.setReviewId(reviewId);
+	                    image.setFileName(savedFilename);
+	                    image.setStoreId(storeId);
+	                    image.setRegId(memberId);
+	                    image.setDisplayNo(++displayNo);
+
+	                    reviewService.addReviewImage(image);
+	                }
+	            }
+	        }
+
+	        mav.setViewName("redirect:/member/mypage");
+
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-	            "status", "error",
-	            "message", "리뷰 수정 중 오류 발생"
-	        ));
+	    	e.printStackTrace();
+	        mav.setViewName("redirect:/review/modifyReviewForm?reviewId=" + reviewId);
 	    }
+
+	    return mav;
 	}
+
 
 	@Override
 	@RequestMapping(value="/deleteReview", method=RequestMethod.POST)
@@ -385,12 +347,6 @@ public class ReviewControllerImpl implements ReviewController{
 	@GetMapping("/isLiked")
 	public ResponseEntity<Boolean> isLiked(@RequestParam("memberId") Long memberId, @RequestParam("reviewId") Long reviewId) throws Exception{
 		boolean result = reviewService.isLiked(memberId, reviewId);
-
-		if(result) {
-			System.out.println("리뷰 좋아요 누름");
-		} else {
-			System.out.println("리뷰 좋아요 안누름");
-		}
 		return ResponseEntity.ok(result);
 	}
 

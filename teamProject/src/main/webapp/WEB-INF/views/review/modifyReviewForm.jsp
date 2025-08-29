@@ -4,34 +4,21 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <style>
+/* 기존 스타일은 유지 */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
-
 .storeInfo { text-align: center; padding: 40px 20px 20px 20px; background-color: #fff; border-bottom: 1px solid #e0e0e0; }
 .storeInfo img { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 .storeInfo h4 { font-size: 22px; color: #333; margin: 10px 0 5px; }
 .storeInfo h2 { font-size: 26px; font-weight: 600; color: #444; margin: 10px 0; }
-
 form { width: 95%; max-width: 750px; margin: 30px auto; background-color: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
-
 .form-row { margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
-
 .star-rating { direction: rtl; display: flex; justify-content: center; font-size: 2.2rem; gap: 5px; }
 .star-rating input[type="radio"] { display: none; }
 .star-rating label { color: #ccc; cursor: pointer; transition: color 0.2s; }
 .star-rating input[type="radio"]:checked ~ label { color: #FFD700; }
 .star-rating label:hover, .star-rating label:hover ~ label { color: #FFD700; }
-
 #rating-message { font-size: 16px; color: #666; margin-top: 10px; }
-
 textarea#content { width: 100%; max-width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; font-size: 16px; background-color: #fafafa; }
-
-#imagePreview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; justify-content: center; }
-#imagePreview img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
-
-.clear-button-container { margin-top: 10px; text-align: center; }
-.clear-images-button { background-color: #e53935; color: white; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }
-.clear-images-button:hover { background-color: #c62828; }
-
 .storeRating { margin-top: 30px; }
 .rating-group { margin-bottom: 20px; }
 .rating-label { font-weight: bold; font-size: 16px; color: #444; margin-bottom: 8px; }
@@ -39,31 +26,60 @@ textarea#content { width: 100%; max-width: 100%; padding: 14px; border: 1px soli
 .rating-options input[type="radio"] { display: none; }
 .rating-options label { background-color: #eee; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
 .rating-options input[type="radio"]:checked + label { background-color: #2196F3; color: white; }
-
 input[type="submit"] { background-color: #1976D2; color: white; border: none; padding: 14px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
 input[type="submit"]:hover { background-color: #1565C0; }
 
-@media (max-width: 600px) {
-  form { padding: 20px; }
-  .rating-options { justify-content: center; }
-  .storeInfo img { width: 90px; height: 90px; }
-  .star-rating { font-size: 1.8rem; }
-  textarea#content { font-size: 15px; }
+/* 추가/수정된 CSS */
+.image-row {
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    gap: 15px; /* 이미지 간격 */
+    margin-top: 20px;
+}
+.image-item-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 이미지와 버튼 간격 */
+    justify-content: center;
+    position: relative;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+}
+.image-item-container img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.image-item-container .remove-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.image-item-container .file-label {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
 }
 </style>
 
-
 <script>
-let selectedFiles = [];     // 새로 추가한 파일 객체
-let existingImages = [];    // 서버에서 불러온 기존 이미지 파일 이름
-let deleteFiles = [];       // 삭제할 기존 파일 이름
+let selectedFiles = []; // 새로 추가된 이미지
+let existingImages = []; // 서버에서 받아온 기존 이미지 목록 (변경/삭제 여부 상관없이 그대로 유지)
+let deleteFiles = []; // 삭제 또는 변경된 기존 이미지의 파일 이름
 
-// 기존 이미지 로딩 스크립트
 document.addEventListener('DOMContentLoaded', function () {
-    const preview = document.getElementById('imagePreview');
-    const imglist = ${!empty imglist ? "true" : "false"};
+    const imglistExists = ${!empty imglist ? "true" : "false"};
 
-    if (imglist) {
+    if (imglistExists) {
         const imageFiles = [
             <c:forEach var="image" items="${imglist}" varStatus="loop">
             { src: '${contextPath}/images/review/${image.fileName}', fileName: '${image.fileName}' }
@@ -72,158 +88,233 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
 
         imageFiles.forEach(({ src, fileName }) => {
-            existingImages.push(fileName); // 기존 파일 이름 저장
-
-            const item = document.createElement('div');
-            item.className = 'image-preview-item';
-
-            const img = document.createElement('img');
-            img.src = src;
-
-            const removeBtn = document.createElement('span');
-            removeBtn.className = 'remove-image';
-            removeBtn.innerHTML = '&times;';
-
-            // 기존 파일 삭제 로직
-            removeBtn.onclick = function () {
-                deleteFiles.push(fileName);
-                existingImages = existingImages.filter(f => f !== fileName);
-                item.remove();
-            };
-
-            item.appendChild(img);
-            item.appendChild(removeBtn);
-            preview.appendChild(item);
+            existingImages.push(fileName); // 기존 이미지 배열은 삭제 여부와 무관하게 유지
+            createImageModifyItem(src, fileName);
         });
+    }
+
+    const rating = document.querySelector('input[name="rating"]:checked');
+    if (rating) {
+        updateRatingMessage(parseInt(rating.value));
     }
 });
 
-function previewReviewImage(input) {
-    const files = Array.from(input.files);
-    const preview = document.getElementById('imagePreview');
-    const maxImages = 5;
+// 기존 이미지 UI 생성 함수
+function createImageModifyItem(src, fileName) {
+    const container = document.getElementById('imageContainer');
+    const item = document.createElement('div');
+    item.className = 'image-item-container';
 
-    let totalImages = existingImages.length + selectedFiles.length;
+    const img = document.createElement('img');
+    img.src = src;
 
-    console.log("이벤트 발생 - 선택한 files:", files.map(f => f.name));
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
 
-    files.forEach(file => {
-        const canAdd = totalImages < maxImages;
+    const fileLabel = document.createElement('label');
+    fileLabel.htmlFor = 'fileInput-' + Date.now();
+    fileLabel.className = 'file-label';
+    fileLabel.textContent = '변경';
 
-        if (canAdd) {
-            const isDuplicate = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-            console.log(`파일: ${file.name}, 중복 여부: ${isDuplicate}`);
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-button';
+    removeBtn.textContent = '삭제';
 
-            if (!isDuplicate) {
-                selectedFiles.push(file);
-                totalImages++;
+    fileInput.onchange = function (e) {
+        const newFile = e.target.files[0];
+        if (newFile) {
+            deleteFiles.push(fileName); // 삭제 목록에 추가
+            selectedFiles.push(newFile); // 새로 선택한 파일 추가
 
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const item = document.createElement('div');
-                    item.className = 'image-preview-item';
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(newFile);
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-
-                    const removeBtn = document.createElement('span');
-                    removeBtn.className = 'remove-image';
-                    removeBtn.innerHTML = '&times;';
-
-                    // 새로 추가한 파일 삭제 로직
-                    removeBtn.onclick = function () {
-                        selectedFiles = selectedFiles.filter(f => !(f.name === file.name && f.size === file.size));
-                        item.remove();
-                        console.log("파일 제거됨:", file.name);
-                    };
-
-                    item.appendChild(img);
-                    item.appendChild(removeBtn);
-                    preview.appendChild(item);
-                };
-                reader.readAsDataURL(file);
-            }
-        } else {
-            alert("최대 5개의 이미지만 업로드할 수 있습니다.");
+            console.log("Image changed. Existing (kept):", existingImages, "New:", selectedFiles, "Deleted:", deleteFiles);
         }
-    });
-    // 같은 파일 다시 선택 가능하게
-    input.value = '';
+    };
+
+    removeBtn.onclick = function () {
+        deleteFiles.push(fileName);
+        item.remove();
+        console.log("Image removed. Existing (kept):", existingImages, "New:", selectedFiles, "Deleted:", deleteFiles);
+    };
+
+    fileLabel.onclick = function () {
+        fileInput.click();
+    };
+
+    item.appendChild(img);
+    item.appendChild(fileLabel);
+    item.appendChild(fileInput);
+    item.appendChild(removeBtn);
+    container.appendChild(item);
 }
 
-function clearImages() {
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
+// 새로운 이미지 추가
+function addNewImageInput() {
+    const container = document.getElementById('imageContainer');
+    const maxImages = 5;
+    const totalImages = existingImages.length + selectedFiles.length;
 
-    deleteFiles = deleteFiles.concat(existingImages); // 기존 이미지들 삭제 처리
-    selectedFiles = [];
-    existingImages = [];
-
-    const fileInput = document.getElementById('fileName');
-    if (fileInput) {
-        fileInput.value = '';
+    if (totalImages >= maxImages) {
+        alert(`최대 ${maxImages}개의 이미지만 업로드할 수 있습니다.`);
+        return;
     }
 
-    console.log("전체 이미지 삭제됨");
+    const item = document.createElement('div');
+    item.className = 'image-item-container';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.name = 'fileName';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+
+    const uniqueId = 'newFile-' + Date.now();
+    fileInput.id = uniqueId;
+
+    const img = document.createElement('img');
+    img.src = '';
+    img.alt = '미리보기';
+    img.style.display = 'none';
+
+    const fileLabel = document.createElement('label');
+    fileLabel.htmlFor = uniqueId;
+    fileLabel.className = 'file-label';
+    fileLabel.textContent = '파일 선택';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-button';
+    removeBtn.textContent = '삭제';
+    removeBtn.style.display = 'none';
+
+    fileInput.onchange = function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            selectedFiles.push(file);
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+                img.style.display = 'block';
+                fileLabel.style.display = 'none';
+                removeBtn.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+
+            console.log("New file added:", selectedFiles);
+        }
+    };
+
+    removeBtn.onclick = function () {
+        selectedFiles = selectedFiles.filter(f => f !== fileInput.files[0]);
+        item.remove();
+        console.log("New file removed:", selectedFiles);
+    };
+
+    item.appendChild(img);
+    item.appendChild(fileLabel);
+    item.appendChild(fileInput);
+    item.appendChild(removeBtn);
+    container.appendChild(item);
 }
 
-function checkReview() {
-    const form = document.querySelector('form');
-    const formData = new FormData(form);
+// 전체 이미지 삭제
+function clearAllImages() {
+    const container = document.getElementById('imageContainer');
+    container.innerHTML = '';
 
+    deleteFiles = deleteFiles.concat(existingImages); // 기존 이미지 모두 삭제 목록에 추가
+    selectedFiles = [];
+
+    console.log("All images removed. Deleted:", deleteFiles);
+}
+
+// 폼 전송 시 모든 데이터 hidden input으로 추가
+function checkReview() {
     const rating = document.querySelector('input[name="rating"]:checked');
     const content = document.getElementById('content').value.trim();
     const errorMessage = document.getElementById('errorMessage');
 
-    errorMessage.textContent = ''; // 초기화
-
+    errorMessage.textContent = '';
     if (!rating) {
         errorMessage.textContent = "별점을 선택해주세요.";
         return false;
     }
-
     if (content.length < 5) {
         errorMessage.textContent = "리뷰 내용은 5자 이상 입력해야 합니다.";
         return false;
     }
 
-    // 새로 추가된 파일 append
-    selectedFiles.forEach(file => {
-        formData.append('fileName[]', file);
+    const form = document.querySelector('form');
+
+    // ✅ 기존 이미지 전송
+    existingImages.forEach(fileName => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'existingFileNames';
+        hiddenInput.value = fileName;
+        form.appendChild(hiddenInput);
     });
 
-    // 삭제할 기존 파일 append
+    // ✅ 삭제된 이미지 전송
     deleteFiles.forEach(fileName => {
-        formData.append('deleteFileName', fileName);
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'deleteFileNames';
+        hiddenInput.value = fileName;
+        form.appendChild(hiddenInput);
     });
 
-    console.log("전송 직전 - selectedFiles:", selectedFiles.map(f => f.name));
-    console.log("전송 직전 - deleteFiles:", deleteFiles);
+    // ✅ 새로 추가된 이미지 전송
+    selectedFiles.forEach(file => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'newFiles';
 
-    fetch(form.action, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || '리뷰 수정 실패');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        alert("리뷰 수정 완료"); // "리뷰 수정 완료"
-        location.reload(); // 새로고침하여 수정된 내용 바로 반영
-    })
-    .catch(error => {
-        document.getElementById('errorMessage').textContent = "리뷰 수정 실패: " + error.message;
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        fileInput.style.display = 'none';
+        form.appendChild(fileInput);
     });
-    
-    // Ajax를 사용하므로 폼 제출을 막아야 함
-    return false;
+
+    return true;
 }
 
+// 별점 메시지 갱신
+function updateRatingMessage(rating) {
+    const message = document.getElementById('rating-message');
+    if (rating >= 4) {
+        message.textContent = '어떤 점이 좋았나요?';
+    } else if (rating === 3) {
+        message.textContent = '어떤 점이 괜찮았나요?';
+    } else if (rating >= 1) {
+        message.textContent = '어떤 점이 아쉬웠나요?';
+    } else {
+        message.textContent = '별점을 선택해주세요';
+    }
+}
+
+// 별점 변경 감지
+document.addEventListener('DOMContentLoaded', function () {
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function () {
+            updateRatingMessage(parseInt(this.value));
+        });
+    });
+});
+
+// 리뷰 삭제 확인
 function confirmDelete(reviewId) {
     if (confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
         const form = document.createElement('form');
@@ -240,7 +331,6 @@ function confirmDelete(reviewId) {
         form.submit();
     }
 }
-
 </script>
 
 <div class="storeInfo">
@@ -290,16 +380,15 @@ function confirmDelete(reviewId) {
             </div>
         </div>
         
-        <div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
-            <div class="form-input" style="flex: 1;">
-                <input type="file" id="fileName" name="fileName" accept="image/*" multiple="multiple" onchange="previewReviewImage(this)" />
-                <div id="imagePreview"></div>
-                <div class="clear-button-container">
-                    <button type="button" class="clear-images-button" onclick="clearImages()">전체 이미지 삭제</button>
+        <div class="form-row" style="flex-direction: column; align-items: center;">
+            <div id="imageContainer" class="image-row">
                 </div>
+            <div style="margin-top: 20px;">
+                <button type="button" class="btn btn-primary" onclick="addNewImageInput()">새로운 이미지 추가</button>
+                <button type="button" class="btn btn-danger" onclick="clearAllImages()">전체 이미지 삭제</button>
             </div>
-        </div>
-        
+        </div> 
+
         <div class="storeRating">
             <div class="rating-group">
                 <div class="rating-label">음식 맛은 어떤가요?</div>
@@ -347,8 +436,8 @@ function confirmDelete(reviewId) {
         </div>
         
         <div class="form-row" style="display: flex; justify-content: space-between; align-items: center;">
-			<input type="button" onclick="confirmDelete(${review.reviewId})" value="리뷰 삭제">
-			<input type="submit" value="리뷰 수정" />
-		</div>
+            <input type="button" onclick="confirmDelete(${review.reviewId})" value="리뷰 삭제">
+            <input type="submit" value="리뷰 수정" />
+        </div>
     </form>
 </div>

@@ -77,7 +77,7 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 .review-writer{font-weight:bold;color:#555;}
 .review-content{color:#333;line-height:1.5;margin-bottom:10px;}
 .review-images{display:flex;flex-wrap:wrap;gap:8px;}
-.review-image{width:70px;height:70px;object-fit:cover;}
+.review-image{max-width:200px; max-height:200px; object-fit:cover;}
 .load-more-btn{display:block;width:100%;padding:10px;margin-top:20px;background:#f0f0f0;border:1px solid #ccc;border-radius:6px;cursor:pointer;transition:background 0.3s;}
 .load-more-btn:hover{background:#e0e0e0;}
 .detail-box{padding:15px 0;border-bottom:1px solid #e0e0e0;margin-bottom:15px;}
@@ -108,8 +108,6 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 .review-meta{margin-bottom:10px;}
 .review-writer{font-weight:bold;margin-bottom:3px;color:#bdc0bd;}
 .review-content{color:#333;line-height:1.5;}
-.review-images{display:flex;flex-wrap:wrap;gap:8px;}
-.review-image{width:70px;height:70px;object-fit:cover;border-radius:4px;}
 
 /* 기타 스타일 */
 .detail-box{padding:auto 10px;margin:30px;}
@@ -142,44 +140,15 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 
  /* 홈 페이지 리뷰 섹션 스타일 */
 .home_review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-/* .home_review-item{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 10px;border-bottom:solid 1px #cfcfcf;background-color:#fdfdfd;height:100px;border-top:solid 1px #cfcfcf;} */
 .home_review-text-wrapper{flex:1;margin-right:15px;}
 .home_review-image-wrapper{flex-shrink:0;}
 .home_review-image{width:90px;height:90px;object-fit:cover;border-radius:5px;align-items:flex-start;}
 .home_review-writer{font-weight:bold;margin-bottom:5px;}
-/* .home_review-content{font-size:0.95em;color:#333;white-space:normal;} */
 .home_review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
 .home_rating p{margin:0;font-weight:bold;font-size:1rem;}
 .review-view-all button{font-size:0.9rem;padding:4px 10px;}
-.home_review-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 5px 10px;
-  border-bottom: solid 1px #cfcfcf;
-  background-color: #fdfdfd;
-  border-top: solid 1px #cfcfcf;
-  /* height: 100px; ← 이 줄 제거 */
-  min-height: 100px; /* 최소 높이 설정 */
-}
-
-.home_review-content {
-  font-size: 0.95em;
-  color: #333;
-  white-space: normal;
-  word-break: break-word;
-}
-
-
-.like-icon {
-  font-size: 1.2em; /* 필요에 따라 조절 */
-  color: grey; /* 기본 하얀 하트 대신 회색으로 */
-  transition: color 0.3s ease;
-}
-
-.like-button.likes .like-icon {
-  color: red;
-}
+.home_review-item {display: flex;justify-content: space-between;align-items: flex-start;padding: 5px 10px;border-bottom: solid 1px #cfcfcf;background-color: #fdfdfd;border-top: solid 1px #cfcfcf;min-height: 100px; }
+.home_review-content {font-size: 0.95em;color: #333;white-space: normal;word-break: break-word;}
 
 
   /* 💡 위시리스트 버튼 CSS 추가 */
@@ -464,43 +433,29 @@ $(function () {
 	$('#bookFormBtn').prop('disabled', false);
 });
 
-$(document).ready(function(){
-	let reviewsLoaded = 10;
-	const totalReviews = ${store.countRating};
+document.addEventListener('DOMContentLoaded', function () {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (!loadMoreBtn) return;
 
-	$('#loadMoreBtn').on('click', function() {
-		$.ajax({
-			url: `${contextPath}/reviews/loadMore`,
-			type: 'GET',
-			data: {
-				storeId: '${store.storeId}',
-				start: reviewsLoaded,
-				count: 10
-			},
-			success: function(response) {
-				response.forEach(function(review) {
-					const newReviewHtml = `
-					<div class="review-box">
-						<div class="review-rating">...</div>
-							<div class="review-meta">...</div>
-					</div>
-					`;
-					$('.detail-review-list').append(newReviewHtml);
-				});
+    const reviews = document.querySelectorAll('.review-box');
+    let visibleCount = 10;
 
-				reviewsLoaded += response.length;
+    loadMoreBtn.addEventListener('click', () => {
+        const total = reviews.length;
+        const nextCount = visibleCount + 10;
 
-				if (reviewsLoaded >= totalReviews) {
-					$('#loadMoreBtn').hide();
-				}
-			},
-			error: function() {
-				alert('리뷰를 불러오는 데 실패했습니다.');
-			}
-		});
-	});
+        for (let i = visibleCount; i < nextCount && i < total; i++) {
+            reviews[i].style.display = 'block';
+        }
+
+        visibleCount = nextCount;
+
+        // 더 이상 리뷰가 없으면 버튼 숨기기
+        if (visibleCount >= total) {
+            loadMoreBtn.style.display = 'none';
+        }
+    });
 });
-
 </script>
 
 
@@ -765,38 +720,43 @@ $(document).ready(function(){
 					<div class="review-list">
 						<h4>리뷰 ${store.countRating}건</h4>
 						<c:forEach var="review" items="${storeMap.review}" varStatus="loop">
-							<div class="review-box">
-								<div class="review-header">
-									<div class="review-rating">
-										<c:forEach begin="1" end="5" var="i">
-											<span class="star <c:if test="${i <= review.rating}">filled</c:if>">★</span>
-										</c:forEach>
-									</div>
-								</div>
-								<div class="review-writer">
-									${fn:substring(review.writerId, 0, 2)}<c:forEach begin="1" end="${fn:length(review.writerId) - 2}">*</c:forEach>
-								</div>
-								
-								<c:if test="${not empty storeMap.reviewImage}">
-								    <div class="review-images">
-								        <c:forEach var="img" items="${storeMap.reviewImage}">
-								            <c:if test="${img.reviewId == review.reviewId}">
-								                <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
-								            </c:if>
-								        </c:forEach>
-								    </div>
-								</c:if>
-								<div class="review-content">${review.content}</div>
-								<!-- 중복 ID 제거 -->
-								<button class="review-like-btn ${isLiked ? 'liked' : ''}" 
-								        data-review-id="${review.reviewId}" 
-								        aria-label="리뷰 좋아요 추가/제거">
-								    <i class="fa fa-heart"></i> <span class="likes-count">${review.likes}</span>
-								</button>
-							</div>
+						    <div class="review-box" style="${loop.index >= 10 ? 'display:none;' : ''}">
+						        <!-- 리뷰 내용 -->
+						        <div class="review-header">
+						            <div class="review-rating">
+						                <c:forEach begin="1" end="5" var="i">
+						                    <span class="star <c:if test="${i <= review.rating}">filled</c:if>">★</span>
+						                </c:forEach>
+						            </div>
+						        </div>
+						        <div class="review-writer">
+						            ${fn:substring(review.writerId, 0, 2)}
+						            <c:forEach begin="1" end="${fn:length(review.writerId) - 2}">
+						                *
+						            </c:forEach>
+						        </div>
+						        
+						        <c:if test="${not empty storeMap.reviewImage}">
+						            <div class="review-images">
+						                <c:forEach var="img" items="${storeMap.reviewImage}">
+						                    <c:if test="${img.reviewId == review.reviewId}">
+						                        <img src="${contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" class="review-image">
+						                    </c:if>
+						                </c:forEach>
+						            </div>
+						        </c:if>
+						        <div class="review-content">${review.content}</div>
+						
+						        <button class="review-like-btn ${isLiked ? 'liked' : ''}" 
+						                data-review-id="${review.reviewId}" 
+						                aria-label="리뷰 좋아요 추가/제거">
+						            <i class="fa fa-heart"></i> <span class="likes-count">${review.likes}</span>
+						        </button>
+						    </div>
 						</c:forEach>
-						<c:if test="${store.countRating > 10}">
-							<button id="loadMoreBtn" class="load-more-btn">더보기</button>
+						
+						<c:if test="${fn:length(storeMap.review) > 10}">
+						    <button id="loadMoreBtn" class="load-more-btn">더보기</button>
 						</c:if>
 					</div>
 				</div>
