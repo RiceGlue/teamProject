@@ -14,7 +14,7 @@
 <!-- 구글 맵 API -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap" ></script>
 
-<c:set var="memberId" value="${memberId}" />
+
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="store" value="${storeMap.store}" />
 <c:set var="detailReview2" value="${storeMap.detailReview2}" />
@@ -189,6 +189,12 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 .type-store-container { display: flex; flex-wrap: wrap; gap: 20px; }
 .type-store {width: calc((100% - 40px) / 3);border: 1px solid grey;border-radius: 10px;padding: 5px 5px;}
 .meta-info { font-size:13px; color:#777; margin:0; }
+
+.review-like-btn {font-size: 12px; background:none;border:none;cursor:pointer;color:#ccc;transition:color 0.3s ease;}
+.review-like-btn.active{color:#ff6347;}
+.review-like-btn.fa-heart { font-size: 12px; }
+.review-like-btn.liked{ color: red; }
+
 </style>
 
 </head>
@@ -202,11 +208,11 @@ const memberId = "${memberId}";
 const storeId = ${storeId};
 const contextPath = '${contextPath}';
 
-// 💡 위시리스트 상태를 확인하는 AJAX 요청
+// 💡 위시리스트 상태 확인
 function checkWishlistStatus() {
 	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
 	$.ajax({
-		url: '${contextPath}/wishlist/isWishlisted',
+		url: `${contextPath}/wishlist/isWishlisted`,
 		type: 'GET',
 		data: {
 			memberId: memberId,
@@ -225,23 +231,21 @@ function checkWishlistStatus() {
 	});
 }
 
-// 💡 위시리스트 추가/제거를 토글하는 AJAX 요청
+// 💡 위시리스트 추가/제거 토글
 function toggleWishlist() {
-	if (!memberId || memberId.trim() === '') {
-        if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
-            window.location.href = contextPath + '/member/login';
-        }
-        return;
-    }
+	if (!memberId || memberId.trim() === '' || memberId === 'null' || memberId === 'undefined') {
+		if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+			window.location.href = contextPath + '/member/login';
+		}
+		return;
+	}
 
 	const isWishlisted = $('#wishlist-btn').hasClass('active');
 
-	// 💡 이미 위시리스트에 추가된 경우 삭제 여부를 묻는 로직 추가
 	if (isWishlisted) {
-		// '확인'을 누르면 true, '취소'를 누르면 false 반환
 		if (confirm("위시리스트에 이미 추가되었습니다. 삭제하시겠습니까?")) {
 			$.ajax({
-				url: '${contextPath}/wishlist/remove',
+				url: `${contextPath}/wishlist/remove`,
 				type: 'DELETE',
 				data: {
 					memberId: memberId,
@@ -249,19 +253,18 @@ function toggleWishlist() {
 				},
 				success: function(response) {
 					alert(response);
-					checkWishlistStatus(); // UI 업데이트
+					checkWishlistStatus();
 				},
 				error: function(xhr) {
 					const errorMessage = xhr.responseText || "오류가 발생했습니다.";
 					alert(errorMessage);
-					checkWishlistStatus(); // UI 업데이트
+					checkWishlistStatus();
 				}
 			});
 		}
 	} else {
-	// 💡 위시리스트에 없는 경우 추가하는 로직
 		$.ajax({
-			url: '${contextPath}/wishlist/add',
+			url: `${contextPath}/wishlist/add`,
 			type: 'POST',
 			data: {
 				memberId: memberId,
@@ -269,24 +272,109 @@ function toggleWishlist() {
 			},
 			success: function(response) {
 				alert(response);
-				checkWishlistStatus(); // UI 업데이트
+				checkWishlistStatus();
 			},
 			error: function(xhr) {
 				const errorMessage = xhr.responseText || "오류가 발생했습니다.";
 				alert(errorMessage);
-				checkWishlistStatus(); // UI 업데이트
+				checkWishlistStatus();
 			}
 		});
 	}
 }
 
+//💡 리뷰 좋아요 상태 확인
+function checkReviewLikeStatus() {
+	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+
+	$('.review-like-btn').each(function () {
+		const $btn = $(this);
+		const reviewId = $btn.data('review-id');
+		if (!reviewId) return;
+
+		$.ajax({
+			url: `${contextPath}/review/isLiked`,
+			type: 'GET',
+			data: {
+				memberId: memberId,
+				reviewId: reviewId
+			},
+			success: function(response) {
+				console.log(response);
+				if (response === true) {
+					$btn.addClass('liked');
+				} else {
+					$btn.removeClass('liked');
+				}
+			},
+			error: function(error) {
+				console.error('리뷰 좋아요 상태 확인 실패:', error);
+			}
+		});
+	});
+}
+
+//💡 리뷰 좋아요 추가/제거 토글
+function toggleReviewLike(event) {
+	if (!memberId || memberId.trim() === '' || memberId === 'null' || memberId === 'undefined') {
+		if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
+			window.location.href = contextPath + '/member/login';
+		}
+		return;
+	}
+
+	const $btn = $(event.currentTarget);
+	const reviewId = $btn.data('review-id');
+	if (!reviewId) {
+		alert("리뷰 ID가 없습니다.");
+		return;
+	}
+
+	const isLiked = $btn.hasClass('liked');
+
+	if (isLiked) {
+		$.ajax({
+			url: `${contextPath}/review/decreaseLikes`,
+			type: 'DELETE',
+			data: {
+				memberId: memberId,
+				reviewId: reviewId
+			},
+			success: function(response) {
+				$btn.removeClass('liked');
+				$btn.find('.likes-count').text(response.likes);
+			},
+			error: function(xhr) {
+				const errorMessage = xhr.responseText || "오류가 발생했습니다.";
+				alert(errorMessage);
+			}
+		});
+	} else {
+		$.ajax({
+			url: `${contextPath}/review/increaseLikes`,
+			type: 'POST',
+			data: {
+				memberId: memberId,
+				reviewId: reviewId
+			},
+			success: function(response) {
+				$btn.addClass('liked');
+				$btn.find('.likes-count').text(response.likes);
+			},
+			error: function(xhr) {
+				const errorMessage = xhr.responseText || "오류가 발생했습니다.";
+				alert(errorMessage);
+			}
+		});
+	}
+}
+
+// 💡 구글 지도 초기화
 function initMap() {
 	const geocoder = new google.maps.Geocoder();
 	const address = '<c:out value="${store.roadAddress}"/>';
 	if (!address) {
-		console.log('address : ',address);
 		alert("주소 정보가 없습니다.");
-		console.error('주소 정보가 없습니다.');
 		return;
 	}
 	geocoder.geocode({ address: address }, function(results, status) {
@@ -302,11 +390,11 @@ function initMap() {
 			});
 		} else {
 			alert("지도를 불러올 수 없습니다: " + status);
-			console.error("지도를 불러올 수 없습니다: " + status);
 		}
 	});
 }
 
+// 💡 게스트 수 변경
 function changeGuestCount(change) {
 	let guestCountInput = $('#guestCount');
 	let newCount = parseInt(guestCountInput.val()) + change;
@@ -315,19 +403,22 @@ function changeGuestCount(change) {
 	}
 }
 
-function openTab2() { document.querySelector('ul.tabs li a[href="#tab2"]').click(); }
-function openTab3() { document.querySelector('ul.tabs li a[href="#tab3"]').click(); }
+function openTab2() {
+	document.querySelector('ul.tabs li a[href="#tab2"]').click();
+}
+function openTab3() {
+	document.querySelector('ul.tabs li a[href="#tab3"]').click();
+}
 
 $(function () {
-// 💡 페이지 로드 시 위시리스트 상태 확인.
-checkWishlistStatus();
+	checkWishlistStatus();
+	checkReviewLikeStatus();
 
-// 💡 위시리스트 버튼 클릭 이벤트
-$('#wishlist-btn').on('click', function() {
-toggleWishlist();
-});
+	$('#wishlist-btn').on('click', toggleWishlist);
 
-$("ul.tabs li a").click(function () {
+	$(document).on('click', '.review-like-btn', toggleReviewLike);
+
+	$("ul.tabs li a").click(function () {
 		const activeTab = $(this).attr("href");
 		$(".tab_content").hide();
 		$(activeTab).fadeIn();
@@ -339,7 +430,7 @@ $("ul.tabs li a").click(function () {
 		return false;
 	});
 
-	document.getElementById('copyaddress').addEventListener('click', function () {
+	$('#copyaddress').on('click', function () {
 		navigator.clipboard.writeText('${store.roadAddress}').then(function () {
 			alert("주소가 복사되었습니다.");
 		}).catch(function (err) {
@@ -347,7 +438,7 @@ $("ul.tabs li a").click(function () {
 		});
 	});
 
-	document.getElementById('copyUrlBtn').addEventListener('click', function () {
+	$('#copyUrlBtn').on('click', function () {
 		navigator.clipboard.writeText(window.location.href).then(function () {
 			alert("주소가 복사되었습니다.");
 		}).catch(function (err) {
@@ -358,6 +449,7 @@ $("ul.tabs li a").click(function () {
 	$(".tab_content").hide();
 	$("ul.tabs li:first").addClass("active").show();
 	$(".tab_content:first").show();
+
 	$("#reservationDate").datepicker({
 		dateFormat: 'yy-mm-dd',
 		minDate: 0,
@@ -373,36 +465,31 @@ $("ul.tabs li a").click(function () {
 });
 
 $(document).ready(function(){
-	// 현재 표시된 리뷰의 개수를 추적합니다.
 	let reviewsLoaded = 10;
 	const totalReviews = ${store.countRating};
 
 	$('#loadMoreBtn').on('click', function() {
-		// 서버에 다음 리뷰 목록을 요청하는 AJAX 호출을 실행합니다.
 		$.ajax({
-			url: '${contextPath}/reviews/loadMore', // 실제 리뷰 데이터를 가져올 서버 URL
+			url: `${contextPath}/reviews/loadMore`,
 			type: 'GET',
 			data: {
-				storeId: '${store.storeId}', // 필요한 경우 매장 ID 전달
-				start: reviewsLoaded, // 시작점 (현재까지 로드된 리뷰 수)
-				count: 10 // 가져올 리뷰의 개수
+				storeId: '${store.storeId}',
+				start: reviewsLoaded,
+				count: 10
 			},
 			success: function(response) {
-				// 응답으로 받은 새로운 리뷰 목록을 화면에 추가합니다.
 				response.forEach(function(review) {
 					const newReviewHtml = `
 					<div class="review-box">
-					<div class="review-rating">...</div>
-					<div class="review-meta">...</div>
+						<div class="review-rating">...</div>
+							<div class="review-meta">...</div>
 					</div>
 					`;
 					$('.detail-review-list').append(newReviewHtml);
 				});
 
-				// 현재 로드된 리뷰 개수를 업데이트합니다.
 				reviewsLoaded += response.length;
 
-				// 모든 리뷰를 불러왔다면 "더보기" 버튼을 숨깁니다.
 				if (reviewsLoaded >= totalReviews) {
 					$('#loadMoreBtn').hide();
 				}
@@ -414,57 +501,8 @@ $(document).ready(function(){
 	});
 });
 
-$(document).ready(function () {
-    $('.like-button').on('click', function () {
-        const $btn = $(this);
-        const reviewId = $btn.data('review-id');
-        const memberId = $btn.data('member-id');
-
-        if (!memberId) {
-            if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
-                window.location.href = contextPath + '/member/login';
-            }
-            return;
-        }
-        
-        console.log('contextPath:', contextPath);
-        console.log('reviewId:', reviewId);
-        console.log('memberId:', memberId);
-
-        const isLiked = $btn.hasClass('likes');
-        const url = isLiked 
-            ? `${contextPath}/review/decreaseLikes` 
-            : `${contextPath}/review/increaseLikes`;
-        const type = isLiked ? 'DELETE' : 'POST';
-
-        $.ajax({
-            url: url,
-            type: type,
-            data: {
-                reviewId: reviewId,
-                memberId: memberId
-            },
-            success: function (newLikes) {
-                // 버튼 UI 업데이트
-                const $icon = $btn.find('.like-icon');
-                const $count = $btn.find('.like-count');
-                $count.text(newLikes);
-
-                if (isLiked) {
-                    $btn.removeClass('likes');
-                    $icon.text('🤍');
-                } else {
-                    $btn.addClass('likes');
-                    $icon.text('❤️');
-                }
-            },
-            error: function () {
-                alert("좋아요 처리 중 오류가 발생했습니다.");
-            }
-        });
-    });
-});
 </script>
+
 
 <div class="store-info">
 	<div class="store-info d-flex" style="gap: 20px; margin:0px; ">
@@ -749,25 +787,12 @@ $(document).ready(function () {
 								    </div>
 								</c:if>
 								<div class="review-content">${review.content}</div>
-
-								<div class="review-like-box">
-									<span
-									    class="like-button ${(review.likes == 1 && memberId != null) ? 'likes' : ''}"
-									    data-review-id="${review.reviewId}"
-									    data-member-id="${memberId}"
-									    role="button"
-									    tabindex="${review.likes}">
-									    
-									    <span class="like-icon">
-									        ${(review.likes == 1 && memberId != null) ? '❤️' : '🤍'}
-									    </span>
-									    
-									    <span class="like-count" id="like-count-${review.reviewId}">
-									        ${review.likes}
-									    </span>
-									</span>
-
-								</div>
+								<!-- 중복 ID 제거 -->
+								<button class="review-like-btn ${isLiked ? 'liked' : ''}" 
+								        data-review-id="${review.reviewId}" 
+								        aria-label="리뷰 좋아요 추가/제거">
+								    <i class="fa fa-heart"></i> <span class="likes-count">${review.likes}</span>
+								</button>
 							</div>
 						</c:forEach>
 						<c:if test="${store.countRating > 10}">

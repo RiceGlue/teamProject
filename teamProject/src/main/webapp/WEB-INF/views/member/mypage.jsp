@@ -180,40 +180,53 @@ $(document).ready(function() {
         <div class="scroll-container">
             <c:choose>
                 <c:when test="${not empty waitings}">
-                    <c:forEach var="waiting" items="${waitings}">
-                        <div class="card scroll-item">
-                            <div class="card-body">
-                                <h5><a href="${contextPath}/store/storeDetail?storeId=${waiting.storeId}" class="store-name-link">${waiting.storeName}</a></h5>
-                                <p class="card-text">
-                                    대기번호: <span class="fw-bold text-danger">${waiting.waitingNumber}번</span>
-                                </p>
-                                <c:if test="${waiting.status != 'SEATED'}">
-                                  <p class="card-text">
-                                    <small class="text-muted">내 앞 대기: ${waiting.aheadCount}팀</small>
-                                  </p>
-                                </c:if>
-                                <p class="card-text">
-                                  <small class="text-muted">
-                                    상태:
-                                    <c:choose>
-                                      <c:when test="${waiting.status == 'SEATED'}">
-                                        방문 완료
-                                      </c:when>
-                                      <c:otherwise>
-                                        ${waiting.status}
-                                      </c:otherwise>
-                                    </c:choose>
-                                  </small>
-                                </p>
-                                <c:if test="${waiting.status == 'SEATED'}">
-                                  <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${waiting.storeId}&waitingId=${waiting.waitingId}"
-                                     class="btn btn-sm btn-primary">
-                                    리뷰쓰기
-                                  </a>
-                                </c:if>
-                            </div>
-                        </div>
-                    </c:forEach>
+					<c:forEach var="waiting" items="${waitings}">
+					    <div class="card scroll-item">
+					        <div class="card-body">
+					            <h5><a href="${contextPath}/store/storeDetail?storeId=${waiting.storeId}" class="store-name-link">${waiting.storeName}</a></h5>
+					            <p class="card-text">
+					                대기번호: <span class="fw-bold text-danger">${waiting.waitingNumber}번</span>
+					            </p>
+					            <c:if test="${waiting.status != 'SEATED'}">
+					                <p class="card-text">
+					                    <small class="text-muted">내 앞 대기: ${waiting.aheadCount}팀</small>
+					                </p>
+					            </c:if>
+					            <p class="card-text">
+					                <small class="text-muted">
+					                    상태:
+					                    <c:choose>
+					                        <c:when test="${waiting.status == 'SEATED'}">방문 완료</c:when>
+					                        <c:otherwise>${waiting.status}</c:otherwise>
+					                    </c:choose>
+					                </small>
+					            </p>
+					            <c:if test="${waiting.status == 'SEATED'}">
+								    <c:set var="hasReview" value="false" />
+								    <c:set var="foundReviewId" value="" />
+								    <c:forEach var="review" items="${reviewList}">
+								        <c:if test="${review.waitingId == waiting.waitingId}">
+								            <c:set var="hasReview" value="true" />
+								            <c:set var="foundReviewId" value="${review.reviewId}" />
+								        </c:if>
+								    </c:forEach>
+								    <c:choose>
+								        <c:when test="${hasReview}">
+								            <!-- 리뷰 수정 버튼 -->
+								            <a href="${contextPath}/review/modifyReviewForm?reviewId=${foundReviewId}" class="btn btn-sm btn-warning">리뷰 수정</a>
+								        </c:when>
+								        <c:otherwise>
+								            <!-- 리뷰 쓰기 버튼 -->
+								            <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${waiting.storeId}&waitingId=${waiting.waitingId}" class="btn btn-sm btn-primary">
+								                리뷰 쓰기
+								            </a>
+								        </c:otherwise>
+								    </c:choose>
+								</c:if>
+					        </div>
+					    </div>
+					</c:forEach>
+
                 </c:when>
                 <c:otherwise>
                     <div class="card scroll-item">
@@ -295,11 +308,27 @@ $(document).ready(function() {
                                 </p>
                                 <a href="${contextPath}/reservation/customer/bookingConfirm?reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">상세보기</a>
                                 <c:if test="${reservation.status == 'COMPLETED'}">
-                                  <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&waitingId=${reservation.reservationId}"
-                                     class="btn btn-sm btn-primary">
-                                    리뷰쓰기
-                                  </a>
-                                </c:if>
+								    <c:set var="hasReview" value="false" />
+								    <c:set var="foundReviewId" value="" />
+								    <c:forEach var="review" items="${reviewList}">
+								        <c:if test="${review.reservationId == reservation.reservationId}">
+								            <c:set var="hasReview" value="true" />
+								            <c:set var="foundReviewId" value="${review.reviewId}" />
+								        </c:if>
+								    </c:forEach>
+								    <c:choose>
+								        <c:when test="${hasReview}">
+								            <!-- 리뷰 수정 버튼 -->
+								            <a href="${contextPath}/review/modifyReviewForm?reviewId=${foundReviewId}" class="btn btn-sm btn-warning">리뷰 수정</a>
+								        </c:when>
+								        <c:otherwise>
+								            <!-- 리뷰 쓰기 버튼 -->
+								            <a href="${contextPath}/review/reviewForm?memberId=${memberInfo.memberId}&storeId=${reservation.storeId}&reservationId=${reservation.reservationId}" class="btn btn-sm btn-primary">
+								                리뷰 쓰기
+								            </a>
+								        </c:otherwise>
+								    </c:choose>
+								</c:if>
                             </div>
                         </div>
                     </c:forEach>

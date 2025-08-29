@@ -1,5 +1,6 @@
 package com.spring.teamProject.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +84,7 @@ public class StoreControllerImpl implements StoreController {
 	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
 	public ModelAndView storeDetail(@ModelAttribute StoreVO storeVO, @AuthenticationPrincipal UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		String viewName = (String)req.getAttribute("viewName");
+		
 		String roadAddress = null;
 		String storeType = null;
 		Long memberId = null;
@@ -108,14 +110,12 @@ public class StoreControllerImpl implements StoreController {
 		
 		List<StoreVO> nearByStoreList = storeService.searchStoreNearUser(roadAddress);
 		List<StoreVO> storeTypeList = storeService.searchStoreSameStoreType(storedStoreVO);
-		List<ReviewLikeVO> userLikeReview = reviewService.uesrLikeReview(memberId);
 		
 		mav.addObject("storeMap", storeMap);
 		mav.addObject("currentWaitingCount", currentWaitingCount);
 		mav.addObject("nearByStoreList", nearByStoreList);
 		mav.addObject("storeTypeList", storeTypeList);
-		mav.addObject("userLikeReview", userLikeReview);
-
+		
 		return mav;
 	}
 		

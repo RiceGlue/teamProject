@@ -54,6 +54,7 @@
 	<resultMap id="reviewlikeInfo" type="ReviewLikeVO">
 		<result property="reviewId" column="review_id" />
 		<result property="memberId" column="member_id" />
+		<result property="liked" column="liked" />
 	</resultMap>
 	
 	<resultMap id="storeInfo" type="StoreVO">
@@ -285,6 +286,16 @@
 	
 	<select id="getLikeCount" parameterType="long" resultType="int">
 	    SELECT count(review_id) FROM review_like WHERE review_id = #{reviewId}
+	</select>
+	
+	<select id="isLiked" parameterType="ReviewLikeVO" resultType="boolean" >
+		<![CDATA[
+			SELECT EXISTS (
+		        SELECT 1 FROM review_like
+		        WHERE member_id = #{memberId}
+		          AND review_id = #{reviewId}
+		    ) as liked;
+		]]>
 	</select>
 	
 	<select id="uesrLikeReview" parameterType="long" resultMap="reviewlikeInfo" >

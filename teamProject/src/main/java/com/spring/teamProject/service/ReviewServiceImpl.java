@@ -161,4 +161,13 @@ public class ReviewServiceImpl implements ReviewService {
 	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws Exception {
 		return reviewDAO.uesrLikeReview(memberId);
 	}
+	
+	@Override
+	public boolean isLiked(Long memberId, Long reviewId) throws Exception {
+		ReviewLikeVO reviewLikeVO = new ReviewLikeVO();
+		reviewLikeVO.setMemberId(memberId);
+		reviewLikeVO.setReviewId(reviewId);
+		
+		return reviewDAO.isLiked(reviewLikeVO);
+	}
 }

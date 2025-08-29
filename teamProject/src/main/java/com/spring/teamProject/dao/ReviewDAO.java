@@ -35,6 +35,7 @@ public interface ReviewDAO {
 	public void decreaseLikes(ReviewLikeVO reviewLikeVO) throws DataAccessException;
 	public int getLikeCount(long reviewId) throws DataAccessException;
 	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws DataAccessException;
+	public boolean isLiked(ReviewLikeVO reviewLikeVO) throws DataAccessException;
 	
 	public List<ReviewVO> selectBestReview() throws DataAccessException;
 	public ImageFileVO selectBestReviewImage(long reviewId) throws DataAccessException;

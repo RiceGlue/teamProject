@@ -11,7 +11,9 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +38,7 @@ import com.spring.teamProject.vo.StoreVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller("reviewController")
 @RequestMapping(value="/review")
@@ -105,6 +108,8 @@ public class ReviewControllerImpl implements ReviewController{
 		long reservationId = review.getReservationId();
 		long waitingId = review.getWaitingId();
 		
+		String contextPath = multiReq.getContextPath();
+		
 		try {
 			long reviewId;
 			
@@ -146,21 +151,24 @@ public class ReviewControllerImpl implements ReviewController{
 			
 				imgList.add(imageFile);
 			}
+			
+			if (!imgList.isEmpty()) {
+			    reviewService.addReviewImageFiles(imgList);
+			}
 		
-			reviewService.addReviewImageFiles(imgList);
-		
-			return ResponseEntity.ok().body(Map.of("success", true, "redirectUrl", "/member/mypage"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.internalServerError().body(Map.of(
-			"success", false,
-			"message", "리뷰 등록 중 오류 발생",
-			"redirectUrl", "/review/reviewForm?memberId=" + regId + "&storeId=" + storeId +
-			(reservationId != 0 ? "&reservationId=" + reservationId : "") +
-			(waitingId != 0 ? "&waitingId=" + waitingId : "") +
-			"&error=true"
-			));
-		}
+			// HTTP 응답 헤더를 설정하여 JSON임을 명시합니다.
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+			
+	        return new ResponseEntity<>(Map.of(
+	                "success", true,
+	                "message", "리뷰가 성공적으로 등록되었습니다."
+	            ), headers, HttpStatus.OK);
+	        
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        return ResponseEntity.internalServerError().body(Map.of( "error", true, "message", "리뷰 등록 중 오류 발생"  ));
+		    }
 	}
 
 	@Override
@@ -322,26 +330,45 @@ public class ReviewControllerImpl implements ReviewController{
 	
 	@PostMapping("/increaseLikes")
 	@ResponseBody
-	public int increaseLikes(@RequestParam long reviewId, @RequestParam long memberId) throws Exception{
+	public Map<String, Object> increaseLikes(@RequestParam("reviewId") long reviewId, @RequestParam("memberId") long memberId) throws Exception {
 	    ReviewLikeVO likeVO = new ReviewLikeVO();
 	    likeVO.setMemberId(memberId);
 	    likeVO.setReviewId(reviewId);
-	    
-		reviewService.increaseLike(likeVO);
-	    return reviewService.getLikeCount(reviewId);
+
+	    reviewService.increaseLike(likeVO);
+	    int likeCount = reviewService.getLikeCount(reviewId);
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("likes", likeCount);
+	    return response;
 	}
 
 	@DeleteMapping("/decreaseLikes")
 	@ResponseBody
-	public int decreaseLikes(@RequestParam long reviewId, @RequestParam long memberId) throws Exception{
-		ReviewLikeVO likeVO = new ReviewLikeVO();
+	public Map<String, Object> decreaseLikes(@RequestParam("reviewId") long reviewId, @RequestParam("memberId") long memberId) throws Exception {
+	    ReviewLikeVO likeVO = new ReviewLikeVO();
 	    likeVO.setMemberId(memberId);
 	    likeVO.setReviewId(reviewId);
-		
-		reviewService.decreaseLike(likeVO);
-	    return reviewService.getLikeCount(reviewId);
+
+	    reviewService.decreaseLike(likeVO);
+	    int likeCount = reviewService.getLikeCount(reviewId);
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("likes", likeCount);
+	    return response;
 	}
 
+	@GetMapping("/isLiked")
+	public ResponseEntity<Boolean> isLiked(@RequestParam("memberId") Long memberId, @RequestParam("reviewId") Long reviewId) throws Exception{
+		boolean result = reviewService.isLiked(memberId, reviewId);
+		
+		if(result) {
+			System.out.println("리뷰 좋아요 누름");
+		} else {
+			System.out.println("리뷰 좋아요 안누름");
+		}
+		return ResponseEntity.ok(result);
+	}
 
 	// 공통 메타 설정 함수
 	private void populateFileMeta(ImageFileVO file, long storeId, long reviewId, long memberId, int displayNo) {

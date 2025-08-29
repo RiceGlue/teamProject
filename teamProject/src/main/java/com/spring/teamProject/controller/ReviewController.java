@@ -10,6 +10,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.vo.ReviewVO;
 
+import jakarta.servlet.http.HttpSession;
+
 public interface ReviewController {
 	
 	public ResponseEntity<?> addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;

@@ -34,5 +34,7 @@ public interface ReviewService {
 	
 	public void increaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
 	public void decreaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
+	public boolean isLiked(Long memberId, Long reviewId) throws Exception;
+	
 	public int getLikeCount(long reviewId) throws Exception;
 }

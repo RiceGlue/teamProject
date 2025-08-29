@@ -58,6 +58,8 @@ input[type="submit"]:hover { background-color: #1565C0; }
 </style>
 
 <script>
+const contextPath = '${contextPath}';
+
 // 전역 변수로 선택된 모든 파일을 저장할 배열을 선언합니다.
 let selectedFiles = [];
 
@@ -189,23 +191,42 @@ function checkReview() {
   selectedFiles.forEach((file, index) => {
       formData.append('fileName[]', file);
   });
-
+  
   fetch(form.action, {
 	    method: 'POST',
 	    body: formData
 	})
-	.then(response => response.json())
-	.then(data => {
-	    if (data.success) {
-	        window.location.href = data.redirectUrl;
-	    } else {
-	        alert(data.message || "리뷰 작성 실패");
-	        window.location.href = data.redirectUrl;
+	.then(response => {
+	    // HTTP 응답이 성공적인지 확인
+	    if (!response.ok) {
+	        throw new Error('네트워크 응답이 실패했습니다.');
+	    }
+	    // 응답 본문을 텍스트로 먼저 변환하여 오류를 방지
+	    return response.text(); 
+	})
+	.then(text => {
+	    try {
+	        // 텍스트를 JSON으로 파싱 시도
+	        const data = JSON.parse(text);
+	        console.log(data); // 서버가 보낸 데이터를 콘솔에 출력
+	        if (data.success) {
+	            alert(data.message);
+	            window.location.href='${contextPath}/member/mypage';
+	        } else {
+	            alert(data.message);
+	            window.history.back();
+	        }
+	    } catch (e) {
+	        // JSON 파싱 오류 발생 시
+	        console.error('JSON 파싱 오류:', e);
+	        console.error('서버 응답 텍스트:', text);
+	        alert("서버 응답을 처리하는 중 오류가 발생했습니다.");
 	    }
 	})
 	.catch(error => {
-	    alert("요청 중 오류 발생");
-	    console.error(error);
+	    alert("요청 중 오류 발생: " + error.message);
+	    console.error("Fetch error:", error);
+	    window.history.back();
 	});
 
   return false; // 기본 폼 제출을 막습니다.
