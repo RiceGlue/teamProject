@@ -9,12 +9,12 @@
     <meta charset="UTF-8">
     <title>관리자 페이지</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    
+
     <!-- Bootstrap Icons CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
-    
+
     <style>
         body {
             background-color: #f8f9fc;
@@ -84,13 +84,13 @@
     <!-- === 좌측 사이드바 메뉴 === -->
     <div class="sidebar">
         <a class="sidebar-brand" href="${contextPath}/admin/dashboard">얌테이블 Admin</a>
-        
+
         <hr class="sidebar-divider">
-        
+
         <div class="nav-item">
             <a class="nav-link" href="${contextPath}/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i>대시보드</a>
         </div>
-        
+
         <hr class="sidebar-divider">
 
         <!-- 회원 관리 아코디언 메뉴 -->
@@ -145,11 +145,12 @@
             </a>
             <div id="collapseAds" class="collapse">
                 <a class="nav-link" href="${contextPath}/admin/banners">- 배너 관리</a>
+                <a class="nav-link" href="${contextPath}/admin/promotion/list">- 프로모션 관리</a>
             </div>
         </div>
 
         <hr class="sidebar-divider">
-        
+
         <div class="nav-item">
             <a class="nav-link" href="${contextPath}/" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>메인 페이지로</a>
         </div>
