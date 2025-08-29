@@ -1,3 +1,4 @@
+// src/main/java/com/spring/teamProject/service/ReservationServiceImpl.java
 package com.spring.teamProject.service;
 
 import com.spring.teamProject.dao.ReservationDAO;
@@ -92,32 +93,6 @@ public class ReservationServiceImpl implements ReservationService {
         List<String> activeStatuses = Arrays.asList("PENDING", "CONFIRMED");
         List<ReservationVO> reservedReservations = reservationDAO.selectReservationsByStoreIdAndDateAndStatuses(storeId, date, activeStatuses);
 
-
-//
-//        // 각 시간대별로 예약 가능한 테이블을 계산
-//        for (String time : timeSlots) {
-//            String reservationTimeStr = date + "T" + time;
-//            LocalDateTime currentSlotTime = LocalDateTime.parse(reservationTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-//
-//            List<StoreTableVO> availableTablesInSlot = new ArrayList<>(allTables);
-//
-//            // 해당 시간대에 예약된 테이블을 걸러냄
-//            for (ReservationVO reserved : reservedReservations) {
-//                // 예약 시간과 현재 슬롯 시간이 일치하는 경우
-//                if (reserved.getReservationTime().equals(currentSlotTime)) {
-//                    reserved.getTables().forEach(reservedTable ->
-//                        availableTablesInSlot.removeIf(table -> table.getTableId().equals(reservedTable.getTableId()))
-//                    );
-//                }
-//            }
-//
-//            // 예약 가능한 테이블이 1개 이상 있을 경우 맵에 추가
-//            if (!availableTablesInSlot.isEmpty()) {
-//                availableSlots.put(time, availableTablesInSlot);
-//            }
-//        }
-
-        // --- ⭐ 이 부분부터 로직을 수정합니다. ⭐ ---
         // 모든 시간대를 미리 맵에 추가하고, 값으로 빈 리스트를 넣어둡니다.
         for (String time : timeSlots) {
             availableSlots.put(time, new ArrayList<>());
@@ -142,7 +117,6 @@ public class ReservationServiceImpl implements ReservationService {
             // 계산된 예약 가능 테이블 목록을 해당 시간대 키에 다시 설정합니다.
             availableSlots.put(time, availableTablesInSlot);
         }
-        // --- ⭐ 여기까지 로직을 수정합니다. ⭐ ---
         return availableSlots;
     }
 
@@ -151,31 +125,68 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationDAO.selectStoreTableById(tableId);
     }
 
+    /**
+     * 사용자의 예약 취소 요청을 처리합니다.
+     * @param reservationId 취소할 예약의 ID
+     * @throws Exception
+     */
     @Override
     @Transactional
     public void cancelReservationByUser(Long reservationId) throws Exception {
+        logger.info(">>> 디버그: cancelReservationByUser() 메서드 시작. reservationId={}", reservationId);
+        cancelReservation(reservationId, "사용자 요청에 의한 취소");
+        logger.info(">>> 디버그: cancelReservationByUser() 메서드 종료. reservationId={}", reservationId);
+    }
+
+    /**
+     * 점주의 예약 취소 요청을 처리합니다.
+     * @param reservationId 취소할 예약의 ID
+     * @throws Exception
+     */
+    @Override
+    @Transactional
+    public void cancelReservationByStore(Long reservationId) throws Exception {
+        logger.info(">>> 디버그: cancelReservationByStore() 메서드 시작. reservationId={}", reservationId);
+        cancelReservation(reservationId, "점주 요청에 의한 취소");
+        logger.info(">>> 디버그: cancelReservationByStore() 메서드 종료. reservationId={}", reservationId);
+    }
+
+    /**
+     * 예약 취소의 핵심 로직을 처리하는 재사용 가능한 private 메서드입니다.
+     * @param reservationId 취소할 예약의 ID
+     * @param reason 취소 사유
+     * @throws Exception
+     */
+    private void cancelReservation(Long reservationId, String reason) throws Exception {
+        // 1. 예약 정보 조회 및 상태 유효성 검사
         ReservationVO reservation = reservationDAO.selectReservationById(reservationId);
         if (reservation == null) {
-            throw new Exception("예약 정보를 찾을 수 없습니다.");
+            logger.error("예약 ID {}에 대한 예약 정보를 찾을 수 없습니다.", reservationId);
+            throw new IllegalArgumentException("예약 정보를 찾을 수 없습니다.");
         }
-        if (reservation.getStatus().equals(ReservationStatus.CANCELLED.name()) ||
-            reservation.getStatus().equals(ReservationStatus.COMPLETED.name())) {
-            throw new IllegalStateException("이미 취소되었거나 완료된 예약은 취소할 수 없습니다.");
-        }
-
-        // 결제 정보가 없을 수도 있으므로 Optional로 처리
-        PaymentVO payment = paymentService.getPaymentByReservationId(reservationId);
-        if (payment != null) {
-            paymentService.refundPayment(payment.getPaymentId());
-        } else {
-            logger.warn("Reservation {} has no payment associated. Skipping refund process.", reservationId);
+        if (!"CONFIRMED".equals(reservation.getStatus())) {
+            logger.warn("확정된 예약이 아닙니다. (현재 상태: {})", reservation.getStatus());
+            throw new IllegalStateException("확정된 예약만 취소할 수 있습니다.");
         }
 
-        reservationDAO.updateReservationStatusAndReason(
-            reservationId,
-            ReservationStatus.CANCELLED.name(),
-            "사용자 취소"
-        );
+        // 2. 결제 상태 확인 및 환불 요청
+        try {
+            // payments 테이블의 상태를 REFUNDED로 변경하고 환불 처리합니다.
+            paymentService.refundPayment(reservationId);
+
+            // 3. 결제 환불이 성공하면, reservations 테이블의 상태를 "CANCELLED"로 변경합니다.
+            reservationDAO.updateReservationStatusAndReason(
+                reservationId,
+                "CANCELLED",
+                reason
+            );
+            logger.info("예약 ID {}에 대한 예약 취소 처리가 완료되었습니다. DB 상태: 'CANCELLED'", reservationId);
+
+        } catch (Exception e) {
+            logger.error("예약 ID {} 환불 처리 중 오류 발생: {}", reservationId, e.getMessage());
+            // 환불 실패 시, 예외를 다시 던져서 트랜잭션이 롤백되도록 합니다.
+            throw new RuntimeException("예약 취소(환불) 처리 중 오류가 발생했습니다. 고객센터에 문의해주세요.", e);
+        }
     }
 
     @Override

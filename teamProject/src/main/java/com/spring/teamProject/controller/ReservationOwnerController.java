@@ -68,34 +68,52 @@ public class ReservationOwnerController {
         List<ReservationVO> reservationsFromService = reservationService.getReservationsByStoreIdAndStatusWithPaging(storeId, status, page, size);
         logger.info("무한 스크롤 API 응답 - {} 건의 데이터 반환", reservationsFromService.size());
 
+        // 여기서 예약 객체의 reservationId를 확인
+        for (ReservationVO res : reservationsFromService) {
+            System.out.println("서버에서 reservationId 확인: " + res.getReservationId());
+        }
+
         return reservationsFromService;
     }
 
     /**
-     * 예약 상태 업데이트 메소드
+     * 예약 상태 업데이트 메소드 (이용완료, 노쇼 등)
      * POST /reservation/owner/updateStatus
      */
     @PostMapping("/updateStatus")
+    @ResponseBody
     public String updateReservationStatus(@RequestParam("reservationId") Long reservationId,
-                                          @RequestParam("status") String status,
-                                          @RequestParam("storeId") Long storeId,
-                                          RedirectAttributes redirectAttributes) {
+                                          @RequestParam("status") String status) {
         logger.info("예약 상태 업데이트 요청 - reservationId: {}, status: {}", reservationId, status);
         try {
             reservationService.updateReservationStatus(reservationId, status);
-
             if(status.equals("CONFIRMED")) {
-            	reservationService.increaseUserTemperatureByReservation(reservationId);
+                reservationService.increaseUserTemperatureByReservation(reservationId);
             } else if (status.equals("NO_SHOW")) {
-            	reservationService.decreaseUserTemperatureByReservation(reservationId);
+                reservationService.decreaseUserTemperatureByReservation(reservationId);
             }
-
-            redirectAttributes.addFlashAttribute("message", "예약 상태가 성공적으로 업데이트되었습니다.");
+            return "Success";
         } catch (Exception e) {
             logger.error("예약 상태 업데이트 중 오류 발생: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "예약 상태 업데이트 중 오류가 발생했습니다: " + e.getMessage());
+            return "Error: " + e.getMessage();
         }
-        return "redirect:/reservation/owner/manageList?storeId=" + storeId;
+    }
+
+    /**
+     * 점주가 예약을 취소하는 메소드
+     * POST /reservation/owner/cancel
+     */
+    @PostMapping("/cancel")
+    @ResponseBody
+    public String cancelReservationByStore(@RequestParam("reservationId") Long reservationId) {
+        logger.info("점주에 의한 예약 취소 요청 - reservationId: {}", reservationId);
+        try {
+            reservationService.cancelReservationByStore(reservationId);
+            return "Success";
+        } catch (Exception e) {
+            logger.error("점주에 의한 예약 취소 중 오류 발생: {}", e.getMessage(), e);
+            return "Error: " + e.getMessage();
+        }
     }
 
     /*

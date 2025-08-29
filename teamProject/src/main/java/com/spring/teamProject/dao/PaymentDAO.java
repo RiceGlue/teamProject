@@ -39,4 +39,11 @@ public interface PaymentDAO {
      * @param paymentId 삭제할 결제 ID
      */
     void deletePayment(Long paymentId);
+
+	PaymentVO selectByReservationIdWithLock(Long reservationId);
+	/**
+     * PaymentVO 객체로 결제 정보를 업데이트합니다.
+     * @param paymentVO 업데이트할 PaymentVO 객체
+     */
+    void updatePayment(PaymentVO payment) throws Exception;
 }

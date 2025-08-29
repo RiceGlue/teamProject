@@ -8,7 +8,6 @@
     <style>
         .container-fluid { max-width: 1200px; margin-top: 50px; }
         .badge { font-weight: bold; }
-        .badge-pending { background-color: #ffc107; color: #212529; }
         .badge-confirmed { background-color: #28a745; color: #fff; }
         .badge-cancelled { background-color: #dc3545; color: #fff; }
         .badge-completed { background-color: #007bff; color: #fff; }
@@ -29,7 +28,7 @@
     </c:if>
 
     <ul class="nav nav-tabs" id="statusTabs" role="tablist">
-        <c:forEach var="status" items="${['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
+        <c:forEach var="status" items="${['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
             <li class="nav-item" role="presentation">
                 <button class="nav-link ${status == 'ALL' ? 'active' : ''}"
                         id="${status.toLowerCase()}-tab"
@@ -40,7 +39,6 @@
                         aria-selected="${status == 'ALL'}">
                     <c:choose>
                         <c:when test="${status == 'ALL'}">전체</c:when>
-                        <c:when test="${status == 'PENDING'}">대기중</c:when>
                         <c:when test="${status == 'CONFIRMED'}">승인됨</c:when>
                         <c:when test="${status == 'COMPLETED'}">이용완료</c:when>
                         <c:when test="${status == 'CANCELLED'}">취소</c:when>
@@ -52,7 +50,7 @@
     </ul>
 
     <div class="tab-content mt-3" id="statusTabContent">
-        <c:forEach var="status" items="${['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
+        <c:forEach var="status" items="${['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
             <div class="tab-pane fade ${status == 'ALL' ? 'show active' : ''}"
                  id="${status.toLowerCase()}"
                  role="tabpanel"
@@ -97,6 +95,7 @@
     const storeId = "${storeId}";
     const contextPath = "${pageContext.request.contextPath}";
 
+    // 주어진 상태의 예약을 비동기적으로 가져오는 함수
     function fetchReservations(status) {
         const safeStatus = (status && typeof status === 'string' && status.trim() !== '') ? status : 'ALL';
 
@@ -137,6 +136,7 @@
         });
     }
 
+    // 가져온 예약을 테이블에 추가하는 함수
     function addReservationsToTable(reservations, status) {
         const tbodyId = '#' + status.toLowerCase() + '-table-body';
         const tbody = $(tbodyId);
@@ -162,32 +162,23 @@
             const created = new Date(res.createdAt).toLocaleString('ko-KR');
             let manage = '';
 
-            if (res.status === 'PENDING') {
-                manage = '<form method="post" action="' + contextPath + '/reservation/owner/updateStatus" style="display:inline-block;">'
-                    + '<input type="hidden" name="reservationId" value="' + res.reservationId + '">'
-                    + '<input type="hidden" name="storeId" value="' + storeId + '">'
-                    + '<button class="btn btn-sm btn-success" name="status" value="CONFIRMED">승인</button>'
-                    + '<button class="btn btn-sm btn-danger" name="status" value="CANCELLED">취소</button>'
-                    + '</form>';
-            } else if (res.status === 'CONFIRMED') {
-                manage = '<form method="post" action="' + contextPath + '/reservation/owner/updateStatus" style="display:inline-block;">'
-                    + '<input type="hidden" name="reservationId" value="' + res.reservationId + '">'
-                    + '<input type="hidden" name="storeId" value="' + storeId + '">'
-                    + '<button class="btn btn-sm btn-primary" name="status" value="COMPLETED">이용완료</button>'
-                    + '<button class="btn btn-sm btn-secondary" name="status" value="NO_SHOW">노쇼</button>'
-                    + '</form>';
+            // res.reservationId가 유효한 경우에만 관리 버튼을 생성
+            if (res.status === 'CONFIRMED' && res.reservationId) {
+                manage = '<button class="btn btn-sm btn-primary status-update-btn" data-id="' + res.reservationId + '" data-status="COMPLETED">이용완료</button>' +
+                         '<button class="btn btn-sm btn-secondary status-update-btn" data-id="' + res.reservationId + '" data-status="NO_SHOW">노쇼</button>' +
+                         '<button class="btn btn-sm btn-danger status-update-btn" data-id="' + res.reservationId + '" data-status="CANCELLED">취소</button>';
             }
 
             html += '<tr>';
             html += '<td><span class="badge badge-' + res.status.toLowerCase() + '">' + res.status + '</span></td>';
-            html += '<td>' + res.reservationId + '</td>';
+            html += '<td>' + (res.reservationId || '-') + '</td>';
             html += '<td>' + (res.memberId || '-') + '</td>';
             html += '<td>' + time + '</td>';
             html += '<td>' + res.guestCount + '명</td>';
             html += '<td>' + (res.tablesName || 'N/A') + '</td>';
             html += '<td>' + created + '</td>';
 
-            if (status === 'CANCELLED' || status === 'NO_SHOW') {
+            if (res.status === 'CANCELLED' || res.status === 'NO_SHOW') {
                 html += '<td>' + (res.cancelledReason || '-') + '</td>';
             } else {
                 html += '<td>' + manage + '</td>';
@@ -198,11 +189,68 @@
         tbody.append(html);
     }
 
-    function getActiveTabStatus() {
-        const active = $('#statusTabs .nav-link.active');
-        const target = active.attr('data-bs-target');
-        return target ? target.substring(1).toUpperCase() : 'ALL';
-    }
+    // 모든 상태 변경 버튼에 대한 통합 이벤트 핸들러
+    $(document).on('click', '.status-update-btn', function(event) {
+        event.preventDefault();
+
+        const reservationId = $(this).attr('data-id');
+        const status = $(this).attr('data-status');
+
+        console.log("취소 요청을 위해 전달되는 reservationId:", reservationId);
+        console.log("변경될 상태:", status);
+
+        // reservationId가 비어있는지 다시 한번 확인
+        if (!reservationId || reservationId.trim() === '') {
+            alert("예약 ID를 찾을 수 없습니다. 페이지를 새로고침해주세요.");
+            console.error("Reservation ID is undefined, null, or empty string. Value found:", reservationId);
+            return;
+        }
+
+        if (!status) {
+            alert("변경될 상태를 찾을 수 없습니다.");
+            console.error("Status is undefined, null, or empty string. Value found:", status);
+            return;
+        }
+
+        let confirmMsg = '';
+        switch (status) {
+            case 'COMPLETED':
+                confirmMsg = '해당 예약을 이용완료 처리하시겠습니까?';
+                break;
+            case 'NO_SHOW':
+                confirmMsg = '해당 예약을 노쇼 처리하시겠습니까?';
+                break;
+            case 'CANCELLED':
+                confirmMsg = '해당 예약을 취소하시겠습니까?';
+                break;
+        }
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        let url = '';
+        if (status === 'CANCELLED') {
+            url = contextPath + '/reservation/owner/cancel';
+        } else {
+            url = contextPath + '/reservation/owner/updateStatus';
+        }
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: { reservationId: reservationId, status: status },
+            success: function(response) {
+                alert("상태가 업데이트되었습니다.");
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("상태 업데이트에 실패했습니다. 관리자에게 문의하세요.");
+                console.error("AJAX Error:", status, error);
+                console.error("Response Text:", xhr.responseText);
+            }
+        });
+    });
 
     $('#statusTabs button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
         const status = $(e.target).attr('data-bs-target').substring(1).toUpperCase();
@@ -220,13 +268,21 @@
         }
     });
 
+    function getActiveTabStatus() {
+        const active = $('#statusTabs .nav-link.active');
+        const target = active.attr('data-bs-target');
+        return target ? target.substring(1).toUpperCase() : 'ALL';
+    }
+
     $(document).ready(function() {
-        ['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW'].forEach(function(s) {
+        ['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW'].forEach(function(s) {
             currentPage[s] = 0;
             hasMore[s] = true;
         });
         fetchReservations('ALL');
     });
 </script>
+
+
 </body>
 </html>

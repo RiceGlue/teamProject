@@ -15,7 +15,7 @@
             <c:if test="${not empty error}">
                 <div class="alert alert-danger">${error}</div>
             </c:if>
-            <%-- 2. form action 경로를 공통 저장 경로(/admin/banners/save)로 지정합니다. --%>
+<%-- 2. form action 경로를 공통 저장 경로(/admin/banners/save)로 지정합니다. --%>
             <form action="${contextPath}/admin/banners/save" method="post" enctype="multipart/form-data">
                 
                 <%-- 수정 모드일 때, bannerId를 서버로 함께 보내기 위한 hidden input --%>
@@ -140,7 +140,9 @@
         } else {
             customLinkDiv.style.display = 'block';
             promotionLinkDiv.style.display = 'none';
-            customUrlInput.required = true;
+            // ? --- 여기가 핵심 수정 부분입니다 --- ?
+            // 커스텀 주소 입력창을 필수가 아닌 선택으로 변경합니다.
+            customUrlInput.required = false; 
             promotionSelect.required = false;
         }
     }
