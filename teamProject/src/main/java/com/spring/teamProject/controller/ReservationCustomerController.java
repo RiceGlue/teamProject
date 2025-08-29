@@ -369,6 +369,17 @@ public class ReservationCustomerController {
     public Map<String, Object> cancelReservation(@RequestParam("reservationId") Long reservationId) {
         Map<String, Object> response = new HashMap<>();
         try {
+            // 전달받은 ID가 예약 ID인지 확인하거나,
+            // ReservationService에서 이 ID를 통해 예약 정보를 찾고 결제 정보를 확인하는 로직을 수행
+
+            ReservationVO reservation = reservationService.getReservationById(reservationId);
+            if (reservation == null) {
+                response.put("success", false);
+                response.put("message", "유효한 예약 정보를 찾을 수 없습니다.");
+                return response;
+            }
+
+            // 올바른 예약 ID를 사용해 서비스 계층 호출
             reservationService.cancelReservationByUser(reservationId);
 
             response.put("success", true);
@@ -376,6 +387,7 @@ public class ReservationCustomerController {
         } catch (Exception e) {
             logger.error("예약 취소 중 오류 발생: {}", e.getMessage(), e);
             response.put("success", false);
+            // 서비스 계층에서 발생한 특정 예외 메시지를 그대로 반환
             response.put("message", e.getMessage());
         }
         return response;

@@ -186,10 +186,16 @@
 
 	<select id="selectStoreReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
-			select r.*, m.login_id as writerId
-			from reviews r inner join members m on r.member_id=m.member_id
-			where store_id=#{storeId}
-			order by r.created_at desc
+			SELECT 
+			    r.*, 
+			    m.login_id AS writerId,
+			    COUNT(rl.review_id) AS likes
+			FROM reviews r
+			INNER JOIN members m ON r.member_id = m.member_id
+			LEFT JOIN review_like rl ON r.review_id = rl.review_id
+			WHERE r.store_id = #{storeId}
+			GROUP BY r.review_id, m.login_id
+			ORDER BY r.created_at DESC
 		]]>
 	</select>
 
