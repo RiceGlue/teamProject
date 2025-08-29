@@ -65,6 +65,14 @@ public interface ReservationService {
     void cancelReservationByUser(Long reservationId) throws Exception;
 
     /**
+     * 점주가 예약을 취소합니다.
+     * @param reservationId 예약 ID
+     * @throws Exception 예약 정보가 없거나 이미 취소된 경우
+     */
+    void cancelReservationByStore(Long reservationId) throws Exception;
+
+
+    /**
      * 사용자 ID로 예약 목록을 조회합니다.
      * @param memberId 사용자 ID
      * @return 해당 사용자의 예약 목록
