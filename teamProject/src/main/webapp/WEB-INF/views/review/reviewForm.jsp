@@ -85,12 +85,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // 이미지 인풋 추가
 function addImageInput() {
-  if (imageCount >= maxImages) {
-    alert(`이미지는 최대 ${maxImages}장까지 업로드할 수 있습니다.`);
+  const container = document.getElementById('imageUploadContainer');
+
+  // 현재 컨테이너 안의 file input 개수를 기준으로 세기
+  const currentInputs = container.querySelectorAll('input[type="file"]').length;
+
+  if (currentInputs >= maxImages) {
+    alert(`이미지는 최대 5장까지 선택할 수 있습니다.`);
     return;
   }
-
-  const container = document.getElementById('imageUploadContainer');
 
   const wrapper = document.createElement('div');
   wrapper.className = 'image-upload-wrapper';
@@ -101,8 +104,7 @@ function addImageInput() {
 
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
-  // 이 부분을 수정합니다.
-  fileInput.name = 'reviewImage'; // 변경: reviewImage[] -> reviewImage
+  fileInput.name = 'reviewImage'; // reviewImage[] 대신 단일 이름
   fileInput.accept = 'image/*';
   fileInput.onchange = function () {
     showPreview(fileInput, previewImg);
@@ -128,15 +130,12 @@ function addImageInput() {
 
   removeBtn.onclick = function () {
     container.removeChild(wrapper);
-    imageCount--;
   };
 
   wrapper.appendChild(fileInput);
   wrapper.appendChild(previewImg);
   wrapper.appendChild(removeBtn);
   container.appendChild(wrapper);
-
-  imageCount++;
 }
 
 // 이미지 미리보기 표시

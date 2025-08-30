@@ -29,46 +29,11 @@ textarea#content { width: 100%; max-width: 100%; padding: 14px; border: 1px soli
 input[type="submit"] { background-color: #1976D2; color: white; border: none; padding: 14px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
 input[type="submit"]:hover { background-color: #1565C0; }
 
-/* 추가/수정된 CSS */
-.image-row {
-    display: flex;
-    flex-direction: column; /* 세로 정렬 */
-    gap: 15px; /* 이미지 간격 */
-    margin-top: 20px;
-}
-.image-item-container {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* 이미지와 버튼 간격 */
-    justify-content: center;
-    position: relative;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 8px;
-}
-.image-item-container img {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 6px;
-}
-.image-item-container .remove-button {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 14px;
-}
-.image-item-container .file-label {
-    background-color: #007bff;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
+.image-row { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+.image-item-container { display: flex; align-items: center; gap: 15px; justify-content: center; position: relative; border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+.image-item-container img { width: 120px; height: 120px; object-fit: cover; border-radius: 6px; }
+.image-item-container .remove-button { background-color: #f44336; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; font-size: 14px; }
+.image-item-container .file-label { background-color: #007bff; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; }\
 </style>
 
 <script>
