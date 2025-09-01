@@ -20,9 +20,8 @@ public interface ReviewService {
 	public ReviewVO getRivew(long reviewId) throws Exception;
 	public List<ImageFileVO> getImageFile (long reviewId) throws Exception;
 	public void modifyReview (ReviewVO review) throws Exception;
-	public long getImageId (ImageFileVO imagefile) throws Exception;
-	public void modifyReviewImage(ImageFileVO imgFile) throws Exception;
-	public void deleteReviewImage(String fileName) throws Exception;
+	public ImageFileVO getReviewImageById (long imageId) throws Exception;
+	public void deleteReviewImage(long imageId) throws Exception;
 	public void addReviewImage(ImageFileVO imgFile) throws Exception;
 	public void deleteReviewImages(long reviewId) throws Exception;
 	public void deleteReview(long reviewId) throws Exception;
@@ -37,4 +36,7 @@ public interface ReviewService {
 	public boolean isLiked(Long memberId, Long reviewId) throws Exception;
 	
 	public int getLikeCount(long reviewId) throws Exception;
+	
+	public List<ReviewVO> getStoreAllReview(long storeId) throws Exception;
+	public int countStoreAllReview(long storeId) throws Exception;
 }

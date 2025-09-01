@@ -183,25 +183,15 @@
 		]]>
 	</update>
 
-	<select id="selectImageId" parameterType="ImageFileVO" resultType="long" >
+	<select id="selectReviewImageById" parameterType="long" resultMap="imagelist" >
 		<![CDATA[
-			select image_id from image_file where file_name=#{fileName} and review_id =#{reviewId}
+			select * from image_file where image_id = #{imageId}
 		]]>
 	</select>
 	
-	<update id="updateReviewImage" parameterType="ImageFileVO" >
+	<delete id="deleteReviewImage" parameterType="long" >
 		<![CDATA[
-			UPDATE image_file
-			SET
-				file_name=#{fileName},
-				updated_at=now()
-			WHERE image_id=#{imageId}
-		]]>
-	</update>
-	
-	<delete id="deleteReviewImage" parameterType="String" >
-		<![CDATA[
-			delete from image_file where file_name=#{fileName}
+			delete from image_file where image_id = #{imageId}
 		]]>
 	</delete>
 	
@@ -307,6 +297,18 @@
 	<select id="selectUserReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
 			select * from reviews where member_id = #{memberId}
+		]]>
+	</select>
+	
+	<select id="selectStoreAllReview" parameterType="long" resultMap="reviewlist" >
+		<![CDATA[
+			select * from reviews where store_id=#{storeId}
+		]]>
+	</select>
+	
+	<select id="countStoreAllReview" parameterType="long" resultType="int" >
+		<![CDATA[
+			select count(review_id) as countRating from reviews where store_id=#{storeId}
 		]]>
 	</select>
 </mapper>

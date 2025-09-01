@@ -24,9 +24,9 @@ public interface ReviewDAO {
 	public ReviewVO selectReview(long reviewId) throws DataAccessException;
 	public List<ImageFileVO> selectReviewImageFile(long reviewId) throws DataAccessException;
 	public void updateReview (ReviewVO review) throws DataAccessException;
-	public long selectImageId (ImageFileVO imagefile) throws DataAccessException;
-	public void updateReviewImage (ImageFileVO imgFile) throws DataAccessException;
-	public void deleteReviewImage(String fileName) throws DataAccessException;
+	
+	public ImageFileVO selectReviewImageById (long imageId) throws DataAccessException;
+	public void deleteReviewImage(long imageId) throws DataAccessException;
 	public void insertReviewImage(ImageFileVO imgFile) throws DataAccessException;
 	public void deleteReviewImages(long reviewId) throws DataAccessException;
 	public void deleteReview(long reviewId) throws DataAccessException;
@@ -40,4 +40,7 @@ public interface ReviewDAO {
 	public List<ReviewVO> selectBestReview() throws DataAccessException;
 	public ImageFileVO selectBestReviewImage(long reviewId) throws DataAccessException;
 	public List<ReviewVO> selectUserReview(long memberId) throws DataAccessException;
+	
+	public List<ReviewVO> selectStoreAllReview(long storeId) throws DataAccessException;
+	public int countStoreAllReview(long storeId) throws DataAccessException;
 }

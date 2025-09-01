@@ -4,7 +4,6 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <style>
-/* 기존 스타일은 유지 */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
 .storeInfo { text-align: center; padding: 40px 20px 20px 20px; background-color: #fff; border-bottom: 1px solid #e0e0e0; }
 .storeInfo img { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
@@ -26,276 +25,242 @@ textarea#content { width: 100%; max-width: 100%; padding: 14px; border: 1px soli
 .rating-options input[type="radio"] { display: none; }
 .rating-options label { background-color: #eee; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
 .rating-options input[type="radio"]:checked + label { background-color: #2196F3; color: white; }
-input[type="submit"] { background-color: #1976D2; color: white; border: none; padding: 14px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
-input[type="submit"]:hover { background-color: #1565C0; }
-
-.image-row { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-.image-item-container { display: flex; align-items: center; gap: 15px; justify-content: center; position: relative; border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+.btn { border: none; padding: 14px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; color: white; }
+.btn-primary { background-color: #1976D2; }
+.btn-primary:hover { background-color: #1565C0; }
+.btn-warning { background-color: #FFC107; }
+.btn-warning:hover { background-color: #E0A800; }
+.btn-danger { background-color: #DC3545; }
+.btn-danger:hover { background-color: #C82333; }
+.image-container-wrapper { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; padding: 20px; border-radius: 8px; margin: 20px 0; width: 100%; box-sizing: border-box; }
+.image-section { flex: 1; min-width: 250px; display: flex; flex-direction: column; align-items: center; }
+#existingImageContainer.image-row { flex-direction: column; flex-wrap: nowrap; gap: 10px; }
+#newImageContainer.image-row { flex-direction: row; flex-wrap: wrap; gap: 15px; }
+.image-item-container { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; }
 .image-item-container img { width: 120px; height: 120px; object-fit: cover; border-radius: 6px; }
 .image-item-container .remove-button { background-color: #f44336; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; font-size: 14px; }
-.image-item-container .file-label { background-color: #007bff; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; }\
+.image-item-container .file-label { background-color: #007bff; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; }
+.image-buttons { margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; }
+.deleted-image-inputs { text-align: center; margin-top: 20px; }
 </style>
 
 <script>
-let selectedFiles = []; // 새로 추가된 이미지
-let existingImages = []; // 서버에서 받아온 기존 이미지 목록 (변경/삭제 여부 상관없이 그대로 유지)
-let deleteFiles = []; // 삭제 또는 변경된 기존 이미지의 파일 이름
+    // 삭제할 이미지 ID를 저장하는 배열
+    let deleteFiles = []; 
 
-document.addEventListener('DOMContentLoaded', function () {
-    const imglistExists = ${!empty imglist ? "true" : "false"};
-
-    if (imglistExists) {
-        const imageFiles = [
-            <c:forEach var="image" items="${imglist}" varStatus="loop">
-            { src: '${contextPath}/images/review/${image.fileName}', fileName: '${image.fileName}' }
-            <c:if test="${!loop.last}">,</c:if>
-            </c:forEach>
-        ];
-
-        imageFiles.forEach(({ src, fileName }) => {
-            existingImages.push(fileName); // 기존 이미지 배열은 삭제 여부와 무관하게 유지
-            createImageModifyItem(src, fileName);
-        });
-    }
-
-    const rating = document.querySelector('input[name="rating"]:checked');
-    if (rating) {
-        updateRatingMessage(parseInt(rating.value));
-    }
-});
-
-// 기존 이미지 UI 생성 함수
-function createImageModifyItem(src, fileName) {
-    const container = document.getElementById('imageContainer');
-    const item = document.createElement('div');
-    item.className = 'image-item-container';
-
-    const img = document.createElement('img');
-    img.src = src;
-
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-
-    const fileLabel = document.createElement('label');
-    fileLabel.htmlFor = 'fileInput-' + Date.now();
-    fileLabel.className = 'file-label';
-    fileLabel.textContent = '변경';
-
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'remove-button';
-    removeBtn.textContent = '삭제';
-
-    fileInput.onchange = function (e) {
-        const newFile = e.target.files[0];
-        if (newFile) {
-            deleteFiles.push(fileName); // 삭제 목록에 추가
-            selectedFiles.push(newFile); // 새로 선택한 파일 추가
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(newFile);
-
-            console.log("Image changed. Existing (kept):", existingImages, "New:", selectedFiles, "Deleted:", deleteFiles);
-        }
-    };
-
-    removeBtn.onclick = function () {
-        deleteFiles.push(fileName);
-        item.remove();
-        console.log("Image removed. Existing (kept):", existingImages, "New:", selectedFiles, "Deleted:", deleteFiles);
-    };
-
-    fileLabel.onclick = function () {
-        fileInput.click();
-    };
-
-    item.appendChild(img);
-    item.appendChild(fileLabel);
-    item.appendChild(fileInput);
-    item.appendChild(removeBtn);
-    container.appendChild(item);
-}
-
-// 새로운 이미지 추가
-function addNewImageInput() {
-    const container = document.getElementById('imageContainer');
+    // 업로드 가능한 최대 이미지 수
     const maxImages = 5;
-    const totalImages = existingImages.length + selectedFiles.length;
 
-    if (totalImages >= maxImages) {
-        alert(`최대 ${maxImages}개의 이미지만 업로드할 수 있습니다.`);
-        return;
-    }
+    // 페이지 로딩 완료 후 실행
+    document.addEventListener('DOMContentLoaded', function () {
+        const imglistExists = ${!empty imglist ? "true" : "false"};
 
-    const item = document.createElement('div');
-    item.className = 'image-item-container';
+        // 기존 이미지가 있을 경우 화면에 표시
+        if (imglistExists) {
+            const imageFiles = [
+                <c:forEach var="image" items="${imglist}" varStatus="loop">
+                {
+                    src: '${contextPath}/images/review/${image.fileName}',
+                    fileName: '${image.fileName}',
+                    imageId: '${image.imageId}'
+                }
+                <c:if test="${!loop.last}">,</c:if>
+                </c:forEach>
+            ];
 
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.name = 'fileName';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-
-    const uniqueId = 'newFile-' + Date.now();
-    fileInput.id = uniqueId;
-
-    const img = document.createElement('img');
-    img.src = '';
-    img.alt = '미리보기';
-    img.style.display = 'none';
-
-    const fileLabel = document.createElement('label');
-    fileLabel.htmlFor = uniqueId;
-    fileLabel.className = 'file-label';
-    fileLabel.textContent = '파일 선택';
-
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'remove-button';
-    removeBtn.textContent = '삭제';
-    removeBtn.style.display = 'none';
-
-    fileInput.onchange = function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            selectedFiles.push(file);
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                img.src = e.target.result;
-                img.style.display = 'block';
-                fileLabel.style.display = 'none';
-                removeBtn.style.display = 'inline-block';
-            };
-            reader.readAsDataURL(file);
-
-            console.log("New file added:", selectedFiles);
+            imageFiles.forEach(({ src, fileName, imageId }) => {
+                createExistingImageItem(src, fileName, imageId); 
+            });
         }
-    };
 
-    removeBtn.onclick = function () {
-        selectedFiles = selectedFiles.filter(f => f !== fileInput.files[0]);
-        item.remove();
-        console.log("New file removed:", selectedFiles);
-    };
+        // 별점이 선택되어 있으면 해당 메시지 출력
+        const rating = document.querySelector('input[name="rating"]:checked');
+        if (rating) {
+            updateRatingMessage(parseInt(rating.value));
+        }
 
-    item.appendChild(img);
-    item.appendChild(fileLabel);
-    item.appendChild(fileInput);
-    item.appendChild(removeBtn);
-    container.appendChild(item);
-}
-
-// 전체 이미지 삭제
-function clearAllImages() {
-    const container = document.getElementById('imageContainer');
-    container.innerHTML = '';
-
-    deleteFiles = deleteFiles.concat(existingImages); // 기존 이미지 모두 삭제 목록에 추가
-    selectedFiles = [];
-
-    console.log("All images removed. Deleted:", deleteFiles);
-}
-
-// 폼 전송 시 모든 데이터 hidden input으로 추가
-function checkReview() {
-    const rating = document.querySelector('input[name="rating"]:checked');
-    const content = document.getElementById('content').value.trim();
-    const errorMessage = document.getElementById('errorMessage');
-
-    errorMessage.textContent = '';
-    if (!rating) {
-        errorMessage.textContent = "별점을 선택해주세요.";
-        return false;
-    }
-    if (content.length < 5) {
-        errorMessage.textContent = "리뷰 내용은 5자 이상 입력해야 합니다.";
-        return false;
-    }
-
-    const form = document.querySelector('form');
-
-    // ✅ 기존 이미지 전송
-    existingImages.forEach(fileName => {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'existingFileNames';
-        hiddenInput.value = fileName;
-        form.appendChild(hiddenInput);
+        // 별점 변경 시 메시지 업데이트
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                updateRatingMessage(parseInt(this.value));
+            });
+        });
     });
 
-    // ✅ 삭제된 이미지 전송
-    deleteFiles.forEach(fileName => {
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'deleteFileNames';
-        hiddenInput.value = fileName;
-        form.appendChild(hiddenInput);
-    });
+    // 기존 이미지를 화면에 추가하는 함수
+    function createExistingImageItem(src, fileName, imageId) {
+        const container = document.getElementById('existingImageContainer');
+        const item = document.createElement('div');
+        item.className = 'image-item-container';
+        item.setAttribute('data-file-name', fileName);
+        item.setAttribute('data-image-id', imageId); 
 
-    // ✅ 새로 추가된 이미지 전송
-    selectedFiles.forEach(file => {
+        const img = document.createElement('img');
+        img.src = src;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-button';
+        removeBtn.textContent = '삭제';
+
+        // 삭제 버튼 클릭 시 해당 이미지 삭제 처리
+        removeBtn.onclick = function () {
+            const idToDelete = item.dataset.imageId; 
+            // 삭제할 이미지 ID 배열에 추가
+            if (idToDelete) {
+                // 중복 추가 방지
+                if (!deleteFiles.includes(idToDelete)) {
+                    deleteFiles.push(idToDelete);
+                    createDeletedImageInput(idToDelete); // 바로 input 생성
+                    console.log("삭제할 이미지 ID:", idToDelete);
+                }
+            }
+            // 화면에서 이미지 제거
+            item.remove();
+            console.log("삭제 목록:", deleteFiles);
+        };
+
+        item.appendChild(img);
+        item.appendChild(removeBtn);
+        container.appendChild(item);
+    }
+
+    // 삭제된 이미지 ID를 표시하는 input을 동적으로 생성
+    function createDeletedImageInput(imageId) {
+        const container = document.getElementById('deletedImageInputsContainer');
+        const input = document.createElement('input');
+        input.type = 'hidden'; // 테스트용으로 'text'
+        input.name = 'deleteFiles';
+        input.value = imageId;
+        container.appendChild(input);
+    }
+    
+    // 새로운 이미지 input 추가
+    function addNewImageInput() {
+        const existingCount = document.querySelectorAll('#existingImageContainer .image-item-container').length;
+        const newCount = document.querySelectorAll('#newImageContainer .image-item-container').length;
+        const totalImages = existingCount + newCount;
+
+        if (totalImages >= maxImages) {
+            alert(`최대 ${maxImages}개의 이미지만 업로드할 수 있습니다.`);
+            return;
+        }
+
+        const container = document.getElementById('newImageContainer');
+
+        const item = document.createElement('div');
+        item.className = 'image-item-container new-file-item';
+
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.name = 'newFiles';
-
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        fileInput.files = dataTransfer.files;
-
+        fileInput.accept = 'image/*';
         fileInput.style.display = 'none';
-        form.appendChild(fileInput);
-    });
 
-    return true;
-}
+        const uniqueId = 'newFile-' + Date.now();
+        fileInput.id = uniqueId;
 
-// 별점 메시지 갱신
-function updateRatingMessage(rating) {
-    const message = document.getElementById('rating-message');
-    if (rating >= 4) {
-        message.textContent = '어떤 점이 좋았나요?';
-    } else if (rating === 3) {
-        message.textContent = '어떤 점이 괜찮았나요?';
-    } else if (rating >= 1) {
-        message.textContent = '어떤 점이 아쉬웠나요?';
-    } else {
-        message.textContent = '별점을 선택해주세요';
+        const img = document.createElement('img');
+        img.src = '';
+        img.alt = '미리보기';
+        img.style.display = 'none';
+
+        const fileLabel = document.createElement('label');
+        fileLabel.htmlFor = uniqueId;
+        fileLabel.className = 'file-label';
+        fileLabel.textContent = '파일 선택';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-button';
+        removeBtn.textContent = '삭제';
+        removeBtn.style.display = 'none';
+
+        // 파일 선택 시 미리보기 표시
+        fileInput.onchange = function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    fileLabel.style.display = 'none';
+                    removeBtn.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // 삭제 버튼 클릭 시 항목 제거
+        removeBtn.onclick = function () {
+            item.remove(); 
+        };
+
+        item.appendChild(fileInput);
+        item.appendChild(img);
+        item.appendChild(fileLabel);
+        item.appendChild(removeBtn);
+        container.appendChild(item);
     }
-}
 
-// 별점 변경 감지
-document.addEventListener('DOMContentLoaded', function () {
-    const ratingInputs = document.querySelectorAll('input[name="rating"]');
-    ratingInputs.forEach(input => {
-        input.addEventListener('change', function () {
-            updateRatingMessage(parseInt(this.value));
-        });
-    });
-});
-
-// 리뷰 삭제 확인
-function confirmDelete(reviewId) {
-    if (confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = '${contextPath}/review/deleteReview';
-
-        const reviewIdInput = document.createElement('input');
-        reviewIdInput.type = 'hidden';
-        reviewIdInput.name = 'reviewId';
-        reviewIdInput.value = reviewId;
-
-        form.appendChild(reviewIdInput);
-        document.body.appendChild(form);
-        form.submit();
+    // 새로 추가한 이미지 모두 제거
+    function clearNewImages() {
+        const container = document.getElementById('newImageContainer');
+        container.innerHTML = '';
     }
-}
+
+    // 폼 유효성 검사 (삭제 input은 이미 생성되었으므로 여기서는 유효성 검사만)
+    function checkReview() {
+        const rating = document.querySelector('input[name="rating"]:checked');
+        const content = document.getElementById('content').value.trim();
+        const errorMessage = document.getElementById('errorMessage');
+
+        errorMessage.textContent = '';
+
+        if (!rating) {
+            errorMessage.textContent = "별점을 선택해주세요.";
+            return false;
+        }
+
+        if (content.length < 5) {
+            errorMessage.textContent = "리뷰 내용은 5자 이상 입력해야 합니다.";
+            return false;
+        }
+        
+        return true;
+    }
+
+
+    // 별점에 따라 안내 문구 표시
+    function updateRatingMessage(rating) {
+        const message = document.getElementById('rating-message');
+        if (rating >= 4) {
+            message.textContent = '어떤 점이 좋았나요?';
+        } else if (rating === 3) {
+            message.textContent = '어떤 점이 괜찮았나요?';
+        } else if (rating >= 1) {
+            message.textContent = '어떤 점이 아쉬웠나요?';
+        } else {
+            message.textContent = '별점을 선택해주세요';
+        }
+    }
+
+    // 리뷰 삭제 요청 전 확인 창 띄우고 처리
+    function confirmDelete(reviewId) {
+        if (confirm('정말 이 리뷰를 삭제하시겠습니까?')) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '${contextPath}/review/deleteReview';
+            const reviewIdInput = document.createElement('input');
+            reviewIdInput.type = 'hidden';
+            reviewIdInput.name = 'reviewId';
+            reviewIdInput.value = reviewId;
+            form.appendChild(reviewIdInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
 </script>
 
 <div class="storeInfo">
@@ -309,7 +274,8 @@ function confirmDelete(reviewId) {
         <input type="hidden" name="reviewId" value="${review.reviewId}" />
         <input type="hidden" name="memberId" value="${review.memberId}" />
         <input type="hidden" name="storeId" value="${review.storeId}" />
-        
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+
         <c:choose>
             <c:when test="${not empty review.reservationId}">
                 <input type="hidden" name="reservationId" value="${review.reservationId}" />
@@ -318,9 +284,9 @@ function confirmDelete(reviewId) {
                 <input type="hidden" name="waitingId" value="${review.waitingId}" />
             </c:otherwise>
         </c:choose>
-        
+
         <div id="errorMessage"></div>
-        
+
         <div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
             <div class="form-input" style="flex: 1;">
                 <div class="star-rating">
@@ -338,21 +304,35 @@ function confirmDelete(reviewId) {
             </div>
             <h4 id="rating-message">별점을 선택해주세요</h4>
         </div>
-        
+
         <div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
             <div class="form-input" style="flex: 1;">
                 <textarea id="content" name="content" rows="5" cols="100" placeholder="리뷰 내용을 입력해주세요.">${review.content}</textarea>
             </div>
         </div>
         
-        <div class="form-row" style="flex-direction: column; align-items: center;">
-            <div id="imageContainer" class="image-row">
+        <div id="deletedImageInputsContainer" class="deleted-image-inputs"></div>
+
+        <div class="image-container-wrapper" style="text-align:center;">
+            <c:if test="${not empty imglist}">
+                <div class="image-section">
+                    <h4>기존 이미지</h4>
+                    <div id="existingImageContainer" class="image-row">
+                    </div>
                 </div>
-            <div style="margin-top: 20px;">
-                <button type="button" class="btn btn-primary" onclick="addNewImageInput()">새로운 이미지 추가</button>
-                <button type="button" class="btn btn-danger" onclick="clearAllImages()">전체 이미지 삭제</button>
+            </c:if>
+            
+            <div class="image-section">
+                <h4>추가할 이미지</h4>
+                <div id="newImageContainer" class="image-row">
+                </div>
             </div>
-        </div> 
+            
+            <div class="image-buttons">
+                <button type="button" class="btn btn-primary" onclick="addNewImageInput()">새로운 이미지 추가</button>
+                <button type="button" class="btn btn-danger" onclick="clearNewImages()">전체 이미지 삭제</button>
+            </div>
+        </div>
 
         <div class="storeRating">
             <div class="rating-group">
@@ -365,7 +345,7 @@ function confirmDelete(reviewId) {
                     <input type="radio" id="taste-5" name="taste" value="5" ${review.taste eq 5 ? 'checked' : ''}><label for="taste-5">최고</label>
                 </div>
             </div>
-            
+
             <div class="rating-group">
                 <div class="rating-label">분위기는 어떤가요?</div>
                 <div class="rating-options">
@@ -376,7 +356,7 @@ function confirmDelete(reviewId) {
                     <input type="radio" id="mood-5" name="mood" value="5" ${review.mood eq 5 ? 'checked' : ''}><label for="mood-5">최고</label>
                 </div>
             </div>
-            
+
             <div class="rating-group">
                 <div class="rating-label">서비스는 친절했나요?</div>
                 <div class="rating-options">
@@ -387,7 +367,7 @@ function confirmDelete(reviewId) {
                     <input type="radio" id="service-5" name="service" value="5" ${review.service eq 5 ? 'checked' : ''}><label for="service-5">최고</label>
                 </div>
             </div>
-            
+
             <div class="rating-group">
                 <div class="rating-label">매장 청결상태는 양호한가요?</div>
                 <div class="rating-options">
@@ -399,10 +379,10 @@ function confirmDelete(reviewId) {
                 </div>
             </div>
         </div>
-        
-        <div class="form-row" style="display: flex; justify-content: space-between; align-items: center;">
-            <input type="button" onclick="confirmDelete(${review.reviewId})" value="리뷰 삭제">
-            <input type="submit" value="리뷰 수정" />
+
+        <div style="display: flex; align-items: center; gap:10px; justify-content:center;">
+            <input type="button" class="btn btn-danger" onclick="confirmDelete(${review.reviewId})" value="리뷰 삭제">
+            <input type="submit" class="btn btn-primary" value="리뷰 수정" />
         </div>
     </form>
 </div>
