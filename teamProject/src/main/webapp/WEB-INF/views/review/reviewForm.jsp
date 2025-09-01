@@ -4,10 +4,6 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<c:if test="${param.error eq 'true'}">
-    <script>alert("리뷰 작성 실패");</script>
-</c:if>
-
 <style>
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
 
@@ -60,9 +56,10 @@ input[type="submit"]:hover { background-color: #1565C0; }
 <script>
 const contextPath = '${contextPath}';
 
-// 전역 변수로 선택된 모든 파일을 저장할 배열을 선언합니다.
-let selectedFiles = [];
+let imageCount = 0;
+const maxImages = 5;
 
+// 별점 선택에 따라 메시지 업데이트
 function updateRatingMessage(rating) {
   const message = document.getElementById('rating-message');
   if (rating >= 4) {
@@ -76,6 +73,7 @@ function updateRatingMessage(rating) {
   }
 }
 
+// 페이지 로드 시 별점 이벤트 리스너 등록
 document.addEventListener('DOMContentLoaded', function () {
   const ratingInputs = document.querySelectorAll('input[name="rating"]');
   ratingInputs.forEach(input => {
@@ -85,94 +83,94 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-function previewReviewImage(input) {
-	  const preview = document.getElementById('imagePreview');
-	  const files = Array.from(input.files);
-	  const maxImages = 5;
+// 이미지 인풋 추가
+function addImageInput() {
+  const container = document.getElementById('imageUploadContainer');
 
-	  // 새로 선택한 파일 중 중복되지 않은 파일만 추가
-	  files.forEach(file => {
-	    const isDuplicate = selectedFiles.some(f => f.name === file.name && f.size === file.size);
-	    if (!isDuplicate) {
-	      selectedFiles.push(file);
-	    }
-	  });
+  // 현재 컨테이너 안의 file input 개수를 기준으로 세기
+  const currentInputs = container.querySelectorAll('input[type="file"]').length;
 
-	  // 최대 이미지 개수 제한
-	  if (selectedFiles.length > maxImages) {
-	    alert(`이미지는 최대 ${maxImages}장까지 업로드할 수 있습니다.`);
-	    selectedFiles = selectedFiles.slice(0, maxImages);
-	  }
+  if (currentInputs >= maxImages) {
+    alert(`이미지는 최대 5장까지 선택할 수 있습니다.`);
+    return;
+  }
 
-	  // 미리보기 다시 그리기
-	  preview.innerHTML = '';
-	  selectedFiles.forEach(file => {
-	    if (!file.type.startsWith('image/')) return;
-	    const reader = new FileReader();
-	    reader.onload = function(e) {
-	      const item = document.createElement('div');
-	      item.className = 'image-preview-item';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'image-upload-wrapper';
+  wrapper.style.display = 'flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.gap = '10px';
+  wrapper.style.marginBottom = '10px';
 
-	      const img = document.createElement('img');
-	      img.src = e.target.result;
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.name = 'reviewImage'; // reviewImage[] 대신 단일 이름
+  fileInput.accept = 'image/*';
+  fileInput.onchange = function () {
+    showPreview(fileInput, previewImg);
+  };
 
-	      const removeBtn = document.createElement('span');
-	      removeBtn.className = 'remove-image';
-	      removeBtn.innerHTML = '&times;';
+  const previewImg = document.createElement('img');
+  previewImg.style.width = '100px';
+  previewImg.style.height = '100px';
+  previewImg.style.borderRadius = '6px';
+  previewImg.style.border = '1px solid #ccc';
+  previewImg.style.objectFit = 'cover';
+  previewImg.style.display = 'none';
 
-	      // 삭제 버튼 클릭 시 해당 파일 제거
-	      removeBtn.onclick = function() {
-	        selectedFiles = selectedFiles.filter(f => f !== file);
-	        previewReviewImage(input);  // 미리보기 갱신
-	      };
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.textContent = '삭제';
+  removeBtn.style.backgroundColor = '#f44336';
+  removeBtn.style.color = 'white';
+  removeBtn.style.border = 'none';
+  removeBtn.style.padding = '6px 10px';
+  removeBtn.style.borderRadius = '6px';
+  removeBtn.style.cursor = 'pointer';
 
-	      item.appendChild(img);
-	      item.appendChild(removeBtn);
-	      preview.appendChild(item);
-	    };
-	    reader.readAsDataURL(file);
-	  });
+  removeBtn.onclick = function () {
+    container.removeChild(wrapper);
+  };
 
-	  // input 초기화 필요 없음 (파일 추가 누적 허용)
-	}
-
-
-function clearImages() {
-  const preview = document.getElementById('imagePreview');
-  preview.innerHTML = '';
-  // 배열도 함께 비웁니다.
-  selectedFiles = [];
-  const fileInput = document.getElementById('fileName');
-  fileInput.value = ''; // 이 부분은 비워도 됩니다.
+  wrapper.appendChild(fileInput);
+  wrapper.appendChild(previewImg);
+  wrapper.appendChild(removeBtn);
+  container.appendChild(wrapper);
 }
 
+// 이미지 미리보기 표시
+function showPreview(input, imgElement) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      imgElement.src = e.target.result;
+      imgElement.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// 전체 이미지 삭제
+function clearAllImages() {
+  const container = document.getElementById('imageUploadContainer');
+  container.innerHTML = '';
+  imageCount = 0;
+}
+
+// 리뷰 폼 유효성 검사
 function checkReview() {
-	debugger;
-	console.log('✅ checkReview() 함수 시작');
-
-  const form = document.querySelector('form');
-
   const ratingInputs = document.querySelectorAll('input[name="rating"]');
   if (![...ratingInputs].some(r => r.checked)) {
     alert('별점을 선택해주세요.');
-    return false; // form.submit() 대신 false 반환
+    return false;
   }
 
-//   const content = form.content.value.trim();
-//   if (content.length < 10) {
-//     alert('리뷰 내용을 10자 이상 작성해주세요.');
-//     form.content.focus();
-//     return false;
-//   }
-
-  //const content = form.content.value.trim();
-
-  const contentElement = document.getElementById('content'); // ✨ ID로 직접 요소 가져오기
-  const content = contentElement.value.trim(); // ✨ 가져온 요소의 value에 접근
+  const contentElement = document.getElementById('content');
+  const content = contentElement.value.trim();
   if (content.length < 10) {
-      console.log('리뷰 내용이 10자 미만입니다. return false를 실행합니다.');
-      form.content.focus();
-      return false; // 이 줄이 실행되는지 확인하세요.
+    alert('리뷰 내용은 최소 10자 이상 작성해주세요.');
+    contentElement.focus();
+    return false;
   }
 
   const tasteInputs = document.getElementsByName('taste');
@@ -199,54 +197,10 @@ function checkReview() {
     return false;
   }
 
-  // 폼 제출 전에 FormData에 파일을 추가합니다.
-  const formData = new FormData(form);
-  selectedFiles.forEach((file, index) => {
-      formData.append('fileName[]', file);
-  });
-  console.log('✅ fetch 요청 시작');
-  fetch(form.action, {
-	    method: 'POST',
-	    body: formData
-	})
-	.then(response => {
-		console.log('✅ fetch 응답 받음:', response.status);
-	    // HTTP 응답이 성공적인지 확인
-	    if (!response.ok) {
-	        throw new Error('네트워크 응답이 실패했습니다.');
-	    }
-	    // 응답 본문을 텍스트로 먼저 변환하여 오류를 방지
-	    return response.text();
-	})
-	.then(text => {
-	    try {
-	    	console.log('✅ 서버 응답 텍스트:', text);
-	        // 텍스트를 JSON으로 파싱 시도
-	        const data = JSON.parse(text);
-	        console.log('✅ JSON 파싱 성공:',data); // 서버가 보낸 데이터를 콘솔에 출력
-	        if (data.success) {
-	            alert(data.message);
-	            window.location.href='${contextPath}/member/mypage';
-	        } else {
-	            alert(data.message);
-	            window.history.back();
-	        }
-	    } catch (e) {
-	        // JSON 파싱 오류 발생 시
-	        console.error('JSON 파싱 오류:', e);
-	        console.error('서버 응답 텍스트:', text);
-	        alert("서버 응답을 처리하는 중 오류가 발생했습니다.");
-	    }
-	})
-	.catch(error => {
-	    alert("요청 중 오류 발생: " + error.message);
-	    console.error("Fetch error:", error);
-	    window.history.back();
-	});
-
-  return false; // 기본 폼 제출을 막습니다.
+  return true;
 }
 </script>
+
 
 <div class="storeInfo">
 	<img src="${contextPath }/images/store/${storeInfo.fileName}" alt="${storeInfo.fileName }">
@@ -292,13 +246,11 @@ function checkReview() {
 			</div>
 		</div>
 
-		<div class="form-row" style="display: flex; flex-direction: column; margin-bottom: 10px; align-items: center;">
-			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName" name="fileName" accept="image/*" multiple="multiple" onchange="previewReviewImage(this)" />
-				<div id="imagePreview"></div>
-				<div class="clear-button-container">
-					<button type="button" class="clear-images-button" onclick="clearImages()">전체 이미지 삭제</button>
-				</div>
+		<div class="form-row" style="flex-direction: column; align-items: center;">
+			<div id="imageUploadContainer"></div>
+			<div style="margin-top: 10px;">
+				<button type="button" onclick="addImageInput()" class="btn btn-primary">이미지 추가</button>
+				<button type="button" class="btn btn-danger" onclick="clearAllImages()">전체 삭제</button>
 			</div>
 		</div>
 

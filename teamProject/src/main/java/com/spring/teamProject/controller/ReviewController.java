@@ -10,12 +10,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.teamProject.vo.ReviewVO;
 
-import jakarta.servlet.http.HttpSession;
-
 public interface ReviewController {
 	
-	public ResponseEntity<?> addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
-	public ResponseEntity<?> modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
+	public ModelAndView addReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
+	public ModelAndView modifyReview(@ModelAttribute ReviewVO review, MultipartHttpServletRequest multiReq) throws Exception;
 	public ModelAndView deleteReview(@RequestParam("reviewId") long reviewId) throws Exception;
     public ResponseEntity<Map<String, Object>> getBestReview() throws Exception;
 }
