@@ -13,8 +13,8 @@
         <button type="submit" class="btn btn-primary mt-4 me-2">조회</button>
         <a href="${pageContext.request.contextPath}/settlement/history" class="btn btn-secondary mt-4">초기화</a>
     </form>
-    <a href="${pageContext.request.contextPath}/settlement/calculate?storeId=1&startDate=${startDate}&endDate=${endDate}" class="btn btn-success mb-4">
-        정산 데이터 생성 (테스트)
+    <a href="${pageContext.request.contextPath}/settlement/calculate?startDate=${startDate}&endDate=${endDate}" class="btn btn-success mb-4">
+        정산 데이터 생성
     </a>
     <c:if test="${empty settlementList}">
         <p>조회된 정산 내역이 없습니다.</p>
