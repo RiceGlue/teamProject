@@ -29,7 +29,7 @@ public class HomeController {
      */
     @RequestMapping(value = "/")
     public String main(@AuthenticationPrincipal UserDetailsVO userDetailsVO, Model model) {
-        logger.info("HomeController: / 요청 처리됨 (개발자용)");
+        logger.info("HomeController: / 요청 처리됨 (사용자용 메인)");
         
         if (userDetailsVO != null) {
 			Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
@@ -40,7 +40,7 @@ public class HomeController {
         List<BannerEntity> bannerList = bannerService.getActiveBanners();
         model.addAttribute("bannerList", bannerList);
         model.addAttribute("body", "index.jsp");
-        return "layout/layout"; // 기존 레이아웃 사용
+        return "layout/main_layout"; // 기존 레이아웃 사용
     }
 
     /**
