@@ -1,8 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-
 
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
 
-<!-- Google Maps JavaScript API 로드 (API 키 필요) -->
+<!-- Google Maps JavaScript API 로드 -->
 <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&libraries=places">
 </script>
@@ -32,7 +30,16 @@
 <script>
 const memberId = "${memberId}";
 var contextPath = '${contextPath}';
-    // Google Maps API가 로드되면 자동으로 실행되는 콜백 함수
+
+	function goSearch() {
+		const keyword = document.getElementById('keyword').value;
+		if (!keyword.trim()) {
+			alert("검색어를 입력해주세요.");
+			return;
+		}
+		window.location.href = contextPath + "/store/storeList?option=search&keyword=" + encodeURIComponent(keyword);
+	}
+
     function initMap() {
         // 1. 사용자 위치 가져오기
         if (navigator.geolocation) {
@@ -59,18 +66,15 @@ var contextPath = '${contextPath}';
         const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
         geocoder.geocode({ location: latlng }, function (results, status) {
-            if (status === "OK") {
-                if (results[0]) {
-                    const fullAddress = results[0].formatted_address;
-                    document.getElementById("address").innerText = fullAddress;
-
-                    const dong = extractDongAddress(results[0].address_components);
-                    if (dong) {
-                        fetchNearbyStores(dong);
-                    }
-                }
+            if (status === "OK" && results[0]) {
+            	const fullAddress = results[0].formatted_address;
+            	document.getElementById("address").innerText = fullAddress;
+            	const dong = extractDongAddress(results[0].address_components);
+            	if (dong) {
+            		fetchNearbyStores(dong);
+            	}
             } else {
-                document.getElementById("address").innerText = "주소를 가져올 수 없습니다.";
+            	document.getElementById("address").innerText = "주소를 가져올 수 없습니다.";
             }
         });
     }
@@ -139,67 +143,63 @@ var contextPath = '${contextPath}';
             });
         });
     }
-    // 7. 매장 카드 UI로 표시
-function displayStoreCards(storeList, dong) {
-    console.log("UI카드 시작");
-    const container = document.getElementById("nearbyStores");
 
-    if (!container) {
-        console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
-        return;
-    }
-
-    container.innerHTML = ""; // 초기화
-
-    const limitedStoreList = storeList.slice(0, 3);
-
-    limitedStoreList.forEach(store => {
-        const card = document.createElement("div");
-        card.className = "card my-3";
-
-        // ✅ 위시리스트 버튼은 항상 생성 (로그인 여부와 무관)
-        card.innerHTML = 
-            '<div class="card-body">' +
-                '<h5 class="card-title">' +
-                    '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
-                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
-                        '<i class="fa fa-bookmark"></i>' +
-                    '</button>' +
-                '</h5>' +	
-                '<p class="card-text">📍 ' + store.roadAddress + '</p>' +
-                '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
-                '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
-            '</div>';
-
-        container.appendChild(card);
-
-        // ✅ 로그인한 경우에만 위시리스트 상태 체크
-        if (memberId && memberId !== 'null' && memberId !== 'undefined') {
-            const wishlistBtn = card.querySelector('.wishlist-btn');
-            if (wishlistBtn) {
-                checkWishlistStatus(store.storeId, wishlistBtn);
-            }
-        }
-    });
-
-    // 더보기 버튼
-    const buttonWrapper = document.createElement("div");
-    buttonWrapper.className = "d-grid mt-2";
-
-    const loadMoreBtn = document.createElement("button");
-    loadMoreBtn.id = "loadMoreBtn";
-    loadMoreBtn.className = "btn btn-light";
-    loadMoreBtn.textContent = "더보기";
-    loadMoreBtn.onclick = function () {
-        window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
-    };
-
-    buttonWrapper.appendChild(loadMoreBtn);
-    container.appendChild(buttonWrapper);
-}
+	function displayStoreCards(storeList, dong) {
+	    console.log("UI카드 시작");
+	    const container = document.getElementById("nearbyStores");
+	
+	    if (!container) {
+	        console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
+	        return;
+	    }
+	
+	    container.innerHTML = ""; // 초기화
+	
+	    const limitedStoreList = storeList.slice(0, 3);
+	
+	    limitedStoreList.forEach(store => {
+	        const card = document.createElement("div");
+	        card.className = "card my-3";
+	
+	        card.innerHTML = 
+	            '<div class="card-body">' +
+	                '<h5 class="card-title">' +
+	                    '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
+	                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
+	                        '<i class="fa fa-bookmark"></i>' +
+	                    '</button>' +
+	                '</h5>' +	
+	                '<p class="card-text">📍 ' + store.roadAddress + '</p>' +
+	                '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
+	                '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
+	            '</div>';
+	
+	        container.appendChild(card);
+	
+	        if (memberId && memberId !== 'null' && memberId !== 'undefined') {
+	            const wishlistBtn = card.querySelector('.wishlist-btn');
+	            if (wishlistBtn) {
+	                checkWishlistStatus(store.storeId, wishlistBtn);
+	            }
+	        }
+	    });
+	
+	    const buttonWrapper = document.createElement("div");
+	    buttonWrapper.className = "d-grid mt-2";
+	
+	    const loadMoreBtn = document.createElement("button");
+	    loadMoreBtn.id = "loadMoreBtn";
+	    loadMoreBtn.className = "btn btn-light";
+	    loadMoreBtn.textContent = "더보기";
+	    loadMoreBtn.onclick = function () {
+	        window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
+	    };
+	
+	    buttonWrapper.appendChild(loadMoreBtn);
+	    container.appendChild(buttonWrapper);
+	}
 
 
-    
 $(document).ready(function () {
     $.ajax({
         url: '/review/getBestReview',
@@ -266,8 +266,8 @@ $(document).ready(function () {
 
                         '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
                             '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
-                            '<h6>📞' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
-                            '<h6>📍' + review.roadAddress + '</h6>' +
+                            '<h6>??' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
+                            '<h6>??' + review.roadAddress + '</h6>' +
                         '</div>' +
                     '</div>';
             }
@@ -304,12 +304,11 @@ function checkWishlistStatus(storeId, btnElement) {
 	});
 }
 
-//위시리스트 버튼 클릭 처리
+// 위시리스트 버튼 클릭 처리
 $(document).on('click', '.wishlist-btn', function () {
     const storeId = $(this).data('store-id');
     toggleWishlist(storeId, this);
 });
-
 
 function toggleWishlist(storeId, btnElement) {
     if (!memberId || memberId == null || memberId.trim() === '') {
@@ -350,14 +349,16 @@ function toggleWishlist(storeId, btnElement) {
     }
 }
 
-$(function () {
-	// 💡 페이지 로드 시 위시리스트 상태 확인.
-	checkWishlistStatus();
-
-	// 💡 위시리스트 버튼 클릭 이벤트
-	$('#wishlist-btn').on('click', function() {
-	toggleWishlist();
-	});
+$(document).ready(function () {
+	// [복원] 페이지 로드 시 로그인한 사용자의 위시리스트 상태를 모든 버튼에 반영합니다.
+    if (memberId && memberId.trim() !== '' && memberId !== 'null' && memberId !== 'undefined') {
+        $('.wishlist-btn').each(function() {
+            const storeId = $(this).data('store-id');
+            if(storeId) { // data-store-id가 있는 버튼만 실행
+               checkWishlistStatus(storeId, this);
+            }
+        });
+    }
 });
 </script>
 
@@ -369,7 +370,7 @@ $(function () {
 	                <c:forEach var="banner" items="${bannerList}" varStatus="status">
 	                    <div class="carousel-item <c:if test="${status.first}">active</c:if>">
 	                        <a href="${contextPath}/promotion/detail?id=${banner.promotionId}">
-	                            <img src="${contextPath}/images/banners/${banner.getImagePath()}"
+								<img src="${contextPath}/banner-images/${banner.getImagePath()}"
 	                                 class="d-block w-100 img-fluid" alt="${banner.text}">
 								<div class="carousel-caption d-none d-md-block">
                                     <h5 class="text-white">${banner.text}</h5>
@@ -501,6 +502,7 @@ $(function () {
     </div>
 </div>
 
+<!-- [복원] 개발 테스트용 HTML 주석 -->
 <!-- <div class="review-item" style="height: 250px; width:200px; border:1px solid #ddd; padding:10px; margin-bottom:10px;"> -->
 <!-- 	<div class="writer" style="display: flex; justify-content: space-between;"> -->
 <!--     <p>작성자</p> -->
@@ -529,8 +531,8 @@ $(function () {
 <!--     </div> -->
 <!--     <div class="review-store" style="padding: 10px; z-index: 10;"> -->
 <!--         <h6>예시가게 | 음식점</h6> -->
-<!--         <h6>📞042-000-0000</h6> -->
-<!--         <h6>📍대전시 대덕구 어쩌구저쩌구</h6> -->
+<!--         <h6>??042-000-0000</h6> -->
+<!--         <h6>??대전시 대덕구 어쩌구저쩌구</h6> -->
 <!--     </div> -->
 <!-- </div> -->
 
@@ -557,4 +559,3 @@ $(function () {
 <!--     </div> -->
 <!-- </div> -->
 
-</div>

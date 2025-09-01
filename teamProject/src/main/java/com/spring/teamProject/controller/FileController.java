@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 public class FileController {
@@ -52,7 +54,7 @@ public class FileController {
             }
         }
     }
-    
+
     /**
      * 배너 이미지 요청을 처리하는 핸들러입니다.
      * FTP 연결 실패 시, 로컬에 저장된 기본 배너 이미지로 대체하여 응답합니다.
@@ -79,6 +81,29 @@ public class FileController {
         }
     }
     
+    /**
+     * [수정됨] 가게, 리뷰 등 일반적인 이미지 요청을 처리하는 범용 핸들러입니다.
+     * FTP 연결 실패 시, 대체 이미지를 응답합니다.
+     * URL 예시: /images/store/uuid.png, /images/review/uuid.png
+     */
+    @GetMapping("/images/{subDirectory}/{fileName}")
+    @ResponseBody
+    public ResponseEntity<byte[]> getImage(@PathVariable String subDirectory, @PathVariable String fileName) {
+        try {
+            byte[] fileContent = ftpService.downloadFile(subDirectory, fileName);
+            return createResponseEntity(fileName, fileContent);
+        } catch (IOException e) {
+            logger.warn("FTP에서 일반 이미지 ({}/{}) 로드 실패. 대체 이미지를 사용합니다.", subDirectory, fileName);
+            // 대체 이미지로 400x300 크기의 회색 배경 이미지를 반환합니다.
+            String placeholderText = URLEncoder.encode(subDirectory + "/" + fileName, StandardCharsets.UTF_8);
+            String placeholderUrl = "https://placehold.co/400x300/e2e8f0/64748b?text=Image\\nNot+Found";
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", placeholderUrl);
+            return new ResponseEntity<>(headers, HttpStatus.FOUND); // 302 Found 리다이렉트
+        }
+    }
+
     /**
      * 파일 이름과 내용(byte 배열)을 받아, 적절한 HTTP 응답을 생성하는 헬퍼 메소드입니다.
      */
