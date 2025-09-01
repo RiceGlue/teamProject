@@ -29,4 +29,10 @@ public interface SettlementService {
      */
     List<SettlementsEntity> getSettlementHistoryByOwnerIdAndDateRange(long ownerId, LocalDate startDate, LocalDate endDate);
 
+    /**
+     * 특정 정산 데이터를 'COMPLETED' 상태로 변경하고 정산일을 기록합니다.
+     * @param settlementId 정산 ID
+     */
+    void approveSettlement(long settlementId);
+
 }

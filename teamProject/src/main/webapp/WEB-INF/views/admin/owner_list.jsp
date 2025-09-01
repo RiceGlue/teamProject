@@ -1,3 +1,4 @@
+<%-- /WEB-INF/views/admin/owner_list.jsp --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -54,6 +55,7 @@
                                         <td>
                                             <a href="#" class="btn btn-info btn-sm">수정</a>
                                             <a href="#" class="btn btn-danger btn-sm">비활성화</a>
+                                            <a href="${pageContext.request.contextPath}/admin/settlement-history?ownerId=${owner.memberId}" class="btn btn-primary btn-sm">정산 관리</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

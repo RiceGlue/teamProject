@@ -28,11 +28,14 @@ public class SettlementServiceImpl implements SettlementService {
     private final SettlementsRepository settlementsRepository;
     private final StoreDAO storeDAO;
     private final PaymentDAO paymentDAO;
+    private final CommissionRateService commissionRateService; // ✨ 새롭게 추가된 의존성
 
-    public SettlementServiceImpl(SettlementsRepository settlementsRepository, StoreDAO storeDAO, PaymentDAO paymentDAO) {
+    // ✨ 생성자 수정: CommissionRateService를 주입받도록 변경
+    public SettlementServiceImpl(SettlementsRepository settlementsRepository, StoreDAO storeDAO, PaymentDAO paymentDAO, CommissionRateService commissionRateService) {
         this.settlementsRepository = settlementsRepository;
         this.storeDAO = storeDAO;
         this.paymentDAO = paymentDAO;
+        this.commissionRateService = commissionRateService;
     }
 
     @Override
@@ -68,6 +71,24 @@ public class SettlementServiceImpl implements SettlementService {
 
     @Override
     @Transactional
+    public void approveSettlement(long settlementId) {
+        logger.info("정산 승인 요청. settlementId: {}", settlementId);
+
+        SettlementsEntity settlement = settlementsRepository.findById(settlementId)
+                .orElseThrow(() -> new IllegalArgumentException("정산 ID를 찾을 수 없습니다: " + settlementId));
+
+        if (settlement.getStatus() == SettlementStatus.PENDING) {
+            settlement.setStatus(SettlementStatus.COMPLETED);
+            settlement.setSettledAt(LocalDateTime.now());
+            settlementsRepository.save(settlement);
+            logger.info("정산 ID {}가 성공적으로 승인되었습니다.", settlementId);
+        } else {
+            logger.warn("정산 ID {}는 이미 처리된 상태이므로 승인할 수 없습니다. 현재 상태: {}", settlementId, settlement.getStatus());
+        }
+    }
+
+    @Override
+    @Transactional
     public void calculateAndSaveSettlement(long storeId, String startDate, String endDate) {
         try {
             logger.info("매장 ID {}의 정산 데이터 계산 시작. 기간: {} ~ {}", storeId, startDate, endDate);
@@ -79,18 +100,15 @@ public class SettlementServiceImpl implements SettlementService {
                 return;
             }
 
-            // 모든 결제 금액을 합산하여 총 매출액을 계산
             BigDecimal totalRevenue = payments.stream()
                                             .map(p -> new BigDecimal(p.getAmount()))
                                             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            // 고정된 수수료율 (예: 5%)을 적용합니다.
-            BigDecimal commissionRate = new BigDecimal("0.05");
+            // ✨ CommissionRateService에서 동적으로 수수료율을 가져옴
+            BigDecimal commissionRate = commissionRateService.getCommissionRate();
 
-            // 총 수수료액을 계산합니다.
             BigDecimal totalCommission = totalRevenue.multiply(commissionRate);
 
-            // 최종 정산액을 계산합니다.
             BigDecimal finalSettlementAmount = totalRevenue.subtract(totalCommission);
 
             SettlementsEntity settlement = new SettlementsEntity();

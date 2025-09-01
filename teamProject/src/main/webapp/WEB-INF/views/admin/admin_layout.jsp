@@ -122,7 +122,8 @@
                 <i class="bi bi-cash-coin me-2"></i>회계 관리
             </a>
             <div id="collapseAccounting" class="collapse">
-                <a class="nav-link" href="#">- 가맹점 수수료 관리</a>
+            	<a class="nav-link" href="${contextPath}/admin/owners">- 정산 관리</a>
+                <a class="nav-link" href="${contextPath}/admin/commission-rate">- 가맹점 수수료 관리</a>
             </div>
         </div>
 
