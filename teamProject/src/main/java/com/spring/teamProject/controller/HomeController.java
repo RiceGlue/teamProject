@@ -40,7 +40,7 @@ public class HomeController {
         List<BannerEntity> bannerList = bannerService.getActiveBanners();
         model.addAttribute("bannerList", bannerList);
         model.addAttribute("body", "index.jsp");
-        return "layout/main_layout"; // 기존 레이아웃 사용
+        return "layout/layout"; // 기존 레이아웃 사용
     }
 
     /**
