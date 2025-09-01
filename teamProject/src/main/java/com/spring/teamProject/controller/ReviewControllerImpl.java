@@ -355,6 +355,7 @@ public class ReviewControllerImpl implements ReviewController{
 	public String requestReviewManage(@ModelAttribute ManageReviewVO manageReviewVO) throws Exception {
 
 		long storeId = manageReviewVO.getStoreId();
+		
 	    try {
 	        // 요청 상태 기본값 설정 (예: PENDING 상태)
 	        manageReviewVO.setStatus("REQUESTED");
@@ -375,12 +376,13 @@ public class ReviewControllerImpl implements ReviewController{
 	@Override
 	@RequestMapping(value = "/updateReviewManageStatus", method = RequestMethod.POST)
 	public String updateReviewManageStatus(@ModelAttribute ManageReviewVO manageReviewVO) throws Exception {
+		long reviewId = manageReviewVO.getReviewId();
 		try {
 			reviewService.updateReviewManage(manageReviewVO);
 			
 			if(manageReviewVO.getStatus().equals("APPROVED")) {
 				System.out.println("여기");
-				List<ImageFileVO> imageList = reviewService.getImageFile(manageReviewVO.getReviewId());
+				List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
 				
 				for(int i=0;i<imageList.size();i++) {
 					String fileName = imageList.get(i).getFileName();
@@ -390,7 +392,7 @@ public class ReviewControllerImpl implements ReviewController{
 					ftpService.deleteFile("review", fileName);
 				}
 				
-				reviewService.deleteReview(manageReviewVO.getReviewId());
+				reviewService.deleteReview(reviewId);
 			}
 			return "redirect:/admin/adminReviewManage";
 		}catch (Exception e) {

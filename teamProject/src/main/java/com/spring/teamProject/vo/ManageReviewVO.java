@@ -9,6 +9,9 @@ public class ManageReviewVO {
 	private long ownerId;
 	private long storeId;
 	
+	private String requestId;
+	private String storeName;
+	
 	private String requestReason;
 	private String customReason;
 	private String status;
@@ -77,6 +80,17 @@ public class ManageReviewVO {
 	public void setStoreId(long storeId) {
 		this.storeId = storeId;
 	}
-	
-	
+	public String getRequestId() {
+		return requestId;
+	}
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+	public String getStoreName() {
+		return storeName;
+	}
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
+
 }

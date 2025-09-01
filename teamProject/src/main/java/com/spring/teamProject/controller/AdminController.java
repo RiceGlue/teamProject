@@ -2,7 +2,10 @@ package com.spring.teamProject.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -11,17 +14,19 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.service.ReviewService;
+import com.spring.teamProject.service.SettlementService;
+import com.spring.teamProject.service.StoreService;
+import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ManageReviewVO;
-import com.spring.teamProject.service.SettlementService; // ✨ SettlementService import 추가
-
 import com.spring.teamProject.vo.MemberVO;
+import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.SettlementsEntity; // ✨ SettlementsEntity import 추가
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +41,9 @@ public class AdminController {
     
     @Autowired
     private ReviewService reviewService;
+    
+    @Autowired
+    private StoreService storeService;
 
     @Autowired
     private SettlementService settlementService; // ✨ SettlementService 의존성 주입
@@ -101,13 +109,29 @@ public class AdminController {
 
     @RequestMapping(value="/adminReviewManage")
     public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
-    	String viewName = (String)req.getAttribute("viewName");
-    	
-    	List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
-    	
-    	ModelAndView mav = ViewUtil.adminLayout(viewName);
-    	mav.addObject("manageReviewList", manageReviewList);
-    	return mav;
+        String viewName = (String) req.getAttribute("viewName");
+        List<ReviewVO> reviewList = new ArrayList<>();
+        Map<Long, Object> reviewImage = new HashMap<>();
+        
+        List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
+        
+        // APPROVED 아닌 것만 for문 돌리기
+        for (ManageReviewVO manageReview : manageReviewList) {
+            if (!"APPROVED".equals(manageReview.getStatus())) {
+                long reviewId = manageReview.getReviewId();
+                ReviewVO reviewVO = reviewService.getRivew(reviewId);
+                List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
+
+                reviewImage.put(reviewId, imageList);
+                reviewList.add(reviewVO);
+            }
+        }
+
+        ModelAndView mav = ViewUtil.adminLayout(viewName);
+        mav.addObject("manageReviewList", manageReviewList);
+        mav.addObject("reviewList", reviewList);
+        mav.addObject("reviewImage", reviewImage);
+        return mav;
     }
 
 

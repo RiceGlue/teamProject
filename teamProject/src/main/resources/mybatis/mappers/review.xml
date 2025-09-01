@@ -99,6 +99,9 @@
 		<result property="manageId" column="manage_id"/>
 		<result property="reviewId" column="review_id"/>
 		<result property="ownerId" column="owner_id"/>
+		<result property="storeId" column="store_id"/>
+		<result property="requestId" column="requestId"/>
+		<result property="storeName" column="store_name"/>
 		<result property="requestReason" column="request_reason"/>
 		<result property="customReason" column="custom_reason"/>
 		<result property="status" column="status"/>
@@ -287,7 +290,9 @@
 	</delete>
 	
 	<select id="getLikeCount" parameterType="long" resultType="int">
-	    SELECT count(review_id) FROM review_like WHERE review_id = #{reviewId}
+		<![CDATA[
+	    	SELECT count(review_id) FROM review_like WHERE review_id = #{reviewId}
+	    ]]>
 	</select>
 	
 	<select id="isLiked" parameterType="ReviewLikeVO" resultType="boolean" >
@@ -326,11 +331,12 @@
 	
 	<insert id="requestReviewManage" parameterType="ManageReviewVO" >
 		<![CDATA[
-			insert into manage_review (review_id, owner_id, request_reason, custom_reason, created_at )
+			insert into manage_review (review_id, owner_id, store_id, request_reason, custom_reason, created_at )
 			values
 			(
 				#{reviewId},
 				#{ownerId},
+				#{storeId},
 				#{requestReason},
 				#{customReason},
 				now()
@@ -346,7 +352,7 @@
 	
 	<select id="selectReviewManage" resultMap="manageReview" >
 		<![CDATA[
-			select m.*, r.store_id from manage_review m inner join reviews r on m.review_id = r.review_id
+			select r.*, s.store_name from manage_review r inner join stores s on r.owner_id=s.owner_id
 		]]>
 	</select>
 	

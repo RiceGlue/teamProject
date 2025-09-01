@@ -66,48 +66,126 @@
 
 
 <div class="manage-review-list">
- <h3>리뷰 관리 요청 상세 정보</h3>
+    <!-- 📌 검열 요청 섹션 -->
+    <h3>검열 요청</h3>
     <c:forEach var="manageReview" items="${manageReviewList}">
-        <form class="review-manage-form" action="${pageContext.request.contextPath}/review/updateReviewManageStatus" method="post">
+        <c:if test="${manageReview.status == 'REQUESTED'}">
+            <form class="review-manage-form"
+                  action="${pageContext.request.contextPath}/review/updateReviewManageStatus"
+                  method="post">
+                <div class="manage-review-item">
+                    <div class="review-info-section">
+                        <input type="hidden" name="manageId" value="${manageReview.manageId}" />
+                        <input type="hidden" name="reviewId" value="${manageReview.reviewId}" />
+
+                        <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
+                        <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
+                        <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
+                        <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
+                        <c:if test="${not empty manageReview.customReason}">
+                            <p><strong>기타 사유:</strong> ${manageReview.customReason}</p>
+                        </c:if>
+                        <p><strong>요청일:</strong>
+                            <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
+                        </p>
+
+                        <!-- 상태 변경 가능 -->
+                        <p>
+                            <strong>요청 상태:</strong>
+                            <select name="status" class="status-select">
+                                <option value="">-- 상태 선택 --</option>
+                                <option value="REQUESTED" selected>검열 요청</option>
+                                <option value="IN_PROGRESS">검열중</option>
+                                <option value="APPROVED">승인</option>
+                                <option value="REJECTED">거절</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <input type="text" name="rejectedReason"
+                                   class="form-control status-reason"
+                                   placeholder="검열 사유를 입력해주세요"
+                                   value="${manageReview.rejectedReason}" />
+                        </p>
+
+                        <button type="submit" class="btn-status-update">상태 변경</button>
+                    </div>
+                </div>
+            </form>
+        </c:if>
+    </c:forEach>
+
+    <!-- 📌 검열중 섹션 -->
+    <h3>검열중</h3>
+    <c:forEach var="manageReview" items="${manageReviewList}">
+        <c:if test="${manageReview.status == 'IN_PROGRESS'}">
+            <%-- REQUESTED와 동일하게 리뷰 정보 다 보여줌 --%>
+            <form class="review-manage-form"
+                  action="${pageContext.request.contextPath}/review/updateReviewManageStatus"
+                  method="post">
+                <div class="manage-review-item">
+                    <div class="review-info-section">
+                        <input type="hidden" name="manageId" value="${manageReview.manageId}" />
+                        <input type="hidden" name="reviewId" value="${manageReview.reviewId}" />
+
+                        <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
+                        <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
+                        <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
+                        <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
+                        <p><strong>요청일:</strong>
+                            <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
+                        </p>
+
+                        <p>
+                            <strong>요청 상태:</strong>
+                            <select name="status" class="status-select">
+                                <option value="REQUESTED">검열 요청</option>
+                                <option value="IN_PROGRESS" selected>검열중</option>
+                                <option value="APPROVED">승인</option>
+                                <option value="REJECTED">거절</option>
+                            </select>
+                        </p>
+
+                        <p>
+                            <input type="text" name="rejectedReason"
+                                   class="form-control status-reason"
+                                   placeholder="검열 사유를 입력해주세요"
+                                   value="${manageReview.rejectedReason}" />
+                        </p>
+
+                        <button type="submit" class="btn-status-update">상태 변경</button>
+                    </div>
+                </div>
+            </form>
+        </c:if>
+    </c:forEach>
+
+    <!-- 📌 승인 / 거절 섹션 -->
+    <h3>승인 / 거절</h3>
+    <c:forEach var="manageReview" items="${manageReviewList}">
+        <c:if test="${manageReview.status == 'APPROVED' || manageReview.status == 'REJECTED'}">
             <div class="manage-review-item">
                 <div class="review-info-section">
-                    <input type="hidden" name="manageId" value="${manageReview.manageId}" />
-
-                    <p><strong>리뷰 ID:</strong> ${manageReview.reviewId}</p>
-                    <p><strong>소유자 ID:</strong> ${manageReview.ownerId}</p>
-                    <p><strong>가게 ID:</strong> ${manageReview.storeId}</p>
+                    <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
+                    <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
+                    <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
                     <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
-
-                    <c:if test="${not empty manageReview.customReason}">
-                        <p><strong>기타 사유:</strong> ${manageReview.customReason}</p>
-                    </c:if>
-
                     <p><strong>요청일:</strong>
                         <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
                     </p>
 
-                    <p>
-                        <strong>요청 상태:</strong>
-                        <select name="status" class="status-select">
-                            <option value="">-- 상태 선택 --</option>
-                            <option value="REQUESTED" ${manageReview.status == 'REQUESTED' ? 'selected' : ''}>검열 요청</option>
-                            <option value="IN_PROGRESS" ${manageReview.status == 'IN_PROGRESS' ? 'selected' : ''}>검열중</option>
-                            <option value="APPROVED" ${manageReview.status == 'APPROVED' ? 'selected' : ''}>승인</option>
-                            <option value="REJECTED" ${manageReview.status == 'REJECTED' ? 'selected' : ''}>거절</option>
-                        </select>
-                    </p>
-
-                    <p>
-                        <input type="text"
-                               name="rejectedReason"
-                               class="form-control status-reason"
-                               placeholder="검열 사유를 입력해주세요"
-                               value="${manageReview.rejectedReason}" />
-                    </p>
-
-                    <button type="submit" class="btn-status-update">상태 변경</button>
+                    <c:choose>
+                        <c:when test="${manageReview.status == 'APPROVED'}">
+                            <p><strong>상태:</strong> 승인됨</p>
+                            <%-- 승인된 건 리뷰 내용 안 보여줌, 이력만 표시 --%>
+                        </c:when>
+                        <c:otherwise>
+                            <p><strong>상태:</strong> 거절됨</p>
+                            <p><strong>거절 사유:</strong> ${manageReview.rejectedReason}</p>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
-        </form>
+        </c:if>
     </c:forEach>
 </div>
