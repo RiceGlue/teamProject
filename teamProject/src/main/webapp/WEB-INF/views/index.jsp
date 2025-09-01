@@ -169,9 +169,9 @@ var contextPath = '${contextPath}';
 	                        '<i class="fa fa-bookmark"></i>' +
 	                    '</button>' +
 	                '</h5>' +	
-	                '<p class="card-text">📍 ' + store.roadAddress + '</p>' +
-	                '<p class="card-text">📞 ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
-	                '<p class="card-text">⭐ ' + store.avgRating + ' / 5</p>' +
+	                '<p class="card-text">&#128205; ' + store.roadAddress + '</p>' +
+	                '<p class="card-text">&#128222; ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
+	                '<p class="card-text">&#11088; ' + store.avgRating + ' / 5</p>' +
 	            '</div>';
 	
 	        container.appendChild(card);
@@ -266,8 +266,8 @@ $(document).ready(function () {
 
                         '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
                             '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
-                            '<h6>??' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
-                            '<h6>??' + review.roadAddress + '</h6>' +
+                            '<h6>&#128222; ' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
+                            '<h6>&#128205; ' + review.roadAddress + '</h6>' +
                         '</div>' +
                     '</div>';
             }
