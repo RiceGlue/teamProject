@@ -134,7 +134,7 @@
             <div id="collapseBoards" class="collapse">
                 <a class="nav-link" href="#">- 공지사항 관리</a>
                 <a class="nav-link" href="#">- 고객문의 관리</a>
-                <a class="nav-link" href="#">- 리뷰 관리</a>
+                <a class="nav-link" href="${contextPath }/admin/adminReviewManage">- 리뷰 관리</a>
             </div>
         </div>
 

@@ -3,9 +3,7 @@ package com.spring.teamProject.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +11,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +29,11 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.FtpService;
 import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
+import com.spring.teamProject.vo.UserDetailsVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -94,6 +95,43 @@ public class ReviewControllerImpl implements ReviewController{
         mav.addObject("review", review);
         mav.addObject("imglist", imglist);
         return mav;
+	}
+	
+	@RequestMapping(value="/reviewManage")
+	public ModelAndView reviewManage(@AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
+	    String viewName = (String) req.getAttribute("viewName");
+	    ModelAndView mav = ViewUtil.ownerLayout(viewName);
+	    
+	    Long ownerId = null;
+	    
+	    if (userDetailsVO != null) {
+	        ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+	    }
+	    
+	    List<ReviewVO> reviewList = reviewService.getStoreAllReview(storeId);
+	    
+	    Map<Long, ManageReviewVO> manageMap = new HashMap<>(); 
+	    Map<Long, List<ImageFileVO>> ImageMap = new HashMap<>();
+	    
+	    for(int i = 0; i < reviewList.size(); i++) {
+	        long reviewId = reviewList.get(i).getReviewId();
+	        
+	        List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
+	        ManageReviewVO manageReviewVO = reviewService.getReviewManageStatus(reviewId);
+	        
+	        if (manageReviewVO != null) {
+	            manageMap.put(reviewId, manageReviewVO); 
+	        }
+	        
+	        ImageMap.put(reviewId, imageList);
+	    }
+	    
+	    mav.addObject("reviewList", reviewList);
+	    mav.addObject("manageMap", manageMap);
+	    mav.addObject("ImageMap", ImageMap);
+	    mav.addObject("ownerId", ownerId);
+	    
+	    return mav;
 	}
 
 	@Override
@@ -310,6 +348,56 @@ public class ReviewControllerImpl implements ReviewController{
 		}
 
 		return mav;
+	}
+	
+	@Override
+	@RequestMapping(value = "/requestReviewManage", method = RequestMethod.POST)
+	public String requestReviewManage(@ModelAttribute ManageReviewVO manageReviewVO) throws Exception {
+
+		long storeId = manageReviewVO.getStoreId();
+	    try {
+	        // 요청 상태 기본값 설정 (예: PENDING 상태)
+	        manageReviewVO.setStatus("REQUESTED");
+
+	        // 서비스 호출
+	        reviewService.requestReviewManage(manageReviewVO);
+
+	        // 성공 시 리다이렉트 또는 메시지 페이지
+	        return "redirect:/review/reviewManage?storeId="+storeId; // 혹은 원하는 URL로
+
+	    } catch (Exception e) {
+	        e.printStackTrace(); // 또는 로깅 처리
+	        // 실패 시 에러 페이지 혹은 다시 요청 페이지로
+	        return "redirect:/review/reviewManage?storeId="+storeId;
+	    }
+	}
+
+	@Override
+	@RequestMapping(value = "/updateReviewManageStatus", method = RequestMethod.POST)
+	public String updateReviewManageStatus(@ModelAttribute ManageReviewVO manageReviewVO) throws Exception {
+		try {
+			reviewService.updateReviewManage(manageReviewVO);
+			
+			if(manageReviewVO.getStatus().equals("APPROVED")) {
+				System.out.println("여기");
+				List<ImageFileVO> imageList = reviewService.getImageFile(manageReviewVO.getReviewId());
+				
+				for(int i=0;i<imageList.size();i++) {
+					String fileName = imageList.get(i).getFileName();
+					System.out.println("지워야 하는 파일 이름 : " + fileName);
+					
+					reviewService.deleteReviewImage(imageList.get(i).getImageId());
+					ftpService.deleteFile("review", fileName);
+				}
+				
+				reviewService.deleteReview(manageReviewVO.getReviewId());
+			}
+			return "redirect:/admin/adminReviewManage";
+		}catch (Exception e) {
+	        e.printStackTrace(); // 또는 로깅 처리
+	        // 실패 시 에러 페이지 혹은 다시 요청 페이지로
+	        return "redirect:/admin/adminReviewManage";
+	    }
 	}
 
 	@Override

@@ -9,10 +9,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.MemberService;
+import com.spring.teamProject.service.ReviewService;
+import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.MemberVO;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/admin") // /admin으로 시작하는 모든 요청은 이 컨트롤러가 처리합니다.
@@ -20,6 +27,9 @@ public class AdminController {
 
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private ReviewService reviewService;
 
     /**
      * 관리자 대시보드 메인 페이지를 보여줍니다.
@@ -78,5 +88,16 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("memberVO", memberVO); // 입력 데이터 유지를 위해 전달
             return "redirect:/admin/owners/new"; // 실패 시 다시 생성 폼으로 이동
         }
+    }
+    
+    @RequestMapping(value="/adminReviewManage")
+    public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
+    	String viewName = (String)req.getAttribute("viewName");
+    	
+    	List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
+    	
+    	ModelAndView mav = ViewUtil.adminLayout(viewName);
+    	mav.addObject("manageReviewList", manageReviewList);
+    	return mav;
     }
 }

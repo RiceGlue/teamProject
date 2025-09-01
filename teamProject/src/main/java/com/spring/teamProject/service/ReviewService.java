@@ -3,6 +3,7 @@ package com.spring.teamProject.service;
 import java.util.List;
 
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
@@ -30,6 +31,7 @@ public interface ReviewService {
 	public ImageFileVO getBestReviewImage(long reviewId) throws Exception;
 	public List<ReviewVO> getUserReview(long memberId) throws Exception;
 	public List<ReviewLikeVO> uesrLikeReview(long memberId) throws Exception;
+	public List<ManageReviewVO> selectReviewManage() throws Exception;
 	
 	public void increaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
 	public void decreaseLike(ReviewLikeVO reviewLikeVO) throws Exception;
@@ -39,4 +41,9 @@ public interface ReviewService {
 	
 	public List<ReviewVO> getStoreAllReview(long storeId) throws Exception;
 	public int countStoreAllReview(long storeId) throws Exception;
+	
+	public void requestReviewManage(ManageReviewVO manageReviewVO) throws Exception;
+	public ManageReviewVO getReviewManageStatus(long reviewId) throws Exception;
+	
+	public void updateReviewManage(ManageReviewVO manageReviewVO) throws Exception;
 }

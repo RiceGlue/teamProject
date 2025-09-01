@@ -24,6 +24,7 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.service.FtpService;
 import com.spring.teamProject.service.ReviewService;
+import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
 import com.spring.teamProject.vo.ReviewVO;
@@ -43,6 +44,9 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	private AdminStoreService adminStoreService;
 	
 	@Autowired
+	private StoreService storeService;
+	
+	@Autowired
 	private ReviewService reviewService;
 	
 	@Autowired
@@ -60,7 +64,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 		List<StoreVO> storeList = new ArrayList<>();
 		Map<String, Object> menuMap = new HashMap<>();
 
-		ModelAndView mav = ViewUtil.adminLayout(viewName);
+		ModelAndView mav = ViewUtil.ownerLayout(viewName);
 		
 		
 		if (userDetailsVO != null) {
@@ -78,37 +82,21 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 				int menuCount = adminStoreService.getMenuCount(storeList.get(i).getStoreId());
 				storeList.get(i).setMenuCount(menuCount);
 			}
+		}else if(type.equals("review")) {
+			storeList = adminStoreService.getOwnerStore(ownerId);
+		    for(int i=0;i<storeList.size();i++) {
+		    	int countRating = reviewService.countStoreAllReview(storeList.get(i).getStoreId());
+		    	storeList.get(i).setCountRating(countRating);
+		    }
 		}
+		
 
 		mav.addObject("ownerId", ownerId);
 		mav.addObject("storeList", storeList);
 		mav.addObject("type", type);
 		return mav;
 	}
-	
-	@RequestMapping(value="/reviewManage")
-	public ModelAndView reviewManage (@AuthenticationPrincipal UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception { 
-	    String viewName = (String)req.getAttribute("viewName");
-	    Long ownerId = null;
 
-	    ModelAndView mav = ViewUtil.adminLayout(viewName);
-	    
-	    if (userDetailsVO != null) {
-	        ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
-	    }
-	    
-	    List<StoreVO> storeList = adminStoreService.getOwnerStore(ownerId);
-	    for(int i=0;i<storeList.size();i++) {
-	    	int countRating = reviewService.countStoreAllReview(storeList.get(i).getStoreId());
-	    	storeList.get(i).setCountRating(countRating);
-	    }
-
-	    mav.addObject("ownerId", ownerId);
-	    mav.addObject("storeList", storeList);
-	    
-	    return mav;
-	}
-	
 	@RequestMapping(value="/addStoreInfoForm")
 	public ModelAndView addStoreInfoForm (@AuthenticationPrincipal UserDetailsVO userDetailsVO,HttpServletRequest req, HttpServletResponse res) throws Exception { //매장 정보 입력 폼 이동
 		String viewName = (String)req.getAttribute("viewName");
@@ -118,7 +106,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
 		}
 		
-		ModelAndView mav = ViewUtil.adminLayout(viewName);
+		ModelAndView mav = ViewUtil.ownerLayout(viewName);
 		mav.addObject("ownerId", ownerId);
 		return mav;
 	} 
@@ -132,7 +120,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 			ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
 		}
 
-		ModelAndView mav = ViewUtil.adminLayout(viewName);
+		ModelAndView mav = ViewUtil.ownerLayout(viewName);
 		System.out.println(storeId);
 		mav.addObject("storeId", storeId);
 		mav.addObject("ownerId", ownerId);
@@ -169,13 +157,12 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 	    List<MenuVO> menuList = adminStoreService.selectMenuList(storeId);
 
 	    // 모델과 뷰 반환
-	    ModelAndView mav = ViewUtil.adminLayout(viewName);
+	    ModelAndView mav = ViewUtil.ownerLayout(viewName);
 	    mav.addObject("menuList", menuList);
 	    mav.addObject("storeMap", storeMap);
 
 	    return mav;
 	}
-
 
 	@Override
 	@RequestMapping(value = "/addStoreInfo", method = RequestMethod.POST)

@@ -123,7 +123,7 @@
         </div>
 
         <div class="nav-item">
-            <a class="nav-link" href="${contentPath }/franchise/reviewManage"> <i class="bi bi-chat-left-text-fill me-2"></i> 리뷰 관리 </a>
+            <a class="nav-link" href="${contentPath }/franchise/storeManage?type=review"> <i class="bi bi-chat-left-text-fill me-2"></i> 리뷰 관리 </a>
         </div>
 
         <div class="nav-item">

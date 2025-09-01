@@ -95,6 +95,18 @@
 		<result property="regId" column="reg_id"/>
 	</resultMap>
 	
+	<resultMap id="manageReview" type="ManageReviewVO">
+		<result property="manageId" column="manage_id"/>
+		<result property="reviewId" column="review_id"/>
+		<result property="ownerId" column="owner_id"/>
+		<result property="requestReason" column="request_reason"/>
+		<result property="customReason" column="custom_reason"/>
+		<result property="status" column="status"/>
+		<result property="rejectedReason" column="rejected_reason" />
+		<result property="createdAt" column="created_at"/>
+		<result property="updatedAt" column="updated_at"/>
+	</resultMap>
+	
 	<select id="selectReview" parameterType="long" resultMap="reviewlist">
 		<![CDATA[
 			select * from reviews where review_id = #{reviewId}
@@ -302,7 +314,7 @@
 	
 	<select id="selectStoreAllReview" parameterType="long" resultMap="reviewlist" >
 		<![CDATA[
-			select * from reviews where store_id=#{storeId}
+			select r.*, m.login_id as writerId from reviews r inner join members m on r.member_id = m.member_id where store_id=#{storeId}
 		]]>
 	</select>
 	
@@ -311,4 +323,42 @@
 			select count(review_id) as countRating from reviews where store_id=#{storeId}
 		]]>
 	</select>
+	
+	<insert id="requestReviewManage" parameterType="ManageReviewVO" >
+		<![CDATA[
+			insert into manage_review (review_id, owner_id, request_reason, custom_reason, created_at )
+			values
+			(
+				#{reviewId},
+				#{ownerId},
+				#{requestReason},
+				#{customReason},
+				now()
+			)
+		]]>
+	</insert>
+	
+	<select id="getReviewManageStatus" parameterType="long" resultMap="manageReview">
+		<![CDATA[
+			select * from manage_review where review_id=#{reviewId}
+		]]>
+	</select>
+	
+	<select id="selectReviewManage" resultMap="manageReview" >
+		<![CDATA[
+			select m.*, r.store_id from manage_review m inner join reviews r on m.review_id = r.review_id
+		]]>
+	</select>
+	
+	<update id="updateReviewManage" parameterType="ManageReviewVO" >
+		<![CDATA[
+			UPDATE manage_review
+			SET
+				status = #{status},
+		        rejected_reason = #{rejectedReason},
+		        updated_at = now()
+		    WHERE manage_id = #{manageId}
+		]]>
+	</update>
+	
 </mapper>

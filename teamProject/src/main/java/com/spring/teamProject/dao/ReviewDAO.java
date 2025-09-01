@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.dao.DataAccessException;
 
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
@@ -43,4 +44,10 @@ public interface ReviewDAO {
 	
 	public List<ReviewVO> selectStoreAllReview(long storeId) throws DataAccessException;
 	public int countStoreAllReview(long storeId) throws DataAccessException;
+	
+	public void requestReviewManage(ManageReviewVO manageReviewVO) throws DataAccessException;
+	public ManageReviewVO getReviewManageStatus(long reviewId) throws DataAccessException;
+	
+	public List<ManageReviewVO> selectReviewManage() throws DataAccessException;
+	public void updateReviewManage(ManageReviewVO manageReviewVO) throws DataAccessException;
 }

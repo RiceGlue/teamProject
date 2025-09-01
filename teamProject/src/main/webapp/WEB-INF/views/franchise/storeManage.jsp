@@ -85,6 +85,31 @@
 				</c:if>
 			</div>
 		</c:when>
+		
+		<c:when test="${type eq 'review'}">
+			<h1 class="h3 mb-4">리뷰 관리</h1>
+			<div class="row">
+				<c:if test="${not empty storeList}">
+					<div class="store-list">
+						<c:forEach var="store" items="${storeList}">
+							<div class="store-item">
+								<img src="${contextPath}/images/store/${store.fileName}" alt="${store.storeName}" class="store-img"/>
+								<div class="store-info">
+									<h3 class="store-name">${store.storeName}</h3>
+									<p class="store-type">${store.storeType}</p>
+									<p>리뷰 ${store.countRating }개 </p>
+								</div>
+
+								<a href="${contextPath}/review/reviewManage?storeId=${store.storeId}" class="btn btn-primary btn-sm" aria-label="${store.storeName} 리뷰 관리">리뷰 관리</a>
+							</div>
+						</c:forEach>
+					</div>
+				</c:if>
+				<c:if test="${empty storeList}">
+					<p>등록된 매장이 없습니다.</p>
+				</c:if>
+			</div>
+		</c:when>
 		<c:otherwise></c:otherwise>
 	</c:choose>
 </div>

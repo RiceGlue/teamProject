@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.spring.teamProject.dao.ReviewDAO;
 import com.spring.teamProject.vo.ImageFileVO;
+import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.ReservationVO;
 import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.ReviewVO;
@@ -174,5 +175,26 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public int countStoreAllReview(long storeId) throws Exception {
 		return reviewDAO.countStoreAllReview(storeId);
+	}
+	
+	@Override
+	public void requestReviewManage(ManageReviewVO manageReviewVO) throws Exception {
+		reviewDAO.requestReviewManage(manageReviewVO);
+	}
+	
+	@Override
+	public ManageReviewVO getReviewManageStatus(long reviewId) throws Exception {
+		return reviewDAO.getReviewManageStatus(reviewId);
+	}
+	
+	@Override
+	public List<ManageReviewVO> selectReviewManage() throws Exception {
+		List<ManageReviewVO> manageReviewList = reviewDAO.selectReviewManage();
+		return manageReviewList;
+	}
+	
+	@Override
+	public void updateReviewManage(ManageReviewVO manageReviewVO) throws Exception {
+		reviewDAO.updateReviewManage(manageReviewVO);
 	}
 }
