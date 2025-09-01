@@ -141,5 +141,17 @@ public class AdminBannerController {
             return "error";
         }
     }
+    
+    // ? --- [신규] 기본 배너 업로드 처리 --- ?
+    @PostMapping("/upload-default")
+    public String uploadDefaultBanner(@RequestParam("defaultImageFile") MultipartFile defaultImageFile,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            bannerService.saveDefaultBanner(defaultImageFile);
+            redirectAttributes.addFlashAttribute("msg", "기본 배너가 성공적으로 변경되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "기본 배너 업로드 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        return "redirect:/admin/banners";
+    }
 }
-
