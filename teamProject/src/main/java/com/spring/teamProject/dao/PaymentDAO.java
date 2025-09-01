@@ -1,8 +1,11 @@
 package com.spring.teamProject.dao;
 
-import com.spring.teamProject.vo.PaymentVO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import com.spring.teamProject.vo.PaymentVO;
 
 @Mapper
 public interface PaymentDAO {
@@ -46,4 +49,10 @@ public interface PaymentDAO {
      * @param paymentVO 업데이트할 PaymentVO 객체
      */
     void updatePayment(PaymentVO payment) throws Exception;
+
+    public List<PaymentVO> selectPaymentsByStoreIdAndDateRange(
+	    @Param("storeId") Long storeId,
+	    @Param("startDate") String startDate,
+	    @Param("endDate") String endDate
+	) throws Exception;
 }
