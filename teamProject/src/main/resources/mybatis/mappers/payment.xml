@@ -4,11 +4,12 @@
 
 <mapper namespace="com.spring.teamProject.dao.PaymentDAO">
 
-    <!-- resultMap의 id는 그대로 paymentResultMap으로 둡니다. -->
     <resultMap id="paymentResultMap" type="com.spring.teamProject.vo.PaymentVO">
         <id property="paymentId" column="payment_id"/>
         <result property="reservationId" column="reservation_id"/>
+        <result property="storeId" column="store_id"/>
         <result property="amount" column="amount"/>
+        <result property="commissionFee" column="commission_fee"/>
         <result property="paymentMethod" column="payment_method"/>
         <result property="status" column="status"/>
         <result property="transactionId" column="transaction_id"/>
@@ -16,26 +17,23 @@
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
-    <!-- 새로운 결제 정보를 추가하는 쿼리 -->
     <insert id="insertPayment" parameterType="com.spring.teamProject.vo.PaymentVO"
             useGeneratedKeys="true" keyProperty="paymentId">
         INSERT INTO payments (
-            reservation_id, amount, payment_method, status, transaction_id
+            reservation_id, amount, payment_method, status, transaction_id, store_id, commission_fee
         ) VALUES (
-            #{reservationId}, #{amount}, #{paymentMethod}, #{status}, #{transactionId}
+            #{reservationId}, #{amount}, #{paymentMethod}, #{status}, #{transactionId}, #{storeId}, #{commissionFee}
         )
     </insert>
 
-    <!-- transactionId로 결제 정보를 조회하는 쿼리 -->
     <select id="selectByTransactionId" parameterType="String" resultMap="paymentResultMap">
         SELECT
-            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at, store_id, commission_fee
         FROM
             payments
         WHERE transaction_id = #{transactionId}
     </select>
 
-    <!-- PaymentService의 updatePaymentStatus에 맞게 매개변수를 Param에 맞도록 수정 -->
     <update id="updatePaymentStatus">
         UPDATE payments
         SET
@@ -44,44 +42,54 @@
             payment_id = #{paymentId}
     </update>
 
-    <!-- reservationId로 결제 정보를 조회하는 쿼리 -->
     <select id="selectByReservationId" parameterType="Long" resultMap="paymentResultMap">
         SELECT
-            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at, store_id, commission_fee
         FROM payments
         WHERE reservation_id = #{reservationId}
         LIMIT 1
     </select>
 
-    <!-- paymentId로 결제 정보를 조회하는 쿼리 (새로 추가) -->
     <select id="selectById" parameterType="Long" resultMap="paymentResultMap">
         SELECT
-            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at, store_id, commission_fee
         FROM payments
         WHERE payment_id = #{paymentId}
     </select>
 
-    <!-- paymentId로 결제 정보를 삭제하는 쿼리 -->
     <delete id="deletePayment" parameterType="Long">
         DELETE FROM payments WHERE payment_id = #{paymentId}
     </delete>
 
-    <!-- resultMap을 paymentResultMap으로 변경했습니다. -->
     <select id="selectByReservationIdWithLock" resultMap="paymentResultMap">
         SELECT
-            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at
+            payment_id, reservation_id, amount, payment_method, status, transaction_id, paid_at, created_at, store_id, commission_fee
         FROM payments
         WHERE reservation_id = #{reservationId}
         FOR UPDATE
     </select>
-	<!-- PaymentVO 객체 전체를 받아 업데이트하는 쿼리 -->
+
     <update id="updatePayment" parameterType="com.spring.teamProject.vo.PaymentVO">
         UPDATE payments
         SET
             amount = #{amount},
+            commission_fee = #{commissionFee},
             status = #{status},
             paid_at = #{paidAt}
         WHERE
             payment_id = #{paymentId}
     </update>
+
+    <select id="selectPaymentsByStoreIdAndDateRange" resultMap="paymentResultMap">
+	    SELECT
+	        payment_id, store_id, reservation_id, amount, commission_fee, status, created_at
+	    FROM
+	        payments
+	    WHERE
+	        store_id = #{storeId}
+	    AND
+	        status = 'COMPLETED'
+	    AND
+	        DATE(created_at) BETWEEN #{startDate} AND #{endDate}
+	</select>
 </mapper>

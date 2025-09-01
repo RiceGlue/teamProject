@@ -1,23 +1,39 @@
 package com.spring.teamProject.vo;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class PaymentVO {
+
     private Long paymentId;
     private Long reservationId;
     private Long amount;
+    private BigDecimal commissionFee; // commissionFee 필드 추가
     private String paymentMethod;
     private String status;
     private String transactionId;
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;
+    private long storeId;
 
+
+    // 기본 생성자
     public PaymentVO() {}
 
-    public PaymentVO(Long paymentId, Long reservationId, Long amount, String paymentMethod, String status, String transactionId, LocalDateTime paidAt, LocalDateTime createdAt) {
+    public long getStoreId() {
+		return storeId;
+	}
+
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
+	}
+
+	// 모든 필드를 포함하는 생성자
+    public PaymentVO(Long paymentId, Long reservationId, Long amount, BigDecimal commissionFee, String paymentMethod, String status, String transactionId, LocalDateTime paidAt, LocalDateTime createdAt) {
         this.paymentId = paymentId;
         this.reservationId = reservationId;
         this.amount = amount;
+        this.commissionFee = commissionFee;
         this.paymentMethod = paymentMethod;
         this.status = status;
         this.transactionId = transactionId;
@@ -25,6 +41,7 @@ public class PaymentVO {
         this.createdAt = createdAt;
     }
 
+    // 각 필드에 대한 Getter 및 Setter
     public Long getPaymentId() { return paymentId; }
     public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }
 
@@ -33,6 +50,9 @@ public class PaymentVO {
 
     public Long getAmount() { return amount; }
     public void setAmount(Long amount) { this.amount = amount; }
+
+    public BigDecimal getCommissionFee() { return commissionFee; }
+    public void setCommissionFee(BigDecimal commissionFee) { this.commissionFee = commissionFee; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
