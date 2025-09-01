@@ -11,21 +11,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-<<<<<<< HEAD
 import org.springframework.web.servlet.ModelAndView;
-=======
 import org.springframework.web.bind.annotation.RequestParam;
->>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.MemberService;
-<<<<<<< HEAD
 import com.spring.teamProject.service.ReviewService;
 import com.spring.teamProject.vo.ManageReviewVO;
-=======
 import com.spring.teamProject.service.SettlementService; // ✨ SettlementService import 추가
->>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
+
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.SettlementsEntity; // ✨ SettlementsEntity import 추가
 
@@ -103,8 +98,7 @@ public class AdminController {
             return "redirect:/admin/owners/new";
         }
     }
-<<<<<<< HEAD
-    
+
     @RequestMapping(value="/adminReviewManage")
     public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
     	String viewName = (String)req.getAttribute("viewName");
@@ -115,8 +109,7 @@ public class AdminController {
     	mav.addObject("manageReviewList", manageReviewList);
     	return mav;
     }
-}
-=======
+
 
     /**
      * 특정 점주의 정산 내역을 조회합니다.
@@ -174,4 +167,4 @@ public class AdminController {
 
 
 }
->>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
+
