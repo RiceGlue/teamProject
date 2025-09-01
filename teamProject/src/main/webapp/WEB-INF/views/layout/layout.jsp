@@ -5,8 +5,7 @@
 <!-- 본문 include -->
 <jsp:include page="/WEB-INF/views/${body}" />
 
-	<div class="fixed-div">
-		<h2>실시간<br>문의</h2>
-	</div>
+<!-- 새로 만든 채팅창 파일을 여기에 포함시킵니다. -->
+<jsp:include page="../common/chat.jsp" />
 
 <%@ include file="footer.jsp" %>
