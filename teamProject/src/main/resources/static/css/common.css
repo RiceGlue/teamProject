@@ -1,15 +1,5 @@
 @charset "UTF-8";
 
-.fixed-div {
-    position: fixed;
-    width: 100px;
-    height: 100px;
-    right: 20px;
-    bottom: 100px;
-    background-color: aquamarine;
-    cursor: pointer;
-}
-
 .row>.col-12,
 .row>.container {
     border: 2px solid olivedrab;

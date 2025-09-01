@@ -117,7 +117,7 @@
                 <i class="bi bi-cash-coin me-2"></i> 정산
             </a>
             <div id="collapseFinance" class="collapse">
-                <a class="nav-link" href="#">- 정산 내역</a>
+                <a class="nav-link" href="${contextPath}/settlement/history">- 정산 내역</a>
                 <a class="nav-link" href="#">- 수익/수수료 분석</a>
             </div>
         </div>

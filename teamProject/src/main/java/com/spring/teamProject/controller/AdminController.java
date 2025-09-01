@@ -1,6 +1,8 @@
 package com.spring.teamProject.controller;
 
-import java.util.List; // List import 추가
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -9,20 +11,29 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+<<<<<<< HEAD
 import org.springframework.web.servlet.ModelAndView;
+=======
+import org.springframework.web.bind.annotation.RequestParam;
+>>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.MemberService;
+<<<<<<< HEAD
 import com.spring.teamProject.service.ReviewService;
 import com.spring.teamProject.vo.ManageReviewVO;
+=======
+import com.spring.teamProject.service.SettlementService; // ✨ SettlementService import 추가
+>>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
 import com.spring.teamProject.vo.MemberVO;
+import com.spring.teamProject.vo.SettlementsEntity; // ✨ SettlementsEntity import 추가
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-@RequestMapping("/admin") // /admin으로 시작하는 모든 요청은 이 컨트롤러가 처리합니다.
+@RequestMapping("/admin")
 public class AdminController {
 
     @Autowired
@@ -30,6 +41,9 @@ public class AdminController {
     
     @Autowired
     private ReviewService reviewService;
+
+    @Autowired
+    private SettlementService settlementService; // ✨ SettlementService 의존성 주입
 
     /**
      * 관리자 대시보드 메인 페이지를 보여줍니다.
@@ -68,7 +82,7 @@ public class AdminController {
     @GetMapping("/owners/new")
     public String ownerJoinForm(Model model) {
         model.addAttribute("body", "admin/owner_join.jsp");
-        return "admin/admin_layout"; // 관리자 전용 레이아웃을 사용합니다.
+        return "admin/admin_layout";
     }
 
     /**
@@ -82,13 +96,14 @@ public class AdminController {
         try {
             memberService.join(memberVO);
             redirectAttributes.addFlashAttribute("msg", "가맹점주 계정이 성공적으로 생성되었습니다.");
-            return "redirect:/admin/owners"; // 성공 시 목록 페이지로 이동
+            return "redirect:/admin/owners";
         } catch (DuplicateKeyException e) {
             redirectAttributes.addFlashAttribute("error", "이미 사용 중인 아이디, 이메일 또는 전화번호입니다.");
-            redirectAttributes.addFlashAttribute("memberVO", memberVO); // 입력 데이터 유지를 위해 전달
-            return "redirect:/admin/owners/new"; // 실패 시 다시 생성 폼으로 이동
+            redirectAttributes.addFlashAttribute("memberVO", memberVO);
+            return "redirect:/admin/owners/new";
         }
     }
+<<<<<<< HEAD
     
     @RequestMapping(value="/adminReviewManage")
     public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
@@ -101,3 +116,62 @@ public class AdminController {
     	return mav;
     }
 }
+=======
+
+    /**
+     * 특정 점주의 정산 내역을 조회합니다.
+     */
+    @GetMapping("/settlement-history")
+    public String getOwnerSettlementHistory(
+            @RequestParam("ownerId") long ownerId,
+            @RequestParam(value = "startDate", required = false) String startDateStr,
+            @RequestParam(value = "endDate", required = false) String endDateStr,
+            Model model) {
+
+        LocalDate endDate = (endDateStr != null) ? LocalDate.parse(endDateStr) : LocalDate.now();
+        LocalDate startDate = (startDateStr != null) ? LocalDate.parse(startDateStr) : endDate.minusMonths(1);
+
+        List<SettlementsEntity> settlementList = settlementService.getSettlementHistoryByOwnerIdAndDateRange(ownerId, startDate, endDate);
+
+        model.addAttribute("ownerId", ownerId);
+        model.addAttribute("settlementList", settlementList);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("body", "admin/owner_settlement_history.jsp");
+
+        return "admin/admin_layout";
+    }
+
+    /**
+     * 정산 상태를 'COMPLETED'로 변경하여 승인 처리합니다.
+     */
+    @GetMapping("/approve-settlement")
+    public String approveSettlement(@RequestParam("settlementId") long settlementId,
+                                    @RequestParam("ownerId") long ownerId) {
+
+        settlementService.approveSettlement(settlementId);
+
+        return "redirect:/admin/settlement-history?ownerId=" + ownerId;
+    }
+
+ // ✨ 수수료율 조회 페이지
+    @GetMapping("/commission-rate")
+    public String getCommissionRate(Model model) {
+        // 현재 수수료율을 가져오는 로직 (추후 구현)
+        BigDecimal currentRate = BigDecimal.valueOf(0.05); // 임시 값
+        model.addAttribute("commissionRate", currentRate);
+        model.addAttribute("body", "admin/commission_rate.jsp");
+        return "admin/admin_layout";
+    }
+
+    // ✨ 수수료율 업데이트 처리
+    @PostMapping("/update-commission-rate")
+    public String updateCommissionRate(@RequestParam("rate") BigDecimal rate, RedirectAttributes redirectAttributes) {
+        // 수수료율을 업데이트하는 로직 (추후 구현)
+        redirectAttributes.addFlashAttribute("msg", "수수료율이 성공적으로 변경되었습니다.");
+        return "redirect:/admin/commission-rate";
+    }
+
+
+}
+>>>>>>> 32317ac13d8633e1b1800b8800e4385e386c2ec0
