@@ -6,7 +6,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">배너 관리</h1>
         <div>
-            <%-- ? --- [신규] '현재 게시 중' 탭일 때만 '순서 변경 모드' 버튼을 보여줍니다. --- ? --%>
+            <%-- '현재 게시 중' 탭일 때만 '순서 변경 모드' 버튼을 보여줍니다. --%>
             <c:if test="${currentTab == 'active'}">
                 <a href="${contextPath}/admin/banners/order" class="btn btn-warning btn-sm">
                     <i class="bi bi-arrow-down-up"></i> 순서 변경 모드
@@ -17,6 +17,41 @@
             </a>
         </div>
     </div>
+
+    <%-- ? --- [신규] 기본 배너 관리 섹션 --- ? --%>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">기본 배너 관리</h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small">활성화된 프로모션 배너가 없을 때 메인 페이지에 표시될 기본 배너입니다.</p>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <p class="mb-2"><strong>현재 기본 배너:</strong></p>
+                    <%-- 
+                        - FTP 서버의 /banners/default_banner.png 이미지를 불러옵니다.
+                        - 캐시 문제를 방지하기 위해 현재 시간을 쿼리 파라미터로 추가합니다.
+                    --%>
+                    <img src="${contextPath}/banner-images/default_banner.png?t=${System.currentTimeMillis()}" 
+                         alt="기본 배너 미리보기" 
+                         class="img-thumbnail"
+                         onerror="this.onerror=null; this.src='https://placehold.co/400x100/FDF6EC/7B2D26?text=Default+Banner';">
+                </div>
+                <div class="col-md-8">
+                    <form action="${contextPath}/admin/banners/upload-default" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="defaultImageFile" class="form-label"><strong>새 기본 배너로 교체:</strong></label>
+                            <input class="form-control" type="file" id="defaultImageFile" name="defaultImageFile" required>
+                            <div class="form-text">권장 사이즈: 1200x400, 최대 2MB, (JPG, PNG, GIF)</div>
+                        </div>
+                        <button type="submit" class="btn btn-info btn-sm">기본 배너 저장</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <%-- ? --- 1. 탭(Tab) UI 구조 --- ? --%>
     <ul class="nav nav-tabs mb-3">
@@ -35,6 +70,9 @@
         <div class="card-body">
             <c:if test="${not empty msg}">
                 <div class="alert alert-success">${msg}</div>
+            </c:if>
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger">${error}</div>
             </c:if>
             <div class="table-responsive">
                 <table class="table table-bordered" width="100%" cellspacing="0">
