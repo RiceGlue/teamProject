@@ -78,19 +78,13 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 	
 	@Override
-	public long getImageId (ImageFileVO imagefile) throws Exception {
-		long imageId = reviewDAO.selectImageId(imagefile);
-		return imageId;
+	public ImageFileVO getReviewImageById (long imageId) throws Exception {
+		return reviewDAO.selectReviewImageById(imageId);
 	}
 	
 	@Override
-	public void modifyReviewImage(ImageFileVO imgFile) throws Exception {
-		reviewDAO.updateReviewImage(imgFile);
-	}
-	
-	@Override
-	public void deleteReviewImage(String fileName) throws Exception {
-		reviewDAO.deleteReviewImage(fileName);
+	public void deleteReviewImage(long imageId) throws Exception {
+		reviewDAO.deleteReviewImage(imageId);
 	}
 	
 	@Override
@@ -169,5 +163,16 @@ public class ReviewServiceImpl implements ReviewService {
 		reviewLikeVO.setReviewId(reviewId);
 		
 		return reviewDAO.isLiked(reviewLikeVO);
+	}
+	
+	@Override
+	public List<ReviewVO> getStoreAllReview(long storeId) throws Exception {
+		List<ReviewVO> reviewList = reviewDAO.selectStoreAllReview(storeId);
+		return reviewList;
+	}
+	
+	@Override
+	public int countStoreAllReview(long storeId) throws Exception {
+		return reviewDAO.countStoreAllReview(storeId);
 	}
 }

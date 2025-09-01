@@ -23,8 +23,10 @@ import com.spring.teamProject.common.StringUtil;
 import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.AdminStoreService;
 import com.spring.teamProject.service.FtpService;
+import com.spring.teamProject.service.ReviewService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
+import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 
@@ -39,6 +41,9 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 
 	@Autowired
 	private AdminStoreService adminStoreService;
+	
+	@Autowired
+	private ReviewService reviewService;
 	
 	@Autowired
 	private FtpService ftpService;
@@ -79,6 +84,29 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 		mav.addObject("storeList", storeList);
 		mav.addObject("type", type);
 		return mav;
+	}
+	
+	@RequestMapping(value="/reviewManage")
+	public ModelAndView reviewManage (@AuthenticationPrincipal UserDetailsVO userDetailsVO, HttpServletRequest req, HttpServletResponse res) throws Exception { 
+	    String viewName = (String)req.getAttribute("viewName");
+	    Long ownerId = null;
+
+	    ModelAndView mav = ViewUtil.adminLayout(viewName);
+	    
+	    if (userDetailsVO != null) {
+	        ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+	    }
+	    
+	    List<StoreVO> storeList = adminStoreService.getOwnerStore(ownerId);
+	    for(int i=0;i<storeList.size();i++) {
+	    	int countRating = reviewService.countStoreAllReview(storeList.get(i).getStoreId());
+	    	storeList.get(i).setCountRating(countRating);
+	    }
+
+	    mav.addObject("ownerId", ownerId);
+	    mav.addObject("storeList", storeList);
+	    
+	    return mav;
 	}
 	
 	@RequestMapping(value="/addStoreInfoForm")

@@ -188,59 +188,78 @@ public class ReviewControllerImpl implements ReviewController{
 	    long memberId = review.getMemberId();
 	    long storeId = review.getStoreId();
 
-	    // 기존 이미지 배열
-	    String[] existingFileNames = multiReq.getParameterValues("existingFileNames");
+	    // 이미지 ID 기반 삭제 요청
+	    String[] deleteFiles = multiReq.getParameterValues("deleteFiles");
+	    
+	    if(deleteFiles != null) {
+	    	for(int i=0;i<deleteFiles.length;i++) {
+	    		System.out.println("삭제할 이미지 Id" + deleteFiles[i]);
+	    	}
+	    }
 
-	    // 삭제할 이미지 배열
-	    String[] deleteFileNames = multiReq.getParameterValues("deleteFileNames");
-	    boolean hasFilesToDelete = (deleteFileNames != null && deleteFileNames.length > 0);
-
-	    // 새로 추가된 파일
+	    // 새로 추가된 이미지 파일
 	    List<MultipartFile> newFiles = multiReq.getFiles("newFiles");
-	    boolean hasFilesToAdd = (newFiles != null && !newFiles.isEmpty() && !newFiles.get(0).isEmpty());
-
+	    
 	    try {
-	        // ✅ 조건 1: 이미지 변경 없이 본문만 수정
-	        if (!hasFilesToDelete && !hasFilesToAdd) {
-	            reviewService.modifyReview(review);
-	            mav.setViewName("redirect:/member/mypage");
-	            return mav;
-	        }
-
-	        // ✅ 모든 경우 리뷰 본문은 수정
+	    	
+	        // 1. 리뷰 본문 수정
 	        reviewService.modifyReview(review);
+	        System.out.println("리뷰 수정 완료");
+	        
+	        // 2. 삭제할 이미지 처리 (imageId 기준)
+	        if (deleteFiles != null && deleteFiles.length > 0) {
+	            for (String idStr : deleteFiles) {
+	                if (idStr != null && !idStr.isBlank()) {
+	                    try {
+	                        long imageId = Long.parseLong(idStr);
+	                        System.out.println("삭제 이미지 아이디 :" +imageId);
 
-	        // ✅ 조건 3 or 4: 삭제할 파일 처리 (기존 이미지 배열에 존재할 경우만)
-	        if (hasFilesToDelete && existingFileNames != null) {
-	            for(int i=0;i<existingFileNames.length;i++) {
-	            	if(existingFileNames[i].equals(deleteFileNames[i])) {
-	            		reviewService.deleteReviewImage(existingFileNames[i]);
-	            	}
+	                        // 이미지 정보 조회
+	                        ImageFileVO image = reviewService.getReviewImageById(imageId);
+	                        if (image != null) {
+	                            // DB 삭제
+	                            reviewService.deleteReviewImage(imageId);
+	                            System.out.println("이미지 DB삭제 완료");
+
+	                            // FTP 삭제
+	                            ftpService.deleteFile(directoryName, image.getFileName());
+	                            System.out.println("이미지 삭제 완료");
+	                        }
+	                    } catch (NumberFormatException e) {
+	                        // 무시 또는 로그
+	                        System.err.println("잘못된 이미지 ID 형식: " + idStr);
+	                    }
+	                }
 	            }
 	        }
 
-	        // ✅ 조건 2 or 4: 이미지 추가
-	        if (hasFilesToAdd) {
-	            // 현재 남아 있는 이미지 개수 → displayNo 설정
-	            List<ImageFileVO> remainingImages = reviewService.getImageFile(reviewId);
-	            int displayNo = remainingImages.size();
+	        // 3. 새 이미지 추가 처리
+	        if (newFiles != null && !newFiles.isEmpty()) {
+	        	System.out.println("이미지 추가");
+	            // 기존 이미지 개수로 displayNo 계산
+	            int displayNo = reviewService.getImageFile(reviewId).size();
 
 	            for (MultipartFile file : newFiles) {
 	                if (!file.isEmpty()) {
 	                    String originalFilename = file.getOriginalFilename();
 	                    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 	                    String savedFilename = UUID.randomUUID().toString() + extension;
-	                    
-	                    File tempFile = File.createTempFile("upload-", extension);
-	    				file.transferTo(tempFile);
 
-	    				boolean uploaded = ftpService.uploadFile(tempFile, directoryName, savedFilename);
+	                    // 임시 파일 저장
+	                    File tempFile = File.createTempFile("upload-", extension);
+	                    file.transferTo(tempFile);
+
+	                    // FTP 업로드
+	                    boolean uploaded = ftpService.uploadFile(tempFile, directoryName, savedFilename);
+
+	                    // 임시 파일 삭제
+	                    tempFile.delete();
+
 	                    if (!uploaded) {
 	                        throw new IOException("FTP 업로드 실패: " + originalFilename);
 	                    }
-	                    
-	                    tempFile.delete();
 
+	                    // DB 저장
 	                    ImageFileVO image = new ImageFileVO();
 	                    image.setReviewId(reviewId);
 	                    image.setFileName(savedFilename);
@@ -253,17 +272,18 @@ public class ReviewControllerImpl implements ReviewController{
 	            }
 	        }
 
+	        // 성공 시 마이페이지로 이동
 	        mav.setViewName("redirect:/member/mypage");
 
 	    } catch (Exception e) {
-	    	e.printStackTrace();
+	        e.printStackTrace();
 	        mav.setViewName("redirect:/review/modifyReviewForm?reviewId=" + reviewId);
 	    }
 
 	    return mav;
 	}
-
-
+	
+	
 	@Override
 	@RequestMapping(value="/deleteReview", method=RequestMethod.POST)
 	public ModelAndView deleteReview(@RequestParam("reviewId") long reviewId) throws Exception {
@@ -275,7 +295,7 @@ public class ReviewControllerImpl implements ReviewController{
 
 			for(int i=0;i<imglist.size();i++) {
 			String fileName = imglist.get(i).getFileName();
-			reviewService.deleteReviewImage(fileName);
+			reviewService.deleteReviewImage(imglist.get(i).getImageId());
 			ftpService.deleteFile(directoryName, fileName);
 			}
 
