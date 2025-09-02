@@ -561,4 +561,9 @@ public class MemberServiceImpl implements MemberService {
             return localPart.substring(0, 3) + "****" + domainPart;
         }
     }
+    
+    @Override
+    public MemberVO getMemberById(long memberId) {
+    	return memberDAO.selectMemberById(memberId);
+    }
 }

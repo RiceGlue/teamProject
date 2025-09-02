@@ -77,4 +77,6 @@ public interface MemberService {
 
     // ✨ --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ✨
     String sendVerificationCodeForId(String memberName, String email);
+    
+    MemberVO getMemberById(long memberId);
 }

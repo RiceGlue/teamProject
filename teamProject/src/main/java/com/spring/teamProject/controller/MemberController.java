@@ -324,10 +324,12 @@ public class MemberController {
 
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
-        MemberVO memberInfo = getMemberInfoFromPrincipal(principal);
-        if (memberInfo == null) {
-            return "redirect:/member/login";
-        }
+    	
+    	MemberVO sessionMember = getMemberInfoFromPrincipal(principal);
+    	if (sessionMember == null) {
+    	    return "redirect:/member/login";
+    	}
+    	MemberVO memberInfo = memberService.getMemberById(sessionMember.getMemberId());
 
         String role = memberInfo.getRole();
 

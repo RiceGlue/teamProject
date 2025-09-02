@@ -141,4 +141,9 @@
         WHERE member_id = #{memberId}
     </update>
 
+	<select id="selectMemberById" parameterType="long" resultMap="memberResultMap" >
+		<![CDATA[
+			select * from members where member_id = #{memberId}
+		]]>
+	</select>
 </mapper>

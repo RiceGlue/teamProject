@@ -58,4 +58,6 @@ public interface MemberDAO {
 
     // --- [신규] 비밀번호를 업데이트하는 메소드 ---
     int updatePassword(@Param("memberId") long memberId, @Param("encodedPassword") String encodedPassword);
+    
+    MemberVO selectMemberById(long memberId);
 }
