@@ -1,6 +1,7 @@
 package com.spring.teamProject.vo;
 
 import java.util.Date;
+import java.util.List;
 
 public class ManageReviewVO {
 	
@@ -20,6 +21,23 @@ public class ManageReviewVO {
 	private Date createdAt;
 	private Date updatedAt;
 	
+	private ReviewVO review;
+	
+	public ReviewVO getReview() {
+		return review;
+	}
+	public void setReview(ReviewVO review) {
+		this.review = review;
+	}
+	
+	private List<ImageFileVO> imageList;
+	
+	public List<ImageFileVO> getImageList() {
+		return imageList;
+	}
+	public void setImageList(List<ImageFileVO> imageList) {
+		this.imageList = imageList;
+	}
 	public long getManageId() {
 		return manageId;
 	}

@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </c:forEach>
     </div>
+    
 <%
     // JSP scriptlet으로 reviewId Set 구성
     java.util.Set<Long> displayedReviewIds = new java.util.HashSet<>();
@@ -211,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     request.setAttribute("displayedReviewIds", displayedReviewIds);
 %>
-
 
 <c:forEach var="entry" items="${manageMap}">
     <c:if test="${not displayedReviewIds.contains(entry.key)}">

@@ -110,27 +110,40 @@ public class AdminController {
     @RequestMapping(value="/adminReviewManage")
     public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
         String viewName = (String) req.getAttribute("viewName");
-        List<ReviewVO> reviewList = new ArrayList<>();
-        Map<Long, Object> reviewImage = new HashMap<>();
-        
-        List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
-        
-        // APPROVED 아닌 것만 for문 돌리기
-        for (ManageReviewVO manageReview : manageReviewList) {
-            if (!"APPROVED".equals(manageReview.getStatus())) {
-                long reviewId = manageReview.getReviewId();
-                ReviewVO reviewVO = reviewService.getRivew(reviewId);
-                List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
 
-                reviewImage.put(reviewId, imageList);
-                reviewList.add(reviewVO);
+        // 전체 검열 요청 리스트
+        List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
+
+        // 상태별 리스트 준비
+        List<ManageReviewVO> requestedOrInProgressList = new ArrayList<>();
+        List<ManageReviewVO> approvedOrRejectedList = new ArrayList<>();
+
+        for (ManageReviewVO manageReview : manageReviewList) {
+            long reviewId = manageReview.getReviewId();
+
+            // 리뷰 및 이미지 세팅
+            ReviewVO reviewVO = reviewService.getRivew(reviewId);
+            manageReview.setReview(reviewVO);
+
+            List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
+            manageReview.setImageList(imageList);
+
+            // 상태 분류
+            String status = manageReview.getStatus();
+            if ("REQUESTED".equals(status) || "IN_PROGRESS".equals(status)) {
+                requestedOrInProgressList.add(manageReview);
+            } else if ("APPROVED".equals(status) || "REJECTED".equals(status)) {
+                approvedOrRejectedList.add(manageReview);
             }
         }
+        
+        System.out.println("requestedOrInProgressList 크기 :"+requestedOrInProgressList.size() );
 
+        // 모델에 상태별 리스트 주입
         ModelAndView mav = ViewUtil.adminLayout(viewName);
-        mav.addObject("manageReviewList", manageReviewList);
-        mav.addObject("reviewList", reviewList);
-        mav.addObject("reviewImage", reviewImage);
+        mav.addObject("requestedOrInProgressList", requestedOrInProgressList);
+        mav.addObject("approvedOrRejectedList", approvedOrRejectedList);
+
         return mav;
     }
 

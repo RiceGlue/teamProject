@@ -352,7 +352,7 @@
 	
 	<select id="selectReviewManage" resultMap="manageReview" >
 		<![CDATA[
-			select r.*, s.store_name from manage_review r inner join stores s on r.owner_id=s.owner_id
+			select r.*, s.store_name from manage_review r inner join stores s on r.store_id=s.store_id
 		]]>
 	</select>
 	

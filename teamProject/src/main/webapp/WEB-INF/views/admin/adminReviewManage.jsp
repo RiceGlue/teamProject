@@ -68,72 +68,97 @@
 <div class="manage-review-list">
     <!-- 📌 검열 요청 섹션 -->
     <h3>검열 요청</h3>
-    <c:forEach var="manageReview" items="${manageReviewList}">
-        <c:if test="${manageReview.status == 'REQUESTED' || manageReview.status == 'IN_PROGRESS'}">
-            <form class="review-manage-form" action="${pageContext.request.contextPath}/review/updateReviewManageStatus" method="post">
-                <div class="manage-review-item">
-                    <div class="review-info-section">
-                        <input type="hidden" name="manageId" value="${manageReview.manageId}" />
-                        <input type="hidden" name="reviewId" value="${manageReview.reviewId}" />
-
-                        <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
-                        <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
-                        <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
-                        <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
-                        <c:if test="${not empty manageReview.customReason}">
-                            <p><strong>기타 사유:</strong> ${manageReview.customReason}</p>
-                        </c:if>
-                        <p><strong>요청일:</strong><fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
-
-                        <!-- 상태 변경 가능 -->
-                        <p>
-                            <strong>요청 상태:</strong>
-                            <select name="status" class="status-select">
-                                <option value="REQUESTED" ${manageReview.status == 'REQUESTED' ? 'selected' : ''}>검열 요청</option>
-								<option value="IN_PROGRESS" ${manageReview.status == 'IN_PROGRESS' ? 'selected' : ''}>검열중</option>
-								<option value="APPROVED" ${manageReview.status == 'APPROVED' ? 'selected' : ''}>승인</option>
-								<option value="REJECTED" ${manageReview.status == 'REJECTED' ? 'selected' : ''}>거절</option>
-                            </select>
-                        </p>
-
-                        <p>
-                            <input type="text" name="rejectedReason"
-                                   class="form-control status-reason"
-                                   placeholder="검열 사유를 입력해주세요"
-                                   value="${manageReview.rejectedReason}" />
-                        </p>
-
-                        <button type="submit" class="btn-status-update">상태 변경</button>
-                    </div>
-                </div>
-            </form>
-        </c:if>
-    </c:forEach>
-
-    <!-- 📌 승인 / 거절 섹션 -->
-    <h3>승인 / 거절</h3>
-    <c:forEach var="manageReview" items="${manageReviewList}">
-        <c:if test="${manageReview.status == 'APPROVED' || manageReview.status == 'REJECTED'}">
+    <c:forEach var="manageReview" items="${requestedOrInProgressList}">
+        <form class="review-manage-form" action="${pageContext.request.contextPath}/review/updateReviewManageStatus" method="post">
             <div class="manage-review-item">
                 <div class="review-info-section">
+                    <input type="hidden" name="manageId" value="${manageReview.manageId}" />
+                    <input type="hidden" name="reviewId" value="${manageReview.reviewId}" />
+
                     <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
                     <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
                     <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
                     <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
+                    <c:if test="${not empty manageReview.customReason}">
+                        <p><strong>기타 사유:</strong> ${manageReview.customReason}</p>
+                    </c:if>
                     <p><strong>요청일:</strong><fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
 
-                    <c:choose>
-                        <c:when test="${manageReview.status == 'APPROVED'}">
-                            <p><strong>상태:</strong> 승인됨</p>
-                            <%-- 승인된 건 리뷰 내용 안 보여줌, 이력만 표시 --%>
-                        </c:when>
-                        <c:otherwise>
-                            <p><strong>상태:</strong> 거절됨</p>
-                            <p><strong>거절 사유:</strong> ${manageReview.rejectedReason}</p>
-                        </c:otherwise>
-                    </c:choose>
+                    <!-- 리뷰 내용 -->
+                    <p><strong>리뷰 내용:</strong> ${manageReview.review.content}</p>
+
+                    <!-- 이미지 출력 -->
+                    <c:if test="${not empty manageReview.imageList}">
+                        <div class="review-images">
+                            <c:forEach var="img" items="${manageReview.imageList}">
+                                <img src="${pageContext.request.contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" width="100" />
+                            </c:forEach>
+                        </div>
+                    </c:if>
+
+                    <!-- 상태 변경 가능 -->
+                    <p>
+                        <strong>요청 상태:</strong>
+                        <select name="status" class="status-select">
+                            <option value="REQUESTED" ${manageReview.status == 'REQUESTED' ? 'selected' : ''}>검열 요청</option>
+                            <option value="IN_PROGRESS" ${manageReview.status == 'IN_PROGRESS' ? 'selected' : ''}>검열중</option>
+                            <option value="APPROVED" ${manageReview.status == 'APPROVED' ? 'selected' : ''}>승인</option>
+                            <option value="REJECTED" ${manageReview.status == 'REJECTED' ? 'selected' : ''}>거절</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <input type="text" name="rejectedReason"
+                               class="form-control status-reason"
+                               placeholder="검열 사유를 입력해주세요"
+                               value="${manageReview.rejectedReason}" />
+                    </p>
+
+                    <button type="submit" class="btn-status-update">상태 변경</button>
                 </div>
             </div>
-        </c:if>
+        </form>
+    </c:forEach>
+
+    <!-- 📌 승인 / 거절 섹션 -->
+    <h3>승인 / 거절</h3>
+    <c:forEach var="manageReview" items="${approvedOrRejectedList}">
+        <div class="manage-review-item">
+            <div class="review-info-section">
+                <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
+                <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
+                <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
+                <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
+                <p><strong>요청일:</strong><fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
+
+                <!-- 승인/거절 상태에 따른 표시 -->
+                <c:choose>
+                    <c:when test="${manageReview.status == 'APPROVED'}">
+                        <p><strong>상태:</strong> 승인됨</p>
+                        <!-- 승인된 경우 리뷰 내용 및 이미지도 보여주고 싶으면 여기에 추가 가능 -->
+                        <p><strong>리뷰 내용:</strong> ${manageReview.review.content}</p>
+                        <c:if test="${not empty manageReview.imageList}">
+                            <div class="review-images">
+                                <c:forEach var="img" items="${manageReview.imageList}">
+                                    <img src="${pageContext.request.contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" width="100" />
+                                </c:forEach>
+                            </div>
+                        </c:if>
+                    </c:when>
+                    <c:otherwise>
+                        <p><strong>상태:</strong> 거절됨</p>
+                        <p><strong>거절 사유:</strong> ${manageReview.rejectedReason}</p>
+                        <p><strong>리뷰 내용:</strong> ${manageReview.review.content}</p>
+                        <c:if test="${not empty manageReview.imageList}">
+                            <div class="review-images">
+                                <c:forEach var="img" items="${manageReview.imageList}">
+                                    <img src="${pageContext.request.contextPath}/images/review/${img.fileName}" alt="리뷰 이미지" width="100" />
+                                </c:forEach>
+                            </div>
+                        </c:if>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
     </c:forEach>
 </div>
