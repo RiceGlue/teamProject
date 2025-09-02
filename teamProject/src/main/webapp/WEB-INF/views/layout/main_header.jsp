@@ -41,6 +41,12 @@
     }
 </style>
 
+    <link rel="stylesheet" href="${contextPath}/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="${contextPath}/js/common.js" defer></script>
+
 <%-- 세션에 에러/성공 메시지가 있으면 alert로 표시하고, 바로 세션에서 제거합니다. --%>
 <c:if test="${not empty sessionScope.errorMessage}">
     <script>
@@ -58,7 +64,7 @@
 <header class="yum-header sticky-top">
     <nav class="navbar navbar-expand-lg" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" href="${contextPath}/main">Yum Table</a>
+            <a class="navbar-brand" href="${contextPath}/">Yum Table</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
