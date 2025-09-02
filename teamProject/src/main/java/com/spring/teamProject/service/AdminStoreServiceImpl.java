@@ -122,4 +122,9 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 		adminStoreDAO.deleteMenuOnImageFile(menuId);
 		adminStoreDAO.deleteMenuOnMenu(menuId);
 	}
+	
+	@Override
+	public boolean deleteImageById(long imageId) throws Exception {
+		return adminStoreDAO.deleteImageById(imageId);
+	}
 }

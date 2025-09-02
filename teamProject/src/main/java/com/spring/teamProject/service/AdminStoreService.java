@@ -30,4 +30,5 @@ public interface AdminStoreService {
 	public void modifyMenu(MenuVO menuVO) throws Exception;
 	public void modifyMenuWithImage(MenuVO menuVO) throws Exception;
 	public void deleteMenu(long menuId) throws Exception;
+	public boolean deleteImageById(long imageId) throws Exception;
 }

@@ -23,7 +23,15 @@
 	#map{ width: 100%; height:300px; margin: 0px auto 20px; position: relative; overflow: hidden; border-radius: 5px;}
 	
 	.wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
-	.wishlist-btn.active{color:#ff6347;}  
+	.wishlist-btn.active{color:#ff6347;}
+	
+	.region-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: calc((11.11% * 9) + (10px * 8)); margin: 0 auto; height: auto; max-height: none; }
+	.region-form { flex: 0 0 calc(11.11% - 10px); max-width: calc(11.11% - 10px); box-sizing: border-box; }
+	.region-form .btn { width: 100%; white-space: nowrap; }
+	.region-btn.active { background-color: #0d6efd;color: white;border-color: #0d6efd;}
+	
+	.storeList {width:60%; margin: 0 auto; margin-top:20px; }
+	
 </style>
 
 <script>
@@ -81,18 +89,21 @@ const memberId = "${memberId != null ? memberId : ''}";
 const contextPath = '${contextPath}';
 const option = "${option}";
 
-let map;
+let maps = {};
 let markers = [];
 
-// 지도 초기화 함수
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
+function initMapById(mapId) {
+    const mapElement = document.getElementById(mapId);
+    if (!mapElement) return;
+
+    const map = new google.maps.Map(mapElement, {
         center: { lat: 37.5665, lng: 126.9780 },
         zoom: 11
     });
+
+    maps[mapId] = map;
 }
 
-// 주소 -> 좌표 변환 Promise 함수
 function geocodeAddress(geocoder, address) {
     return new Promise((resolve, reject) => {
         geocoder.geocode({ address: address }, (results, status) => {
@@ -105,10 +116,13 @@ function geocodeAddress(geocoder, address) {
     });
 }
 
-// 마커 표시 함수 (async/await 사용)
-async function showMarkers(storeList) {
-    console.log("showMarkers 호출, 데이터 개수:", storeList.length);
-    // 기존 마커 제거
+async function showMarkersOnMap(mapId, storeList) {
+    const map = maps[mapId];
+    if (!map) {
+        console.warn(`지도 ${mapId}가 초기화되지 않았습니다.`);
+        return;
+    }
+
     markers.forEach(m => m.setMap(null));
     markers = [];
 
@@ -117,15 +131,10 @@ async function showMarkers(storeList) {
 
     for (const store of storeList) {
         const address = store.roadAddress || store.address;
-        if (!address) {
-            console.warn("주소 누락된 매장 건너뜀:", store);
-            continue;
-        }
+        if (!address) continue;
 
         try {
             const pos = await geocodeAddress(geocoder, address);
-            console.log("마커 생성 위치:", pos.toString());
-
             const marker = new google.maps.Marker({
                 map: map,
                 position: pos,
@@ -145,59 +154,29 @@ async function showMarkers(storeList) {
     }
 }
 
-// 사용자 좌표 -> 주소 변환 및 표시
 function getAddressFromCoords(lat, lng) {
     const geocoder = new google.maps.Geocoder();
     const latlng = { lat: lat, lng: lng };
     geocoder.geocode({ location: latlng }, function (results, status) {
         if (status === "OK" && results[0]) {
             const fullAddress = results[0].formatted_address;
-            console.log("사용자 주소:", fullAddress);
-
             const addressElem = document.getElementById("userAddress");
             if (addressElem) {
                 addressElem.innerText = fullAddress;
             }
-
-            // TODO: 주소 기반 근처 매장 검색 API 호출 가능
         } else {
             alert("주소를 가져올 수 없습니다.");
         }
     });
 }
 
-async function centerMapToFirstStore(storeList) {
-    if (!storeList || storeList.length === 0) return;
-
-    const firstStore = storeList[0];
-    const address = firstStore.roadAddress || firstStore.address;
-
-    if (!address) {
-        console.warn("첫 번째 매장의 주소가 없습니다.");
-        return;
-    }
-
-    const geocoder = new google.maps.Geocoder();
-
-    try {
-        const pos = await geocodeAddress(geocoder, address);
-        map.setCenter(pos);
-        map.setZoom(14);
-        console.log("지도 중심을 첫 번째 매장으로 이동:", pos.toString());
-    } catch (error) {
-        console.error("지도 중심 이동 실패:", error);
-    }
-}
-
-
-// 위시리스트 상태 확인 함수 (AJAX)
 function checkWishlistStatus(storeId, btnElement) {
-    if (!memberId || memberId === 'null' || memberId === 'undefined' || memberId.trim() === '') return;
+    if (!memberId || memberId.trim() === '') return;
 
     $.ajax({
         url: `${contextPath}/wishlist/isWishlisted`,
         type: 'GET',
-        data: { memberId: memberId, storeId: storeId },
+        data: { memberId, storeId },
         success: function(response) {
             if (response === true) {
                 $(btnElement).addClass('active');
@@ -211,7 +190,6 @@ function checkWishlistStatus(storeId, btnElement) {
     });
 }
 
-// 위시리스트 추가/제거 토글 함수 (AJAX)
 function toggleWishlist(storeId, btnElement) {
     if (!memberId || memberId.trim() === '') {
         if (confirm('로그인 후 이용해주세요. 로그인 페이지로 이동하시겠습니까?')) {
@@ -243,8 +221,64 @@ function toggleWishlist(storeId, btnElement) {
     }
 }
 
+function renderStoreList(storeList) {
+    const container = document.getElementById('store-list-container');
+    container.innerHTML = '';
+
+    if (!storeList || storeList.length === 0) {
+        container.innerHTML = '<h3>검색 결과 없음</h3>';
+        return;
+    }
+
+    storeList.forEach(store => {
+        const card = document.createElement('div');
+        card.className = 'store-card';
+
+        card.innerHTML =
+            '<div class="store-image">' +
+                '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' +
+                    '<img src="' + window.location.origin + '/images/store/' + (store.fileName || 'default.jpg') + '" alt="' + store.storeName + '">' +
+                '</a>' +
+            '</div>' +
+            '<div class="store-info">' +
+                '<div style="display: flex; align-items: center; gap: 10px;">' +
+                    '<h4>' + store.storeName + '</h4>' +
+                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '">' +
+                        '<i class="fa fa-bookmark"></i>' +
+                    '</button>' +
+                '</div>' +
+                '<p><span class="rating">★ ' +store.avgRating + '</span>  리뷰 ' +store.countRating+ '개</p>' +
+				'<p class="meta-info">' +store.storeType + ' · ' + store.roadAddress + '</p>' +
+				'<p class="meta-info">' +store.description + '</p>' +
+            '</div>';
+
+        container.appendChild(card);
+    });
+
+    if (memberId && memberId.trim() !== '') {
+        $('.wishlist-btn').each(function() {
+            const storeId = $(this).data('store-id');
+            checkWishlistStatus(storeId, this);
+        });
+    }
+}
+
+function showRegion(region) {
+    document.querySelectorAll(".region-btn").forEach(btn => {
+        const btnRegion = btn.getAttribute("data-region");
+
+        if (btnRegion === region) {
+            btn.classList.add("active");
+            btn.disabled = true;
+        } else {
+            btn.classList.remove("active");
+            btn.disabled = false;
+        }
+    });
+}
+
+// ⭐ DOMContentLoaded 내부
 document.addEventListener('DOMContentLoaded', function () {
-    // 초기 탭 UI 세팅
     $(".tab_content").hide();
     $("ul.tabs li:first").addClass("active").show();
     $(".tab_content:first").show();
@@ -255,7 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
         "#tab3": nameStores
     };
 
-    // 탭 클릭 시 마커 갱신
     $("ul.tabs li").click(function (e) {
         e.preventDefault();
         $("ul.tabs li").removeClass("active");
@@ -266,20 +299,17 @@ document.addEventListener('DOMContentLoaded', function () {
         $(activeTab).fadeIn();
 
         if (activeTabStores[activeTab]) {
-            showMarkers(activeTabStores[activeTab]);
+            showMarkersOnMap("map", activeTabStores[activeTab]);
         }
     });
 
-    // 위시리스트 버튼 클릭
     $(document).on('click', '.wishlist-btn', function () {
         const storeId = $(this).data('store-id');
         toggleWishlist(storeId, this);
     });
 
-    // 지도 초기화
-    initMap();
+    initMapById("map");
 
-    // 옵션에 따라 초기 마커 표시
     if (option === "userLocation") {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -287,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     getAddressFromCoords(lat, lng);
-                    showMarkers(userLocationStores);
+                    showMarkersOnMap("map", userLocationStores);
                 },
                 () => {
                     alert("사용자 위치를 가져오지 못했습니다.");
@@ -297,175 +327,186 @@ document.addEventListener('DOMContentLoaded', function () {
             alert("브라우저가 위치 정보를 지원하지 않습니다.");
         }
     } else if (option === "region") {
-        showMarkers(regionStores);
+        showMarkersOnMap("region-map", regionStores);
     } else if (option === "search") {
-        showMarkers(menuStores);
+        showMarkersOnMap("map", menuStores);
     }
 
-    // 로그인 상태라면 위시리스트 상태 초기화
     if (memberId && memberId.trim() !== '') {
         $('.wishlist-btn').each(function() {
             const storeId = $(this).data('store-id');
             checkWishlistStatus(storeId, this);
         });
     }
+
+    document.querySelectorAll(".ajax-region-form").forEach(form => {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch(contextPath + "/store/regionList", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("서버 응답 실패");
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.regionList) {
+                    renderStoreList(data.regionList);
+                    showMarkersOnMap("map", data.regionList);
+                    showRegion(data.region);
+                } else {
+                    console.warn("regionList 없음");
+                }
+            })
+            .catch(err => {
+                console.error("AJAX 지역 요청 실패:", err);
+            });
+        });
+    });
 });
-
-
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&v=weekly&libraries=marker" defer></script>
+
+<div class="storeList">
 <c:choose>
 <c:when test="${option eq 'search'}">
-	<h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
+    <h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
 
+    <!-- 지도는 딱 하나만 -->
+    <div id="map" style="width:100%; height:400px; margin-bottom: 20px;"></div>
 
-	<div class="tab_container">
-		<div class="tab_container" id="container">
-			<ul class="tabs">
-				<li><a href="#tab1">메뉴</a></li>
-				<li><a href="#tab2">주소</a></li>
-				<li><a href="#tab3">매장명</a></li>
-			</ul>
-			<div class="tab_container">
-				<div class="tab_content" id="tab1">
-					<c:choose>
-						<c:when test="${empty menulist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="menu" items="${menulist}" varStatus="status">
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${contextPath }/images/store/${menu.fileName}" alt="${menu.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${store.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-									      <h4>${menu.storeName}</h4>
-									      <button class="wishlist-btn" data-store-id="${menu.storeId }" aria-label="위시리스트 추가/제거">
-						                        <i class="fa fa-bookmark"></i>
-						                  </button>
-						                 </div>
-										<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
-										<p class="meta-info">${menu.storeType} · ${menu.roadAddress}</p>
-										<p class="meta-info">${menu.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-				<div class="tab_content" id="tab2">
-					<c:choose>
-						<c:when test="${empty addrlist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="addr" items="${addrlist}" varStatus="status">	
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${contextPath }/images/store/${addr.fileName}" alt="${addr.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${store.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-									      <h4>${addr.storeName}</h4>
-									      <button class="wishlist-btn" data-store-id="${addr.storeId }" aria-label="위시리스트 추가/제거">
-						                        <i class="fa fa-bookmark"></i>
-						                  </button>
-						                 </div>
-										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
-										<p class="meta-info">${addr.storeType} · ${addr.roadAddress}</p>
-										<p class="meta-info">${addr.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-				<div class="tab_content" id="tab3">
-					<c:choose>
-						<c:when test="${empty namelist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="name" items="${namelist}" varStatus="status">
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${contextPath }/images/store/${name.fileName}" alt="${name.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${name.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-										    <h4>${name.storeName}</h4>
-										    <button class="wishlist-btn" data-store-id="${name.storeId }" aria-label="위시리스트 추가/제거">
-							                	<i class="fa fa-bookmark"></i>
-							                </button>
-						                </div>
-										<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
-										<p class="meta-info">${name.storeType} · ${name.roadAddress}</p>
-										<p class="meta-info">${name.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="tab_container">
+        <ul class="tabs">
+            <li><a href="#tab1">메뉴</a></li>
+            <li><a href="#tab2">주소</a></li>
+            <li><a href="#tab3">매장명</a></li>
+        </ul>
+
+        <div class="tab_content" id="tab1">
+            <c:choose>
+                <c:when test="${empty menulist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="menu" items="${menulist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}">
+                                    <img src="${contextPath}/images/store/${menu.fileName}" alt="${menu.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${menu.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${menu.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${menu.avgRating}</span> 리뷰 ${menu.countRating}개</p>
+                                <p class="meta-info">${menu.storeType} · ${menu.roadAddress}</p>
+                                <p class="meta-info">${menu.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <div class="tab_content" id="tab2">
+            <c:choose>
+                <c:when test="${empty addrlist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="addr" items="${addrlist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}">
+                                    <img src="${contextPath}/images/store/${addr.fileName}" alt="${addr.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${addr.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${addr.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${addr.avgRating}</span> 리뷰 ${addr.countRating}개</p>
+                                <p class="meta-info">${addr.storeType} · ${addr.roadAddress}</p>
+                                <p class="meta-info">${addr.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <div class="tab_content" id="tab3">
+            <c:choose>
+                <c:when test="${empty namelist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="name" items="${namelist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${name.storeId}">
+                                    <img src="${contextPath}/images/store/${name.fileName}" alt="${name.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${name.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${name.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${name.avgRating}</span> 리뷰 ${name.countRating}개</p>
+                                <p class="meta-info">${name.storeType} · ${name.roadAddress}</p>
+                                <p class="meta-info">${name.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
 </c:when>
+
 
 <c:when test="${option eq 'region'}">
-	<h2>${keyword }</h2>
-	<hr>
+    <h2 style="margin-bottom:20px;">지역 맛집 검색</h2>
 
-	<!-- 반복 렌더링 시작 -->
-	<div id="map"></div>
-	<c:choose>
-		<c:when test="${empty regionlist }"><h3>검색 결과 없음</h3></c:when>
-		<c:otherwise>
-			<c:forEach var="region" items="${regionlist}" varStatus="status">
-			  <div class="store-card">
-			    <div class="store-image">
-			      <a href="${contextPath}/store/storeDetail?storeId=${region.storeId}">
-			        <img src="${contextPath }/images/store/${region.fileName}" alt="${region.fileName }">
-			      </a>
-			<!--       대기 팀 수 표시 -->
-			<%--       <c:if test="${store.waitCount > 0}"> --%>
-			<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-			<%--       </c:if> --%>
-			    </div>
-		
-			    <div class="store-info">
-			    	<div style="display: flex; align-items: center; gap: 10px;">
-				      <h4>${region.storeName}</h4>
-				      <button class="wishlist-btn" data-store-id="${region.storeId }" aria-label="위시리스트 추가/제거">
-	                        <i class="fa fa-bookmark"></i>
-	                  </button>
-	                 </div>
-			      <p>
-			        <span class="rating">★ ${region.avgRating}</span>
-			        리뷰 ${region.countRating}개
-			      </p>
-			      <p class="meta-info">${region.storeType} · ${region.roadAddress}</p>
-			      <p class="meta-info">${region.description}</p>
-			    </div>
-			  </div>
-			</c:forEach>
-		</c:otherwise>
-	</c:choose>
+    <div class="region-buttons two-rows mb-4">
+        <c:forEach var="regionName" items="${regions}">
+            <form class="region-form ajax-region-form">
+                <input type="hidden" name="option" value="region" />
+                <input type="hidden" name="keyword" value="${regionName}" />
+                
+                <!-- region-btn 클래스와 data-region 속성 추가 -->
+                <button 
+                    type="submit" 
+                    class="btn btn-outline-primary region-btn" 
+                    data-region="${regionName}">
+                    ${regionName}
+                </button>
+            </form>
+        </c:forEach>
+    </div>
+
+    <div id="map"></div>
+    <div id="store-list-container"></div>
 </c:when>
+
+
 <c:when test="${option eq 'userLocation'}">
 	<h2>주변 맛집</h2>
 	<p id="userAddress" class="userLocation"></p>
@@ -510,3 +551,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </c:when>
 <c:otherwise></c:otherwise>
 </c:choose>
+</div>

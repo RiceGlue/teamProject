@@ -46,4 +46,5 @@ public interface ReviewService {
 	public ManageReviewVO getReviewManageStatus(long reviewId) throws Exception;
 	
 	public void updateReviewManage(ManageReviewVO manageReviewVO) throws Exception;
+	public List<ManageReviewVO> getCompleteManageReview(long storeId) throws Exception;
 }

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <c:if test="${param.success eq 'true'}">
     <script>alert("정보 등록 완료!");</script>
@@ -52,8 +53,6 @@
 		'<div class="form-label" style="width: 200px;">메인 이미지</div>'+
 		'<div class="form-input" style="flex: 1;">'+
 		'<input type="file" id="'+fileIdx+'" name="fileName" accept="image/*" onchange="validateImages(this);" />'+
-		'<label for="'+ fileIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
-		'<span id="'+fileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span><br />'+
 		'</div>'+
 		'<div class="image-preview" style="max-width:200px;">'+
 		'<img id="'+previewIdx+'" src="" style="max-width: 200px; display: block;" />'+
@@ -158,11 +157,6 @@
 	    const menuNames = form.querySelectorAll('input[name="menuName"]');
 	    const prices = form.querySelectorAll('input[name="price"]');
 
-	    if (menuNames.length === 0) {
-	        alert("최소 하나 이상의 메뉴를 추가해 주세요.");
-	        return false; // 폼 제출을 막음
-	    }
-
 	    for (let i = 0; i < menuNames.length; i++) {
 	        const name = menuNames[i].value.trim();
 	        const price = prices[i].value.trim();
@@ -222,9 +216,7 @@
 		<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 			<div class="form-label" style="width: 200px;">메뉴 이미지</div>
 			<div class="form-input" style="flex: 1;">
-				<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);" >
-				<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-				<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
+				<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);" >				
 				<br />
 			</div>
 			<div class="image-preview" style="max-width:200px;"></div>

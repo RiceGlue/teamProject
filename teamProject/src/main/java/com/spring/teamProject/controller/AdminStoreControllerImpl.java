@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,7 +29,6 @@ import com.spring.teamProject.service.ReviewService;
 import com.spring.teamProject.service.StoreService;
 import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.MenuVO;
-import com.spring.teamProject.vo.ReviewVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 
@@ -280,7 +281,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 		}
 		
 		// ✅ FTP 방식 파일 업로드 처리
-		List<MultipartFile> files = multiReq.getFiles("fileName[]");
+		List<MultipartFile> files = multiReq.getFiles("fileName");
 		List<ImageFileVO> fileList = new ArrayList<>();
 		
 		for (MultipartFile file : files) {
@@ -300,6 +301,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 				ImageFileVO imageFileVO = new ImageFileVO();
 				imageFileVO.setFileName(savedFilename);
 				fileList.add(imageFileVO);
+				System.out.println("업로드 파일 이름 : "+savedFilename);
 			} else {
 				System.err.println("FTP 업로드 실패: " + originalFilename);
 			}
@@ -471,6 +473,27 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 		return mav;
 	}
 	
+	@PostMapping("/deleteImage")
+    @ResponseBody
+    public Map<String, Object> deleteImage(@RequestParam("imageId") long imageId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            boolean deleted = adminStoreService.deleteImageById(imageId);  // 서비스에서 이미지 삭제 로직 처리
+
+            if (deleted) {
+                result.put("success", true);
+            } else {
+                result.put("success", false);
+                result.put("message", "삭제할 이미지가 없습니다.");
+            }
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "서버 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
+        return result;
+    }
+	
 	@Override
 	@RequestMapping(value="/modifyMenu", method=RequestMethod.POST)
 	public ModelAndView modifyMenu(MultipartHttpServletRequest multiReq) throws Exception {
@@ -498,6 +521,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 			String savedFileName = null;
 		
 			if (imageFile != null && !imageFile.isEmpty()) {
+				
 				String originalFilename = imageFile.getOriginalFilename();
 				String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
 				savedFileName = UUID.randomUUID().toString() + extension;

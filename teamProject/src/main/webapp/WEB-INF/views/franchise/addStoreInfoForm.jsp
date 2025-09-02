@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <c:if test="${param.success eq 'true'}">
     <script>alert("등록 완료!");</script>
@@ -92,7 +93,6 @@
 		    '<input type="hidden" name="fileType" value="false">'+
 		    '<input type="hidden" name="displayNo" value="'+imgIdx+'"></div>'+
 		    '<input type="file" id="'+fileNameIdx+'" name="fileName" accept="image/*" onchange="validateImages(this);">'+
-		    '<label for="'+fileNameIdx+'" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>'+
 		    '<span id="'+showFileNameIdx+'" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>'+
 		    '</div><div class="image-preview" style="max-width:200px;"></div></div>';
 
@@ -546,7 +546,6 @@
 					</div>
 					<input type="file" id="fileName0" name="fileName" accept="image/*" onchange="validateImages(this);">
 					<label for="fileName0" style="cursor:pointer; background:#007bff; color:#fff; padding:5px 10px; border-radius:4px; margin-left: 10px;">파일 선택</label>
-					<span id="showFileName0" style="margin-left:10px; font-size:14px; color:#333;">선택된 파일 없음</span>
 				</div>
 				<div class="image-preview" style="max-width:200px;"></div>
 			</div>
