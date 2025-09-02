@@ -89,14 +89,19 @@ const memberId = "${memberId != null ? memberId : ''}";
 const contextPath = '${contextPath}';
 const option = "${option}";
 
-let map;
+let maps = {};
 let markers = [];
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
+function initMapById(mapId) {
+    const mapElement = document.getElementById(mapId);
+    if (!mapElement) return;
+
+    const map = new google.maps.Map(mapElement, {
         center: { lat: 37.5665, lng: 126.9780 },
         zoom: 11
     });
+
+    maps[mapId] = map;
 }
 
 function geocodeAddress(geocoder, address) {
@@ -111,8 +116,13 @@ function geocodeAddress(geocoder, address) {
     });
 }
 
-async function showMarkers(storeList) {
-    console.log("showMarkers 호출, 데이터 개수:", storeList.length);
+async function showMarkersOnMap(mapId, storeList) {
+    const map = maps[mapId];
+    if (!map) {
+        console.warn(`지도 ${mapId}가 초기화되지 않았습니다.`);
+        return;
+    }
+
     markers.forEach(m => m.setMap(null));
     markers = [];
 
@@ -158,23 +168,6 @@ function getAddressFromCoords(lat, lng) {
             alert("주소를 가져올 수 없습니다.");
         }
     });
-}
-
-async function centerMapToFirstStore(storeList) {
-    if (!storeList || storeList.length === 0) return;
-    const firstStore = storeList[0];
-    const address = firstStore.roadAddress || firstStore.address;
-    if (!address) return;
-
-    const geocoder = new google.maps.Geocoder();
-
-    try {
-        const pos = await geocodeAddress(geocoder, address);
-        map.setCenter(pos);
-        map.setZoom(14);
-    } catch (error) {
-        console.error("지도 중심 이동 실패:", error);
-    }
 }
 
 function checkWishlistStatus(storeId, btnElement) {
@@ -228,7 +221,6 @@ function toggleWishlist(storeId, btnElement) {
     }
 }
 
-// ⭐ renderStoreList 함수 추가 (AJAX 결과 반영용)
 function renderStoreList(storeList) {
     const container = document.getElementById('store-list-container');
     container.innerHTML = '';
@@ -260,11 +252,9 @@ function renderStoreList(storeList) {
 				'<p class="meta-info">' +store.description + '</p>' +
             '</div>';
 
-            
         container.appendChild(card);
     });
 
-    // 위시리스트 상태 다시 체크
     if (memberId && memberId.trim() !== '') {
         $('.wishlist-btn').each(function() {
             const storeId = $(this).data('store-id');
@@ -309,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $(activeTab).fadeIn();
 
         if (activeTabStores[activeTab]) {
-            showMarkers(activeTabStores[activeTab]);
+            showMarkersOnMap("map", activeTabStores[activeTab]);
         }
     });
 
@@ -318,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleWishlist(storeId, this);
     });
 
-    initMap();
+    initMapById("map");
 
     if (option === "userLocation") {
         if (navigator.geolocation) {
@@ -327,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     getAddressFromCoords(lat, lng);
-                    showMarkers(userLocationStores);
+                    showMarkersOnMap("map", userLocationStores);
                 },
                 () => {
                     alert("사용자 위치를 가져오지 못했습니다.");
@@ -337,9 +327,9 @@ document.addEventListener('DOMContentLoaded', function () {
             alert("브라우저가 위치 정보를 지원하지 않습니다.");
         }
     } else if (option === "region") {
-        showMarkers(regionStores);
+        showMarkersOnMap("region-map", regionStores);
     } else if (option === "search") {
-        showMarkers(menuStores);
+        showMarkersOnMap("map", menuStores);
     }
 
     if (memberId && memberId.trim() !== '') {
@@ -356,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(form);
 
             fetch(contextPath + "/store/regionList", {
-                method: "POST", // ✅ POST 방식으로 변경
+                method: "POST",
                 body: formData
             })
             .then(res => {
@@ -368,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.regionList) {
                     renderStoreList(data.regionList);
-                    showMarkers(data.regionList);
+                    showMarkersOnMap("map", data.regionList);
                     showRegion(data.region);
                 } else {
                     console.warn("regionList 없음");
@@ -382,120 +372,115 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1kAhEMiW_-y5zg2uFTUeAOTG_uVO_kts&callback=initMap&v=weekly&libraries=marker" defer></script>
 
 <div class="storeList">
 <c:choose>
 <c:when test="${option eq 'search'}">
-	<h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
+    <h2><span style="color:#4296e0;">${keyword }</span> 검색 결과 </h2>
 
+    <!-- 지도는 딱 하나만 -->
+    <div id="map" style="width:100%; height:400px; margin-bottom: 20px;"></div>
 
-	<div class="tab_container">
-		<div class="tab_container" id="container">
-			<ul class="tabs">
-				<li><a href="#tab1">메뉴</a></li>
-				<li><a href="#tab2">주소</a></li>
-				<li><a href="#tab3">매장명</a></li>
-			</ul>
-			<div class="tab_container">
-				<div class="tab_content" id="tab1">
-					<c:choose>
-						<c:when test="${empty menulist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="menu" items="${menulist}" varStatus="status">
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}"><img src="${contextPath }/images/store/${menu.fileName}" alt="${menu.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${store.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-									      <h4>${menu.storeName}</h4>
-									      <button class="wishlist-btn" data-store-id="${menu.storeId }" aria-label="위시리스트 추가/제거">
-						                        <i class="fa fa-bookmark"></i>
-						                  </button>
-						                 </div>
-										<p><span class="rating">★ ${menu.avgRating}</span>리뷰 ${menu.countRating}개</p>
-										<p class="meta-info">${menu.storeType} · ${menu.roadAddress}</p>
-										<p class="meta-info">${menu.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-				<div class="tab_content" id="tab2">
-					<c:choose>
-						<c:when test="${empty addrlist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="addr" items="${addrlist}" varStatus="status">	
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}"><img src="${contextPath }/images/store/${addr.fileName}" alt="${addr.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${store.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${store.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-									      <h4>${addr.storeName}</h4>
-									      <button class="wishlist-btn" data-store-id="${addr.storeId }" aria-label="위시리스트 추가/제거">
-						                        <i class="fa fa-bookmark"></i>
-						                  </button>
-						                 </div>
-										<p><span class="rating">★ ${addr.avgRating}</span>리뷰 ${addr.countRating}개</p>
-										<p class="meta-info">${addr.storeType} · ${addr.roadAddress}</p>
-										<p class="meta-info">${addr.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-				<div class="tab_content" id="tab3">
-					<c:choose>
-						<c:when test="${empty namelist }"><h3>검색 결과 없음</h3></c:when>
-						<c:otherwise>
-							<div id="map"></div>
-							<c:forEach var="name" items="${namelist}" varStatus="status">
-								<div class="store-card">
-									<div class="store-image">
-										<a href="${contextPath}/store/storeDetail?storeId=${name.storeId}"><img src="${contextPath }/images/store/${name.fileName}" alt="${name.fileName }"></a>
-										<!--       대기 팀 수 표시 -->
-										<%--       <c:if test="${name.waitCount > 0}"> --%>
-										<%--         <div class="badge-wait">대기 ${name.waitCount}팀</div> --%>
-										<%--       </c:if> --%>
-									</div>
-		
-									<div class="store-info">
-										<div style="display: flex; align-items: center; gap: 10px;">
-										    <h4>${name.storeName}</h4>
-										    <button class="wishlist-btn" data-store-id="${name.storeId }" aria-label="위시리스트 추가/제거">
-							                	<i class="fa fa-bookmark"></i>
-							                </button>
-						                </div>
-										<p><span class="rating">★ ${name.avgRating}</span>리뷰 ${name.countRating}개</p>
-										<p class="meta-info">${name.storeType} · ${name.roadAddress}</p>
-										<p class="meta-info">${name.description}</p>
-									</div>
-								</div>
-							</c:forEach>
-						</c:otherwise>
-					</c:choose>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="tab_container">
+        <ul class="tabs">
+            <li><a href="#tab1">메뉴</a></li>
+            <li><a href="#tab2">주소</a></li>
+            <li><a href="#tab3">매장명</a></li>
+        </ul>
+
+        <div class="tab_content" id="tab1">
+            <c:choose>
+                <c:when test="${empty menulist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="menu" items="${menulist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${menu.storeId}">
+                                    <img src="${contextPath}/images/store/${menu.fileName}" alt="${menu.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${menu.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${menu.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${menu.avgRating}</span> 리뷰 ${menu.countRating}개</p>
+                                <p class="meta-info">${menu.storeType} · ${menu.roadAddress}</p>
+                                <p class="meta-info">${menu.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <div class="tab_content" id="tab2">
+            <c:choose>
+                <c:when test="${empty addrlist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="addr" items="${addrlist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${addr.storeId}">
+                                    <img src="${contextPath}/images/store/${addr.fileName}" alt="${addr.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${addr.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${addr.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${addr.avgRating}</span> 리뷰 ${addr.countRating}개</p>
+                                <p class="meta-info">${addr.storeType} · ${addr.roadAddress}</p>
+                                <p class="meta-info">${addr.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <div class="tab_content" id="tab3">
+            <c:choose>
+                <c:when test="${empty namelist}">
+                    <h3>검색 결과 없음</h3>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach var="name" items="${namelist}">
+                        <div class="store-card">
+                            <div class="store-image">
+                                <a href="${contextPath}/store/storeDetail?storeId=${name.storeId}">
+                                    <img src="${contextPath}/images/store/${name.fileName}" alt="${name.fileName}">
+                                </a>
+                            </div>
+                            <div class="store-info">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h4>${name.storeName}</h4>
+                                    <button class="wishlist-btn" data-store-id="${name.storeId}" aria-label="위시리스트 추가/제거">
+                                        <i class="fa fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <p><span class="rating">★ ${name.avgRating}</span> 리뷰 ${name.countRating}개</p>
+                                <p class="meta-info">${name.storeType} · ${name.roadAddress}</p>
+                                <p class="meta-info">${name.description}</p>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </div>
 </c:when>
+
 
 <c:when test="${option eq 'region'}">
     <h2 style="margin-bottom:20px;">지역 맛집 검색</h2>
