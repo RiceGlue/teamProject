@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <c:set var="contextPath" value="${pageContext.request.contextPath }" />
 
 <c:if test="${param.success eq 'true'}">
@@ -152,7 +153,6 @@
 		<input type="hidden" name="menuId" value="${menu.menuId}" />
 		
 		<div class="info_container" style="max-width: 700px; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius:10px;">
-			<p><strong>${menu.displayNo + 1}</strong></p>
 			
 			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: center;">
 				<div class="form-label" style="width: 200px;">메뉴 이름</div>

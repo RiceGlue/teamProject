@@ -359,5 +359,11 @@
 			delete from image_file where menu_id = #{menuId}
 		]]>
 	</delete>
+	
+	<delete id="deleteImageById" parameterType="long">
+		<![CDATA[
+			delete from image_file where image_id = #{imageId}
+		]]>
+	</delete>
 
 </mapper>

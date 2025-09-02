@@ -34,4 +34,5 @@ public interface AdminStoreDAO {
 	public void updateMenuWithImage(MenuVO menuVO) throws DataAccessException;
 	public void deleteMenuOnMenu(long menuId) throws DataAccessException;
 	public void deleteMenuOnImageFile(long meunId) throws DataAccessException;
+	public boolean deleteImageById(long imageId) throws DataAccessException;
 }

@@ -11,6 +11,8 @@
 </c:if>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script>
 function sample4_execDaumPostcode() {
@@ -268,6 +270,30 @@ function sample4_execDaumPostcode() {
 		input.value=value;
 	}
 
+	 function deleteImageBlock(imageId) {
+		    if (!confirm("정말 이 이미지를 삭제하시겠습니까?")) return;
+
+		    $.ajax({
+		      url: '${contextPath}/franchise/deleteImage',
+		      type: 'POST',
+		      data: { imageId: imageId },
+		      success: function(response) {
+		        if (response.success) {  // 서버에서 JSON { success: true } 같은 응답 가정
+		          const block = document.getElementById(`imageBlock${index}`);
+		          if (block) {
+		            block.remove();
+		          }
+		          alert("이미지가 삭제되었습니다.");
+		          location.reload();
+		        } else {
+		          alert("이미지 삭제에 실패했습니다.");
+		        }
+		      },
+		      error: function() {
+		        alert("서버 오류가 발생했습니다.");
+		      }
+		    });
+		  }
 </script>
 
 <form action="${contextPath}/franchise/modifyStoreInfo" method="post" name="storeInfo" enctype="multipart/form-data" onsubmit="return checkStoreInfo()">
@@ -529,35 +555,42 @@ function sample4_execDaumPostcode() {
 			</div>
 		</div>
 		<div id="ImagesContainer">
-			<div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
-				<div class="form-label" style="width: 200px; float:left;">이미지</div>
-				<div id="addImage" style="float:right; width:calc(100%-210px);">
-					<c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
-						<input type="hidden" name="imageId" value="${image.imageId }" >
-						<div style="margin-bottom: 10px;">
-							<input type="hidden" name="fileType" value="${image.fileType}" />
-							<label><input type="radio" name="mainImageRadio" onchange="setMainImage(this)" <c:if test="${image.fileType}">checked</c:if>> 메인</label>
-						</div>
-						
-						<div style="display: flex; width: 100%;">
-							<div class="form-input" style="flex: 1;">
-								<input type="hidden" name="originalFileName" id="originalFileName${status.index}" value="${image.fileName}">
-								
-								<span style="font-weight: bold;">현재 이미지</span><br>
-								<div style="margin:35px;"></div>
-								<img src="${contextPath}/images/store/${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
-							</div>
-							
-							<div class="form-input" style="flex: 1;">
-								<span style="font-weight: bold;">변경 이미지</span><br>
-								<input type="file" name="fileName" id="fileName${status.index}" accept="image/*" onchange="validateImages(this, ${status.index})" />
-								<div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
-								<input type="hidden" name="displayNo" id="displayNo${status.index}" value="${image.displayNo}">
-							</div>
-						</div>
-					</c:forEach>
-				</div>
-			</div>
+		  <div class="form-row" style="display: flex; margin-bottom: 10px; align-items: flex-start;">
+		    <div class="form-label" style="width: 200px; float:left;">이미지</div>
+		    <div id="addImage" style="float:right; width:calc(100% - 210px);">
+		      <c:forEach var="image" items="${storeMap.imageList}" varStatus="status">
+		        <div id="imageBlock${status.index}" style="margin-bottom: 10px; padding: 10px; position: relative;">
+		          <input type="hidden" name="imageId" value="${image.imageId}" >
+		          <input type="hidden" name="fileType" value="${image.fileType}" />
+		          <input type="hidden" name="originalFileName" id="originalFileName${status.index}" value="${image.fileName}">
+		          <input type="hidden" name="displayNo" id="displayNo${status.index}" value="${image.displayNo}">
+		
+		          <!-- 삭제 버튼 -->
+		          <button type="button" style="position: absolute; top: 5px; right: 5px; background: #ff4d4f; border: none; color: white; padding: 5px 10px; cursor: pointer;" onclick="deleteImageBlock(${image.imageId})">삭제</button>
+		
+		          <div style="margin-bottom: 10px;">
+		            <label>
+		              <input type="radio" name="mainImageRadio" onchange="setMainImage(this)" <c:if test="${image.fileType}">checked</c:if>> 메인
+		            </label>
+		          </div>
+		
+		          <div style="display: flex; width: 100%;">
+		            <div class="form-input" style="flex: 1;">
+		              <span style="font-weight: bold;">현재 이미지</span><br>
+		              <div style="margin:35px;"></div>
+		              <img src="${contextPath}/images/store/${image.fileName}" alt="${image.fileName}" style="max-width: 200px;" />
+		            </div>
+		
+		            <div class="form-input" style="flex: 1;">
+		              <span style="font-weight: bold;">변경 이미지</span><br>
+		              <input type="file" name="fileName" id="fileName${status.index}" accept="image/*" onchange="validateImages(this, ${status.index})" />
+		              <div class="image-preview" id="preview${status.index}" style="margin-top: 10px;"></div>
+		            </div>
+		          </div>
+		        </div>
+		      </c:forEach>
+		    </div>
+		  </div>
 		</div>
 		<div style="margin-top: 15px;">
 			<input type="button" onclick="addImage()" value="신규 이미지 추가 ">

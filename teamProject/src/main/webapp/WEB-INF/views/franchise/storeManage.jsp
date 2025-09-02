@@ -70,7 +70,10 @@
 								</div>
 								<c:choose>
 									<c:when test="${store.menuCount > 0}">
-										<a href="${contextPath}/franchise/modifyMenuForm?storeId=${store.storeId}" class="btn btn-primary btn-sm" aria-label="${store.storeName} 메뉴 수정하기">메뉴 수정</a>
+										<div style="display: flex; flex-direction: column; gap: 8px; width: 150px;">
+										  <a href="${contextPath}/franchise/modifyMenuForm?storeId=${store.storeId}" class="btn btn-primary btn-sm" aria-label="${store.storeName} 메뉴 수정하기" style="width: 100%;">메뉴 수정</a>
+										  <a href="${contextPath}/franchise/addMenuForm?storeId=${store.storeId}" class="btn btn-success btn-sm" aria-label="${store.storeName} 메뉴 추가하기" style="width: 100%;">메뉴 추가</a>
+										</div>
 									</c:when>
 									<c:otherwise>
 										<a href="${contextPath}/franchise/addMenuForm?storeId=${store.storeId}" class="btn btn-success btn-sm" aria-label="${store.storeName} 메뉴 추가하기">메뉴 추가</a>
