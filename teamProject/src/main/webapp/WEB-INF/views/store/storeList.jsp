@@ -28,6 +28,8 @@
 	.region-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: calc((11.11% * 9) + (10px * 8)); margin: 0 auto; height: auto; max-height: none; }
 	.region-form { flex: 0 0 calc(11.11% - 10px); max-width: calc(11.11% - 10px); box-sizing: border-box; }
 	.region-form .btn { width: 100%; white-space: nowrap; }
+	.region-btn.active { background-color: #0d6efd;color: white;border-color: #0d6efd;}
+	
 	.storeList {width:80%; margin: 0 auto; margin-top:20px; }
 	
 </style>
@@ -253,8 +255,9 @@ function renderStoreList(storeList) {
                         '<i class="fa fa-bookmark"></i>' +
                     '</button>' +
                 '</div>' +
-                '<p class="meta-info">' + (store.storeType || '') + ' · ' + (store.roadAddress || '') + '</p>' +
-                '<p class="meta-info">' + (store.description || '') + '</p>' +
+                '<p><span class="rating">★ ' +store.avgRating + '</span>  리뷰 ' +store.countRating+ '개</p>' +
+				'<p class="meta-info">' +store.storeType + ' · ' + store.roadAddress + '</p>' +
+				'<p class="meta-info">' +store.description + '</p>' +
             '</div>';
 
             
@@ -268,6 +271,20 @@ function renderStoreList(storeList) {
             checkWishlistStatus(storeId, this);
         });
     }
+}
+
+function showRegion(region) {
+    document.querySelectorAll(".region-btn").forEach(btn => {
+        const btnRegion = btn.getAttribute("data-region");
+
+        if (btnRegion === region) {
+            btn.classList.add("active");
+            btn.disabled = true;
+        } else {
+            btn.classList.remove("active");
+            btn.disabled = false;
+        }
+    });
 }
 
 // ⭐ DOMContentLoaded 내부
@@ -352,6 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.regionList) {
                     renderStoreList(data.regionList);
                     showMarkers(data.regionList);
+                    showRegion(data.region);
                 } else {
                     console.warn("regionList 없음");
                 }
@@ -480,20 +498,29 @@ document.addEventListener('DOMContentLoaded', function () {
 </c:when>
 
 <c:when test="${option eq 'region'}">
-	<h2 style="margin-bottom:20px;">지역을 선택해주세요</h2>
-    <div class="region-buttons two-rows mb-4">
-		<c:forEach var="regionName" items="${regions}">
-		    <form class="region-form ajax-region-form">
-		        <input type="hidden" name="option" value="region" />
-		        <input type="hidden" name="keyword" value="${regionName}" />
-		        <button type="submit" class="btn btn-outline-primary">${regionName}</button>
-		    </form>
-		</c:forEach>
-	</div>
+    <h2 style="margin-bottom:20px;">지역 맛집 검색</h2>
 
-	<div id="map"></div>
-	<div id="store-list-container"></div>
+    <div class="region-buttons two-rows mb-4">
+        <c:forEach var="regionName" items="${regions}">
+            <form class="region-form ajax-region-form">
+                <input type="hidden" name="option" value="region" />
+                <input type="hidden" name="keyword" value="${regionName}" />
+                
+                <!-- region-btn 클래스와 data-region 속성 추가 -->
+                <button 
+                    type="submit" 
+                    class="btn btn-outline-primary region-btn" 
+                    data-region="${regionName}">
+                    ${regionName}
+                </button>
+            </form>
+        </c:forEach>
+    </div>
+
+    <div id="map"></div>
+    <div id="store-list-container"></div>
 </c:when>
+
 
 <c:when test="${option eq 'userLocation'}">
 	<h2>주변 맛집</h2>

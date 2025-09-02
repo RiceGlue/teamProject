@@ -79,6 +79,7 @@ public class StoreControllerImpl implements StoreController {
 	    Map<String, Object> response = new HashMap<>();
 	    List<StoreVO> regionList = storeService.selectStoreByRegion(keyword);
 	    response.put("regionList", regionList);
+	    response.put("region", keyword);
 	    return response;
 	}
 

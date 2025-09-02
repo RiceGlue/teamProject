@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="type-store-container">
 						<c:forEach var="type" items="${storeTypeList}">
 							<div class="type-store">
-								<a href="${contextPath}/store/storeDetail?storeId=${type.storeId}"><img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="180px"></a>
+								<a href="${contextPath}/store/storeDetail?storeId=${type.storeId}"><img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="100%"></a>
 								<div class="type-storeInfo">
 									<p><span class="rating">⭐ ${type.avgRating}</span> 리뷰 ${type.countRating}개</p> 
 									<h5>${type.storeName} · ${type.storeType}</h5>
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						<c:forEach var="near" items="${nearByStoreList}">
 						    <c:if test="${near.storeId != store.storeId}">
 						        <div class="type-store">
-						            <a href="${contextPath}/store/storeDetail?storeId=${near.storeId}"><img alt="${near.storeName}" src="${contextPath}/images/store/${near.fileName}" width="180px"></a>
+						            <a href="${contextPath}/store/storeDetail?storeId=${near.storeId}"><img alt="${near.storeName}" src="${contextPath}/images/store/${near.fileName}" width="100%"></a>
 						            <div class="type-storeInfo">
 						                <p><span class="rating">⭐ ${near.avgRating}</span> 리뷰 ${near.countRating}개</p> 
 						                <h5>${near.storeName} · ${near.storeType}</h5>
