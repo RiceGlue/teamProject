@@ -26,7 +26,7 @@
 
 <style>
 /* 기본 CSS 스타일 */
-p{display:flex;align-items:center;gap:7px;}
+/* p{align-items:center;gap:7px;} */
 input[type="text"]:not(.form-control){width:50px;text-align:center;}
 .store-info{margin:20px auto;max-width:950px;background:#fff;padding:20px;border-radius:10px;}
 .store-banner{width:100%;height:200px;background-color:#eee;display:flex;justify-content:center;align-items:center;}
@@ -657,6 +657,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				</div>
 
 				<div class="tab_content" id="tab2">
+					<h5 class="mt-4">메뉴</h5>
 					<div class="menu-container">
 						<c:forEach var="menu" items="${storeMap.menu}">
 							<div class="menu-card">
