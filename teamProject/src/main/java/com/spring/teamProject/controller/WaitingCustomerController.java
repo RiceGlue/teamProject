@@ -114,7 +114,10 @@ public class WaitingCustomerController {
     // GET 요청: 웨이팅 등록 성공 후 보여줄 페이지 (리다이렉트 대상)
     @GetMapping("/result")
     public String showResultPage(Model model) {
-        return "waiting/customer/result";
+        //return "waiting/customer/result";
+
+        model.addAttribute("body","waiting/customer/result.jsp");
+        return "layout/layout";
     }
 
     // --- REST API 관련 메서드들 ---
