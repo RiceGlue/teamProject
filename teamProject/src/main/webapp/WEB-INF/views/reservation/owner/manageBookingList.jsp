@@ -30,7 +30,7 @@
     </c:if>
 
     <ul class="nav nav-tabs" id="statusTabs" role="tablist">
-        <c:forEach var="status" items="${['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
+        <c:forEach var="status" items="${['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
             <li class="nav-item" role="presentation">
                 <button class="nav-link ${status == 'ALL' ? 'active' : ''}"
                         id="${status.toLowerCase()}-tab"
