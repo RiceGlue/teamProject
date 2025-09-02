@@ -46,7 +46,10 @@ public class WaitingCustomerController {
     public String showForm(@RequestParam("storeId") Long storeId, Model model) {
     	logger.info("GET /form 요청이 들어왔습니다.");
     	model.addAttribute("storeId", storeId);
-        return "waiting/customer/register";
+
+    	//return "waiting/customer/register";
+        model.addAttribute("body", "waiting/customer/register.jsp");
+        return "layout/layout";
     }
 
     // POST 요청: 웨이팅 등록 폼 데이터를 처리합니다.

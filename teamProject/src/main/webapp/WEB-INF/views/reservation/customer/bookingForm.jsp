@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
-        .container { max-width: 800px; margin-top: 50px; }
+        .container { max-width: 800px; margin-top: 50px; margin-bottom:50px;}
         .form-group label { font-weight: bold; }
         .error-message { color: red; font-size: 0.9em; margin-top: 5px; }
         .time-slot-btn {
@@ -104,10 +104,10 @@
             </div>
         </div>
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label for="request" class="form-label">요청 사항 (선택 사항):</label>
             <textarea class="form-control" id="request" name="request" rows="3" placeholder="특별히 요청할 사항이 있다면 입력해주세요."></textarea>
-        </div>
+        </div> -->
 
         <button type="button" id="payment-button" class="btn btn-primary mt-3">예약 신청하기</button>
         <a href="${pageContext.request.contextPath}/store/storeDetail?storeId=${storeId}" class="btn btn-secondary mt-3">취소</a>

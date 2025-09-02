@@ -81,7 +81,9 @@ public class ReservationCustomerController {
         session.removeAttribute("pendingReservation");
         session.removeAttribute("pendingPayment");
 
-        return "reservation/customer/bookingForm";
+        //return "layout/layout";
+        model.addAttribute("body", "reservation/customer/bookingForm.jsp");
+        return "layout/layout";
     }
 
     @GetMapping("/available-slots")
@@ -289,7 +291,10 @@ public class ReservationCustomerController {
             model.addAttribute("errorMessage", "예약 정보를 불러오는 데 실패했습니다.");
         }
 
-        return "reservation/customer/bookingConfirm";
+        //return "reservation/customer/bookingConfirm";
+        model.addAttribute("body", "reservation/customer/bookingConfirm.jsp");
+        return "layout/layout";
+
     }
 
     @GetMapping("/api/payment-status")

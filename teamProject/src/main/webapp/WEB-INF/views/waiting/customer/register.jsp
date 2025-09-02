@@ -7,7 +7,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-messaging-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
+    	.content-wrapper {padding: 50px;}
+        body { font-family: Arial, sans-serif;}
         label { display: block; margin-bottom: 5px; }
         input[type="number"], input[type="text"] { /* text 타입도 포함하도록 수정 */
             width: 200px;
@@ -77,11 +78,13 @@
         <input type="hidden" id="fcmToken" name="fcmToken" value="" />
 
         <button type="submit" id="submitButton" disabled>등록</button>
+        <button type="button" onclick="location.href='/store/storeDetail?storeId=${storeId}'">목록으로</button>
+
     </form>
-
-    <div id="fcmStatus">FCM 초기화 중...</div>
-    <div id="fcmError"></div>
-
+	<div style="display: none;">
+	    <div id="fcmStatus">FCM 초기화 중...</div>
+	    <div id="fcmError"></div>
+	</div>
     <script>
         // 1. Firebase 프로젝트 설정 (실제 Firebase Console에서 가져온 값)
         const firebaseConfig = {
