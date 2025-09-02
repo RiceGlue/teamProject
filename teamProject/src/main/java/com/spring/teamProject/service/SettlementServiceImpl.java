@@ -105,7 +105,8 @@ public class SettlementServiceImpl implements SettlementService {
                                             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             // ✨ CommissionRateService에서 동적으로 수수료율을 가져옴
-            BigDecimal commissionRate = commissionRateService.getCommissionRate();
+            //BigDecimal commissionRate = commissionRateService.getCommissionRate();
+            BigDecimal commissionRate = commissionRateService.getCurrentCommissionRate();
 
             BigDecimal totalCommission = totalRevenue.multiply(commissionRate);
 

@@ -1,5 +1,9 @@
+/*
+ * /com/spring/teamProject/service/PaymentServiceImpl.java
+ */
 package com.spring.teamProject.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.spring.teamProject.dao.PaymentDAO;
 import com.spring.teamProject.dao.ReservationDAO;
 import com.spring.teamProject.vo.PaymentVO;
+import com.spring.teamProject.vo.ReservationVO;
 
 import reactor.core.publisher.Mono;
 
@@ -28,16 +33,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentDAO paymentDAO;
     private final ReservationDAO reservationDAO;
+    private final CommissionRateService commissionRateService; // ✨ CommissionRateService 추가
     private final WebClient webClient;
 
     @Value("${portone.apiSecret}")
     private String apiSecret;
 
     @Autowired
-    public PaymentServiceImpl(PaymentDAO paymentDAO, ReservationDAO reservationDAO, WebClient.Builder webClientBuilder) {
+    public PaymentServiceImpl(PaymentDAO paymentDAO, ReservationDAO reservationDAO,
+                              WebClient.Builder webClientBuilder, CommissionRateService commissionRateService) {
         this.paymentDAO = paymentDAO;
         this.reservationDAO = reservationDAO;
         this.webClient = webClientBuilder.baseUrl("https://api.portone.io").build();
+        this.commissionRateService = commissionRateService;
     }
 
     /**
@@ -67,8 +75,36 @@ public class PaymentServiceImpl implements PaymentService {
      * @param payment 추가할 결제 정보
      */
     @Override
+    @Transactional
     public void addPayment(PaymentVO payment) throws Exception {
-        paymentDAO.insertPayment(payment);
+        try {
+            log.info("결제 정보 저장 시작: transactionId={}, amount={}", payment.getTransactionId(), payment.getAmount());
+
+            // 1. CommissionRateService를 사용해 현재 수수료율을 가져옵니다.
+            BigDecimal currentRate = commissionRateService.getCurrentCommissionRate();
+
+            // 2. 결제 금액에 수수료율을 곱하여 수수료(commissionFee)를 계산합니다.
+            BigDecimal amount = new BigDecimal(payment.getAmount());
+            BigDecimal commissionFee = amount.multiply(currentRate);
+            payment.setCommissionFee(commissionFee);
+
+            // ✨ 3. reservationId를 이용해 매장 ID를 찾고 PaymentVO에 설정합니다.
+            ReservationVO reservation = reservationDAO.selectReservationById(payment.getReservationId());
+            if (reservation != null && reservation.getStoreId() != null) {
+                payment.setStoreId(reservation.getStoreId());
+            } else {
+                log.error("예약 ID {}로 매장 정보를 찾을 수 없습니다.", payment.getReservationId());
+                throw new Exception("예약 ID로 매장 정보를 찾을 수 없습니다.");
+            }
+
+            // 4. DAO를 호출하여 DB에 결제 정보를 저장합니다.
+            paymentDAO.insertPayment(payment);
+            log.info("결제 정보 저장 완료: transactionId={}", payment.getTransactionId());
+
+        } catch (Exception e) {
+            log.error("임시 결제 정보 저장 중 오류 발생:", e);
+            throw e;
+        }
     }
 
     /**

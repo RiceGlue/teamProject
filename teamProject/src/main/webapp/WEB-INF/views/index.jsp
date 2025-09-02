@@ -73,7 +73,7 @@
         border-radius: 1rem;
         overflow: hidden;
     }
-    
+
     .banner-carousel img {
         width: 100%;
         height: auto; /* 자동 높이로 변경 */
@@ -81,17 +81,17 @@
         object-fit: contain; /* 전체 이미지를 보여주도록 변경 */
         background-color: var(--yum-cream); /* 여백 부분 배경색 */
     }
-    
+
     /* 모바일에서 배너 높이 조정 */
     @media (max-width: 768px) {
         .banner-carousel img {
             max-height: 250px; /* 모바일 최대 높이를 더 작게 조정 */
         }
-        
+
         .search-bar {
             padding: 1.5rem;
         }
-        
+
         .category-icons .icon-circle {
             width: 50px;
             height: 50px;
@@ -160,7 +160,7 @@
     .card-title { font-weight: 700; }
     .card-text { color: #5a6a7b; font-size: 0.9rem; }
     .rating-text { color: #ffc107; font-weight: bold; }
-    
+
     /* 리뷰 카드 전용 스타일 */
     .review-card .card-body {
         display: flex;
@@ -183,7 +183,7 @@
     }
 
     .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
-    .wishlist-btn.active{color:#ff6347;}  
+    .wishlist-btn.active{color:#ff6347;}
 </style>
 
 <script>
@@ -219,7 +219,7 @@ var map; // 지도 객체를 전역 변수로 선언
     function success(position) {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        
+
         // 3. 사용자 위치를 가져오면, 기존 지도의 중심을 이동시킵니다.
         map.setCenter({ lat: lat, lng: lng });
         map.setZoom(14);
@@ -274,7 +274,7 @@ var map; // 지도 객체를 전역 변수로 선언
                     document.getElementById("nearbyStores").innerHTML = "<p>근처에 매장이 없습니다.</p>";
                     return;
                 }
-                
+
                 // [수정] 새로운 지도 객체를 생성하는 대신, 전역 map 객체를 사용합니다.
                 displayStoresOnMap(storeList, map);
                 displayStoreCards(storeList, dong);
@@ -312,35 +312,35 @@ var map; // 지도 객체를 전역 변수로 선언
 	function displayStoreCards(storeList, dong) {
 	    console.log("UI카드 시작");
 	    const container = document.getElementById("nearbyStores");
-	
+
 	    if (!container) {
 	        console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
 	        return;
 	    }
-	
+
 	    container.innerHTML = ""; // 초기화
-	
+
 	    const limitedStoreList = storeList.slice(0, 3);
-	
+
 	    limitedStoreList.forEach(store => {
 	        const card = document.createElement("div");
 	        card.className = "card my-3";
-	
-	        card.innerHTML = 
+
+	        card.innerHTML =
 	            '<div class="card-body">' +
 	                '<h5 class="card-title">' +
 	                    '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
 	                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
 	                        '<i class="fa fa-bookmark"></i>' +
 	                    '</button>' +
-	                '</h5>' +	
+	                '</h5>' +
 	                '<p class="card-text">&#128205; ' + store.roadAddress + '</p>' +
 	                '<p class="card-text">&#128222; ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
 	                '<p class="card-text">&#11088; ' + store.avgRating + ' / 5</p>' +
 	            '</div>';
-	
+
 	        container.appendChild(card);
-	
+
 	        if (memberId && memberId !== 'null' && memberId !== 'undefined') {
 	            const wishlistBtn = card.querySelector('.wishlist-btn');
 	            if (wishlistBtn) {
@@ -348,10 +348,10 @@ var map; // 지도 객체를 전역 변수로 선언
 	            }
 	        }
 	    });
-	
+
 	    const buttonWrapper = document.createElement("div");
 	    buttonWrapper.className = "d-grid mt-2";
-	
+
 	    const loadMoreBtn = document.createElement("button");
 	    loadMoreBtn.id = "loadMoreBtn";
 	    loadMoreBtn.className = "btn btn-light";
@@ -359,7 +359,7 @@ var map; // 지도 객체를 전역 변수로 선언
 	    loadMoreBtn.onclick = function () {
 	        window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
 	    };
-	
+
 	    buttonWrapper.appendChild(loadMoreBtn);
 	    container.appendChild(buttonWrapper);
 	}
@@ -459,7 +459,8 @@ function checkWishlistStatus(storeId, btnElement) {
 }
 
 // 위시리스트 버튼 클릭 처리
-$(document).on('click', '.wishlist-btn', function () {
+$(document).on('click', '.wishlist-btn', function (e) {
+	e.stopPropagation();
     const storeId = $(this).data('store-id');
     toggleWishlist(storeId, this);
 });
@@ -549,16 +550,16 @@ function toggleWishlist(storeId, btnElement) {
                                         </c:choose>
                                             <c:choose>
                                                 <c:when test="${not empty banner.mobileImagePath}">
-                                                    <img src="${contextPath}/banner-images/${banner.imagePath}" 
-                                                         class="d-block w-100 d-none d-md-block" 
+                                                    <img src="${contextPath}/banner-images/${banner.imagePath}"
+                                                         class="d-block w-100 d-none d-md-block"
                                                          alt="${banner.text}">
-                                                    <img src="${contextPath}/banner-images/${banner.mobileImagePath}" 
-                                                         class="d-block w-100 d-md-none" 
+                                                    <img src="${contextPath}/banner-images/${banner.mobileImagePath}"
+                                                         class="d-block w-100 d-md-none"
                                                          alt="${banner.text}">
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <img src="${contextPath}/banner-images/${banner.imagePath}" 
-                                                         class="d-block w-100" 
+                                                    <img src="${contextPath}/banner-images/${banner.imagePath}"
+                                                         class="d-block w-100"
                                                          alt="${banner.text}">
                                                 </c:otherwise>
                                             </c:choose>
@@ -568,14 +569,14 @@ function toggleWishlist(storeId, btnElement) {
                             </c:when>
                             <c:otherwise>
                                 <div class="carousel-item active">
-                                    <img src="https://placehold.co/1200x400/FDF6EC/7B2D26?text=Yum+Table" 
-                                         class="d-block w-100" 
+                                    <img src="https://placehold.co/1200x400/FDF6EC/7B2D26?text=Yum+Table"
+                                         class="d-block w-100"
                                          alt="기본 배너">
                                 </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
-                    
+
                     <c:if test="${fn:length(bannerList) > 1}">
                         <button class="carousel-control-prev" type="button" data-bs-target="#mainBannerCarousel" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -585,11 +586,11 @@ function toggleWishlist(storeId, btnElement) {
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">다음</span>
                         </button>
-                        
+
                         <div class="carousel-indicators">
                             <c:forEach var="banner" items="${bannerList}" varStatus="status">
-                                <button type="button" data-bs-target="#mainBannerCarousel" 
-                                        data-bs-slide-to="${status.index}" 
+                                <button type="button" data-bs-target="#mainBannerCarousel"
+                                        data-bs-slide-to="${status.index}"
                                         <c:if test="${status.first}">class="active"</c:if>
                                         aria-label="슬라이드 ${status.index + 1}"></button>
                             </c:forEach>
@@ -597,7 +598,7 @@ function toggleWishlist(storeId, btnElement) {
                     </c:if>
                 </div>
             </section>
-            
+
             <!-- 최신 인기 리뷰 섹션 -->
             <section class="mb-5">
                 <h4 class="mb-3 fw-bold">최신 인기 리뷰</h4>
@@ -614,7 +615,7 @@ function toggleWishlist(storeId, btnElement) {
 			    <div id="map" style="height: 300px; border-radius: 1rem;" class="mb-3"></div>
 			    <div id="nearbyStores" class="store-carousel">
 			        <%-- AJAX를 통해 이 곳에 가게 카드가 채워집니다. --%>
-			    </div> 
+			    </div>
 			</section>
         </div>
 
@@ -624,7 +625,7 @@ function toggleWishlist(storeId, btnElement) {
         <div class="col-lg-4 d-none d-lg-block">
             <div class="sidebar-box mb-4">
                 <%-- [33차 수정] isAnonymous와 isAuthenticated를 별개의 블록으로 분리 --%>
-                
+
                 <%-- 로그아웃 상태일 때 --%>
                 <sec:authorize access="isAnonymous()">
                     <h5 class="sidebar-title">로그인</h5>
@@ -675,7 +676,7 @@ function toggleWishlist(storeId, btnElement) {
 <!--         <image src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%;" > -->
 <!--         <p>★★★★★ -->
 <!--         <p>리뷰 내용 -->
-<!--     </div> --> 
+<!--     </div> -->
 <!-- </div> -->
 
 <!-- <div class="review-item" style="padding: 0px; flex: 0 0 calc(33.333% - 10px); height: 300px; border:1px solid #ddd; margin-bottom:10px; position: relative; overflow: hidden;"> -->
@@ -683,7 +684,7 @@ function toggleWishlist(storeId, btnElement) {
 <!--         <h6>작성자ID</h6> -->
 <!--         <h6>2025-08-27</h6> -->
 <!--     </div> -->
-    
+
 <!--     <div class="review-image" style="position: relative; height: 170px;"> -->
 <!--         <img src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지"> -->
 <!--         <div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: white; background-color: rgba(0, 0, 0, 0.5);"> -->
