@@ -413,10 +413,6 @@ var map; // 지도 객체를 전역 변수로 선언
 
 	                html +=
 	                	'<a href="' + contextPath + '/store/storeDetail?storeId=' + review.storeId + '" class="card review-card">' +
-	                    '<div class="writer" style="display: flex; justify-content: space-between; margin:10px 0;">' +
-	                        '<h6>' + maskedWriterId + '</h6>' +
-	                        '<h6>' + formattedDate + '</h6>' +
-	                    '</div>' +
 	                    (image && image.fileName
 	                        ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" class="card-img-top" alt="' + review.reviewId + '">'
 	                        : '') +
