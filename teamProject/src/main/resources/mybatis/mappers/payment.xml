@@ -17,6 +17,14 @@
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
+<!--     <insert id="insertPayment" parameterType="com.spring.teamProject.vo.PaymentVO" -->
+<!--             useGeneratedKeys="true" keyProperty="paymentId"> -->
+<!--         INSERT INTO payments ( -->
+<!--             reservation_id, amount, payment_method, status, transaction_id, store_id, commission_fee -->
+<!--         ) VALUES ( -->
+<!--             #{reservationId}, #{amount}, #{paymentMethod}, #{status}, #{transactionId}, #{storeId}, #{commissionFee} -->
+<!--         ) -->
+<!--     </insert> -->
     <insert id="insertPayment" parameterType="com.spring.teamProject.vo.PaymentVO"
             useGeneratedKeys="true" keyProperty="paymentId">
         INSERT INTO payments (
