@@ -106,7 +106,7 @@ public class MemberController {
     public String joinSelectForm(Model model, HttpSession session) {
         if (isAuthenticated()) {
             session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
-            return "redirect:/main";
+            return "redirect:/index";
         }
         model.addAttribute("body", "member/join_select.jsp");
         return "layout/layout";
@@ -116,7 +116,7 @@ public class MemberController {
     public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
         if (isAuthenticated()) {
             session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
-            return "redirect:/main";
+            return "redirect:/index";
         }
 
         // Spring Security가 저장한 '원래 가려던 페이지' 정보를 가져옵니다.
@@ -144,7 +144,7 @@ public class MemberController {
     public String joinForm(@RequestParam("role") String role, Model model, @ModelAttribute("memberVO") MemberVO memberVO, HttpSession session) {
         if (isAuthenticated()) {
             session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
-            return "redirect:/main";
+            return "redirect:/index";
         }
 
         model.addAttribute("recaptchaSiteKey", recaptchaSiteKey);
@@ -188,7 +188,7 @@ public class MemberController {
     public String joinSocialForm(Model model, HttpSession session) {
         if (isAuthenticated()) {
             session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
-            return "redirect:/main";
+            return "redirect:/index";
         }
 
         Object socialUserInfo = session.getAttribute("socialUserInfo");
