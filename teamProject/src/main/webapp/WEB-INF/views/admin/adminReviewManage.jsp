@@ -69,10 +69,8 @@
     <!-- 📌 검열 요청 섹션 -->
     <h3>검열 요청</h3>
     <c:forEach var="manageReview" items="${manageReviewList}">
-        <c:if test="${manageReview.status == 'REQUESTED'}">
-            <form class="review-manage-form"
-                  action="${pageContext.request.contextPath}/review/updateReviewManageStatus"
-                  method="post">
+        <c:if test="${manageReview.status == 'REQUESTED' || manageReview.status == 'IN_PROGRESS'}">
+            <form class="review-manage-form" action="${pageContext.request.contextPath}/review/updateReviewManageStatus" method="post">
                 <div class="manage-review-item">
                     <div class="review-info-section">
                         <input type="hidden" name="manageId" value="${manageReview.manageId}" />
@@ -85,64 +83,16 @@
                         <c:if test="${not empty manageReview.customReason}">
                             <p><strong>기타 사유:</strong> ${manageReview.customReason}</p>
                         </c:if>
-                        <p><strong>요청일:</strong>
-                            <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
-                        </p>
+                        <p><strong>요청일:</strong><fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
 
                         <!-- 상태 변경 가능 -->
                         <p>
                             <strong>요청 상태:</strong>
                             <select name="status" class="status-select">
-                                <option value="">-- 상태 선택 --</option>
-                                <option value="REQUESTED" selected>검열 요청</option>
-                                <option value="IN_PROGRESS">검열중</option>
-                                <option value="APPROVED">승인</option>
-                                <option value="REJECTED">거절</option>
-                            </select>
-                        </p>
-
-                        <p>
-                            <input type="text" name="rejectedReason"
-                                   class="form-control status-reason"
-                                   placeholder="검열 사유를 입력해주세요"
-                                   value="${manageReview.rejectedReason}" />
-                        </p>
-
-                        <button type="submit" class="btn-status-update">상태 변경</button>
-                    </div>
-                </div>
-            </form>
-        </c:if>
-    </c:forEach>
-
-    <!-- 📌 검열중 섹션 -->
-    <h3>검열중</h3>
-    <c:forEach var="manageReview" items="${manageReviewList}">
-        <c:if test="${manageReview.status == 'IN_PROGRESS'}">
-            <%-- REQUESTED와 동일하게 리뷰 정보 다 보여줌 --%>
-            <form class="review-manage-form"
-                  action="${pageContext.request.contextPath}/review/updateReviewManageStatus"
-                  method="post">
-                <div class="manage-review-item">
-                    <div class="review-info-section">
-                        <input type="hidden" name="manageId" value="${manageReview.manageId}" />
-                        <input type="hidden" name="reviewId" value="${manageReview.reviewId}" />
-
-                        <p><strong>리뷰 번호:</strong> ${manageReview.reviewId}</p>
-                        <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
-                        <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
-                        <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
-                        <p><strong>요청일:</strong>
-                            <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
-                        </p>
-
-                        <p>
-                            <strong>요청 상태:</strong>
-                            <select name="status" class="status-select">
-                                <option value="REQUESTED">검열 요청</option>
-                                <option value="IN_PROGRESS" selected>검열중</option>
-                                <option value="APPROVED">승인</option>
-                                <option value="REJECTED">거절</option>
+                                <option value="REQUESTED" ${manageReview.status == 'REQUESTED' ? 'selected' : ''}>검열 요청</option>
+								<option value="IN_PROGRESS" ${manageReview.status == 'IN_PROGRESS' ? 'selected' : ''}>검열중</option>
+								<option value="APPROVED" ${manageReview.status == 'APPROVED' ? 'selected' : ''}>승인</option>
+								<option value="REJECTED" ${manageReview.status == 'REJECTED' ? 'selected' : ''}>거절</option>
                             </select>
                         </p>
 
@@ -170,9 +120,7 @@
                     <p><strong>요청 ID:</strong> ${manageReview.ownerId}</p>
                     <p><strong>리뷰 매장:</strong> ${manageReview.storeName}</p>
                     <p><strong>요청 사유:</strong> ${manageReview.requestReason}</p>
-                    <p><strong>요청일:</strong>
-                        <fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" />
-                    </p>
+                    <p><strong>요청일:</strong><fmt:formatDate value="${manageReview.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
 
                     <c:choose>
                         <c:when test="${manageReview.status == 'APPROVED'}">

@@ -412,28 +412,22 @@ var map; // 지도 객체를 전역 변수로 선언
 	                const maskedWriterId = maskWriterId(review.writerId);
 
 	                html +=
-	                    '<div class="review-item" style="flex: 0 0 calc(33.333% - 10px); border:1px solid #ddd; padding:10px; margin-bottom:10px; position: relative; overflow: hidden;">' +
-	                        '<div class="writer" style="display: flex; justify-content: space-between; margin:10px 0;">' +
-	                            '<h6>' + maskedWriterId + '</h6>' +
-	                            '<h6>' + formattedDate + '</h6>' +
+	                	'<a href="' + contextPath + '/store/storeDetail?storeId=' + review.storeId + '" class="card review-card">' +
+	                    '<div class="writer" style="display: flex; justify-content: space-between; margin:10px 0;">' +
+	                        '<h6>' + maskedWriterId + '</h6>' +
+	                        '<h6>' + formattedDate + '</h6>' +
+	                    '</div>' +
+	                    (image && image.fileName
+	                        ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" class="card-img-top" alt="' + review.reviewId + '">'
+	                        : '') +
+	                    '<div class="card-body p-3">' +
+	                        '<div>' +
+	                            '<p class="rating-text mb-1">' + starRating + '<small class="text-muted ms-2">' + maskedWriterId + '</small></p>' +
+	                            '<p class="review-content">' + review.content + '</p>' +
 	                        '</div>' +
-
-	                        '<div class="review-image" style="position: relative; height: 170px;">' +
-	                            (image && image.fileName
-	                                ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지">'
-	                                : '') +
-	                            '<div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: black; background-color: rgb(193 193 193 / 50%);">' +
-	                                '<p>' + starRating + ' / 좋아요: ' + review.likes + '</p>' +
-	                                '<p>' + review.content + '</p>' +
-	                            '</div>' +
-	                        '</div>' +
-
-	                        '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
-	                            '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
-	                            '<h6>&#128222; ' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
-	                            '<h6>&#128205; ' + review.roadAddress + '</h6>' +
-	                        '</div>' +
-	                    '</div>';
+	                    '</div>' +
+	                    '<p class="store-info mt-2 mb-0">' + review.storeName + ' | ' + review.roadAddress + '</p>' +
+	                '</a>';
 	            }
 
 	            $('#reviewContainer').html(html);
@@ -707,4 +701,5 @@ function toggleWishlist(storeId, btnElement) {
 <!--         <h6>??대전시 대덕구 어쩌구저쩌구</h6> -->
 <!--     </div> -->
 <!-- </div> -->
+
 
