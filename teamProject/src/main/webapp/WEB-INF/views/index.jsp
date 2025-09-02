@@ -653,27 +653,23 @@ function toggleWishlist(storeId, btnElement) {
                 </sec:authorize>
 
                 <%-- 로그인 상태일 때 (GUEST 제외) --%>
-                <sec:authorize access="isAuthenticated() and !hasRole('GUEST')">
-                    <sec:authentication property="principal" var="principal" />
-                    <div class="d-flex align-items-center mb-3">
-                        <c:choose>
-                            <c:when test="${not empty principal.memberVO.profileImageUrl}">
-                                <img src="${contextPath}${principal.memberVO.profileImageUrl}" class="rounded-circle profile-pic-md">
-                            </c:when>
-                            <c:otherwise>
-                                <img src="${contextPath}/images/default_profile.png" class="rounded-circle profile-pic-md">
-                            </c:otherwise>
-                        </c:choose>
-                        <div class="ms-3">
-                            <h5 class="mb-0 fw-bold">${principal.memberVO.memberName} 님</h5>
-                            <p class="mb-0 text-muted small">매너온도: ${principal.memberVO.mannerTemperature}°C</p>
-                        </div>
-                    </div>
-                    <div class="d-grid">
-                           <a href="${contextPath}/member/mypage" class="btn" style="background-color: var(--yum-beige);">마이페이지</a>
-                    </div>
-                </sec:authorize>
-                
+                <c:if test="${not empty memberInfo}">
+				    <div class="d-flex align-items-center mb-3">
+				        <c:choose>
+				            <c:when test="${not empty memberInfo.profileImageUrl}">
+				                <img src="${contextPath}${memberInfo.profileImageUrl}" class="rounded-circle profile-pic-md">
+				            </c:when>
+				            <c:otherwise>
+				                <img src="${contextPath}/images/default_profile.png" class="rounded-circle profile-pic-md">
+				            </c:otherwise>
+				        </c:choose>
+				        <div class="ms-3">
+				            <h5 class="mb-0 fw-bold">${memberInfo.memberName} 님</h5>
+				            <p class="mb-0 text-muted small">매너온도: ${memberInfo.mannerTemperature}°C</p>
+				        </div>
+				    </div>
+				</c:if>
+
                 <%-- GUEST 상태일 때 --%>
                 <sec:authorize access="hasRole('GUEST')">
                      <h5 class="sidebar-title">회원가입</h5>

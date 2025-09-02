@@ -2,6 +2,7 @@ package com.spring.teamProject.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.spring.teamProject.service.BannerService;
+import com.spring.teamProject.service.MemberService;
 import com.spring.teamProject.vo.BannerEntity;
+import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.UserDetailsVO;
 
 @Controller
@@ -21,6 +24,9 @@ public class HomeController {
 
     @Autowired
     private BannerService bannerService;
+    
+    @Autowired
+    private MemberService memberService;
 
     /**
      * 사용자용 메인 페이지
@@ -33,7 +39,8 @@ public class HomeController {
         // 1. 로그인한 사용자 정보가 있으면 모델에 추가합니다.
         if (userDetailsVO != null) {
             Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
-            model.addAttribute("memberId", memberId);
+            MemberVO freshMemberInfo = memberService.getMemberById(memberId); // DB에서 최신 사용자 정보 조회
+            model.addAttribute("memberInfo", freshMemberInfo); // JSP로 전달
         }
         
         // 2. BannerService를 통해 현재 활성화된 배너 목록을 DB에서 조회합니다.
