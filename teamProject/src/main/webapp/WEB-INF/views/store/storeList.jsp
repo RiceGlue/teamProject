@@ -30,7 +30,7 @@
 	.region-form .btn { width: 100%; white-space: nowrap; }
 	.region-btn.active { background-color: #0d6efd;color: white;border-color: #0d6efd;}
 	
-	.storeList {width:80%; margin: 0 auto; margin-top:20px; }
+	.storeList {width:60%; margin: 0 auto; margin-top:20px; }
 	
 </style>
 
