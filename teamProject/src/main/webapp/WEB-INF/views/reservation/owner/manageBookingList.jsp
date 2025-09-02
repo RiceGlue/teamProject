@@ -13,6 +13,8 @@
         .badge-completed { background-color: #007bff; color: #fff; }
         .badge-no_show { background-color: #6c757d; color: #fff; }
         .table-responsive { margin-top: 20px; }
+        .badge-pending { background-color: #ffc107; color: #212529; }
+    	.table-responsive { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -39,7 +41,8 @@
                         aria-selected="${status == 'ALL'}">
                     <c:choose>
                         <c:when test="${status == 'ALL'}">전체</c:when>
-                        <c:when test="${status == 'CONFIRMED'}">승인됨</c:when>
+                        <c:when test="${status == 'PENDING'}">결제대기</c:when>
+                        <c:when test="${status == 'CONFIRMED'}">결제승인(예약)</c:when>
                         <c:when test="${status == 'COMPLETED'}">이용완료</c:when>
                         <c:when test="${status == 'CANCELLED'}">취소</c:when>
                         <c:when test="${status == 'NO_SHOW'}">노쇼</c:when>
@@ -50,7 +53,7 @@
     </ul>
 
     <div class="tab-content mt-3" id="statusTabContent">
-        <c:forEach var="status" items="${['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
+        <c:forEach var="status" items="${['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW']}">
             <div class="tab-pane fade ${status == 'ALL' ? 'show active' : ''}"
                  id="${status.toLowerCase()}"
                  role="tabpanel"
@@ -161,6 +164,8 @@
             const time = new Date(res.reservationTime).toLocaleString('ko-KR');
             const created = new Date(res.createdAt).toLocaleString('ko-KR');
             let manage = '';
+
+
 
             // res.reservationId가 유효한 경우에만 관리 버튼을 생성
             if (res.status === 'CONFIRMED' && res.reservationId) {
@@ -275,7 +280,7 @@
     }
 
     $(document).ready(function() {
-        ['ALL','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW'].forEach(function(s) {
+        ['ALL','PENDING','CONFIRMED','COMPLETED','CANCELLED','NO_SHOW'].forEach(function(s) {
             currentPage[s] = 0;
             hasMore[s] = true;
         });
