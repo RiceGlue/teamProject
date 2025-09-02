@@ -47,7 +47,7 @@ public class HomeController {
      * 실제 사용자용 메인 페이지
      * URL: /main
      */
-    @GetMapping("/main")
+    @GetMapping("/")
     public String showMainPage(Model model) {
         logger.info("HomeController: /main 요청 처리됨 (사용자용)");
         
@@ -65,7 +65,7 @@ public class HomeController {
             defaultBanner.setImagePath("default_banner.png"); 
             defaultBanner.setText("Yum Table에 오신 것을 환영합니다.");
             // 2-2. 클릭 시 메인 페이지로 이동하도록 링크를 설정합니다.
-            defaultBanner.setLinkUrl("/main"); 
+            defaultBanner.setLinkUrl("/"); 
             
             bannerList.add(defaultBanner);
         }
