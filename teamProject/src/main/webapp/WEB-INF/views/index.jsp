@@ -522,7 +522,7 @@ function toggleWishlist(storeId, btnElement) {
             <!-- 카테고리 아이콘 -->
             <section class="category-icons mb-5">
                 <ul class="nav justify-content-around">
-                    <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-geo-alt-fill"></i></div><span>지역별</span></a></li>
+                    <li class="nav-item"><a href="${contextPath}/store/storeList?option=region&keyword=" class="nav-link"><div class="icon-circle"><i class="bi bi-geo-alt-fill"></i></div><span>지역별</span></a></li>
                     <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-egg-fried"></i></div><span>음식별</span></a></li>
                     <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-star-fill"></i></div><span>인기 맛집</span></a></li>
                     <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-shop-window"></i></div><span>신규 오픈</span></a></li>

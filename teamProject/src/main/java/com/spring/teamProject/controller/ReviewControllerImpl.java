@@ -99,62 +99,53 @@ public class ReviewControllerImpl implements ReviewController{
 	
 	@RequestMapping(value="/reviewManage")
 	public ModelAndView reviewManage(@AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("storeId") long storeId, HttpServletRequest req, HttpServletResponse res) throws Exception {
-	    
+
 	    String viewName = (String) req.getAttribute("viewName");
 	    ModelAndView mav = ViewUtil.ownerLayout(viewName);
 
-	    Long ownerId = (userDetailsVO != null) ? (long) userDetailsVO.getMemberVO().getMemberId() : null;
+	    Long ownerId = null;
 
-	    // 전체 리뷰
+	    if (userDetailsVO != null) {
+	        ownerId = (long) userDetailsVO.getMemberVO().getMemberId();
+	    }
+
+	    // 전체 리뷰 리스트 조회
 	    List<ReviewVO> reviewList = reviewService.getStoreAllReview(storeId);
 
-	    // 매핑용 Map
-	    Map<Long, ManageReviewVO> manageMap = new HashMap<>();
+	    // 리뷰 ID 기준으로 이미지 리스트와 검열 요청 상태 맵 생성
+	    Map<Long, ManageReviewVO> manageMap = new HashMap<>(); 
 	    Map<Long, List<ImageFileVO>> imageMap = new HashMap<>();
-
-	    // 상태별 리스트
-	    List<ReviewVO> approvedReviewList = new ArrayList<>();
-	    List<ManageReviewVO> requestedOrInProgressList = new ArrayList<>();
-	    List<ManageReviewVO> rejectedList = new ArrayList<>();
 
 	    for (ReviewVO review : reviewList) {
 	        long reviewId = review.getReviewId();
 
-	        // 이미지 세팅
 	        List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
-	        imageMap.put(reviewId, imageList);
+	        ManageReviewVO manageReviewVO = reviewService.getReviewManageStatus(reviewId);
 
-	        // 검열 상태 가져오기
-	        ManageReviewVO manageReview = reviewService.getReviewManageStatus(reviewId);
-	        if (manageReview != null) {
-	            manageMap.put(reviewId, manageReview);
-
-	            switch (manageReview.getStatus()) {
-	                case "REQUESTED":
-	                case "IN_PROGRESS":
-	                    requestedOrInProgressList.add(manageReview);
-	                    break;
-	                case "REJECTED":
-	                    rejectedList.add(manageReview);
-	                    break;
-	                case "APPROVED":
-	                    approvedReviewList.add(review); // 리뷰만 저장
-	                    break;
+	        // 상태가 REQUESTED 또는 IN_PROGRESS 인 검열 요청만 맵에 추가
+	        if (manageReviewVO != null) {
+	            String status = manageReviewVO.getStatus();
+	            if ("REQUESTED".equals(status) || "IN_PROGRESS".equals(status)) {
+	                manageMap.put(reviewId, manageReviewVO);
 	            }
 	        }
+
+	        imageMap.put(reviewId, imageList);
 	    }
 
-	    // 모델 세팅
+	    // 승인 또는 거절된 상태의 검열 요청 리스트 조회
+	    List<ManageReviewVO> manageList = reviewService.getCompleteManageReview(storeId);
+
+	    // ModelAndView에 데이터 세팅
+	    mav.addObject("reviewList", reviewList);
+	    mav.addObject("manageMap", manageMap);
+	    mav.addObject("imageMap", imageMap);
 	    mav.addObject("ownerId", ownerId);
-	    mav.addObject("reviewList", reviewList); // 전체 리뷰
-	    mav.addObject("approvedReviewList", approvedReviewList); // 승인된 리뷰만 따로
-	    mav.addObject("requestedOrInProgressList", requestedOrInProgressList);
-	    mav.addObject("rejectedList", rejectedList);
-	    mav.addObject("manageMap", manageMap); // reviewId → manageReviewVO
-	    mav.addObject("imageMap", imageMap);   // reviewId → imageList
+	    mav.addObject("manageList", manageList);
 
 	    return mav;
 	}
+
 
 	@Override
 	@PostMapping("/addReview")

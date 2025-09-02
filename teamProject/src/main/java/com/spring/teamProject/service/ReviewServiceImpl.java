@@ -197,4 +197,9 @@ public class ReviewServiceImpl implements ReviewService {
 	public void updateReviewManage(ManageReviewVO manageReviewVO) throws Exception {
 		reviewDAO.updateReviewManage(manageReviewVO);
 	}
+	
+	@Override
+	public List<ManageReviewVO> getCompleteManageReview(long storeId) throws Exception {
+		return reviewDAO.selectCompleteManageReview(storeId);
+	}
 }

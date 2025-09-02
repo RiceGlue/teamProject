@@ -13,36 +13,29 @@
 <style>
 .container-fluid { max-width: 900px; margin: auto; }
 .store-list { display: flex; flex-direction: column; gap: 20px; padding: 10px; }
-.store-item { border: 1px solid #ddd; display: flex; align-items: flex-start; gap: 20px; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.store-item { border: 1px solid #ddd; display: flex; align-items: flex-start; gap: 20px; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .store-info { flex: 1; display: flex; flex-direction: column; gap: 10px; }
 .store-info p { margin: 0; font-size: 1rem; color: #444; }
 .store-info strong { color: #222; font-weight: 600; }
-.review-images { margin-top: 15px; }
+.review-images { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
 .review-img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; transition: transform 0.2s ease; }
 .review-img:hover { transform: scale(1.05); }
-.moderation-info { margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #f8f9fa; border: 1px solid #e9ecef; }
+.moderation-info { margin-top: 20px; padding: 15px; border-radius: 8px; background: #f8f9fa; border: 1px solid #e9ecef; }
 .moderation-info h6 { font-weight: bold; color: #0056b3; }
 .moderation-form { display: none; flex-direction: column; gap: 10px; margin-top: 15px; max-width: 500px; }
 .form-control, .form-select { font-size: 0.95rem; padding: 8px 12px; }
 .custom-reason { display: none; }
-.btn-toggle-form, .btn-submit-form { padding: 8px 16px; font-size: 1rem; border-radius: 8px; cursor: pointer; transition: background-color 0.25s ease; }
-.btn-toggle-form { background-color: #6c757d; color: white; }
+.btn-toggle-form, .btn-submit-form { padding: 8px 16px; font-size: 1rem; border-radius: 8px; cursor: pointer; transition: background-color 0.25s ease; border: none; }
+.btn-toggle-form { background-color: #6c757d; color: #fff; }
 .btn-toggle-form:hover { background-color: #5a6268; }
-.btn-submit-form { background-color: #28a745; color: white; }
+.btn-submit-form { background-color: #28a745; color: #fff; }
 .btn-submit-form:hover { background-color: #218838; }
-.status-requested { background-color: #57b0ff; }
-.status-in-progress { background-color: #cdff35; }
-.status-approved { background-color: #28a745; }
-.status-rejected { background-color: #ff0018; }
+.status-requested { background-color: #57b0ff; color: #fff; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; display: inline-block; }
+.status-in-progress { background-color: #cdff35; color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; display: inline-block; }
+.status-approved { background-color: #28a745; color: #fff; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; display: inline-block; }
+.status-rejected { background-color: #ff0018; color: #fff; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; display: inline-block; }
+@media (max-width: 768px) { .store-item { flex-direction: column; align-items: stretch; } }
 
-
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-    .store-item {
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
 </style>
 
 <script>
@@ -198,57 +191,33 @@ document.addEventListener('DOMContentLoaded', function () {
         </c:forEach>
     </div>
     
-<%
-    // JSP scriptlet으로 reviewId Set 구성
-    java.util.Set<Long> displayedReviewIds = new java.util.HashSet<>();
-    java.util.List reviewList = (java.util.List) request.getAttribute("reviewList");
-
-    if (reviewList != null) {
-        for (Object obj : reviewList) {
-            com.spring.teamProject.vo.ReviewVO r = (com.spring.teamProject.vo.ReviewVO) obj;
-            displayedReviewIds.add(r.getReviewId());
-        }
-    }
-
-    request.setAttribute("displayedReviewIds", displayedReviewIds);
-%>
-
-<c:forEach var="entry" items="${manageMap}">
-    <c:if test="${not displayedReviewIds.contains(entry.key)}">
-        <div class="store-item">
-            <div class="store-info">
-                <p><strong>리뷰 ID:</strong> ${entry.key}</p>
-                <div class="moderation-info">
-                    <h6><i class="fa-solid fa-file-circle-check"></i> 요청 정보 (삭제된 리뷰)</h6>
-                    <p><strong>요청일:</strong> <fmt:formatDate value="${entry.value.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
-                    <p><strong>요청 사유:</strong> ${entry.value.requestReason}</p>
-                    <c:if test="${not empty entry.value.customReason}">
-                        <p><strong>기타 사유:</strong> ${entry.value.customReason}</p>
-                    </c:if>
-                    <p>
-                        <strong>요청 상태:</strong>
-                        <c:choose>
-                            <c:when test="${entry.value.status eq 'REQUESTED'}">
-                                <span class="status-badge status-requested">검열 요청됨</span>
-                            </c:when>
-                            <c:when test="${entry.value.status eq 'IN_PROGRESS'}">
-                                <span class="status-badge status-in-progress">검열중</span>
-                            </c:when>
-                            <c:when test="${entry.value.status eq 'APPROVED'}">
-                                <span class="status-badge status-approved">승인</span>
-                            </c:when>
-                            <c:when test="${entry.value.status eq 'REJECTED'}">
-                                <span class="status-badge status-rejected">거절</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="status-badge">알 수 없음</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </p>
-                </div>
+    <h3>검열 완료</h3>
+    <div class="store-list">
+    	<c:forEach var="manage" items="${manageList }" >
+    		<div class="store-item">
+                <div class="store-info">
+	                <p><strong>리뷰 번호:</strong> ${manage.reviewId}</p>
+	                <p><strong>요청 ID:</strong> ${manage.ownerId}</p>
+	                <p><strong>리뷰 매장:</strong> ${manage.storeName}</p>
+	                <p><strong>요청 사유:</strong> ${manage.requestReason}</p>
+	                <p><strong>요청일:</strong><fmt:formatDate value="${manage.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" /></p>
+	                <p>
+	                	<strong>요청 상태:</strong> 
+			            <c:set var="status" value="${manage.status}" />
+			            <c:choose>
+				            <c:when test="${status eq 'APPROVED'}">
+								<span class="status-badge status-approved">승인</span>
+							</c:when>
+							<c:when test="${status eq 'REJECTED'}">
+								<span class="status-badge status-rejected">거절</span>
+							</c:when>
+							<c:otherwise>
+								<span class="status-badge">알 수 없음</span>
+							</c:otherwise>
+						</c:choose>
+					</p>
+           		</div>
             </div>
-        </div>
-    </c:if>
-</c:forEach>
-    
+    	</c:forEach>
+    </div>
 </div>

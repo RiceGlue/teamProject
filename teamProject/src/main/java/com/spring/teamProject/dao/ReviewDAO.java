@@ -50,4 +50,6 @@ public interface ReviewDAO {
 	
 	public List<ManageReviewVO> selectReviewManage() throws DataAccessException;
 	public void updateReviewManage(ManageReviewVO manageReviewVO) throws DataAccessException;
+	
+	public List<ManageReviewVO> selectCompleteManageReview(long storeId) throws DataAccessException; 
 }

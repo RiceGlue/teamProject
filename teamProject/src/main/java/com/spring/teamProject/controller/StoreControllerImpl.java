@@ -1,6 +1,6 @@
 package com.spring.teamProject.controller;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal; // 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,6 @@ import com.spring.teamProject.common.ViewUtil;
 import com.spring.teamProject.service.ReviewServiceImpl;
 import com.spring.teamProject.service.StoreServiceImpl;
 import com.spring.teamProject.service.WaitingService;
-import com.spring.teamProject.vo.ReviewLikeVO;
 import com.spring.teamProject.vo.StoreVO;
 import com.spring.teamProject.vo.UserDetailsVO; // 💡 UserDetailsVO 추가
 
@@ -40,45 +40,48 @@ public class StoreControllerImpl implements StoreController {
 	private ReviewServiceImpl reviewService;
 
 	@Override
-	@RequestMapping(value="/storeList", method=RequestMethod.GET)
-	public ModelAndView storeList ( @AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("option") String option, @RequestParam("keyword") String keyword, HttpServletRequest req, HttpServletResponse res) throws Exception {
-		String viewName = (String)req.getAttribute("viewName");
+	@RequestMapping(value = "/storeList", method = RequestMethod.GET)
+	public ModelAndView storeList(@AuthenticationPrincipal UserDetailsVO userDetailsVO, @RequestParam("option") String option,@RequestParam("keyword") String keyword,HttpServletRequest req,HttpServletResponse res) throws Exception {
 
-		List<StoreVO> regionlist = null ;
-		List<StoreVO> menulist = null ;
-		List<StoreVO> addrlist = null ;
-		List<StoreVO> namelist = null ;
-		List<StoreVO> typelist = null ;
-		List<StoreVO> userLocationlist = null ;
+	    String viewName = (String) req.getAttribute("viewName");
+	    ModelAndView mav = ViewUtil.layout(viewName);
 
-		if(option.equals("region")) {
-			regionlist = storeService.selectStoreByRegion(keyword);
-		} else if(option.equals("search")) {
-			menulist = storeService.selectStoreByMenu(keyword);
-			addrlist = storeService.selectStoreByAddr(keyword);
-			namelist = storeService.selectStoreByName(keyword);
-		} else if(option.equals("storeType")) {
-			typelist = storeService.selectStoreByType(keyword);
-		} else if(option.equals("userLocation")) {
-			userLocationlist = searchStoreNearUser(keyword);
-		}
+	    // 로그인 사용자 ID 설정
+	    if (userDetailsVO != null) {
+	        Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
+	        mav.addObject("memberId", memberId);
+	    }
 
-		ModelAndView mav = ViewUtil.layout(viewName);
-		
-		if (userDetailsVO != null) {
-			Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
-			mav.addObject("memberId", memberId);
-		}
-		
-		mav.addObject("option", option);
-		mav.addObject("keyword",keyword);
-		mav.addObject("regionlist",regionlist);
-		mav.addObject("menulist",menulist);
-		mav.addObject("addrlist",addrlist);
-		mav.addObject("namelist",namelist);
-		mav.addObject("userLocationlist",userLocationlist);
-		return mav;
+	    // 옵션에 따른 검색 처리
+	    if ("region".equals(option)&&keyword.isEmpty()) {
+	    	String[] regions = { "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"};
+	    	mav.addObject("regions",regions);
+	    } else if ("search".equals(option)) {
+	        mav.addObject("menulist", storeService.selectStoreByMenu(keyword));
+	        mav.addObject("addrlist", storeService.selectStoreByAddr(keyword));
+	        mav.addObject("namelist", storeService.selectStoreByName(keyword));
+	    } else if ("storeType".equals(option)) {
+	        mav.addObject("typelist", storeService.selectStoreByType(keyword));
+	    } else if ("userLocation".equals(option)) {
+	        mav.addObject("userLocationlist", searchStoreNearUser(keyword));
+	    }
+
+	    // 검색 정보 전달
+	    mav.addObject("option", option);
+	    mav.addObject("keyword", keyword);
+
+	    return mav;
 	}
+	
+	@PostMapping("/regionList")
+	@ResponseBody
+	public Map<String, Object> getStoreListByRegion(@RequestParam String keyword) throws Exception {
+	    Map<String, Object> response = new HashMap<>();
+	    List<StoreVO> regionList = storeService.selectStoreByRegion(keyword);
+	    response.put("regionList", regionList);
+	    return response;
+	}
+
 
 	@Override
 	@RequestMapping(value="/storeDetail", method=RequestMethod.GET)
