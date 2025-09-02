@@ -364,71 +364,86 @@ var map; // 지도 객체를 전역 변수로 선언
 	    container.appendChild(buttonWrapper);
 	}
 
+	$(document).ready(function () {
+	    $.ajax({
+	        url: '/review/getBestReview',
+	        type: 'GET',
+	        success: function (data) {
+	            const reviewList = data.reviewList;
+	            const reviewImageList = data.reviewImageList;
 
-$(document).ready(function () {
-    $('#keyword').on('keydown', function(e) {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            goSearch();
-        }
-    });
+	            let html = '';
 
-    // AJAX 호출
-    $.ajax({
-        url: '/review/getBestReview',
-        type: 'GET',
-        success: function (data) {
-            const reviewList = data.reviewList || [];
-            const reviewImageList = data.reviewImageList || [];
-            const $reviewContainer = $('#reviewContainer');
-            $reviewContainer.empty();
+	            const limitedReviewList = reviewList.slice(0, 10);
 
-            if (reviewList.length === 0) {
-                $reviewContainer.html('<p class="text-muted">아직 인기 리뷰가 없습니다.</p>');
-                return;
-            }
+	            function formatDate(dateString) {
+	                if (dateString && dateString.includes('T')) {
+	                    return dateString.split('T')[0];
+	                }
+	                return dateString;
+	            }
 
-            const limitedReviewList = reviewList.slice(0, 10);
+	            function createStarRating(rating) {
+	                const maxRating = 5;
+	                let starsHtml = '';
+	                for (let i = 0; i < rating; i++) {
+	                    starsHtml += '★';
+	                }
+	                for (let i = 0; i < (maxRating - rating); i++) {
+	                    starsHtml += '☆';
+	                }
+	                return starsHtml;
+	            }
 
-            limitedReviewList.forEach(review => {
-                const image = reviewImageList.find(img => img.reviewId === review.reviewId);
-                const imageUrl = image && image.fileName
-                    ? `${contextPath}/images/review/${image.fileName}`
-                    : 'https://placehold.co/800x600/eee/ccc?text=No+Image';
+	            function maskWriterId(writerId) {
+	                if (!writerId) return '';
+	                const visible = writerId.slice(0, 2);
+	                const maskedLength = writerId.length - 2;
+	                const masked = '*'.repeat(maskedLength > 0 ? maskedLength : 0);
+	                return visible + masked;
+	            }
 
-                const starRating = createStarRating(review.rating);
-                const writerLabel = review.memberNickname || maskWriterId(review.writerId);
-                const createdAtLabel = formatDate(review.createdAt);
+	            for (let i = 0; i < limitedReviewList.length; i++) {
+	                const review = limitedReviewList[i];
+	                const image = reviewImageList.find(img => img.reviewId === review.reviewId);
 
-                // 부가 정보: 유형 / 주소 / 전화 (있을 때만)
-                const storeTypePart = review.storeType ? `${review.storeType}` : '';
-                const addressPart = review.roadAddress ? `${storeTypePart ? ' | ' : ''}${review.roadAddress}` : '';
-                const telPart = (review.localNumber && review.number1 && review.number2)
-                    ? `<span class="ms-2"><i class="bi bi-telephone"></i> ${review.localNumber}-${review.number1}-${review.number2}</span>`
-                    : '';
+	                const formattedDate = formatDate(review.createdAt);
+	                const starRating = createStarRating(review.rating);
+	                const maskedWriterId = maskWriterId(review.writerId);
 
-                const cardHtml = `
-                    <a href="${contextPath}/store/storeDetail?storeId=${review.storeId}" class="card review-card">
-                        <img src="${imageUrl}" class="card-img-top" alt="리뷰 이미지">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h6 class="fw-bold mb-0">${review.storeName || '가게명 없음'}</h6>
-                                <span class="rating-text"><i class="bi bi-star-fill"></i> ${starRating}</span>
-                            </div>
-                            <p class="store-info mb-2">${storeTypePart}${addressPart}${telPart}</p>
-                            <p class="review-content mb-2">"${review.content || ''}"</p>
-                            <p class="review-meta mb-0 text-end">${writerLabel}${createdAtLabel ? ' | ' + createdAtLabel : ''}</p>
-                        </div>
-                    </a>
-                `;
-                $reviewContainer.append(cardHtml);
-            });
-        },
-        error: function (err) {
-            console.error("리뷰 로드 실패:", err);
-            $('#reviewContainer').html('<p>리뷰를 불러오는 데 실패했습니다.</p>');
-        }
-    });
-})();
+	                html +=
+	                    '<div class="review-item" style="flex: 0 0 calc(33.333% - 10px); border:1px solid #ddd; padding:10px; margin-bottom:10px; position: relative; overflow: hidden;">' +
+	                        '<div class="writer" style="display: flex; justify-content: space-between; margin:10px 0;">' +
+	                            '<h6>' + maskedWriterId + '</h6>' +
+	                            '<h6>' + formattedDate + '</h6>' +
+	                        '</div>' +
+
+	                        '<div class="review-image" style="position: relative; height: 170px;">' +
+	                            (image && image.fileName
+	                                ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지">'
+	                                : '') +
+	                            '<div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: black; background-color: rgb(193 193 193 / 50%);">' +
+	                                '<p>' + starRating + ' / 좋아요: ' + review.likes + '</p>' +
+	                                '<p>' + review.content + '</p>' +
+	                            '</div>' +
+	                        '</div>' +
+
+	                        '<div class="review-store" style="margin-bottom: 10px; padding-top:5px;">' +
+	                            '<h6>' + review.storeName + ' | ' + review.storeType + '</h6>' +
+	                            '<h6>&#128222; ' + review.localNumber + ' - ' + review.number1 + ' - ' + review.number2 + '</h6>' +
+	                            '<h6>&#128205; ' + review.roadAddress + '</h6>' +
+	                        '</div>' +
+	                    '</div>';
+	            }
+
+	            $('#reviewContainer').html(html);
+	        },
+	        error: function (err) {
+	            console.error("데이터 가져오기 실패:", err);
+	            $('#reviewContainer').html('<p>리뷰를 불러오는 데 실패했습니다.</p>');
+	        }
+	    });
+	});
 
 function checkWishlistStatus(storeId, btnElement) {
 	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
