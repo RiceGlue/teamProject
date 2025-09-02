@@ -191,14 +191,14 @@ const memberId = "${memberId}";
 var contextPath = '${contextPath}';
 var map; // 지도 객체를 전역 변수로 선언
 
-	function goSearch() {
-		const keyword = document.getElementById('keyword').value;
-		if (!keyword.trim()) {
-			alert("검색어를 입력해주세요.");
-			return;
-		}
-		window.location.href = contextPath + "/store/storeList?option=search&keyword=" + encodeURIComponent(keyword);
-	}
+    function goSearch() {
+        const keyword = document.getElementById('keyword').value;
+        if (!keyword.trim()) {
+            alert("검색어를 입력해주세요.");
+            return;
+        }
+        window.location.href = contextPath + "/store/storeList?option=search&keyword=" + encodeURIComponent(keyword);
+    }
 
     // Google Maps API 콜백 함수
     function initMap() {
@@ -309,158 +309,175 @@ var map; // 지도 객체를 전역 변수로 선언
         });
     }
 
-	function displayStoreCards(storeList, dong) {
-	    console.log("UI카드 시작");
-	    const container = document.getElementById("nearbyStores");
+    function displayStoreCards(storeList, dong) {
+        console.log("UI카드 시작");
+        const container = document.getElementById("nearbyStores");
 
-	    if (!container) {
-	        console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
-	        return;
-	    }
+        if (!container) {
+            console.error("nearbyStores 컨테이너를 찾지 못했습니다.");
+            return;
+        }
 
-	    container.innerHTML = ""; // 초기화
+        container.innerHTML = ""; // 초기화
 
-	    const limitedStoreList = storeList.slice(0, 3);
+        const limitedStoreList = storeList.slice(0, 3);
 
-	    limitedStoreList.forEach(store => {
-	        const card = document.createElement("div");
-	        card.className = "card my-3";
+        limitedStoreList.forEach(store => {
+            const card = document.createElement("div");
+            card.className = "card my-3";
 
-	        card.innerHTML =
-	            '<div class="card-body">' +
-	                '<h5 class="card-title">' +
-	                    '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
-	                    '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
-	                        '<i class="fa fa-bookmark"></i>' +
-	                    '</button>' +
-	                '</h5>' +
-	                '<p class="card-text">&#128205; ' + store.roadAddress + '</p>' +
-	                '<p class="card-text">&#128222; ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
-	                '<p class="card-text">&#11088; ' + store.avgRating + ' / 5</p>' +
-	            '</div>';
+            card.innerHTML =
+                '<div class="card-body">' +
+                    '<h5 class="card-title">' +
+                        '<a href="' + contextPath + '/store/storeDetail?storeId=' + store.storeId + '">' + store.storeName + '</a>' +
+                        '<button class="wishlist-btn" data-store-id="' + store.storeId + '" aria-label="위시리스트 추가/제거">' +
+                            '<i class="fa fa-bookmark"></i>' +
+                        '</button>' +
+                    '</h5>' +
+                    '<p class="card-text">&#128205; ' + store.roadAddress + '</p>' +
+                    '<p class="card-text">&#128222; ' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
+                    '<p class="card-text">&#11088; ' + store.avgRating + ' / 5</p>' +
+                '</div>';
 
-	        container.appendChild(card);
+            container.appendChild(card);
 
-	        if (memberId && memberId !== 'null' && memberId !== 'undefined') {
-	            const wishlistBtn = card.querySelector('.wishlist-btn');
-	            if (wishlistBtn) {
-	                checkWishlistStatus(store.storeId, wishlistBtn);
-	            }
-	        }
-	    });
+            if (memberId && memberId !== 'null' && memberId !== 'undefined') {
+                const wishlistBtn = card.querySelector('.wishlist-btn');
+                if (wishlistBtn) {
+                    checkWishlistStatus(store.storeId, wishlistBtn);
+                }
+            }
+        });
 
-	    const buttonWrapper = document.createElement("div");
-	    buttonWrapper.className = "d-grid mt-2";
+        const buttonWrapper = document.createElement("div");
+        buttonWrapper.className = "d-grid mt-2";
 
-	    const loadMoreBtn = document.createElement("button");
-	    loadMoreBtn.id = "loadMoreBtn";
-	    loadMoreBtn.className = "btn btn-light";
-	    loadMoreBtn.textContent = "더보기";
-	    loadMoreBtn.onclick = function () {
-	        window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
-	    };
+        const loadMoreBtn = document.createElement("button");
+        loadMoreBtn.id = "loadMoreBtn";
+        loadMoreBtn.className = "btn btn-light";
+        loadMoreBtn.textContent = "더보기";
+        loadMoreBtn.onclick = function () {
+            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
+        };
 
-	    buttonWrapper.appendChild(loadMoreBtn);
-	    container.appendChild(buttonWrapper);
-	}
+        buttonWrapper.appendChild(loadMoreBtn);
+        container.appendChild(buttonWrapper);
+    }
 
-	$(document).ready(function () {
-	    $.ajax({
-	        url: '/review/getBestReview',
-	        type: 'GET',
-	        success: function (data) {
-	            const reviewList = data.reviewList;
-	            const reviewImageList = data.reviewImageList;
+    $(document).ready(function () {
+        // [55차 수정] 검색창에서 Enter 키를 눌렀을 때 goSearch() 함수를 호출하는 이벤트 리스너를 추가합니다.
+        $('#keyword').on('keydown', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                goSearch();
+            }
+        });
+        
+        $.ajax({
+            url: '/review/getBestReview',
+            type: 'GET',
+            success: function (data) {
+                const reviewList = data.reviewList;
+                const reviewImageList = data.reviewImageList;
 
-	            let html = '';
+                let html = '';
 
-	            const limitedReviewList = reviewList.slice(0, 10);
+                const limitedReviewList = reviewList.slice(0, 10);
 
-	            function formatDate(dateString) {
-	                if (dateString && dateString.includes('T')) {
-	                    return dateString.split('T')[0];
-	                }
-	                return dateString;
-	            }
+                function formatDate(dateString) {
+                    if (dateString && dateString.includes('T')) {
+                        return dateString.split('T')[0];
+                    }
+                    return dateString;
+                }
 
-	            function createStarRating(rating) {
-	                const maxRating = 5;
-	                let starsHtml = '';
-	                for (let i = 0; i < rating; i++) {
-	                    starsHtml += '★';
-	                }
-	                for (let i = 0; i < (maxRating - rating); i++) {
-	                    starsHtml += '☆';
-	                }
-	                return starsHtml;
-	            }
+                function createStarRating(rating) {
+                    const maxRating = 5;
+                    let starsHtml = '';
+                    for (let i = 0; i < rating; i++) {
+                        starsHtml += '★';
+                    }
+                    for (let i = 0; i < (maxRating - rating); i++) {
+                        starsHtml += '☆';
+                    }
+                    return starsHtml;
+                }
 
-	            function maskWriterId(writerId) {
-	                if (!writerId) return '';
-	                const visible = writerId.slice(0, 2);
-	                const maskedLength = writerId.length - 2;
-	                const masked = '*'.repeat(maskedLength > 0 ? maskedLength : 0);
-	                return visible + masked;
-	            }
+                function maskWriterId(writerId) {
+                    if (!writerId) return '';
+                    const visible = writerId.slice(0, 2);
+                    const maskedLength = writerId.length - 2;
+                    const masked = '*'.repeat(maskedLength > 0 ? maskedLength : 0);
+                    return visible + masked;
+                }
 
-	            for (let i = 0; i < limitedReviewList.length; i++) {
-	                const review = limitedReviewList[i];
-	                const image = reviewImageList.find(img => img.reviewId === review.reviewId);
+                for (let i = 0; i < limitedReviewList.length; i++) {
+                    const review = limitedReviewList[i];
+                    const image = reviewImageList.find(img => img.reviewId === review.reviewId);
 
-	                const formattedDate = formatDate(review.createdAt);
-	                const starRating = createStarRating(review.rating);
-	                const maskedWriterId = maskWriterId(review.writerId);
+                    const formattedDate = formatDate(review.createdAt);
+                    const starRating = createStarRating(review.rating);
+                    const maskedWriterId = maskWriterId(review.writerId);
 
-	                html +=
-	                	'<a href="' + contextPath + '/store/storeDetail?storeId=' + review.storeId + '" class="card review-card">' +
-	                    (image && image.fileName
-	                        ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" class="card-img-top" alt="' + review.reviewId + '">'
-	                        : '') +
-	                    '<div class="card-body p-3">' +
-	                        '<div>' +
-	                            '<p class="rating-text mb-1">' + starRating + '<small class="text-muted ms-2">' + maskedWriterId + '</small></p>' +
-	                            '<p class="review-content">' + review.content + '</p>' +
-	                        '</div>' +
-	                    '</div>' +
-	                    '<p class="store-info mt-2 mb-0">' + review.storeName + ' | ' + review.roadAddress + '</p>' +
-	                '</a>';
-	            }
+                    html +=
+                        '<a href="' + contextPath + '/store/storeDetail?storeId=' + review.storeId + '" class="card review-card">' +
+                        (image && image.fileName
+                            ? '<img src="' + contextPath + '/images/review/' + image.fileName + '" class="card-img-top" alt="' + review.reviewId + '">'
+                            : '') +
+                        '<div class="card-body p-3">' +
+                            '<div>' +
+                                '<p class="rating-text mb-1">' + starRating + '<small class="text-muted ms-2">' + maskedWriterId + '</small></p>' +
+                                '<p class="review-content">' + review.content + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<p class="store-info mt-2 mb-0">' + review.storeName + ' | ' + review.roadAddress + '</p>' +
+                    '</a>';
+                }
 
-	            $('#reviewContainer').html(html);
-	        },
-	        error: function (err) {
-	            console.error("데이터 가져오기 실패:", err);
-	            $('#reviewContainer').html('<p>리뷰를 불러오는 데 실패했습니다.</p>');
-	        }
-	    });
-	});
+                $('#reviewContainer').html(html);
+            },
+            error: function (err) {
+                console.error("데이터 가져오기 실패:", err);
+                $('#reviewContainer').html('<p>리뷰를 불러오는 데 실패했습니다.</p>');
+            }
+        });
+
+        // [55차 수정] 위시리스트 초기화 로직을 다시 추가합니다.
+        if (memberId && memberId.trim() !== '' && memberId !== 'null' && memberId !== 'undefined') {
+            $('.wishlist-btn').each(function() {
+                const storeId = $(this).data('store-id');
+                if(storeId) {
+                   checkWishlistStatus(storeId, this);
+                }
+            });
+        }
+    });
 
 function checkWishlistStatus(storeId, btnElement) {
-	if (!memberId || memberId === 'null' || memberId === 'undefined') return;
+    if (!memberId || memberId === 'null' || memberId === 'undefined') return;
 
-	$.ajax({
-		url: `${contextPath}/wishlist/isWishlisted`,
-		type: 'GET',
-		data: {
-			memberId: memberId,
-			storeId: storeId
-		},
-		success: function(response) {
-			if (response === true) {
-				$(btnElement).addClass('active');
-			} else {
-				$(btnElement).removeClass('active');
-			}
-		},
-		error: function(error) {
-			console.error('Error checking wishlist status:', error);
-		}
-	});
+    $.ajax({
+        url: `${contextPath}/wishlist/isWishlisted`,
+        type: 'GET',
+        data: {
+            memberId: memberId,
+            storeId: storeId
+        },
+        success: function(response) {
+            if (response === true) {
+                $(btnElement).addClass('active');
+            } else {
+                $(btnElement).removeClass('active');
+            }
+        },
+        error: function(error) {
+            console.error('Error checking wishlist status:', error);
+        }
+    });
 }
 
 // 위시리스트 버튼 클릭 처리
 $(document).on('click', '.wishlist-btn', function (e) {
-	e.stopPropagation();
+    e.stopPropagation();
     const storeId = $(this).data('store-id');
     toggleWishlist(storeId, this);
 });
@@ -609,14 +626,14 @@ function toggleWishlist(storeId, btnElement) {
             </section>
 
             <!-- 내 지역 맛집 섹션 -->
-			<section>
-			    <h4 class="mb-3 fw-bold">내 지역 맛집</h4>
-			    <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
-			    <div id="map" style="height: 300px; border-radius: 1rem;" class="mb-3"></div>
-			    <div id="nearbyStores" class="store-carousel">
-			        <%-- AJAX를 통해 이 곳에 가게 카드가 채워집니다. --%>
-			    </div>
-			</section>
+            <section>
+                <h4 class="mb-3 fw-bold">내 지역 맛집</h4>
+                <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
+                <div id="map" style="height: 300px; border-radius: 1rem;" class="mb-3"></div>
+                <div id="nearbyStores" class="store-carousel">
+                    <%-- AJAX를 통해 이 곳에 가게 카드가 채워집니다. --%>
+                </div>
+            </section>
         </div>
 
         <!-- ======================================= -->
@@ -635,8 +652,8 @@ function toggleWishlist(storeId, btnElement) {
                     </div>
                 </sec:authorize>
 
-                <%-- 로그인 상태일 때 --%>
-                <sec:authorize access="isAuthenticated()">
+                <%-- 로그인 상태일 때 (GUEST 제외) --%>
+                <sec:authorize access="isAuthenticated() and !hasRole('GUEST')">
                     <sec:authentication property="principal" var="principal" />
                     <div class="d-flex align-items-center mb-3">
                         <c:choose>
@@ -656,6 +673,15 @@ function toggleWishlist(storeId, btnElement) {
                            <a href="${contextPath}/member/mypage" class="btn" style="background-color: var(--yum-beige);">마이페이지</a>
                     </div>
                 </sec:authorize>
+                
+                <%-- GUEST 상태일 때 --%>
+                <sec:authorize access="hasRole('GUEST')">
+                     <h5 class="sidebar-title">회원가입</h5>
+                     <p class="small text-muted">추가 정보를 입력하고 모든 서비스를 이용해보세요.</p>
+                     <div class="d-grid">
+                        <a href="${contextPath}/member/join_social" class="btn" style="background-color: var(--yum-beige);">추가 정보 입력</a>
+                     </div>
+                </sec:authorize>
             </div>
 
             <div class="sidebar-box">
@@ -665,38 +691,4 @@ function toggleWishlist(storeId, btnElement) {
         </div>
     </div>
 </main>
-
-<!-- [복원] 개발 테스트용 HTML 주석 -->
-<!-- <div class="review-item" style="height: 250px; width:200px; border:1px solid #ddd; padding:10px; margin-bottom:10px;"> -->
-<!--     <div class="writer" style="display: flex; justify-content: space-between;"> -->
-<!--      <p>작성자</p> -->
-<!--      <p>작성 날짜</p> -->
-<!-- </div> -->
-<!--     <div calss="review-image"> -->
-<!--         <image src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%;" > -->
-<!--         <p>★★★★★ -->
-<!--         <p>리뷰 내용 -->
-<!--     </div> -->
-<!-- </div> -->
-
-<!-- <div class="review-item" style="padding: 0px; flex: 0 0 calc(33.333% - 10px); height: 300px; border:1px solid #ddd; margin-bottom:10px; position: relative; overflow: hidden;"> -->
-<!--     <div class="writer" style="display: flex; justify-content: space-between; margin:10px;"> -->
-<!--         <h6>작성자ID</h6> -->
-<!--         <h6>2025-08-27</h6> -->
-<!--     </div> -->
-
-<!--     <div class="review-image" style="position: relative; height: 170px;"> -->
-<!--         <img src="https://cdn.pixabay.com/photo/2015/10/09/01/01/steak-978666_1280.jpg" style="width:100%; height:100%; object-fit: cover;" alt="리뷰 이미지"> -->
-<!--         <div class="review-content" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; color: white; background-color: rgba(0, 0, 0, 0.5);"> -->
-<!--             <p>★★★★☆ / 좋아요: 15</p> -->
-<!--             <p>리뷰 내용 예시입니다.</p> -->
-<!--         </div> -->
-<!--     </div> -->
-<!--     <div class="review-store" style="padding: 10px; z-index: 10;"> -->
-<!--         <h6>예시가게 | 음식점</h6> -->
-<!--         <h6>??042-000-0000</h6> -->
-<!--         <h6>??대전시 대덕구 어쩌구저쩌구</h6> -->
-<!--     </div> -->
-<!-- </div> -->
-
 
