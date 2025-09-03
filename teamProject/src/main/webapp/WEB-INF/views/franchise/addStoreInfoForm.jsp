@@ -130,82 +130,64 @@
       // 여기에 기존 validate 이미지 체크 로직도 넣어주세요
     }
     
-	function validateImages(input) {
-	    const files = input.files;
-	    const maxFiles = 20;              // 최대 파일 개수
-	    const maxSizeInBytes = 2 * 1024 * 1024; // 최대 파일 크기 2MB
-	    const maxResolution = 500;       // 최대 해상도 500x500 픽셀
+    function validateImages(input) {
+        const files = input.files;
+        const maxFiles = 20;              // 최대 파일 개수
+        const maxSizeInBytes = 2 * 1024 * 1024; // 최대 파일 크기 2MB
 
-	    if (files.length > maxFiles) {
-	        alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
-	        resetInput(input);
-	        return;
-	    }
+        if (files.length > maxFiles) {
+            alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+            resetInput(input);
+            return;
+        }
 
-	    let checkedCount = 0;
-	    let errorMessage = null;
+        let errorMessage = null;
 
-	    for (let i = 0; i < files.length; i++) {
-	        const file = files[i];
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
 
-	        // 이미지 파일 여부 체크
-	        if (!file.type.startsWith("image/")) {
-	            errorMessage = "이미지 파일만 업로드할 수 있습니다.";
-	            break;
-	        }
+            // 이미지 파일 여부 체크
+            if (!file.type.startsWith("image/")) {
+                errorMessage = "이미지 파일만 업로드할 수 있습니다.";
+                break;
+            }
 
-	        // 파일 크기 체크
-	        if (file.size > maxSizeInBytes) {
-	            errorMessage = "각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})";
-	            break;
-	        }
-	    }
+            // 파일 크기 체크
+            if (file.size > maxSizeInBytes) {
+                errorMessage = `각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})`;
+                break;
+            }
+        }
 
-	    if (errorMessage) {
-	        alert(errorMessage);
-	        resetInput(input);
-	        return;
-	    }
+        if (errorMessage) {
+            alert(errorMessage);
+            resetInput(input);
+            return;
+        }
 
-	    // 해상도 검사 (비동기 작업이라 Promise로 처리)
-	    const promises = [];
+        // 유효성 통과 시 첫 번째 이미지 미리보기
+        if (files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
 
-	    for (let i = 0; i < files.length; i++) {
-	        promises.push(checkImageResolution(files[i], maxResolution));
-	    }
+                if (imagePreviewDiv) {
+                    // 기존 이미지 제거
+                    imagePreviewDiv.innerHTML = '';
 
-	    Promise.all(promises)
-	        .then(results => {
-	            // results 배열 안에 true/false가 들어있음
-	            if (results.includes(false)) {
-	                alert(`모든 이미지의 해상도는 최대 ${maxResolution}x${maxResolution} 픽셀을 초과할 수 없습니다.`);
-	                resetInput(input);
-	                
-	                return;
-	            }
+                    // 새로운 이미지 생성 및 삽입
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '200px';
+                    img.style.display = 'block';
 
-	            if (files.length > 0) {
-					const reader = new FileReader();
-					reader.onload = function (e) {
-						const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
-						
-						if (imagePreviewDiv) {
-							// 기존 이미지 제거
-							imagePreviewDiv.innerHTML = '';
-							
-							// 새로운 이미지 생성 및 삽입
-							const img = document.createElement('img');
-							img.src = e.target.result;
-							img.style.maxWidth = '200px';
-							img.style.display = 'block';
-							
-							imagePreviewDiv.appendChild(img);
-						}
-					};
-					reader.readAsDataURL(files[0]);
-				}
-	        });
-	}
+                    imagePreviewDiv.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    }
+
 
 	// 해상도 검사 함수: Promise 반환
 	function checkImageResolution(file, maxResolution) {

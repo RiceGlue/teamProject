@@ -138,7 +138,7 @@ $(document).ready(function() {
         height: 150px;
         object-fit: cover;
     }
-    .card-img-top { width:150px; }
+    .card-img-top {width: 100%;  height: 180px; object-fit: cover;  display: block; }
     .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
     .wishlist-btn.active{color:#ff6347;}
 </style>

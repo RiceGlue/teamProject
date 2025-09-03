@@ -122,46 +122,39 @@ function sample4_execDaumPostcode() {
     }
 
     function validateImages(input, index) {
-    	const files = input.files;
-    	const maxFiles = 20;
-    	const maxSizeInBytes = 2 * 1024 * 1024;
-    	const maxResolution = 500;
-    	
-    	if (files.length > maxFiles) {
-    		alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
-    		resetInput(input);
-    		return;
-    	}
-    	
-    	let errorMessage = null;
-    	for (let i = 0; i < files.length; i++) {
-    		const file = files[i];
-    		if (!file.type.startsWith("image/")) {
-    			errorMessage = "이미지 파일만 업로드할 수 있습니다.";
-    			break;
-    		}
-    		if (file.size > maxSizeInBytes) {
-    			errorMessage = `각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})`;
-    			break;
-    		}
-    	}
-    	
-    	if (errorMessage) {
-    		alert(errorMessage);
-    		resetInput(input);
-    		return;
-    	}
-    	
-    	const promises = [];
-    	for (let i = 0; i < files.length; i++) { promises.push(checkImageResolution(files[i], maxResolution)); }
-    	
-    	Promise.all(promises).then(results => {
-    		if (results.includes(false)) {
-    			alert(`모든 이미지의 해상도는 최대 ${maxResolution}x${maxResolution} 픽셀을 초과할 수 없습니다.`);
-    			resetInput(input);
-    		} else { previewImage(files[0], index); }
-    	});
+        const files = input.files;
+        const maxFiles = 20;
+        const maxSizeInBytes = 2 * 1024 * 1024;
+
+        if (files.length > maxFiles) {
+            alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+            resetInput(input);
+            return;
+        }
+
+        let errorMessage = null;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (!file.type.startsWith("image/")) {
+                errorMessage = "이미지 파일만 업로드할 수 있습니다.";
+                break;
+            }
+            if (file.size > maxSizeInBytes) {
+                errorMessage = `각 파일 크기는 최대 2MB 이하여야 합니다. (${file.name})`;
+                break;
+            }
+        }
+
+        if (errorMessage) {
+            alert(errorMessage);
+            resetInput(input);
+            return;
+        }
+
+        // 유효성 검사를 모두 통과하면 미리보기 표시
+        previewImage(files[0], index);
     }
+
 
     function checkImageResolution(file, maxResolution) {
     	return new Promise((resolve) => {

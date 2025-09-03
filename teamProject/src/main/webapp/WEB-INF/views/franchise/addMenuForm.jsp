@@ -70,18 +70,22 @@
 		const files = input.files;
 		const maxFiles = 20;
 		const maxSizeInBytes = 2 * 1024 * 1024;
-		const maxResolution = 500;
-		
+
+		// 파일명 표시
 		const parentDiv = input.parentElement;
 		const fileNameSpan = parentDiv.querySelector('span');
-		if (fileNameSpan) { fileNameSpan.textContent = files.length > 0 ? files[0].name : '선택된 파일 없음'; }
-		
+		if (fileNameSpan) {
+			fileNameSpan.textContent = files.length > 0 ? files[0].name : '선택된 파일 없음';
+		}
+
+		// 최대 파일 개수 검사
 		if (files.length > maxFiles) {
 			alert(`최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
 			resetInput(input);
 			return;
 		}
-		
+
+		// 파일 유효성 검사 (이미지 타입 및 용량)
 		let errorMessage = null;
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
@@ -94,45 +98,36 @@
 				break;
 			}
 		}
-		
+
 		if (errorMessage) {
 			alert(errorMessage);
 			resetInput(input);
 			return;
 		}
-		
-		const promises = [];
-		for (let i = 0; i < files.length; i++) { promises.push(checkImageResolution(files[i], maxResolution)); }
-		
-		Promise.all(promises).then(results => {
-			if (results.includes(false)) {
-				alert(`모든 이미지의 해상도는 최대 ${maxResolution}x${maxResolution} 픽셀을 초과할 수 없습니다.`);
-				resetInput(input);
-				return;
-			}
-			
-			if (files.length > 0) {
-				const reader = new FileReader();
-				reader.onload = function (e) {
-					const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
-					
-					if (imagePreviewDiv) {
-						// 기존 이미지 제거
-						imagePreviewDiv.innerHTML = '';
-						
-						// 새로운 이미지 생성 및 삽입
-						const img = document.createElement('img');
-						img.src = e.target.result;
-						img.style.maxWidth = '200px';
-						img.style.display = 'block';
-						
-						imagePreviewDiv.appendChild(img);
-					}
-				};
-				reader.readAsDataURL(files[0]);
-			}
-		});
+
+		// 유효성 통과 시 미리보기
+		if (files.length > 0) {
+			const reader = new FileReader();
+			reader.onload = function (e) {
+				const imagePreviewDiv = input.closest('.form-row').querySelector('.image-preview');
+
+				if (imagePreviewDiv) {
+					// 기존 이미지 제거
+					imagePreviewDiv.innerHTML = '';
+
+					// 새로운 이미지 생성 및 삽입
+					const img = document.createElement('img');
+					img.src = e.target.result;
+					img.style.maxWidth = '200px';
+					img.style.display = 'block';
+
+					imagePreviewDiv.appendChild(img);
+				}
+			};
+			reader.readAsDataURL(files[0]);
+		}
 	}
+
 	
 	// 해상도 체크 함수 (비동기)
 	function checkImageResolution(file, maxResolution) {

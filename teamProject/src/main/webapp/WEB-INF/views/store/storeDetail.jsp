@@ -157,6 +157,8 @@ input[type="text"]:not(.form-control){width:50px;text-align:center;}
 
 .type-store-container { display: flex; flex-wrap: wrap; gap: 20px; }
 .type-store {width: calc((100% - 40px) / 3);border: 1px solid grey;border-radius: 10px;padding: 5px 5px;}
+.type-store img { width: 100%;  height: 200px; object-fit: cover; display: block;}
+
 .meta-info { font-size:13px; color:#777; margin:0; }
 
 .review-like-btn {font-size: 12px; background:none;border:none;cursor:pointer;color:#ccc;transition:color 0.3s ease;}
@@ -625,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="type-store-container">
 						<c:forEach var="type" items="${storeTypeList}">
 							<div class="type-store">
-								<a href="${contextPath}/store/storeDetail?storeId=${type.storeId}"><img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}" width="100%"></a>
+								<a href="${contextPath}/store/storeDetail?storeId=${type.storeId}"><img alt="${type.storeName}" src="${contextPath}/images/store/${type.fileName}"></a>
 								<div class="type-storeInfo">
 									<p><span class="rating">⭐ ${type.avgRating}</span> 리뷰 ${type.countRating}개</p> 
 									<h5>${type.storeName} · ${type.storeType}</h5>
@@ -642,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						<c:forEach var="near" items="${nearByStoreList}">
 						    <c:if test="${near.storeId != store.storeId}">
 						        <div class="type-store">
-						            <a href="${contextPath}/store/storeDetail?storeId=${near.storeId}"><img alt="${near.storeName}" src="${contextPath}/images/store/${near.fileName}" width="100%"></a>
+						            <a href="${contextPath}/store/storeDetail?storeId=${near.storeId}"><img alt="${near.storeName}" src="${contextPath}/images/store/${near.fileName}"></a>
 						            <div class="type-storeInfo">
 						                <p><span class="rating">⭐ ${near.avgRating}</span> 리뷰 ${near.countRating}개</p> 
 						                <h5>${near.storeName} · ${near.storeType}</h5>
