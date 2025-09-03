@@ -53,6 +53,9 @@
 					</div>
 				</c:if>
 			</div>
+			<a href="${contextPath }/franchise/addStoreInfoForm?ownerId=${memberId}" class="btn btn-primary mt-3">
+									<i class="bi bi-plus-circle me-2"></i>새 매장 등록하기
+								</a>
 		</c:when>
 		
 		<c:when test="${type eq 'menu'}">

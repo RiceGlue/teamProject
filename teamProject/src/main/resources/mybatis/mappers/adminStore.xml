@@ -101,15 +101,17 @@
 	</select>
 	
 	<insert id="insertStoreInfo" parameterType="java.util.Map" >
+		<selectKey keyProperty="storeId" resultType="long" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
 			insert into stores
 			(
-				store_id,
 				owner_id,
 				store_name,
 				store_type,
 				postcode,
 				road_address,
-				jibun_adress,
+				jibun_address,
 				detail_address,
 				extra_address, 
 				operation_type, 
@@ -127,7 +129,6 @@
 			)
 			values
 			(
-				null,
 				#{ownerId},
 				#{storeName},
 				#{storeType},
@@ -149,9 +150,6 @@
 				#{fileName},
 				now()
 			)
-		<selectKey order="AFTER" resultType="long" keyProperty="storeId">
-			select last_insert_id()
-		</selectKey>
 	</insert>
 	
 	<insert id="insertStoreImage" parameterType="list">

@@ -188,7 +188,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 		String[] fileTypes = multiReq.getParameterValues("fileType");
 		String[] displayNos = multiReq.getParameterValues("displayNo");
 		
-		List<MultipartFile> files = multiReq.getFiles("fileName[]");
+		List<MultipartFile> files = multiReq.getFiles("fileName");
 		List<ImageFileVO> imgFileList = new ArrayList<>();
 		
 		for (MultipartFile file : files) {
@@ -208,6 +208,7 @@ public class AdminStoreControllerImpl implements AdminStoreController {
 				ImageFileVO imageFileVO = new ImageFileVO();
 				imageFileVO.setFileName(savedFilename);
 				imgFileList.add(imageFileVO);
+				System.out.println("업로드 파일 이름 : " + savedFilename);
 			} else {
 				System.err.println("FTP 업로드 실패: " + originalFilename);
 			}

@@ -38,8 +38,8 @@ public class AdminStoreServiceImpl implements AdminStoreService{
 	
 	@Override
 	public long addStoreInfo(Map storeInfo) throws Exception {
-		long storeId = adminStoreDAO.insertStoreInfo(storeInfo);
-		return storeId;
+		adminStoreDAO.insertStoreInfo(storeInfo);
+		return (long) storeInfo.get("storeId");
 	}
 
 	@Override
