@@ -2,7 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<fmt:setLocale value="ko_KR"/>
 <div class="container-fluid">
     <h1 class="mt-4 mb-4">점주 ID ${ownerId} 정산 내역</h1>
     <form action="${pageContext.request.contextPath}/admin/settlement-history" method="get" class="mb-4 d-flex align-items-center">
@@ -43,7 +43,7 @@
                         <td>${settlement.settlementId}</td>
                         <td>${settlement.storeId}</td>
                         <td>
-                            ${settlement.settlementPeriodStart} ~ ${settlement.settlementPeriodEnd}
+                            <fmt:formatDate value="${settlement.settlementPeriodStart}" pattern="yyyy년 MM월 dd일"/> ~ <fmt:formatDate value="${settlement.settlementPeriodEnd}" pattern="yyyy년 MM월 dd일"/>
                         </td>
                         <td><fmt:formatNumber value="${settlement.totalRevenueAmount}" type="number" pattern="#,##0"/></td>
                         <td><fmt:formatNumber value="${settlement.totalCommissionAmount}" type="number" pattern="#,##0.00"/></td>

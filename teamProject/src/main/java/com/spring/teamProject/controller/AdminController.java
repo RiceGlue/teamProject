@@ -2,7 +2,9 @@ package com.spring.teamProject.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId; // ZoneId import 추가
 import java.util.ArrayList;
+import java.util.Date; // Date import 추가
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ import com.spring.teamProject.vo.ImageFileVO;
 import com.spring.teamProject.vo.ManageReviewVO;
 import com.spring.teamProject.vo.MemberVO;
 import com.spring.teamProject.vo.ReviewVO;
-import com.spring.teamProject.vo.SettlementsEntity; // ✨ SettlementsEntity import 추가
+import com.spring.teamProject.vo.SettlementsEntity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,15 +40,15 @@ public class AdminController {
 
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private ReviewService reviewService;
-    
+
     @Autowired
     private StoreService storeService;
 
     @Autowired
-    private SettlementService settlementService; // ✨ SettlementService 의존성 주입
+    private SettlementService settlementService;
 
     /**
      * 관리자 대시보드 메인 페이지를 보여줍니다.
@@ -111,24 +113,19 @@ public class AdminController {
     public ModelAndView adminReviewManage(HttpServletRequest req, HttpServletResponse res) throws Exception {
         String viewName = (String) req.getAttribute("viewName");
 
-        // 전체 검열 요청 리스트
         List<ManageReviewVO> manageReviewList = reviewService.selectReviewManage();
-
-        // 상태별 리스트 준비
         List<ManageReviewVO> requestedOrInProgressList = new ArrayList<>();
         List<ManageReviewVO> approvedOrRejectedList = new ArrayList<>();
 
         for (ManageReviewVO manageReview : manageReviewList) {
             long reviewId = manageReview.getReviewId();
 
-            // 리뷰 및 이미지 세팅
             ReviewVO reviewVO = reviewService.getRivew(reviewId);
             manageReview.setReview(reviewVO);
 
             List<ImageFileVO> imageList = reviewService.getImageFile(reviewId);
             manageReview.setImageList(imageList);
 
-            // 상태 분류
             String status = manageReview.getStatus();
             if ("REQUESTED".equals(status) || "IN_PROGRESS".equals(status)) {
                 requestedOrInProgressList.add(manageReview);
@@ -136,10 +133,9 @@ public class AdminController {
                 approvedOrRejectedList.add(manageReview);
             }
         }
-        
-        System.out.println("requestedOrInProgressList 크기 :"+requestedOrInProgressList.size() );
 
-        // 모델에 상태별 리스트 주입
+        System.out.println("requestedOrInProgressList 크기 :" + requestedOrInProgressList.size());
+
         ModelAndView mav = ViewUtil.adminLayout(viewName);
         mav.addObject("requestedOrInProgressList", requestedOrInProgressList);
         mav.addObject("approvedOrRejectedList", approvedOrRejectedList);
@@ -163,8 +159,35 @@ public class AdminController {
 
         List<SettlementsEntity> settlementList = settlementService.getSettlementHistoryByOwnerIdAndDateRange(ownerId, startDate, endDate);
 
+        // --- 여기서부터 LocalDate/LocalDateTime을 Date로 변환하는 로직 추가 ---
+        List<Map<String, Object>> displayList = new ArrayList<>();
+        for (SettlementsEntity entity : settlementList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("settlementId", entity.getSettlementId());
+            map.put("storeId", entity.getStoreId());
+
+            // LocalDate를 Date로 변환
+            map.put("settlementPeriodStart", Date.from(entity.getSettlementPeriodStart().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            map.put("settlementPeriodEnd", Date.from(entity.getSettlementPeriodEnd().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+            map.put("totalRevenueAmount", entity.getTotalRevenueAmount());
+            map.put("totalCommissionAmount", entity.getTotalCommissionAmount());
+            map.put("finalSettlementAmount", entity.getFinalSettlementAmount());
+            map.put("status", entity.getStatus());
+
+            // LocalDateTime을 Date로 변환 (null 체크 포함)
+            if (entity.getSettledAt() != null) {
+                map.put("settledAt", Date.from(entity.getSettledAt().atZone(ZoneId.systemDefault()).toInstant()));
+            } else {
+                map.put("settledAt", null);
+            }
+
+            displayList.add(map);
+        }
+        // --- 변환 로직 끝 ---
+
         model.addAttribute("ownerId", ownerId);
-        model.addAttribute("settlementList", settlementList);
+        model.addAttribute("settlementList", displayList); // 변환된 displayList를 모델에 추가
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("body", "admin/owner_settlement_history.jsp");
@@ -184,7 +207,7 @@ public class AdminController {
         return "redirect:/admin/settlement-history?ownerId=" + ownerId;
     }
 
- // ✨ 수수료율 조회 페이지
+    // ✨ 수수료율 조회 페이지
     @GetMapping("/commission-rate")
     public String getCommissionRate(Model model) {
         // 현재 수수료율을 가져오는 로직 (추후 구현)
@@ -202,6 +225,4 @@ public class AdminController {
         return "redirect:/admin/commission-rate";
     }
 
-
 }
-
