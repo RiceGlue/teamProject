@@ -83,7 +83,7 @@
             <p><span class="label">매장 ID:</span> <span>${waiting.storeId}</span></p>
             <p><span class="label">인원 수:</span> <span>${waiting.guestCount} 명</span></p>
             <p><span class="label">웨이팅 상태:</span> <span>${waiting.status}</span></p>
-            <p><span class="label">FCM 토큰:</span> <span>${waiting.fcmToken}</span></p>
+            <p style="display: none;"><span class="label">FCM 토큰:</span> <span>${waiting.fcmToken}</span></p>
             <a href="/">메인으로 돌아가기</a>
         </div>
     </div>
