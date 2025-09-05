@@ -184,6 +184,35 @@
 
     .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
     .wishlist-btn.active{color:#ff6347;}
+
+    /* --- 드래그 슬라이더 공통 스타일 --- */
+    .slider-container {
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+        overflow-x: hidden;
+        position: relative;
+        padding: 10px 0;
+    }
+    .slider-container.active {
+        cursor: grabbing;
+    }
+    .slider-track {
+        display: inline-flex;
+        gap: 16px;
+    }
+    /* a태그인 card 자체는 클릭 가능해야 하므로 pointer-events를 설정하지 않습니다. */
+    /* card 내부의 다른 요소들(img, p 등)의 이벤트를 막아 드래그를 원활하게 합니다. */
+    .slider-track .card * {
+        pointer-events: none;
+    }
+
+
+    /* --- 리뷰 카드 그림자 효과 추가 --- */
+    .review-card {
+    /* 기존 review-card 스타일은 그대로 두고 아래 한 줄만 추가합니다. */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
 </style>
 
 <script>
@@ -229,14 +258,14 @@ var map; // 지도 객체를 전역 변수로 선언
 
         geocoder.geocode({ location: latlng }, function (results, status) {
             if (status === "OK" && results[0]) {
-            	const fullAddress = results[0].formatted_address;
-            	document.getElementById("address").innerText = fullAddress;
-            	const dong = extractDongAddress(results[0].address_components);
-            	if (dong) {
-            		fetchNearbyStores(dong);
-            	}
+                const fullAddress = results[0].formatted_address;
+                document.getElementById("address").innerText = fullAddress;
+                const dong = extractDongAddress(results[0].address_components);
+                if (dong) {
+                    fetchNearbyStores(dong);
+                }
             } else {
-            	document.getElementById("address").innerText = "주소를 가져올 수 없습니다.";
+                document.getElementById("address").innerText = "주소를 가져올 수 없습니다.";
             }
         });
     }
@@ -355,6 +384,100 @@ var map; // 지도 객체를 전역 변수로 선언
         container.appendChild(buttonWrapper);
     }
 
+    /**
+    * 드래그 슬라이더 로직을 초기화하는 함수 (클릭/드래그 구분 기능 개선)
+    * @param {string} containerId - 슬라이더 컨테이너의 ID
+    */
+    function initSlider(containerId) {
+        const sliderContainer = document.getElementById(containerId);
+        if (!sliderContainer) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let velocity = 0;
+        let animationFrame = null;
+        
+        let isDragging = false;
+        const dragThreshold = 10; // 10px 이상 움직여야 드래그로 인식
+
+        // ★★★ 추가: 브라우저의 기본 '링크 드래그' 동작을 막습니다. ★★★
+        sliderContainer.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+
+        const endDrag = () => {
+            if (!isDown) return;
+            isDown = false;
+            sliderContainer.classList.remove('active');
+            if (velocity !== 0) {
+                animationFrame = requestAnimationFrame(momentumScroll);
+            }
+        };
+
+        const preventClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        sliderContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isDragging = false;
+            sliderContainer.classList.add('active');
+            startX = e.pageX - sliderContainer.offsetLeft;
+            scrollLeft = sliderContainer.scrollLeft;
+            cancelAnimationFrame(animationFrame);
+            velocity = 0;
+        });
+
+        sliderContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            
+            const x = e.pageX - sliderContainer.offsetLeft;
+            const walk = x - startX;
+
+            // 임계값을 넘어서야 드래그로 간주
+            if (Math.abs(walk) > dragThreshold) {
+                isDragging = true;
+            }
+
+            if (!isDragging) return;
+
+            // 드래그가 시작되면 기본 동작(텍스트 선택 등)을 막습니다.
+            e.preventDefault();
+            
+            const newScrollLeft = scrollLeft - walk;
+            velocity = newScrollLeft - sliderContainer.scrollLeft;
+            sliderContainer.scrollLeft = newScrollLeft;
+        });
+        
+        // 클릭 이벤트를 'mouseup' 시점에 판단
+        sliderContainer.addEventListener('mouseup', (e) => {
+            const wasDragging = isDragging; // mouseup 시점의 드래그 상태 저장
+            endDrag();
+            // 드래그를 했다면, 해당 카드(a 태그)의 클릭 이벤트를 막습니다.
+            if (wasDragging) {
+                const targetLink = e.target.closest('a');
+                if (targetLink) {
+                    targetLink.addEventListener('click', preventClick, { once: true });
+                }
+            }
+        });
+
+        sliderContainer.addEventListener('mouseleave', endDrag);
+
+        function momentumScroll() {
+            if (Math.abs(velocity) < 0.5) {
+                cancelAnimationFrame(animationFrame);
+                return;
+            }
+            sliderContainer.scrollLeft += velocity;
+            velocity *= 0.95;
+            animationFrame = requestAnimationFrame(momentumScroll);
+        }
+    }
+
+
     $(document).ready(function () {
         // [55차 수정] 검색창에서 Enter 키를 눌렀을 때 goSearch() 함수를 호출하는 이벤트 리스너를 추가합니다.
         $('#keyword').on('keydown', function(e) {
@@ -419,12 +542,15 @@ var map; // 지도 객체를 전역 변수로 선언
                                 '<p class="rating-text mb-1">' + starRating + '<small class="text-muted ms-2">' + maskedWriterId + '</small></p>' +
                                 '<p class="review-content">' + review.content + '</p>' +
                             '</div>' +
+                            '<p class="store-info mt-2 mb-0">' + review.storeName + ' | ' + review.roadAddress + '</p>' +
                         '</div>' +
-                        '<p class="store-info mt-2 mb-0">' + review.storeName + ' | ' + review.roadAddress + '</p>' +
-                    '</a>';
+                        '</a>';
                 }
 
                 $('#reviewContainer').html(html);
+
+                // AJAX로 리뷰 카드가 모두 생성된 후, 슬라이더를 초기화합니다.
+                initSlider('review-slider');
             },
             error: function (err) {
                 console.error("데이터 가져오기 실패:", err);
@@ -437,7 +563,7 @@ var map; // 지도 객체를 전역 변수로 선언
             $('.wishlist-btn').each(function() {
                 const storeId = $(this).data('store-id');
                 if(storeId) {
-                   checkWishlistStatus(storeId, this);
+                    checkWishlistStatus(storeId, this);
                 }
             });
         }
@@ -607,12 +733,14 @@ function toggleWishlist(storeId, btnElement) {
                 </div>
             </section>
 
-            <!-- 최신 인기 리뷰 섹션 -->
+            <!-- 최신 인기 리뷰 섹션 (수정된 부분) -->
             <section class="mb-5">
                 <h4 class="mb-3 fw-bold">최신 인기 리뷰</h4>
-                <div id="reviewContainer" class="store-carousel">
-                    <%-- AJAX를 통해 이 곳에 리뷰 카드가 채워집니다. --%>
-                    <p class="text-muted">인기 리뷰를 불러오는 중입니다...</p>
+                <div id="review-slider" class="slider-container">
+                    <div id="reviewContainer" class="slider-track">
+                        <%-- AJAX를 통해 이 곳에 리뷰 카드가 채워집니다. --%>
+                        <p class="text-muted">인기 리뷰를 불러오는 중입니다...</p>
+                    </div>
                 </div>
             </section>
 
@@ -645,28 +773,28 @@ function toggleWishlist(storeId, btnElement) {
 
                 <%-- 로그인 상태일 때 (GUEST 제외) --%>
                 <c:if test="${not empty memberInfo}">
-				    <div class="d-flex align-items-center mb-3">
-				        <c:choose>
-				            <c:when test="${not empty memberInfo.profileImageUrl}">
-				                <img src="${contextPath}${memberInfo.profileImageUrl}" class="rounded-circle profile-pic-md">
-				            </c:when>
-				            <c:otherwise>
-				                <img src="${contextPath}/images/default_profile.png" class="rounded-circle profile-pic-md">
-				            </c:otherwise>
-				        </c:choose>
-				        <div class="ms-3">
-				            <h5 class="mb-0 fw-bold">${memberInfo.memberName} 님</h5>
-				            <p class="mb-0 text-muted small">매너온도: ${memberInfo.mannerTemperature}°C</p>
-				        </div>
-				    </div>
-				</c:if>
+                    <div class="d-flex align-items-center mb-3">
+                        <c:choose>
+                            <c:when test="${not empty memberInfo.profileImageUrl}">
+                                <img src="${contextPath}${memberInfo.profileImageUrl}" class="rounded-circle profile-pic-md">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${contextPath}/images/default_profile.png" class="rounded-circle profile-pic-md">
+                            </c:otherwise>
+                        </c:choose>
+                        <div class="ms-3">
+                            <h5 class="mb-0 fw-bold">${memberInfo.memberName} 님</h5>
+                            <p class="mb-0 text-muted small">매너온도: ${memberInfo.mannerTemperature}°C</p>
+                        </div>
+                    </div>
+                </c:if>
 
                 <%-- GUEST 상태일 때 --%>
                 <sec:authorize access="hasRole('GUEST')">
                      <h5 class="sidebar-title">회원가입</h5>
                      <p class="small text-muted">추가 정보를 입력하고 모든 서비스를 이용해보세요.</p>
                      <div class="d-grid">
-                        <a href="${contextPath}/member/join_social" class="btn" style="background-color: var(--yum-beige);">추가 정보 입력</a>
+                         <a href="${contextPath}/member/join_social" class="btn" style="background-color: var(--yum-beige);">추가 정보 입력</a>
                      </div>
                 </sec:authorize>
             </div>
