@@ -191,15 +191,6 @@ const memberId = "${memberId}";
 var contextPath = '${contextPath}';
 var map; // 지도 객체를 전역 변수로 선언
 
-    function goSearch() {
-        const keyword = document.getElementById('keyword').value;
-        if (!keyword.trim()) {
-            alert("검색어를 입력해주세요.");
-            return;
-        }
-        window.location.href = contextPath + "/store/storeList?option=search&keyword=" + encodeURIComponent(keyword);
-    }
-
     // Google Maps API 콜백 함수
     function initMap() {
         // 1. 페이지 로드 시 즉시 지도를 기본 위치(서울)로 생성합니다.
@@ -539,10 +530,10 @@ function toggleWishlist(storeId, btnElement) {
             <!-- 카테고리 아이콘 -->
             <section class="category-icons mb-5">
                 <ul class="nav justify-content-around">
-                    <li class="nav-item"><a href="${contextPath}/store/storeList?option=region&keyword=" class="nav-link"><div class="icon-circle"><i class="bi bi-geo-alt-fill"></i></div><span>지역별</span></a></li>
-                    <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-egg-fried"></i></div><span>음식별</span></a></li>
-                    <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-star-fill"></i></div><span>인기 맛집</span></a></li>
-                    <li class="nav-item"><a href="#" class="nav-link"><div class="icon-circle"><i class="bi bi-shop-window"></i></div><span>신규 오픈</span></a></li>
+                    <li class="nav-item"><a href="${contextPath}/store/storeList?option=region" class="nav-link"><div class="icon-circle"><i class="bi bi-geo-alt-fill"></i></div><span>지역별</span></a></li>
+                    <li class="nav-item"><a href="${contextPath}/store/storeList?option=type" class="nav-link"><div class="icon-circle"><i class="bi bi-egg-fried"></i></div><span>음식별</span></a></li>
+                    <li class="nav-item"><a href="${contextPath}/store/userLikeStores" class="nav-link"><div class="icon-circle"><i class="bi bi-star-fill"></i></div><span>인기 맛집</span></a></li>
+                    <li class="nav-item"><a href="${contextPath}/store/findNewStores" class="nav-link"><div class="icon-circle"><i class="bi bi-shop-window"></i></div><span>신규 오픈</span></a></li>
                 </ul>
             </section>
 
