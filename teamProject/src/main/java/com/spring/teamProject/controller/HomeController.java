@@ -41,6 +41,7 @@ public class HomeController {
             Long memberId = (long) userDetailsVO.getMemberVO().getMemberId();
             MemberVO freshMemberInfo = memberService.getMemberById(memberId); // DB에서 최신 사용자 정보 조회
             model.addAttribute("memberInfo", freshMemberInfo); // JSP로 전달
+            model.addAttribute("memberId", memberId); // [57차 수정] JavaScript 위시리스트 기능용
         }
         
         // 2. BannerService를 통해 현재 활성화된 배너 목록을 DB에서 조회합니다.
