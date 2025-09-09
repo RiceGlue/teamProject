@@ -85,20 +85,133 @@
 		<result property="cleanPercent" column="clean_percent" />
 		<result property="likes" column="likes" />
 	</resultMap>
-
-<!-- 	<select id="selectBestReviewByStores" resultMap="storelist" > -->
-<!-- 		<![CDATA[ -->
-<!-- 			WITH RankedReviews AS ( -->
-<!-- 			  SELECT *, -->
-<!-- 			         ROW_NUMBER() OVER (PARTITION BY store_id ORDER BY created_at DESC) AS rn -->
-<!-- 			  FROM reviews -->
-<!-- 			  WHERE rating = 5 -->
-<!-- 			) -->
-<!-- 			SELECT * -->
-<!-- 			FROM RankedReviews -->
-<!-- 			WHERE rn = 1; -->
-<!-- 		]]> -->
-<!-- 	</select> -->
+	<!-- 키워드 판별 -->
+	
+	<!-- 1. 키워드가 지역인지 판단 -->
+	<select id="isRegion" resultType="int" parameterType="String">
+		SELECT COUNT(1)
+        FROM stores
+	    WHERE road_address LIKE CONCAT('%', #{keyword}, '%')
+	       OR jibun_address LIKE CONCAT('%', #{keyword}, '%')
+	</select>
+	
+	<!-- 2. 키워드가 매장명인지 판단 -->
+	<select id="isStoreName" resultType="int" parameterType="String">
+	  SELECT COUNT(1)
+	  FROM stores
+	  WHERE store_name LIKE CONCAT('%', #{keyword}, '%')
+	</select>
+	
+	<!-- 3. 키워드가 메뉴인지 판단 -->
+	<select id="isMenu" resultType="int" parameterType="String">
+	  SELECT COUNT(1)
+	  FROM menu
+	  WHERE menu_name LIKE CONCAT('%', #{keyword}, '%')
+	</select>
+	
+	<!-- 단일 검색 -->
+	
+	<select id="findByRegion" resultMap="storelist" parameterType="String">
+	  SELECT *
+	  FROM stores
+	  WHERE road_address LIKE CONCAT('%', #{keyword}, '%')
+	     OR jibun_address LIKE CONCAT('%', #{keyword}, '%')
+	</select>
+	
+	<select id="findByStoreName" resultMap="storelist" parameterType="String">
+	  SELECT *
+	  FROM stores
+	  WHERE store_name LIKE CONCAT('%', #{keyword}, '%')
+	</select>
+	
+	<select id="findStoresByMenu" resultMap="storelist" parameterType="String">
+	  SELECT DISTINCT s.*
+	  FROM stores s
+	  JOIN menu m ON s.store_id = m.store_id
+	  WHERE m.menu_name LIKE CONCAT('%', #{menu}, '%')
+	</select>
+	
+	<select id="findByType" resultMap="storelist" parameterType="String">
+	  SELECT *
+	  FROM stores
+	  WHERE store_type=#{type}
+	</select>
+	
+	<!-- 복합 검색 -->
+	
+	<select id="findByRegionAndMenu" resultMap="storelist" parameterType="map">
+	  SELECT DISTINCT s.*
+	  FROM stores s
+	  JOIN menu m ON s.store_id = m.store_id
+	  WHERE (s.road_address LIKE CONCAT('%', #{region}, '%')
+	      OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
+	    AND m.menu_name LIKE CONCAT('%', #{menu}, '%')
+	</select>
+	
+	<select id="findByRegionAndStoreName" resultMap="storelist" parameterType="map">
+	  SELECT *
+	  FROM stores
+	  WHERE (road_address LIKE CONCAT('%', #{region}, '%')
+	      OR jibun_address LIKE CONCAT('%', #{region}, '%'))
+	    AND store_name LIKE CONCAT('%', #{storeName}, '%')
+	</select>
+	
+	<select id="findByMenuAndStoreName" resultMap="storelist" parameterType="map">
+	  SELECT DISTINCT s.*
+	  FROM stores s
+	  JOIN menu m ON s.store_id = m.store_id
+	  WHERE m.menu_name LIKE CONCAT('%', #{menu}, '%')
+	    AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
+	</select>
+	
+	<select id="findByRegionAndMenuAndStoreName" resultMap="storelist" parameterType="map">
+	  SELECT DISTINCT s.*
+	  FROM stores s
+	  JOIN menu m ON s.store_id = m.store_id
+	  WHERE (s.road_address LIKE CONCAT('%', #{region}, '%')
+	      OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
+	    AND m.menu_name LIKE CONCAT('%', #{menu}, '%')
+	    AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
+	</select>
+	
+	<!-- 메뉴 기반으로 매장 찾기 -->
+	
+	<select id="findStoreIdsByMenuName" resultType="long" parameterType="String">
+	  SELECT DISTINCT store_id
+	  FROM menu
+	  WHERE menu_name LIKE CONCAT('%', #{menuName}, '%')
+	</select>
+	
+	<select id="findByStoreIds" resultMap="storelist" parameterType="list">
+	  SELECT *
+	  FROM stores
+	  WHERE store_id IN
+	  <foreach collection="list" item="id" open="(" separator="," close=")">
+	    #{id}
+	  </foreach>
+	</select>
+	
+	<select id="findNewOpenStore" resultMap="storelist" >
+		<![CDATA[
+			SELECT *
+			FROM stores
+			WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+			ORDER BY created_at DESC;	
+		]]>
+	</select>
+	
+	<select id="findUserLikeStores" resultMap="storelist" >
+		<![CDATA[
+			SELECT s.*
+			FROM stores s
+			JOIN (
+			    SELECT store_id, COUNT(*) AS wishlist_count
+			    FROM wishlists
+			    GROUP BY store_id
+			    ORDER BY wishlist_count DESC
+			) w ON s.store_id = w.store_id;	
+		]]>
+	</select>
 
 	<select id="selectStoreInfo" resultMap="storelist" parameterType="String">
 		<![CDATA[
@@ -118,42 +231,6 @@
 	  ]]>
 	</select>
 
-	<select id="selectStoreByMenu" parameterType="String" resultMap="storelist">
-		<![CDATA[
-		    SELECT s.store_id, s.owner_id, s.store_name, s.road_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
-		    ROUND(AVG(r.rating), 2) AS avgRating,COUNT(r.review_id) AS countRating
-		    FROM stores s
-		    INNER JOIN menu m ON s.store_id = m.store_id
-		    LEFT JOIN reviews r ON s.store_id = r.store_id
-		    WHERE m.menu_name LIKE CONCAT('%', #{keyword}, '%')
-		    GROUP BY s.store_id
-		    ORDER BY s.store_id
-		]]>
-	</select>
-
-	<select id="selectStoreByAddr" parameterType="String" resultMap="storelist">
-		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.road_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
-	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
-			FROM stores s
-			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.road_address LIKE CONCAT('%', #{keyword}, '%')
-			GROUP BY s.store_id
-			ORDER BY s.store_id
-		]]>
-	</select>
-
-	<select id="selectStoreByName" parameterType="String" resultMap="storelist">
-		<![CDATA[
-			SELECT s.store_id, s.owner_id, s.store_name, s.road_address, s.local_number, s.number1, s.number2, s.description, s.file_name, s.store_type,
-	      	ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.review_id) AS countRating
-			FROM stores s
-			INNER JOIN reviews r ON s.store_id = r.store_id
-			WHERE s.store_name LIKE CONCAT('%', #{keyword}, '%')
-			GROUP BY s.store_id
-			ORDER BY s.store_id
-		]]>
-	</select>
 
 	<select id="selectStoreByType" parameterType="String" resultMap="storelist">
 		<![CDATA[

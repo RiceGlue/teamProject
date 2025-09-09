@@ -9,11 +9,16 @@ import com.spring.teamProject.vo.StoreVO;
 
 public interface StoreService {
 
-	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception;
-	public List<StoreVO> selectStoreByMenu(String keyword) throws Exception;
-	public List<StoreVO> selectStoreByAddr(String keyword) throws Exception;
-	public List<StoreVO> selectStoreByName(String keyword) throws Exception;
-	public List<StoreVO> selectStoreByType(String keyword) throws Exception;
+	// 검색어 입력 검색
+	List<StoreVO> searchByKeyword(String keyword) throws Exception;
+	
+	//지역, 유형별 검색
+	List<StoreVO> getStoresByRegion(String region) throws Exception;
+	List<StoreVO> getStoresByType(String type) throws Exception;
+	
+	List<StoreVO> findNewOpenStore() throws Exception;
+	List<StoreVO> findUserLikeStores() throws Exception;
+	
 	public Map storeDetail(StoreVO storeVO) throws Exception;
 
 	// 매장 ID로 매장 정보를 가져오는 메서드 추가

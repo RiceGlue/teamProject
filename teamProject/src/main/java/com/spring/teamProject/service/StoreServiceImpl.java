@@ -1,6 +1,8 @@
 package com.spring.teamProject.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,35 +23,109 @@ public class StoreServiceImpl implements StoreService{
 	private StoreDAO storeDAO;
 
 	@Override
-	public List<StoreVO> selectStoreByRegion(String keyword) throws Exception {
-		List<StoreVO> regionlist = storeDAO.selectStoreByRegion(keyword);
-		return regionlist;
+	public List<StoreVO> searchByKeyword(String keyword) {
+	    keyword = keyword.trim();
+	    String[] tokens = keyword.split("\\s+");
+
+	    if (tokens.length == 1) {
+	        return searchBySingleKeyword(tokens[0]);
+	    } else if (tokens.length == 2) {
+	        return searchByDoubleKeyword(tokens[0], tokens[1]);
+	    } else if (tokens.length == 3) {
+	        return searchByTripleKeyword(tokens[0], tokens[1], tokens[2]);
+	    }
+
+	    return new ArrayList<>();
+	}
+
+	public List<StoreVO> searchBySingleKeyword(String keyword) {
+		List<StoreVO> storeList1 = storeDAO.findByRegion(keyword);
+		List<StoreVO> storeList2 = storeDAO.findByStoreName(keyword);
+		List<StoreVO> storeList3 = storeDAO.findStoresByMenu(keyword);
+		List<StoreVO> storeList4 = storeDAO.findByType(keyword);
+
+		Map<Long, StoreVO> storeMap = new LinkedHashMap<>();
+
+		for (StoreVO store : storeList1) {
+		    storeMap.put(store.getStoreId(), store);
+		}
+		for (StoreVO store : storeList2) {
+		    storeMap.put(store.getStoreId(), store);
+		}
+		for (StoreVO store : storeList3) {
+		    storeMap.put(store.getStoreId(), store);
+		}
+		for (StoreVO store : storeList4) {
+		    storeMap.put(store.getStoreId(), store);
+		}
+
+		return new ArrayList<>(storeMap.values());
+
+	}
+
+	public List<StoreVO> searchByDoubleKeyword(String first, String second) {
+	    if (isRegion(first)) {
+	        if (isMenu(second)) {
+	            return storeDAO.findByRegionAndMenu(first, second);
+	        } else {
+	            return storeDAO.findByRegionAndStoreName(first, second);
+	        }
+	    } else if (isMenu(first)) {
+	        return storeDAO.findByMenuAndStoreName(first, second);
+	    }
+
+	    return new ArrayList<>();
+	}
+
+	public List<StoreVO> searchByTripleKeyword(String first, String second, String third) {
+	    String[] tokens = { first, second, third };
+	    String region = null;
+	    String menu = null;
+	    String storeName = null;
+
+	    for (String token : tokens) {
+	        if (region == null && isRegion(token)) {
+	            region = token;
+	        } else if (menu == null && isMenu(token)) {
+	            menu = token;
+	        } else if (storeName == null &&isStoreName(token)) {
+	            storeName = token;
+	        }
+	    }
+
+	    if (region != null && menu != null && storeName != null) {
+	        return storeDAO.findByRegionAndMenuAndStoreName(region, menu, storeName);
+	    } else if (region != null && menu != null) {
+	        return storeDAO.findByRegionAndMenu(region, menu);
+	    } else if (region != null && storeName != null) {
+	        return storeDAO.findByRegionAndStoreName(region, storeName);
+	    } else if (menu != null && storeName != null) {
+	        return storeDAO.findByMenuAndStoreName(menu, storeName);
+	    }
+
+	    return new ArrayList<>();
 	}
 
 	@Override
-	public List<StoreVO> selectStoreByMenu(String keyword) throws Exception {
-		List<StoreVO> menulist = storeDAO.selectStoreByMenu(keyword);
-		return menulist;
+	public List<StoreVO> getStoresByRegion(String region) throws Exception {
+		return storeDAO.findByRegion(region);
 	}
-
+	
 	@Override
-	public List<StoreVO> selectStoreByAddr(String keyword) throws Exception{
-		List<StoreVO> addrlist = storeDAO.selectStoreByAddr(keyword);
-		return addrlist;
+	public List<StoreVO> getStoresByType(String type) throws Exception {
+		return storeDAO.findByType(type);
 	}
-
+	
 	@Override
-	public List<StoreVO> selectStoreByName(String keyword) throws Exception{
-		List<StoreVO> namelist = storeDAO.selectStoreByName(keyword);
-		return namelist;
+	public List<StoreVO> findNewOpenStore() throws Exception {
+		return storeDAO.findNewOpenStore();
 	}
-
+	
 	@Override
-	public List<StoreVO> selectStoreByType(String keyword) throws Exception {
-		List<StoreVO> typelist = storeDAO.selectStoreByType(keyword);
-		return typelist;
+	public List<StoreVO> findUserLikeStores() throws Exception {
+		return storeDAO.findUserLikeStores();
 	}
-
+	
 	@Override
 	public Map storeDetail(StoreVO storeVO) throws Exception {
 		Map storeMap = new HashMap<>();
@@ -109,5 +185,20 @@ public class StoreServiceImpl implements StoreService{
 		return storeDAO.selectStoreSameStoreType(storeVO);
 	}
 	
+	public boolean isRegion(String keyword) {
+	    Integer count = storeDAO.isRegion(keyword);
+	    return count != null && count > 0;
+	}
+
+	public boolean isStoreName(String keyword) {
+	    Integer count = storeDAO.isStoreName(keyword);
+	    return count != null && count > 0;
+	}
+
+	public boolean isMenu(String keyword) {
+	    Integer count = storeDAO.isMenu(keyword);
+	    return count != null && count > 0;
+	}
+
 	
 }

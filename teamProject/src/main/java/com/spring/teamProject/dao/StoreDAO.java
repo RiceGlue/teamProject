@@ -14,11 +14,27 @@ import com.spring.teamProject.vo.StoreVO;
 public interface StoreDAO {
 
 	//가게 검색
-	public List<StoreVO> selectStoreByRegion(String keyword) throws DataAccessException; //지역별 검색
-	public List<StoreVO> selectStoreByMenu(String keyword) throws DataAccessException; //메뉴 이름 검색
-	public List<StoreVO> selectStoreByAddr(String keyword) throws DataAccessException; //주소 검색
-	public List<StoreVO> selectStoreByName(String keyword) throws DataAccessException; //가게 이름 검색
-	public List<StoreVO> selectStoreByType(String keyword) throws DataAccessException; //가게 유형 검색
+	Integer isRegion(String keyword);
+	Integer isStoreName(String keyword);
+	Integer isMenu(String keyword);   // 메뉴 판별 메서드 추가
+
+	List<StoreVO> findByRegion(String region);
+	List<StoreVO> findByStoreName(String storeName);
+	List<StoreVO> findStoresByMenu(String menu);
+	List<StoreVO> findByType(String type);
+
+	List<StoreVO> findByRegionAndMenu(String region, String menu);
+	List<StoreVO> findByRegionAndStoreName(String region, String storeName);
+	List<StoreVO> findByMenuAndStoreName(String menu, String storeName);
+	List<StoreVO> findByRegionAndMenuAndStoreName(String region, String menu, String storeName);
+
+	List<StoreVO> findByMenu(String menuName);  // 메뉴로 매장 찾기
+	List<Long> findStoreIdsByMenuName(String menuName);  // 메뉴 이름으로 매장 ID 찾기
+	
+	List<StoreVO> findNewOpenStore();
+	List<StoreVO> findUserLikeStores();
+	    
+	List<StoreVO> findByStoreIds(List<Long> storeIds);
 
 	//가게 상세 페이지
 	public StoreVO selectStoreDetail(long storeId) throws DataAccessException;
