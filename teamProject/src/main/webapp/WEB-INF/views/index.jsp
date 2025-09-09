@@ -377,7 +377,7 @@ var map; // 지도 객체를 전역 변수로 선언
         loadMoreBtn.className = "btn btn-light";
         loadMoreBtn.textContent = "더보기";
         loadMoreBtn.onclick = function () {
-            window.location.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
+            window.location.href = contextPath + "/store/storeList?option=userLocation&location=" + encodeURIComponent(dong);
         };
 
         buttonWrapper.appendChild(loadMoreBtn);

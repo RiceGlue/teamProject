@@ -112,7 +112,7 @@ public class StoreControllerImpl implements StoreController {
 
 	// storeList 뷰로 직접 접속할 경우 option을 통해 데이터 세팅
 	@GetMapping("/storeList")
-	public ModelAndView showStoreList(@RequestParam(value = "option", required = false, defaultValue = "region") String option) {
+	public ModelAndView showStoreList(@RequestParam("option") String option, HttpServletRequest req) {
 	    
 		ModelAndView mav = ViewUtil.layout("store/storeList");
 		
@@ -122,6 +122,13 @@ public class StoreControllerImpl implements StoreController {
 	    } else if(option.equals("type")) {
 	    	mav.addObject("option", "type");
 	    	mav.addObject("types", getTypes());
+	    } else if(option.equals("userLocation")) {
+	    	String location = req.getParameter("location");
+	    	List<StoreVO> storeList = storeService.searchStoreNearUser(location);
+	    	
+	    	mav.addObject("option", "userLocation");
+	    	mav.addObject("location", location);
+	    	mav.addObject("userLocationlist", storeList);
 	    }
 	    return mav;
 	}
