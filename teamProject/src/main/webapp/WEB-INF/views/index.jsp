@@ -416,7 +416,7 @@ var map; // 지도 객체를 전역 변수로 선언
             container.appendChild(loadMoreCard);
         }
 
-<<<<<<< HEAD
+
         const loadMoreBtn = document.createElement("button");
         loadMoreBtn.id = "loadMoreBtn";
         loadMoreBtn.className = "btn btn-light";
@@ -427,9 +427,8 @@ var map; // 지도 객체를 전역 변수로 선언
 
         buttonWrapper.appendChild(loadMoreBtn);
         container.appendChild(buttonWrapper);
-=======
         initSlider('nearby-stores-slider');
->>>>>>> 63663dc2412c64b543326b4a62b2bc956c7f0a29
+
     }
 
     /**
