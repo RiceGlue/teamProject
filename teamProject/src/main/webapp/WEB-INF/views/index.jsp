@@ -203,6 +203,7 @@
     }
     /* a태그인 card 자체는 클릭 가능해야 하므로 pointer-events를 설정하지 않습니다. */
     /* card 내부의 다른 요소들(img, p 등)의 이벤트를 막아 드래그를 원활하게 합니다. */
+    /* [수정] 클릭 방지 CSS를 리뷰 카드 섹션에만 한정합니다. */
     #reviewContainer.slider-track .card * {
         pointer-events: none;
     }
@@ -214,7 +215,7 @@
         box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
     
-    /* '내 지역 맛집' 카드 전용 스타일 */
+    /* [수정] '내 지역 맛집' 카드 전용 스타일 추가 */
     .nearby-store-card {
         position: relative; /* 자식 요소(버튼)의 absolute 위치 기준점 */
         cursor: pointer;    /* 카드 전체가 클릭 가능하다는 것을 시각적으로 표시 */
@@ -238,16 +239,6 @@
 const memberId = "${memberId}";
 var contextPath = '${contextPath}';
 var map; // 지도 객체를 전역 변수로 선언
-
-    // [수정] goSearch 함수 복원
-    function goSearch() {
-        const keyword = document.getElementById('keyword').value;
-        if (!keyword.trim()) {
-            alert("검색어를 입력해주세요.");
-            return;
-        }
-        window.location.href = contextPath + "/store/storeList?option=search&keyword=" + encodeURIComponent(keyword);
-    }
 
     // Google Maps API 콜백 함수
     function initMap() {
@@ -372,15 +363,18 @@ var map; // 지도 객체를 전역 변수로 선언
         limitedStoreList.forEach(store => {
             const card = document.createElement("div");
             card.className = "card my-3 nearby-store-card";
-            card.onclick = function() {
-                window.location.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
+            card.onclick = function(event) {
+                // [수정] 클릭된 대상이 위시리스트 버튼이 아닐 때만 페이지 이동
+                if (!event.target.closest('.wishlist-btn')) {
+                    window.location.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
+                }
             };
 
             const imageUrl = store.fileName 
                 ? contextPath + '/images/store/' + store.fileName
                 : 'https://placehold.co/280x180/FDF6EC/7B2D26?text=' + encodeURIComponent(store.storeName);
 
-            // 아이콘과 함께 정보를 재배치합니다.
+            // [수정] 아이콘과 함께 정보를 재배치합니다.
             card.innerHTML =
                 '<img src="' + imageUrl + '" class="card-img-top" alt="' + store.storeName + '">' +
                 '<div class="card-body p-3">' +
@@ -404,7 +398,7 @@ var map; // 지도 객체를 전역 변수로 선언
             }
         });
         
-        // "더보기" 버튼 표시 조건을 변경하고 디자인을 개선합니다.
+        // [수정] "더보기" 버튼 표시 조건을 'storeList.length > 0'으로 변경하고 디자인을 개선합니다.
         if (storeList.length > 0) { 
             const loadMoreCard = document.createElement("a");
             loadMoreCard.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
@@ -597,12 +591,14 @@ function checkWishlistStatus(storeId, btnElement) {
 
 // 위시리스트 버튼 클릭 처리
 $(document).on('click', '.wishlist-btn', function (e) {
+    // [수정] 이벤트 전파를 막아 카드 전체의 onclick이 실행되는 것을 방지합니다.
     e.preventDefault(); 
     e.stopPropagation(); 
     const storeId = $(this).data('store-id');
     toggleWishlist(storeId, this);
 });
 
+// [수정] 위시리스트 토글 함수에서 확인창 제거
 function toggleWishlist(storeId, btnElement) {
     if (!memberId || memberId == null || memberId.trim() === '') {
         alert('로그인 후 이용해주세요.');
@@ -636,8 +632,8 @@ function toggleWishlist(storeId, btnElement) {
             <section class="search-bar mb-5">
                 <div class="input-group">
                     <input type="text" class="form-control" id="keyword" placeholder="지역, 가게, 메뉴로 특별한 순간을 찾아보세요">
-                    <!-- [수정] onclick 이벤트 복원 -->
-                    <button class="btn" type="button" onclick="goSearch()"><i class="bi bi-search"></i></button>
+                    <!-- 'goSearch()'가 없으므로 onclick 이벤트 제거 -->
+                    <button class="btn" type="button"><i class="bi bi-search"></i></button>
                 </div>
             </section>
 
