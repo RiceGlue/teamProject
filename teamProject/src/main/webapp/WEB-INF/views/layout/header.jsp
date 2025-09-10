@@ -10,6 +10,11 @@
 <head>
     <meta charset="UTF-8">
     <title>얌테이블</title>
+    <link rel="icon" href="${pageContext.request.contextPath}/images/test/yummy-favicon.ico">
+
+<%--     <link rel="icon" type="image/x-icon" href="${contextPath}/images/test/yummy-favicon.ico"> --%>
+<%-- 	<link rel="shortcut icon" href="${contextPath}/images/test/yummy-favicon.ico"> --%>
+<%-- 	<link rel="icon" href="${contextPath}/images/test/yummy-favicon.ico"> --%>
 
     <%-- CSS는 link 태그로 직접 로드하는 것이 성능에 유리합니다. --%>
     <link rel="stylesheet" href="${contextPath}/css/style.css">
@@ -65,7 +70,7 @@
                                     </c:if>
                                 </c:forEach>
                             </c:if>
-                            
+
                             <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
                             <c:choose>
                                 <c:when test="${principal.memberVO.role == 'ADMIN'}">
