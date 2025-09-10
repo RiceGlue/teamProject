@@ -72,11 +72,16 @@ public interface MemberService {
     // --- 비밀번호 재설정 로직 ---
     boolean resetPassword(String loginId, String email);
 
-    // ✨ --- [신규] 아이디 찾기 시 테스트 이메일을 발송하는 메소드 --- ✨
+    // ? --- [신규] 아이디 찾기 시 테스트 이메일을 발송하는 메소드 --- ?
     //boolean sendFindIdTestEmail(String memberName, String email);
 
-    // ✨ --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ✨
+    // ? --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ?
     String sendVerificationCodeForId(String memberName, String email);
     
     MemberVO getMemberById(long memberId);
+    
+    // [추가] 로그인 실패/성공 카운트 처리를 위한 메소드 선언
+    void incrementLoginFailCount(String loginId);
+    void resetLoginFailCount(String loginId);
+    MemberVO findByLoginId(String loginId);
 }

@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.spring.teamProject.service.CustomOAuth2UserService;
 
@@ -31,10 +31,22 @@ public class SecurityConfig {
     @Autowired
     private CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    // 비밀번호 암호화를 위한 Bean
+    // [추가] 로그인 실패/성공 핸들러와 reCAPTCHA 필터를 주입받습니다.
+    @Autowired
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
+
+    @Autowired
+    private CustomLoginFailureHandler customLoginFailureHandler;
+
+    @Autowired
+    private RecaptchaVerificationFilter recaptchaVerificationFilter;
+
+    // [수정] PasswordEncoder Bean은 AppConfig로 이동되었습니다.
+
+    // [복원] 정적 리소스는 Spring Security의 보안 필터를 거치지 않도록 설정합니다.
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/images/**", "/js/**", "/css/**");
     }
 
     @Bean
@@ -43,11 +55,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN")                       // /admin/** 경로는 ADMIN 역할만 접근 가능
-                .requestMatchers("/owner/**").hasRole("OWNER")                       // /owner/** 경로는 OWNER 역할만 접근 가능
-                .requestMatchers("/member/mypage/**").authenticated()                // ? /member/mypage 하위 경로도 인증 필요
+                .requestMatchers("/admin/**").hasRole("ADMIN")                      // /admin/** 경로는 ADMIN 역할만 접근 가능
+                .requestMatchers("/owner/**", "/franchise/**", "/settlement/**").hasRole("OWNER") // /owner/**, /franchise/**, /settlement/** 경로는 OWNER 역할만 접근 가능
+                .requestMatchers("/member/mypage/**", "/member/edit-profile").authenticated()      // ? /member/mypage 하위 경로도 인증 필요
                 .requestMatchers("/reservation/**", "/waiting/**").authenticated()   // reservation 페이지나 waiting 페이지로 이동할때 로그인을 유도함
-                .requestMatchers("/settlement/**").hasRole("OWNER")
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
@@ -55,8 +66,9 @@ public class SecurityConfig {
                 .loginProcessingUrl("/member/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/")
-                .failureUrl("/member/login?error=true")
+                // [수정] 기본 성공/실패 URL 대신, 직접 만든 핸들러를 사용하도록 변경합니다.
+                .successHandler(customLoginSuccessHandler)
+                .failureHandler(customLoginFailureHandler)
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/member/login")
@@ -77,6 +89,9 @@ public class SecurityConfig {
                 .accessDeniedHandler(customAccessDeniedHandler)
                 .authenticationEntryPoint(ajaxAwareAuthenticationEntryPoint())
             );
+            
+        // [추가] 직접 만든 reCAPTCHA 필터를 Spring Security의 기본 로그인 필터보다 먼저 실행되도록 등록합니다.
+        http.addFilterBefore(recaptchaVerificationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -96,3 +111,4 @@ public class SecurityConfig {
         };
     }
 }
+

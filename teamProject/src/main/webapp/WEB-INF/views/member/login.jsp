@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
+<%-- [추가] reCAPTCHA 스크립트를 로드합니다. --%>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <style>
     /* 얌테이블 커스텀 컬러 팔레트 */
     :root {
@@ -93,7 +96,7 @@
                 <%-- ? --- 여기가 핵심 수정 부분입니다 --- ? --%>
                 <c:if test="${not empty loginRedirectMessage}"><div class="alert alert-info small p-2">${loginRedirectMessage}</div></c:if>
                 <c:if test="${not empty error}"><div class="alert alert-danger small p-2">${error}</div></c:if>
-                <c:if test="${param.error}"><div class="alert alert-danger small p-2">아이디 또는 비밀번호가 일치하지 않습니다.</div></c:if>
+                <c:if test="${param.error and empty error}"><div class="alert alert-danger small p-2">아이디 또는 비밀번호가 일치하지 않습니다.</div></c:if>
                 <c:if test="${not empty msg}"><div class="alert alert-success small p-2">${msg}</div></c:if>
 
                 <form action="${contextPath}/member/login" method="post">
@@ -103,6 +106,14 @@
                     <div class="mb-3">
                         <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호" required>
                     </div>
+
+                    <%-- [추가] 로그인 실패 횟수가 5회 이상일 경우 reCAPTCHA 표시 --%>
+                    <c:if test="${showRecaptcha}">
+                        <div class="mb-3 d-flex justify-content-center">
+                            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+                        </div>
+                    </c:if>
+
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">로그인</button>
                     </div>

@@ -27,6 +27,8 @@
         <result property="status" column="status"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <!-- [추가] 로그인 실패 횟수 컬럼을 MemberVO 필드에 매핑합니다. -->
+        <result property="loginFailCount" column="login_fail_count"/>
         <collection property="socialAccounts"
                     ofType="com.spring.teamProject.vo.SocialAccountVO"
                     select="com.spring.teamProject.dao.SocialAccountDAO.findByMemberId"
@@ -141,9 +143,26 @@
         WHERE member_id = #{memberId}
     </update>
 
-	<select id="selectMemberById" parameterType="long" resultMap="memberResultMap" >
-		<![CDATA[
-			select * from members where member_id = #{memberId}
-		]]>
-	</select>
+    <select id="selectMemberById" parameterType="long" resultMap="memberResultMap" >
+        <![CDATA[
+            select * from members where member_id = #{memberId}
+        ]]>
+    </select>
+    
+    <!-- [추가] 로그인 아이디로 회원 정보를 조회하고 비관적 잠금을 설정합니다. (동시성 문제 방지) -->
+    <select id="findForUpdateByLoginId" parameterType="String" resultMap="memberResultMap">
+        SELECT * FROM members WHERE login_id = #{loginId} FOR UPDATE
+    </select>
+    
+    <!-- [추가] 로그인 아이디로 회원을 찾아 로그인 실패 횟수를 1 증가시킵니다. -->
+    <update id="incrementLoginFailCount" parameterType="String">
+        UPDATE members SET login_fail_count = login_fail_count + 1 WHERE login_id = #{loginId}
+    </update>
+    
+    <!-- [추가] 로그인 아이디로 회원을 찾아 로그인 실패 횟수를 0으로 초기화합니다. -->
+    <update id="resetLoginFailCount" parameterType="String">
+        UPDATE members SET login_fail_count = 0 WHERE login_id = #{loginId}
+    </update>
+    
 </mapper>
+

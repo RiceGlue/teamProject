@@ -182,6 +182,12 @@ public class MemberServiceImpl implements MemberService {
     public MemberVO findById(long memberId) {
         return memberDAO.findById(memberId);
     }
+    
+    // [수정] findByLoginId 메소드 구현 추가
+    @Override
+    public MemberVO findByLoginId(String loginId) {
+        return memberDAO.findByLoginId(loginId);
+    }
 
     /**
      * 아이디 중복 여부를 확인합니다.
@@ -238,7 +244,7 @@ public class MemberServiceImpl implements MemberService {
         return null;
     }
 
-    // ✨ --- [신규] 비밀번호 재설정 로직 구현 --- ✨
+    // ? --- [신규] 비밀번호 재설정 로직 구현 --- ?
     @Override
     @Transactional
     public boolean resetPassword(String loginId, String email) {
@@ -279,7 +285,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    // ✨ --- [신규] 아이디 찾기 테스트 이메일 발송 로직 구현 --- ✨
+    // ? --- [신규] 아이디 찾기 테스트 이메일 발송 로직 구현 --- ?
     // @Override
     // public boolean sendFindIdTestEmail(String memberName, String email) {
     //     logger.info("테스트 이메일 발송 요청: name={}, email={}", memberName, email);
@@ -304,7 +310,7 @@ public class MemberServiceImpl implements MemberService {
     //     }
     // }
 
-    // ✨ --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ✨
+    // ? --- [수정] 아이디 찾기 로직을 '인증 이메일 발송' 기능으로 변경 --- ?
     @Override
     public String sendVerificationCodeForId(String memberName, String email) {
         MemberVO member = memberDAO.findByNameAndEmail(memberName, email);
@@ -392,54 +398,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
     
-    // /**
-    //  * FTP 적용 전 코드
-    //  * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.
-    //  * @param memberVO 이미지 파일이 포함된 MemberVO 객체
-    //  */
-    // private void saveProfileImage(MemberVO memberVO) {
-    //     MultipartFile file = memberVO.getProfileImageFile();
-    //     if (file != null && !file.isEmpty()) {
-            
-    //         // 1. 서버 측 파일 크기 검사
-    //         long maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-    //         if (file.getSize() > maxSizeInBytes) {
-    //             throw new RuntimeException("프로필 사진은 2MB를 초과할 수 없습니다.");
-    //         }
-
-    //         try {
-    //             // 2. 서버 측 해상도 검사
-    //             BufferedImage image = ImageIO.read(file.getInputStream());
-    //             if (image == null) {
-    //                 // 이미지 파일이 아닌 경우
-    //                 throw new RuntimeException("올바른 이미지 파일이 아닙니다.");
-    //             }
-    //             int width = image.getWidth();
-    //             int height = image.getHeight();
-    //             int maxResolution = 500; // 최대 해상도 500px
-
-    //             if (width > maxResolution || height > maxResolution) {
-    //                 throw new RuntimeException("프로필 사진의 해상도는 500x500 픽셀을 초과할 수 없습니다.");
-    //             }
-
-    //             // 3. 파일 저장 로직
-    //             String originalFilename = file.getOriginalFilename();
-    //             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-    //             String savedFilename = UUID.randomUUID().toString() + extension;
-
-    //             File dest = new File(uploadDir + savedFilename);
-    //             // ImageIO.read()로 inputStream을 한 번 사용했으므로, 파일을 다시 저장해야 합니다.
-    //             file.transferTo(dest);
-
-    //             memberVO.setProfileImageUrl("/profile-images/" + savedFilename);
-
-    //         } catch (IOException e) {
-    //             e.printStackTrace();
-    //             throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
-    //         }
-    //     }
-    // }
-
     /**
      * 프로필 이미지 파일을 서버에 저장하고, 접근 가능한 URL을 MemberVO에 설정합니다.
      * @param memberVO 이미지 파일이 포함된 MemberVO 객체
@@ -566,4 +524,25 @@ public class MemberServiceImpl implements MemberService {
     public MemberVO getMemberById(long memberId) {
     	return memberDAO.selectMemberById(memberId);
     }
+
+    // [추가] 로그인 실패/성공에 따른 카운트 처리 로직
+    @Override
+    @Transactional
+    public void incrementLoginFailCount(String loginId) {
+        MemberVO member = memberDAO.findForUpdateByLoginId(loginId);
+        if (member != null) {
+            memberDAO.incrementLoginFailCount(loginId);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void resetLoginFailCount(String loginId) {
+        MemberVO member = memberDAO.findByLoginId(loginId);
+        if (member != null && member.getLoginFailCount() > 0) {
+            memberDAO.resetLoginFailCount(loginId);
+        }
+    }
+
 }
+

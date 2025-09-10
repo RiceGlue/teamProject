@@ -45,6 +45,9 @@ public class MemberVO {
     private String currentLoginPw;
     private String newLoginPw;
 
+    // [추가] 로그인 실패 횟수를 담을 필드
+    private int loginFailCount;
+
     // [신규] 연동된 소셜 계정 목록을 담을 리스트 추가
     private List<SocialAccountVO> socialAccounts;
 
@@ -176,6 +179,15 @@ public class MemberVO {
     public void setNewLoginPw(String newLoginPw) {
         this.newLoginPw = newLoginPw;
     }
+    
+    // [추가] loginFailCount 필드의 Getter/Setter
+    public int getLoginFailCount() {
+        return loginFailCount;
+    }
+    public void setLoginFailCount(int loginFailCount) {
+        this.loginFailCount = loginFailCount;
+    }
+
     public List<SocialAccountVO> getSocialAccounts() {
         return socialAccounts;
     }

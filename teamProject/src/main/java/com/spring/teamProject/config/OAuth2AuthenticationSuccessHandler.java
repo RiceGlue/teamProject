@@ -3,6 +3,9 @@ package com.spring.teamProject.config;
 import java.io.IOException;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -12,6 +15,9 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 
+import com.spring.teamProject.service.MemberService;
+import com.spring.teamProject.vo.UserDetailsVO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,16 +26,21 @@ import jakarta.servlet.http.HttpSession;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationSuccessHandler.class);
+
+    @Autowired
+    private MemberService memberService; // [추가] MemberService 주입
+
     private RequestCache requestCache = new HttpSessionRequestCache();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                          Authentication authentication) throws IOException, ServletException {
+                                        Authentication authentication) throws IOException, ServletException {
         
         HttpSession session = request.getSession();
         Boolean isLinking = (Boolean) session.getAttribute("socialLinkRequest");
 
-        // --- ? 1. '계정 연동' 시나리오 처리 (사용자가 프로필 수정 페이지에서 직접 연동을 시작한 경우) ---
+        // --- 📌 1. '계정 연동' 시나리오 처리 (사용자가 프로필 수정 페이지에서 직접 연동을 시작한 경우) ---
         // 세션에 '계정 연동' 표식이 있는지 먼저 확인합니다.
         if (Boolean.TRUE.equals(isLinking)) {
             // 표식을 사용했으니 즉시 제거하여 다음 로그인에 영향을 주지 않도록 합니다.
@@ -42,14 +53,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return; // 여기서 로직을 종료합니다.
         }
 
-        // --- ? 2. '신규 가입' 또는 '기존 회원 로그인' 또는 '연동 확인' 시나리오 처리 ---
+        // --- 📌 2. '신규 가입' 또는 '기존 회원 로그인' 또는 '연동 확인' 시나리오 처리 ---
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         // 2-1. "계정 연동 확인"이 필요한 경우 (소셜 로그인 이메일과 동일한 이메일의 일반 계정이 이미 존재)
         if (Boolean.TRUE.equals(attributes.get("link_required"))) {
             session.setAttribute("socialLinkInfo", attributes); // 소셜 정보를 세션에 저장
-            getRedirectStrategy().sendRedirect(request, response, "/member/link-account"); // 연동 확인 페이지로 이동
+            getRedirectStrategy().sendRedirect(request, response, "/member/link_account"); // 연동 확인 페이지로 이동
             return;
         }
 
@@ -64,6 +75,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         } else {
             // 3. '기존 회원 로그인' 시나리오 처리
             
+            // [추가] 소셜 로그인 성공 시, 해당 계정의 로그인 실패 횟수를 초기화합니다.
+            if (authentication.getPrincipal() instanceof UserDetailsVO) {
+                UserDetailsVO userDetails = (UserDetailsVO) authentication.getPrincipal();
+                String loginId = userDetails.getMemberVO().getLoginId();
+                if (loginId != null && !loginId.isEmpty()) {
+                    logger.info("소셜 로그인 성공, 로그인 실패 횟수 초기화. 사용자: {}", loginId);
+                    memberService.resetLoginFailCount(loginId);
+                }
+            }
+
             // Spring Security가 저장해 둔 '원래 가려던 페이지' 정보를 가져옵니다.
             SavedRequest savedRequest = requestCache.getRequest(request, response);
 
@@ -79,3 +100,4 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
     }
 }
+

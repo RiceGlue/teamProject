@@ -113,11 +113,34 @@ public class MemberController {
         return "layout/layout";
     }
 
+    // 로그인 실패 시 username과 error 파라미터를 받도록 수정
     @GetMapping("/login")
-    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+    public String loginForm(@RequestParam(value = "error", required = false) String error,
+                            @RequestParam(value = "username", required = false) String username,
+                            Model model, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        
         if (isAuthenticated() && !isGuest()) {
             session.setAttribute("errorMessage", "이미 로그인되어 있습니다.");
             return "redirect:/";
+        }
+
+        // [추가] 로그인 실패 횟수에 따른 reCAPTCHA 표시 로직
+        if (username != null && !username.isEmpty()) {
+            // [수정] memberId로 조회하는 것이 아닌, loginId로 조회하도록 변경
+            MemberVO member = memberService.findByLoginId(username);
+            if (member != null && member.getLoginFailCount() >= 5) {
+                model.addAttribute("showRecaptcha", true);
+                model.addAttribute("recaptchaSiteKey", recaptchaSiteKey);
+            }
+        }
+        
+        // [추가] error 파라미터에 따른 구체적인 에러 메시지 처리
+        if (error != null) {
+            if ("recaptcha_required".equals(error)) {
+                model.addAttribute("error", "보안 문자를 입력해주세요.");
+            } else if ("recaptcha_fail".equals(error)) {
+                model.addAttribute("error", "reCAPTCHA 인증에 실패했습니다.");
+            }
         }
 
         // Spring Security가 저장한 '원래 가려던 페이지' 정보를 가져옵니다.
@@ -204,9 +227,9 @@ public class MemberController {
 
     @PostMapping("/join_social")
     public String joinSocial(MemberVO memberVO,
-                             @RequestParam("g-recaptcha-response") String recaptchaResponse,
-                             HttpSession session,
-                             RedirectAttributes redirectAttributes) {
+                                     @RequestParam("g-recaptcha-response") String recaptchaResponse,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
 
         boolean isRecaptchaVerified = recaptchaService.verifyRecaptcha(recaptchaResponse);
         if (!isRecaptchaVerified) {
@@ -324,12 +347,12 @@ public class MemberController {
 
     @GetMapping("/mypage")
     public String mypage(@AuthenticationPrincipal Object principal, Model model) {
-    	
-    	MemberVO sessionMember = getMemberInfoFromPrincipal(principal);
-    	if (sessionMember == null) {
-    	    return "redirect:/member/login";
-    	}
-    	MemberVO memberInfo = memberService.getMemberById(sessionMember.getMemberId());
+        
+        MemberVO sessionMember = getMemberInfoFromPrincipal(principal);
+        if (sessionMember == null) {
+            return "redirect:/member/login";
+        }
+        MemberVO memberInfo = memberService.getMemberById(sessionMember.getMemberId());
 
         String role = memberInfo.getRole();
 
@@ -376,27 +399,27 @@ public class MemberController {
                     wishlistStore.add(storeVO);
                 }
 //
-//                // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
-//                List<Map<String, Object>> displayWishlists = wishlists.stream().map(wish -> {
-//                    Map<String, Object> map = new HashMap<>();
-//                    map.put("wishlistId", wish.getWishlistId());
-//                    map.put("storeId", wish.getStoreId());
+//                 // 위시리스트 엔티티에 가게 정보를 추가하여 새로운 리스트를 만듭니다.
+//                 List<Map<String, Object>> displayWishlists = wishlists.stream().map(wish -> {
+//                     Map<String, Object> map = new HashMap<>();
+//                     map.put("wishlistId", wish.getWishlistId());
+//                     map.put("storeId", wish.getStoreId());
 //
-//                    try {
-//                        StoreVO store = storeService.getStoreById(wish.getStoreId());
-//                        if (store != null) {
-//                            map.put("store", store);
-//                            map.put("storeFileName", store.getFileName()); // storeFileName 추가
-//                        } else {
-//                            map.put("storeName", "알 수 없는 가게");
-//                            map.put("storeFileName", null);
-//                        }
-//                    } catch (Exception e) {
-//                        map.put("storeName", "가게 정보 오류");
-//                        map.put("storeFileName", null);
-//                    }
-//                    return map;
-//                }).collect(Collectors.toList());
+//                     try {
+//                         StoreVO store = storeService.getStoreById(wish.getStoreId());
+//                         if (store != null) {
+//                             map.put("store", store);
+//                             map.put("storeFileName", store.getFileName()); // storeFileName 추가
+//                         } else {
+//                             map.put("storeName", "알 수 없는 가게");
+//                             map.put("storeFileName", null);
+//                         }
+//                     } catch (Exception e) {
+//                         map.put("storeName", "가게 정보 오류");
+//                         map.put("storeFileName", null);
+//                     }
+//                     return map;
+//                 }).collect(Collectors.toList());
                 model.addAttribute("wishlistStore", wishlistStore);
 
                 // 3. 웨이팅 정보 목록 가져오기
@@ -607,7 +630,7 @@ public class MemberController {
 
         } catch (BadCredentialsException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/member/link-account";
+            return "redirect:/member/link_account";
         }
     }
 

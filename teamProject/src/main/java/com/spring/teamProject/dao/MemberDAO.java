@@ -60,4 +60,9 @@ public interface MemberDAO {
     int updatePassword(@Param("memberId") long memberId, @Param("encodedPassword") String encodedPassword);
     
     MemberVO selectMemberById(long memberId);
+    
+    // [추가] 로그인 실패 횟수 관리를 위한 메소드
+    MemberVO findForUpdateByLoginId(String loginId); // 비관적 잠금(Pessimistic Lock)을 사용하여 동시성 문제 방지
+    void incrementLoginFailCount(String loginId);
+    void resetLoginFailCount(String loginId);
 }
