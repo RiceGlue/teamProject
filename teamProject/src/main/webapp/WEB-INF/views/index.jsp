@@ -416,19 +416,7 @@ var map; // 지도 객체를 전역 변수로 선언
             container.appendChild(loadMoreCard);
         }
 
-
-        const loadMoreBtn = document.createElement("button");
-        loadMoreBtn.id = "loadMoreBtn";
-        loadMoreBtn.className = "btn btn-light";
-        loadMoreBtn.textContent = "더보기";
-        loadMoreBtn.onclick = function () {
-            window.location.href = contextPath + "/store/storeList?option=userLocation&location=" + encodeURIComponent(dong);
-        };
-
-        buttonWrapper.appendChild(loadMoreBtn);
-        container.appendChild(buttonWrapper);
         initSlider('nearby-stores-slider');
-
     }
 
     /**
