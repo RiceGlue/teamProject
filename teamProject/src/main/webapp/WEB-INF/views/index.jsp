@@ -146,6 +146,7 @@
         background-color: #fff;
         text-decoration: none;
         color: inherit;
+        position: relative; /* 위시리스트 버튼의 기준점이 되도록 추가 */
     }
     .card:hover {
         transform: translateY(-5px);
@@ -182,7 +183,18 @@
         margin-top: auto; /* 카드 하단에 고정 */
     }
 
-    .wishlist-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#ccc;transition:color 0.3s ease;}
+    .wishlist-btn{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        background:none;
+        border:none;
+        cursor:pointer;
+        font-size:24px;
+        color:#ccc;
+        transition:color 0.3s ease;
+    }
     .wishlist-btn.active{color:#ff6347;}
 
     /* --- 드래그 슬라이더 공통 스타일 --- */
@@ -203,35 +215,20 @@
     }
     /* a태그인 card 자체는 클릭 가능해야 하므로 pointer-events를 설정하지 않습니다. */
     /* card 내부의 다른 요소들(img, p 등)의 이벤트를 막아 드래그를 원활하게 합니다. */
-    /* [수정] 클릭 방지 CSS를 리뷰 카드 섹션에만 한정합니다. */
-    #reviewContainer.slider-track .card * {
+    .slider-track .card * {
         pointer-events: none;
     }
-
+    
+    /* [수정] 슬라이더 내부의 위시리스트 버튼은 클릭이 가능하도록 예외 처리 */
+    .slider-track .card .wishlist-btn,
+    .slider-track .card .wishlist-btn * {
+        pointer-events: auto;
+    }
 
     /* --- 리뷰 카드 그림자 효과 추가 --- */
     .review-card {
     /* 기존 review-card 스타일은 그대로 두고 아래 한 줄만 추가합니다. */
         box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
-    
-    /* [수정] '내 지역 맛집' 카드 전용 스타일 추가 */
-    .nearby-store-card {
-        position: relative; /* 자식 요소(버튼)의 absolute 위치 기준점 */
-        cursor: pointer;    /* 카드 전체가 클릭 가능하다는 것을 시각적으로 표시 */
-    }
-    .nearby-store-card .wishlist-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 10; /* 다른 콘텐츠 위에 보이도록 설정 */
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 </style>
 
@@ -347,6 +344,7 @@ var map; // 지도 객체를 전역 변수로 선언
         });
     }
 
+    // [수정] 카드 생성 로직을 '리뷰 카드'와 동일한 a 태그 방식으로 변경합니다.
     function displayStoreCards(storeList, dong) {
         console.log("UI카드 시작");
         const container = document.getElementById("nearbyStores");
@@ -361,29 +359,28 @@ var map; // 지도 객체를 전역 변수로 선언
         const limitedStoreList = storeList.slice(0, 10);
 
         limitedStoreList.forEach(store => {
-            const card = document.createElement("div");
-            card.className = "card my-3 nearby-store-card";
-            card.onclick = function(event) {
-                // [수정] 클릭된 대상이 위시리스트 버튼이 아닐 때만 페이지 이동
-                if (!event.target.closest('.wishlist-btn')) {
-                    window.location.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
-                }
-            };
+            // 카드를 div 대신 a 태그로 생성하고 href를 추가합니다.
+            const card = document.createElement("a");
+            card.className = "card"; // my-3 제거 (slider-track의 gap으로 간격 조절)
+            card.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
 
             const imageUrl = store.fileName 
                 ? contextPath + '/images/store/' + store.fileName
                 : 'https://placehold.co/280x180/FDF6EC/7B2D26?text=' + encodeURIComponent(store.storeName);
 
-            // [수정] 아이콘과 함께 정보를 재배치합니다.
+            // [복원] 연락처 및 소개 정보를 포함하여 카드 내부 HTML을 구성합니다.
             card.innerHTML =
                 '<img src="' + imageUrl + '" class="card-img-top" alt="' + store.storeName + '">' +
                 '<div class="card-body p-3">' +
-                    '<h5 class="card-title mb-1">' + store.storeName + '</h5>' +
+                    '<div class="d-flex justify-content-between align-items-start">' + // 타이틀과 버튼을 한 줄에 배치
+                        '<h5 class="card-title mb-1">' + store.storeName + '</h5>' +
+                    '</div>' +
                     '<p class="card-text small rating-text"><i class="bi bi-star-fill"></i> ' + (store.avgRating || '평점없음') + ' (리뷰 ' + (store.countRating || 0) + ')</p>' +
-                    '<p class="card-text small"><i class="bi bi-geo-alt me-1"></i>' + store.roadAddress + '</p>' +
+                    '<p class="card-text small text-muted"><i class="bi bi-geo-alt me-1"></i>' + store.roadAddress + '</p>' +
                     '<p class="card-text small text-muted"><i class="bi bi-telephone me-1"></i>' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
-                    '<p class="card-text small text-muted text-truncate mt-2">' + store.description + '</p>' +
+                    '<p class="card-text small text-muted text-truncate">' + store.description + '</p>' +
                 '</div>' +
+                // 위시리스트 버튼은 a 태그 안에 있어도 독립적으로 동작하도록 JS에서 처리합니다.
                 '<button type="button" class="wishlist-btn" data-store-id="' + store.storeId + '">' +
                     '<i class="fa fa-bookmark"></i>' +
                 '</button>';
@@ -398,8 +395,8 @@ var map; // 지도 객체를 전역 변수로 선언
             }
         });
         
-        // [수정] "더보기" 버튼 표시 조건을 'storeList.length > 0'으로 변경하고 디자인을 개선합니다.
-        if (storeList.length > 0) { 
+        // [복원] "더보기" 버튼 로직 (디자인 개선)
+        if (storeList.length > 0) {
             const loadMoreCard = document.createElement("a");
             loadMoreCard.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
             loadMoreCard.className = "card d-flex align-items-center justify-content-center text-decoration-none text-muted";
@@ -453,9 +450,6 @@ var map; // 지도 객체를 전역 변수로 선언
         };
 
         sliderContainer.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.wishlist-btn')) {
-                return;
-            }
             isDown = true;
             isDragging = false;
             sliderContainer.classList.add('active');
@@ -485,9 +479,9 @@ var map; // 지도 객체를 전역 변수로 선언
             const wasDragging = isDragging;
             endDrag();
             if (wasDragging) {
-                const targetCard = e.target.closest('.nearby-store-card, a.card');
-                if (targetCard) {
-                    targetCard.addEventListener('click', preventClick, { once: true });
+                const targetLink = e.target.closest('a.card');
+                if (targetLink) {
+                    targetLink.addEventListener('click', preventClick, { once: true });
                 }
             }
         });
@@ -591,7 +585,7 @@ function checkWishlistStatus(storeId, btnElement) {
 
 // 위시리스트 버튼 클릭 처리
 $(document).on('click', '.wishlist-btn', function (e) {
-    // [수정] 이벤트 전파를 막아 카드 전체의 onclick이 실행되는 것을 방지합니다.
+    // [수정] 이벤트 전파를 막아 카드 전체의 링크 이동을 방지합니다.
     e.preventDefault(); 
     e.stopPropagation(); 
     const storeId = $(this).data('store-id');
