@@ -148,10 +148,9 @@
         color: inherit;
         position: relative; /* 위시리스트 버튼의 기준점이 되도록 추가 */
     }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
+
+    /* [19차 수정] 모든 카드에 공통 호버 효과를 주기 위해 기존 .card:hover 스타일은 제거합니다. */
+
     .card-img-top {
         height: 180px;
         object-fit: cover;
@@ -202,33 +201,45 @@
         cursor: grab;
         user-select: none;
         -webkit-user-select: none;
-        overflow-x: hidden;
+        overflow-x: scroll;
         position: relative;
-        padding: 10px 0;
+        padding: 10px 0 1.5rem 0;
+        scrollbar-width: none; /* Firefox */
     }
+    .slider-container::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+
     .slider-container.active {
         cursor: grabbing;
     }
     .slider-track {
         display: inline-flex;
-        gap: 16px;
+        gap: 24px;
+        padding-right: 1.5rem; /* 마지막 카드의 우측 여백 확보 */
     }
     /* a태그인 card 자체는 클릭 가능해야 하므로 pointer-events를 설정하지 않습니다. */
     /* card 내부의 다른 요소들(img, p 등)의 이벤트를 막아 드래그를 원활하게 합니다. */
     .slider-track .card * {
         pointer-events: none;
     }
-    
+
     /* [수정] 슬라이더 내부의 위시리스트 버튼은 클릭이 가능하도록 예외 처리 */
     .slider-track .card .wishlist-btn,
     .slider-track .card .wishlist-btn * {
         pointer-events: auto;
     }
 
-    /* --- 리뷰 카드 그림자 효과 추가 --- */
-    .review-card {
-    /* 기존 review-card 스타일은 그대로 두고 아래 한 줄만 추가합니다. */
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    /* --- [19차 수정] 슬라이더 내 모든 카드 (리뷰, 맛집)에 수직 그림자 효과 통일 --- */
+    /* 기존 .review-card의 그림자 효과를 모든 .slider-track 안의 .card로 확장 적용합니다. */
+    .slider-track .card {
+        box-shadow: 0 4px 0px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .slider-track .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 0px rgba(0, 0, 0, 0.15);
     }
 </style>
 
@@ -358,20 +369,18 @@ var map; // 지도 객체를 전역 변수로 선언
         const limitedStoreList = storeList.slice(0, 10);
 
         limitedStoreList.forEach(store => {
-            // 카드를 div 대신 a 태그로 생성하고 href를 추가합니다.
             const card = document.createElement("a");
-            card.className = "card"; // my-3 제거 (slider-track의 gap으로 간격 조절)
+            card.className = "card";
             card.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
 
             const imageUrl = store.fileName 
                 ? contextPath + '/images/store/' + store.fileName
                 : 'https://placehold.co/280x180/FDF6EC/7B2D26?text=' + encodeURIComponent(store.storeName);
 
-            // [복원] 연락처 및 소개 정보를 포함하여 카드 내부 HTML을 구성합니다.
             card.innerHTML =
                 '<img src="' + imageUrl + '" class="card-img-top" alt="' + store.storeName + '">' +
                 '<div class="card-body p-3">' +
-                    '<div class="d-flex justify-content-between align-items-start">' + // 타이틀과 버튼을 한 줄에 배치
+                    '<div class="d-flex justify-content-between align-items-start">' +
                         '<h5 class="card-title mb-1">' + store.storeName + '</h5>' +
                     '</div>' +
                     '<p class="card-text small rating-text"><i class="bi bi-star-fill"></i> ' + (store.avgRating || '평점없음') + ' (리뷰 ' + (store.countRating || 0) + ')</p>' +
@@ -379,7 +388,6 @@ var map; // 지도 객체를 전역 변수로 선언
                     '<p class="card-text small text-muted"><i class="bi bi-telephone me-1"></i>' + store.localNumber + '-' + store.number1 + '-' + store.number2 + '</p>' +
                     '<p class="card-text small text-muted text-truncate">' + store.description + '</p>' +
                 '</div>' +
-                // 위시리스트 버튼은 a 태그 안에 있어도 독립적으로 동작하도록 JS에서 처리합니다.
                 '<button type="button" class="wishlist-btn" data-store-id="' + store.storeId + '">' +
                     '<i class="fa fa-bookmark"></i>' +
                 '</button>';
@@ -394,7 +402,6 @@ var map; // 지도 객체를 전역 변수로 선언
             }
         });
         
-        // [복원] "더보기" 버튼 로직 (디자인 개선)
         if (storeList.length > 0) {
             const loadMoreCard = document.createElement("a");
             loadMoreCard.href = contextPath + "/store/storeList?option=userLocation&keyword=" + encodeURIComponent(dong);
