@@ -240,7 +240,7 @@
     .slider-track .card:hover {
         transform: translateY(-4px);
         /* [20차 수정] 마우스 오버 시 그림자 색상을 사이트 테마 색상(진한 갈색)으로 변경합니다. */
-        box-shadow: 0 8px 0px rgba(123, 45, 38);
+        box-shadow: 0 8px 0px var(--yum-dark-red);
     }
 </style>
 
