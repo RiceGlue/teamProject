@@ -344,7 +344,6 @@ var map; // 지도 객체를 전역 변수로 선언
         });
     }
 
-    // [수정] 카드 생성 로직을 '리뷰 카드'와 동일한 a 태그 방식으로 변경합니다.
     function displayStoreCards(storeList, dong) {
         console.log("UI카드 시작");
         const container = document.getElementById("nearbyStores");
@@ -592,27 +591,33 @@ $(document).on('click', '.wishlist-btn', function (e) {
     toggleWishlist(storeId, this);
 });
 
-// [수정] 위시리스트 토글 함수에서 확인창 제거
+// [수정] 위시리스트 토글 함수에 확인창(confirm) 로직 추가
 function toggleWishlist(storeId, btnElement) {
     if (!memberId || memberId == null || memberId.trim() === '') {
         alert('로그인 후 이용해주세요.');
         return;
     }
+
     const isWishlisted = $(btnElement).hasClass('active');
     const url = isWishlisted ? `${contextPath}/wishlist/remove` : `${contextPath}/wishlist/add`;
     const type = isWishlisted ? 'DELETE' : 'POST';
-    
-    $.ajax({
-        url: url,
-        type: type,
-        data: { memberId, storeId },
-        success: function(response) {
-            $(btnElement).toggleClass('active');
-        },
-        error: function(xhr) {
-            alert(xhr.responseText || "오류가 발생했습니다.");
-        }
-    });
+    const confirmMsg = isWishlisted ? "위시리스트에서 삭제하시겠습니까?" : "위시리스트에 추가하시겠습니까?";
+    const successMsg = isWishlisted ? "위시리스트에서 삭제되었습니다." : "위시리스트에 추가되었습니다.";
+
+    if (confirm(confirmMsg)) {
+        $.ajax({
+            url: url,
+            type: type,
+            data: { memberId, storeId },
+            success: function(response) {
+                alert(successMsg);
+                $(btnElement).toggleClass('active');
+            },
+            error: function(xhr) {
+                alert(xhr.responseText || "오류가 발생했습니다.");
+            }
+        });
+    }
 }
 </script>
 
