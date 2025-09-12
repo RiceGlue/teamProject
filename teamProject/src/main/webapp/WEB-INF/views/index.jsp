@@ -46,15 +46,15 @@
     .search-bar .form-control { padding: 1rem; }
     .search-bar .btn { background-color: var(--yum-dark-red); color: white; padding: 0 2rem; }
 
-    /* 검색창 포커스 시 테두리 스타일 추가 */
+    /* 검색창 포커스 시 테두리 스타일 */
     .search-bar .input-group:focus-within {
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        border-radius: 0.5rem; /* input-group 전체에 둥근 모서리를 적용하여 자연스럽게 만듭니다. */
+        border-radius: 0.5rem; /* input-group 전체에 둥근 모서리를 적용 */
         transition: box-shadow .15s ease-in-out;
     }
     .search-bar .form-control:focus {
-        box-shadow: none; /* input 개별 포커스 효과는 제거합니다. */
-        border-color: #ced4da; /* Bootstrap 기본 테두리 색상을 유지합니다. */
+        box-shadow: none; /* input 개별 포커스 효과는 제거 */
+        border-color: #ced4da; /* Bootstrap 기본 테두리 색상 유지 */
     }
 
     /* --- 카테고리 아이콘 --- */
@@ -76,9 +76,9 @@
 
     .banner-carousel img {
         width: 100%;
-        height: auto; /* 자동 높이로 변경 */
+        height: auto;
         max-height: 400px; /* PC 최대 높이 제한 */
-        object-fit: contain; /* 전체 이미지를 보여주도록 변경 */
+        object-fit: contain; /* 전체 이미지를 보여주도록 설정 */
         background-color: var(--yum-cream); /* 여백 부분 배경색 */
     }
 
@@ -146,10 +146,8 @@
         background-color: #fff;
         text-decoration: none;
         color: inherit;
-        position: relative; /* 위시리스트 버튼의 기준점이 되도록 추가 */
+        position: relative; /* 위시리스트 버튼의 기준점 */
     }
-
-    /* [19차 수정] 모든 카드에 공통 호버 효과를 주기 위해 기존 .card:hover 스타일은 제거합니다. */
 
     .card-img-top {
         height: 180px;
@@ -218,20 +216,19 @@
         gap: 24px;
         padding-right: 1.5rem; /* 마지막 카드의 우측 여백 확보 */
     }
-    /* a태그인 card 자체는 클릭 가능해야 하므로 pointer-events를 설정하지 않습니다. */
-    /* card 내부의 다른 요소들(img, p 등)의 이벤트를 막아 드래그를 원활하게 합니다. */
+    /* card 내부 요소들의 이벤트를 막아 드래그를 원활하게 함 */
     .slider-track .card * {
         pointer-events: none;
     }
 
-    /* [수정] 슬라이더 내부의 위시리스트 버튼은 클릭이 가능하도록 예외 처리 */
+    /* 슬라이더 내부의 위시리스트 버튼은 클릭 가능하도록 예외 처리 */
     .slider-track .card .wishlist-btn,
     .slider-track .card .wishlist-btn * {
         pointer-events: auto;
     }
 
-    /* --- [19차 수정] 슬라이더 내 모든 카드 (리뷰, 맛집)에 수직 그림자 효과 통일 --- */
-    /* 기존 .review-card의 그림자 효과를 모든 .slider-track 안의 .card로 확장 적용합니다. */
+    /* --- 슬라이더 내 모든 카드 (리뷰, 맛집) 공통 스타일 --- */
+    /* 슬라이더 내 모든 카드에 그림자 효과를 적용 */
     .slider-track .card {
         box-shadow: 0 4px 0px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -239,7 +236,7 @@
 
     .slider-track .card:hover {
         transform: translateY(-4px);
-        /* [20차 수정] 마우스 오버 시 그림자 색상을 사이트 테마 색상(진한 갈색)으로 변경합니다. */
+        /* 마우스 오버 시 그림자 색상을 사이트 테마 색상으로 변경 */
         box-shadow: 0 8px 0px var(--yum-dark-red);
     }
 </style>
@@ -251,13 +248,13 @@ var map; // 지도 객체를 전역 변수로 선언
 
     // Google Maps API 콜백 함수
     function initMap() {
-        // 1. 페이지 로드 시 즉시 지도를 기본 위치(서울)로 생성합니다.
+        // 1. 페이지 로드 시 지도를 기본 위치(서울)로 생성합니다.
         map = new google.maps.Map(document.getElementById("map"), {
             zoom: 11,
             center: { lat: 37.5665, lng: 126.9780 }, // 기본 위치: 서울
         });
 
-        // 2. 사용자 위치 정보 요청을 시작합니다.
+        // 2. 사용자 위치 정보를 요청합니다.
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error);
         } else {
@@ -269,7 +266,7 @@ var map; // 지도 객체를 전역 변수로 선언
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        // 3. 사용자 위치를 가져오면, 기존 지도의 중심을 이동시킵니다.
+        // 3. 사용자 위치를 가져오면, 지도의 중심을 이동시킵니다.
         map.setCenter({ lat: lat, lng: lng });
         map.setZoom(14);
 
@@ -299,7 +296,7 @@ var map; // 지도 객체를 전역 변수로 선언
         });
     }
 
-    // 5. 주소 컴포넌트에서 동 주소 추출
+    // 5. 주소 컴포넌트에서 '동' 주소 추출
     function extractDongAddress(components) {
         for (let i = 0; i < components.length; i++) {
             const types = components[i].types;
@@ -310,7 +307,7 @@ var map; // 지도 객체를 전역 변수로 선언
         return null;
     }
 
-    // 6. AJAX로 동 주소 전달 → 매장 리스트 받아오기
+    // 6. AJAX로 '동' 주소를 전달하여 근처 매장 리스트를 받아옴
     function fetchNearbyStores(dong) {
         console.log("AJAX 요청 시작. 동 주소:", dong);
         $.ajax({
@@ -333,11 +330,10 @@ var map; // 지도 객체를 전역 변수로 선언
         });
     }
 
-    // 7. 매장 주소 → 위도/경도 → 지도 마커 표시
+    // 7. 매장 주소를 위도/경도로 변환하여 지도에 마커 표시
     function displayStoresOnMap(storeList, mapInstance) {
         const geocoder = new google.maps.Geocoder();
-        // [42차 수정] 한 번에 너무 많은 주소 변환 요청을 보내면 API 제한에 걸릴 수 있으므로,
-        // 각 요청 사이에 약간의 지연(delay)을 주어 안정적으로 처리합니다.
+        // Geocoding API의 요청 제한을 피하기 위해 각 주소 변환 요청 사이에 지연(delay)을 둡니다.
         storeList.forEach((store, index) => {
             setTimeout(() => {
                 geocoder.geocode({ address: store.roadAddress }, function (results, status) {
@@ -374,7 +370,7 @@ var map; // 지도 객체를 전역 변수로 선언
             card.className = "card";
             card.href = contextPath + '/store/storeDetail?storeId=' + store.storeId;
 
-            const imageUrl = store.fileName 
+            const imageUrl = store.fileName
                 ? contextPath + '/images/store/' + store.fileName
                 : 'https://placehold.co/280x180/FDF6EC/7B2D26?text=' + encodeURIComponent(store.storeName);
 
@@ -424,7 +420,7 @@ var map; // 지도 객체를 전역 변수로 선언
     }
 
     /**
-    * 드래그 슬라이더 로직을 초기화하는 함수 (클릭/드래그 구분 기능 개선)
+    * 드래그 슬라이더 로직을 초기화하는 함수 (클릭과 드래그 구분)
     * @param {string} containerId - 슬라이더 컨테이너의 ID
     */
     function initSlider(containerId) {
@@ -508,7 +504,7 @@ var map; // 지도 객체를 전역 변수로 선언
 
 
     $(document).ready(function () {
-        // [수정] Enter 키 이벤트 핸들러 복원
+        // 검색창에서 Enter 키를 누르면 검색을 실행합니다.
         $('#keyword').on('keydown', function(e) {
             if (e.key === 'Enter') {
                 goSearch();
@@ -570,7 +566,7 @@ var map; // 지도 객체를 전역 변수로 선언
             }
         });
 
-        // [55차 수정] 위시리스트 초기화 로직을 다시 추가합니다.
+        // 페이지 로드 시 위시리스트 상태를 확인하고 버튼에 반영합니다.
         if (memberId && memberId.trim() !== '' && memberId !== 'null' && memberId !== 'undefined') {
             $('.wishlist-btn').each(function() {
                 const storeId = $(this).data('store-id');
@@ -592,14 +588,14 @@ function checkWishlistStatus(storeId, btnElement) {
 
 // 위시리스트 버튼 클릭 처리
 $(document).on('click', '.wishlist-btn', function (e) {
-    // [수정] 이벤트 전파를 막아 카드 전체의 링크 이동을 방지합니다.
-    e.preventDefault(); 
-    e.stopPropagation(); 
+    // 이벤트 전파를 막아 카드 링크로 이동하는 것을 방지합니다.
+    e.preventDefault();
+    e.stopPropagation();
     const storeId = $(this).data('store-id');
     toggleWishlist(storeId, this);
 });
 
-// [수정] 위시리스트 토글 함수에 확인창(confirm) 로직 추가
+// 위시리스트 추가/삭제 토글 (확인창 표시)
 function toggleWishlist(storeId, btnElement) {
     if (!memberId || memberId == null || memberId.trim() === '') {
         alert('로그인 후 이용해주세요.');
@@ -639,7 +635,6 @@ function toggleWishlist(storeId, btnElement) {
             <section class="search-bar mb-5">
                 <div class="input-group">
                     <input type="text" class="form-control" id="keyword" placeholder="지역, 가게, 메뉴로 특별한 순간을 찾아보세요">
-                    <!-- 'goSearch()'가 없으므로 onclick 이벤트 제거 -->
                     <button class="btn" type="button"><i class="bi bi-search"></i></button>
                 </div>
             </section>
@@ -647,7 +642,6 @@ function toggleWishlist(storeId, btnElement) {
             <!-- 카테고리 아이콘 -->
             <section class="category-icons mb-5">
                 <ul class="nav justify-content-around">
-                    <!-- [수정] &keyword= 제거 -->
                     <li class="nav-item"><a href="${contextPath}/store/storeList?option=region" class="nav-link"><div class="icon-circle"><i class="bi bi-geo-alt-fill"></i></div><span>지역별</span></a></li>
                     <li class="nav-item"><a href="${contextPath}/store/storeList?option=type" class="nav-link"><div class="icon-circle"><i class="bi bi-egg-fried"></i></div><span>음식별</span></a></li>
                     <li class="nav-item"><a href="${contextPath}/store/userLikeStores" class="nav-link"><div class="icon-circle"><i class="bi bi-star-fill"></i></div><span>인기 맛집</span></a></li>
@@ -735,7 +729,6 @@ function toggleWishlist(storeId, btnElement) {
                 <h4 class="mb-3 fw-bold">내 지역 맛집</h4>
                 <p><span id="address">사용자의 위치 정보를 불러오는 중...</span></p>
                 <div id="map" style="height: 300px; border-radius: 1rem;" class="mb-3"></div>
-                <!-- [수정] HTML 구조 변경 -->
                 <div id="nearby-stores-slider" class="slider-container">
                     <div id="nearbyStores" class="slider-track">
                         <%-- AJAX를 통해 이 곳에 가게 카드가 채워집니다. --%>
@@ -749,7 +742,7 @@ function toggleWishlist(storeId, btnElement) {
         <!-- ======================================= -->
         <div class="col-lg-4 d-none d-lg-block">
             <div class="sidebar-box mb-4">
-                <%-- [33차 수정] isAnonymous와 isAuthenticated를 별개의 블록으로 분리 --%>
+                <%-- isAnonymous와 isAuthenticated를 별개의 블록으로 분리하여 처리 --%>
 
                 <%-- 로그아웃 상태일 때 --%>
                 <sec:authorize access="isAnonymous()">
@@ -795,4 +788,3 @@ function toggleWishlist(storeId, btnElement) {
         </div>
     </div>
 </main>
-
