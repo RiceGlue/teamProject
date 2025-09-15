@@ -123,7 +123,7 @@ public class StoreControllerImpl implements StoreController {
 	    	mav.addObject("option", "type");
 	    	mav.addObject("types", getTypes());
 	    } else if(option.equals("userLocation")) {
-	    	String location = req.getParameter("location");
+	    	String location = req.getParameter("keyword");
 	    	List<StoreVO> storeList = storeService.searchStoreNearUser(location);
 	    	
 	    	mav.addObject("option", "userLocation");
