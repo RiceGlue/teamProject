@@ -149,12 +149,15 @@
         position: relative; /* 위시리스트 버튼의 기준점 */
     }
 
-    .card-img-top {
-        height: 180px;
-        object-fit: cover;
-        border-top-left-radius: 1rem;
-        border-top-right-radius: 1rem;
-    }
+	.card-img-top {
+	    width: 100%;
+	    height: 180px;
+	    object-fit: cover;
+	    aspect-ratio: 1/1 ; /* 원하는 비율로 조절 */
+	    border-top-left-radius: 1rem;
+	    border-top-right-radius: 1rem;
+	}
+
     .card-title { font-weight: 700; }
     .card-text { color: #5a6a7b; font-size: 0.9rem; }
     .rating-text { color: #ffc107; font-weight: bold; }
