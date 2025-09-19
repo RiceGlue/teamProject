@@ -512,8 +512,15 @@
 		<c:when test="${option eq 'newOpen'}">
 			<h2>신규 등록된 맛집</h2>
 			<div id="map"></div>
-			<div id="store-list-container"></div>
+			<c:if test="${empty newOpenStores}">
+				<p>신규 오픈 매장이 없습니다.</p>
+			</c:if>
+			    
+			<c:if test="${not empty newOpenStores}">
+				<div id="store-list-container"></div>
+			</c:if>
 		</c:when>
+
 		
 		<c:when test="${option eq 'like'}">
 			<h2>사용자들이 찜한 맛집</h2>

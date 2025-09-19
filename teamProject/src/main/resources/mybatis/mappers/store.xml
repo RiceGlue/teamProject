@@ -112,67 +112,106 @@
 	<!-- 단일 검색 -->
 	
 	<select id="findByRegion" resultMap="storelist" parameterType="String">
-	  SELECT *
-	  FROM stores
-	  WHERE road_address LIKE CONCAT('%', #{keyword}, '%')
-	     OR jibun_address LIKE CONCAT('%', #{keyword}, '%')
+	  SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.rating) AS countRating
+	  FROM stores s INNER JOIN reviews r ON s.store_id = r.store_id 
+	  WHERE s.road_address LIKE CONCAT('%', #{keyword}, '%')
+	     OR s.jibun_address LIKE CONCAT('%', #{keyword}, '%')
+	  GROUP BY s.store_id
 	</select>
 	
 	<select id="findByStoreName" resultMap="storelist" parameterType="String">
-	  SELECT *
-	  FROM stores
-	  WHERE store_name LIKE CONCAT('%', #{keyword}, '%')
+	  SELECT s.*, ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.rating) AS countRating
+	  FROM stores s INNER JOIN reviews r ON s.store_id = r.store_id
+	  WHERE s.store_name LIKE CONCAT('%', #{keyword}, '%')
+	  GROUP BY s.store_id
 	</select>
 	
 	<select id="findStoresByMenu" resultMap="storelist" parameterType="String">
-	  SELECT DISTINCT s.*
-	  FROM stores s
-	  JOIN menu m ON s.store_id = m.store_id
-	  WHERE m.menu_name LIKE CONCAT('%', #{menu}, '%')
+	    SELECT DISTINCT s.*, r.avgRating, r.countRating
+		FROM stores s
+		JOIN menu m ON s.store_id = m.store_id
+		LEFT JOIN (
+		    SELECT store_id, 
+		           ROUND(AVG(rating),2) AS avgRating, 
+		           COUNT(rating) AS countRating
+		    FROM reviews
+		    GROUP BY store_id
+		) r ON s.store_id = r.store_id
+		WHERE m.menu_name LIKE CONCAT('%', #{menu}, '%')
 	</select>
 	
 	<select id="findByType" resultMap="storelist" parameterType="String">
-	  SELECT *
-	  FROM stores
-	  WHERE store_type=#{type}
+	  SELECT s.*,  ROUND(AVG(r.rating),2) AS avgRating, COUNT(r.rating) AS countRating
+	  FROM stores s INNER JOIN reviews r ON s.store_id=r.store_id
+	  WHERE s.store_type=#{type}
+	  GROUP BY s.store_id
 	</select>
 	
 	<!-- 복합 검색 -->
 	
 	<select id="findByRegionAndMenu" resultMap="storelist" parameterType="map">
-	  SELECT DISTINCT s.*
+	  SELECT DISTINCT s.*, r.avgRating, r.countRating
 	  FROM stores s
 	  JOIN menu m ON s.store_id = m.store_id
+	  LEFT JOIN (
+	    SELECT store_id,
+	           ROUND(AVG(rating),2) AS avgRating,
+	           COUNT(rating) AS countRating
+	    FROM reviews
+	    GROUP BY store_id
+	  ) r ON s.store_id = r.store_id
 	  WHERE (s.road_address LIKE CONCAT('%', #{region}, '%')
-	      OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
+	         OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
 	    AND m.menu_name LIKE CONCAT('%', #{menu}, '%')
 	</select>
 	
 	<select id="findByRegionAndStoreName" resultMap="storelist" parameterType="map">
-	  SELECT *
-	  FROM stores
-	  WHERE (road_address LIKE CONCAT('%', #{region}, '%')
-	      OR jibun_address LIKE CONCAT('%', #{region}, '%'))
-	    AND store_name LIKE CONCAT('%', #{storeName}, '%')
+	  SELECT DISTINCT s.*, r.avgRating, r.countRating
+	  FROM stores s
+	  LEFT JOIN (
+	    SELECT store_id,
+	           ROUND(AVG(rating),2) AS avgRating,
+	           COUNT(rating) AS countRating
+	    FROM reviews
+	    GROUP BY store_id
+	  ) r ON s.store_id = r.store_id
+	  WHERE (s.road_address LIKE CONCAT('%', #{region}, '%')
+	         OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
+	    AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
 	</select>
 	
 	<select id="findByMenuAndStoreName" resultMap="storelist" parameterType="map">
-	  SELECT DISTINCT s.*
+	  SELECT DISTINCT s.*, r.avgRating, r.countRating
 	  FROM stores s
 	  JOIN menu m ON s.store_id = m.store_id
+	  LEFT JOIN (
+	    SELECT store_id,
+	           ROUND(AVG(rating),2) AS avgRating,
+	           COUNT(rating) AS countRating
+	    FROM reviews
+	    GROUP BY store_id
+	  ) r ON s.store_id = r.store_id
 	  WHERE m.menu_name LIKE CONCAT('%', #{menu}, '%')
 	    AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
 	</select>
 	
 	<select id="findByRegionAndMenuAndStoreName" resultMap="storelist" parameterType="map">
-	  SELECT DISTINCT s.*
+	  SELECT DISTINCT s.*, r.avgRating, r.countRating
 	  FROM stores s
 	  JOIN menu m ON s.store_id = m.store_id
+	  LEFT JOIN (
+	    SELECT store_id,
+	           ROUND(AVG(rating),2) AS avgRating,
+	           COUNT(rating) AS countRating
+	    FROM reviews
+	    GROUP BY store_id
+	  ) r ON s.store_id = r.store_id
 	  WHERE (s.road_address LIKE CONCAT('%', #{region}, '%')
-	      OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
+	         OR s.jibun_address LIKE CONCAT('%', #{region}, '%'))
 	    AND m.menu_name LIKE CONCAT('%', #{menu}, '%')
 	    AND s.store_name LIKE CONCAT('%', #{storeName}, '%')
 	</select>
+
 	
 	<!-- 메뉴 기반으로 매장 찾기 -->
 	
@@ -192,12 +231,19 @@
 	</select>
 	
 	<select id="findNewOpenStore" resultMap="storelist" >
-		<![CDATA[
-			SELECT *
-			FROM stores
-			WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-			ORDER BY created_at DESC;	
-		]]>
+	  <![CDATA[
+	    SELECT s.*, r.avgRating, r.countRating
+	    FROM stores s
+	    LEFT JOIN (
+	      SELECT store_id,
+	             ROUND(AVG(rating),2) AS avgRating,
+	             COUNT(rating) AS countRating
+	      FROM reviews
+	      GROUP BY store_id
+	    ) r ON s.store_id = r.store_id
+	    WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+	    ORDER BY s.created_at DESC;
+	  ]]>
 	</select>
 	
 	<select id="findUserLikeStores" resultMap="storelist" >
